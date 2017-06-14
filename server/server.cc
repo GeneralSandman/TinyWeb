@@ -1,89 +1,54 @@
-#include <stdio.h>
+#include "server.h"
+#include "../api/api.h"
+#include <iostream>
 #include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <arpa/inet.h>
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <iostream>
-#include <string>
+#include <arpa/inet.h>
 #include <vector>
-#include <map>
-#include "../api/server.h"
-#include "../api/api.h"
-void printf_connection(struct sockaddr_in &addr);
-void response_header(int client_socket);
-void response_html(int client_socket);
 
-
-
-int main__(int argc, char **argv)
+namespace server
 {
-    int i;
-    char buf[1024];
-
-    int serv_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+Server::Server(const std::string &host, const int &port, const int &listen)
+{
+    server_socket = Socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     struct sockaddr_in serv_addr;
     memset(&serv_addr, 0, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    serv_addr.sin_addr.s_addr = Inet_addr(host);
+    serv_addr.sin_port = htons(port);
 
-    serv_addr.sin_port = htons(9999);
-
-    Bind(serv_sock, (const struct sockaddr *)&serv_addr, sizeof(serv_addr));
-    Listen(serv_sock, 8);
-
-    struct sockaddr_in client_addr;
-    socklen_t client_addr_size = sizeof(client_addr);
-
-    while (1)
-    {
-        int client_socket = accept(serv_sock, (struct sockaddr *)&client_addr, &client_addr_size);
-        printf_connection(client_addr);
-        response_header(client_socket);
-        response_html(client_socket);
-
-        shutdown(client_socket, SHUT_WR);
-        // close(client_socket);
-    }
-
-    close(serv_sock);
-
-    return 0;
+    Bind(server_socket, (const struct sockaddr *)&serv_addr, sizeof(serv_addr));
+    Listen(server_socket, listen);
 }
 
-int main(int argc, char **argv)
+int Server::getSockfd(void)
 {
-    std::map<char, std::string> opt;
-    opt = getOption(argc, argv);
-    if(opt.size()==0){
-        std::cout<<"argv error\n";
-        exit(-1);
-    }
-
-    std::string host = "127.0.0.1";
-    int port;
-    port = stoi(opt['p']);
-    server::Server s = server::Server(host, port);
-
-    while (1)
-    {
-        int client_socket = s.getClient();
-        response_header(client_socket);
-        response_html(client_socket);
-        std::cout << "----" << std::endl;
-        shutdown(client_socket, SHUT_WR);
-    }
+    return server_socket;
 }
 
-void printf_connection(struct sockaddr_in &addr)
+Protocal Server::getClient(void)
 {
     char buff[1024];
-    printf("connection from %s,port:%d\n", inet_ntop(AF_INET, &addr.sin_addr, buff, sizeof(buff)),
-           ntohs(addr.sin_port));
+    struct sockaddr_in client_addr;
+    socklen_t client_addr_size = sizeof(client_addr);
+    int client_socket = accept(server_socket, (struct sockaddr *)&client_addr,
+                               &client_addr_size);
+    client_sockets.push_back(client_socket);
+    std::string host = Inet_ntop(AF_INET, &client_addr.sin_addr, buff, sizeof(buff));
+    int port = ntohs(client_addr.sin_port);
+    Protocal prot = Protocal(client_socket, host, port);
+    return prot;
 }
 
-void response_header(int client_socket)
+Server::~Server()
+{
+    if (Close(server_socket) > 0)
+        std::cout << "close server \n";
+}
+
+void Protocal::response_header(int client_socket)
 {
     using namespace std;
     vector<string> header;
@@ -97,7 +62,7 @@ void response_header(int client_socket)
     }
 }
 
-void response_html(int client_socket)
+void Protocal::response_html(int client_socket)
 {
     using namespace std;
     vector<string> header;
@@ -111,4 +76,51 @@ void response_html(int client_socket)
     {
         Write(client_socket, t);
     }
+}
+
+Protocal::Protocal(const int &sockfd, const std::string &ip, const int &port)
+{
+    client_socket = sockfd;
+    peer = ip;
+    peer_port = port;
+    std::cout << "connection:" << peer << "," << peer_port << std::endl;
+    connectionMade();
+}
+
+Protocal::~Protocal()
+{
+    shutdown(client_socket, SHUT_WR);
+    std::cout << "close connection:" << peer << ","
+              << peer_port << std::endl;
+}
+
+int Protocal::makeConnection(void)
+{
+}
+
+int Protocal::loseConnection(void)
+{
+}
+
+int Protocal::connectionMade(void)
+{
+    response_header(client_socket);
+}
+
+int Protocal::connectionLose(void)
+{
+}
+
+size_t Protocal::writeString(const std::string &str)
+{
+    std::cout << "write data to " << peer << "," << peer_port << std::endl;
+    int len = 0;
+    len = Write(client_socket, str);
+    return len;
+}
+
+size_t writeHtml(const std::string &filename)
+{
+    
+}
 }
