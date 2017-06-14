@@ -11,9 +11,7 @@
 #include <map>
 #include "./server/server.h"
 #include "./api/api.h"
-void printf_connection(struct sockaddr_in &addr);
-void response_header(int client_socket);
-void response_html(int client_socket);
+
 
 int main(int argc, char **argv)
 {
@@ -29,13 +27,12 @@ int main(int argc, char **argv)
     int port;
     port = stoi(opt['p']);
     server::Server s = server::Server(host, port);
-    std::string html = "1";
-
+    std::string html = "home.html";
+    int num=0;
     while (1)
     {
-        std::cout<<std::endl;
+        std::cout<<std::endl<<num++<<std::endl;
         server::Protocal port = s.getClient();
-        port.writeString(html);
-        html+="1";
+        port.responseHtml(html);
     }
 }

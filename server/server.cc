@@ -53,16 +53,15 @@ void Protocal::response_header(int client_socket)
     using namespace std;
     vector<string> header;
     header.reserve(3);
-    header.push_back("HTTP/1.0 200 Method Not Implemented\r\n");
-    header.push_back("Content-Type: text/html\r\n");
-    header.push_back("\r\n");
+    header.push_back("HTTP/1.0 200 OK\r\n");
+    header.push_back("Content-Type: text/html\r\n\r\n");
     for (auto t : header)
     {
-        Write(client_socket, t);
+        writeString(client_socket, t);
     }
 }
 
-void Protocal::response_html(int client_socket)
+void Protocal::response_body(int client_socket)
 {
     using namespace std;
     vector<string> header;
@@ -74,7 +73,7 @@ void Protocal::response_html(int client_socket)
     cout << header.capacity();
     for (auto t : header)
     {
-        Write(client_socket, t);
+        writeString(client_socket, t);
     }
 }
 
@@ -111,16 +110,10 @@ int Protocal::connectionLose(void)
 {
 }
 
-size_t Protocal::writeString(const std::string &str)
-{
-    std::cout << "write data to " << peer << "," << peer_port << std::endl;
-    int len = 0;
-    len = Write(client_socket, str);
-    return len;
-}
 
-size_t writeHtml(const std::string &filename)
+size_t Protocal::responseHtml(const std::string &filename)
 {
-    
+    int len = writeHtml(client_socket, filename);
+    return len;
 }
 }

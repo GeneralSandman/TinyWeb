@@ -37,7 +37,7 @@ private:
   int peer_port;
 
   void response_header(int client_socket);
-  void response_html(int client_socket);
+  void response_body(int client_socket);
 
 public:
   Protocal(const int &, const std::string &, const int &);
@@ -48,8 +48,8 @@ public:
   int connectionMade(void);
   int connectionLose(void);
 
-  size_t writeString(const std::string &);
-  size_t writeHtml(const std::string &);
+  // size_t writeString(const std::string &);
+  size_t responseHtml(const std::string &);
 };
 
 class Service

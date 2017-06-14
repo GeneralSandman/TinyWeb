@@ -8,6 +8,15 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <getopt.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
+
+void handle_error(char *msg)
+{
+    fprintf(stderr, "%s: %s\n", msg, strerror(errno));
+    exit(-1);
+}
 
 std::string cstr2string(const char *str)
 {
@@ -41,7 +50,10 @@ int Socket(int domain, int type, int protocol)
 {
     int res = socket(domain, type, protocol);
     if (res < 0)
-        std::cout << "socket error\n";
+    {
+        char msg[] = "socket error";
+        handle_error(msg);
+    }
 
     return res;
 }
@@ -50,34 +62,135 @@ int Close(int fd)
 {
     int res = close(fd);
     if (res < 0)
-        std::cout << "close error\n";
+    {
+        char msg[] = "close error";
+        handle_error(msg);
+    }
     return res;
 }
 
 int Bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 {
-
-    while (bind(sockfd, addr, addrlen) < 0)
+    int res = bind(sockfd, addr, addrlen);
+    if (res < 0)
     {
-        std::cout << "bind error,try bind again\n";
+        char msg[] = "bind error";
+        handle_error(msg);
     }
+    return res;
 }
 
 int Listen(int sockfd, int backlog)
 {
-    if (listen(sockfd, 20) < 0)
-        std::cout << "listen error\n";
+
+    int res = listen(sockfd, 20);
+    if (res < 0)
+    {
+        char msg[] = "listen error";
+        handle_error(msg);
+    }
+    return res;
 }
 
-ssize_t Write(int sockfd, const std::string &str)
+int Open(const char *pathname, int flags, mode_t mode)
+{
+
+    int res = open(pathname, flags, mode);
+    if (res < 0)
+    {
+        char msg[] = "open error";
+        handle_error(msg);
+    }
+    return res;
+}
+
+int Stat(const char *pathname, struct stat *buf)
+{
+
+    int res = stat(pathname, buf);
+    if (res < 0)
+    {
+        char msg[] = "stat error";
+        handle_error(msg);
+    }
+    return res;
+}
+
+void *Mmap(void *addr, size_t len, int prot, int flags, int fd, off_t offset)
+{
+    void *ptr;
+
+    if ((ptr = mmap(addr, len, prot, flags, fd, offset)) == ((void *)-1))
+    {
+        char msg[] = "mmap error";
+        handle_error(msg);
+    }
+    return (ptr);
+}
+
+int Munmap(void *start, size_t length)
+{
+
+    int res = munmap(start, length);
+    if (res < 0)
+    {
+        char msg[] = "munmap error";
+        handle_error(msg);
+    }
+    return res;
+}
+
+ssize_t writeString(int sockfd, const std::string &str)
 {
     char *tmp = new char[str.size() + 1];
     char *head = tmp;
     for (auto t : str)
         *(head++) = t;
 
-    ssize_t result = write(sockfd, tmp, strlen(tmp));
+    ssize_t result = Rio_writen(sockfd, tmp, strlen(tmp));
     delete[] tmp;
+    return result;
+}
+
+ssize_t Rio_writen(int fd, void *usrbuf, size_t n)
+{
+    size_t nleft = n;
+    ssize_t nwritten;
+    char *bufp = (char *)usrbuf;
+
+    while (nleft > 0)
+    {
+        if ((nwritten = write(fd, bufp, nleft)) <= 0)
+        {
+            if (errno == EINTR) /* Interrupted by sig handler return */
+                nwritten = 0;   /* and call write() again */
+            else
+                return -1; /* errno set by write() */
+        }
+        nleft -= nwritten;
+        bufp += nwritten;
+    }
+    return n;
+}
+ssize_t writeHtml(int sockfd, const std::string &f)
+{
+    size_t result;
+    char *filename = new char[f.size() + 1];
+    char *head = filename;
+    for (auto t : f)
+        *(head++) = t;
+    *(head++) = '\0'; // very very important
+
+    struct stat sbuf;
+    Stat(filename, &sbuf);
+    size_t filesize = sbuf.st_size;
+    int filefd = Open(filename, O_RDONLY, 0);
+    char *srcp = (char *)Mmap(0, filesize, PROT_READ, MAP_PRIVATE, filefd, 0); //line:netp:servestatic:mmap
+    Close(filefd);                                                             //line:netp:servestatic:close
+    result = Rio_writen(sockfd, srcp, filesize);                               //line:netp:servestatic:write
+    Munmap(srcp, filesize);
+
+    delete[] filename;
     return result;
 }
 
@@ -87,6 +200,7 @@ in_addr_t Inet_addr(const std::string &host)
     char *head = tmp;
     for (auto t : host)
         *(head++) = t;
+    *(head++) = '\0'; // very very important
 
     in_addr_t result = inet_addr(tmp);
     delete[] tmp;
