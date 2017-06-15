@@ -29,6 +29,24 @@ std::string cstr2string(const char *str)
     return result;
 }
 
+void splitString(const std::string &s, const std::string &p,
+                 std::vector<std::string> &result)
+{
+    std::string::size_type begin,end;
+    begin=0;
+    end=s.find(p,begin);
+
+    while(std::string::npos != end){
+        result.push_back(s.substr(begin,end-begin));
+
+        begin=end+p.size();
+        end=s.find(p,begin);
+    }
+
+    if(begin!=s.size())
+        result.push_back(s.substr(begin));
+}
+
 std::map<char, std::string> getOption(int argc, char *argv[])
 {
     std::map<char, std::string> result;
@@ -146,6 +164,7 @@ ssize_t writeString(int sockfd, const std::string &str)
     char *head = tmp;
     for (auto t : str)
         *(head++) = t;
+    *head='\0';
 
     ssize_t result = Rio_writen(sockfd, tmp, strlen(tmp));
     delete[] tmp;
@@ -189,9 +208,41 @@ ssize_t writeHtml(int sockfd, const std::string &f)
     Close(filefd);                                                             //line:netp:servestatic:close
     result = Rio_writen(sockfd, srcp, filesize);                               //line:netp:servestatic:write
     Munmap(srcp, filesize);
-
+    
     delete[] filename;
     return result;
+}
+
+int get_line(int sock, char *buf, int size)
+{
+    int i = 0;
+    char c = '\0';
+    int n;
+
+    while ((i < size - 1) && (c != '\n'))
+    {
+        n = recv(sock, &c, 1, 0);
+        /* DEBUG printf("%02X\n", c); */
+        if (n > 0)
+        {
+            if (c == '\r')
+            {
+                n = recv(sock, &c, 1, MSG_PEEK);
+                /* DEBUG printf("%02X\n", c); */
+                if ((n > 0) && (c == '\n'))
+                    recv(sock, &c, 1, 0);
+                else
+                    c = '\n';
+            }
+            buf[i] = c;
+            i++;
+        }
+        else
+            c = '\n';
+    }
+    buf[i] = '\0';
+
+    return (i);
 }
 
 in_addr_t Inet_addr(const std::string &host)

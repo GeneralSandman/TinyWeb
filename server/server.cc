@@ -7,6 +7,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <vector>
+#include <algorithm>
 
 namespace server
 {
@@ -48,7 +49,30 @@ Server::~Server()
         std::cout << "close server \n";
 }
 
-void Protocal::response_header(int client_socket)
+
+
+void Protocal::read_request()
+{
+    char buf[1024];
+    char *head=buf;
+    size_t numchars = get_line(client_socket, buf, sizeof(buf));
+    while(*head!='\0'){
+        request+=*(head++);
+    }
+}
+
+void Protocal::parser_request(void){
+    std::cout<<request<<std::endl;
+    std::vector<std::string> res;
+    splitString(request," ",res);
+    // method url http  
+    for(int i=0;i<res.size();i++)
+        std::cout<<i<<"-"<<res[i]<<"-"<<std::endl;
+
+
+}
+
+void Protocal::response_header()
 {
     using namespace std;
     vector<string> header;
@@ -61,7 +85,7 @@ void Protocal::response_header(int client_socket)
     }
 }
 
-void Protocal::response_body(int client_socket)
+void Protocal::response_body()
 {
     using namespace std;
     vector<string> header;
@@ -103,13 +127,14 @@ int Protocal::loseConnection(void)
 
 int Protocal::connectionMade(void)
 {
-    response_header(client_socket);
+    read_request();
+    parser_request();
+    response_header();
 }
 
 int Protocal::connectionLose(void)
 {
 }
-
 
 size_t Protocal::responseHtml(const std::string &filename)
 {

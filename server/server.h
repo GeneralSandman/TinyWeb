@@ -36,8 +36,13 @@ private:
   std::string peer;
   int peer_port;
 
-  void response_header(int client_socket);
-  void response_body(int client_socket);
+  std::string request;
+
+  void read_request();
+  void parser_request();
+
+  void response_header();
+  void response_body();
 
 public:
   Protocal(const int &, const std::string &, const int &);
