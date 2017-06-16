@@ -8,10 +8,11 @@
 #include <vector>
 
 void handle_error(char *msg);
+void setnonblocking(int sock);
 
 std::string cstr2string(const char *str);
 void splitString(const std::string &, const std::string &, std::vector<std::string> &);
-    std::map<char, std::string> getOption(int argc, char *argv[]);
+std::map<char, std::string> getOption(int argc, char *argv[]);
 
 int Socket(int domain, int type, int protocol);
 int Close(int fd);

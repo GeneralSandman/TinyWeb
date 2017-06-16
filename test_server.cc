@@ -35,22 +35,7 @@ int main__(int argc, char **argv)
         port.responseHtml(html);
     }
 }
-void setnonblocking(int sock)
-{
-    int opts;
-    opts = fcntl(sock, F_GETFL);
-    if (opts < 0)
-    {
-        perror("fcntl(sock, GETFL)");
-        exit(1);
-    }
-    opts = opts | O_NONBLOCK;
-    if (fcntl(sock, F_SETFL, opts) < 0)
-    {
-        perror("fcntl(sock,SETFL,opts)");
-        exit(1);
-    }
-}
+
 int main(int argc, char **argv)
 {
     std::map<char, std::string> opt;
@@ -61,8 +46,7 @@ int main(int argc, char **argv)
         exit(-1);
     }
 
-    int port;
-    port = stoi(opt['p']);
+    int port = stoi(opt['p']);
 
     struct epoll_event ev, events[20];
     int epfd = epoll_create(256);
@@ -80,9 +64,8 @@ int main(int argc, char **argv)
     char *local_addr = "127.0.0.1";
     inet_aton(local_addr, &(serveraddr.sin_addr));
     serveraddr.sin_port = htons(port); //或者htons(SERV_PORT);
-    if (bind(listenfd, (sockaddr *)&serveraddr, sizeof(serveraddr)))
-        exit(-1);
-    listen(listenfd, 8);
+    Bind(listenfd, (sockaddr *)&serveraddr, sizeof(serveraddr));
+    Listen(listenfd, 8);
     for (;;)
     {
         int nfds = epoll_wait(epfd, events, 20, 500); //等待epoll事件的发生
@@ -114,7 +97,7 @@ int main(int argc, char **argv)
                     continue;
                 }
                 int n;
-                std::cout<<"connfd is:"<<connfd<<std::endl;
+                std::cout << "connfd is:" << connfd << std::endl;
                 if ((n = read(connfd, line, 8192)) < 0) // 这里和IOCP不同
                 {
                     if (errno == ECONNRESET)
@@ -132,8 +115,8 @@ int main(int argc, char **argv)
                     close(connfd);
                     events[i].data.fd = -1;
                 }
-                printf("-%s-\n",line);
-                
+                // printf("-%s-\n", line);
+
                 ev.data.fd = connfd;            //设置用于写操作的文件描述符
                 ev.events = EPOLLOUT | EPOLLET; //设置用于注测的写操作事件
                 //修改connfd上要处理的事件为EPOLLOUT
@@ -146,10 +129,9 @@ int main(int argc, char **argv)
                 sprintf(buf, "HTTP/1.0 200 OK\r\n"); //line:netp:servestatic:beginserve
                 sprintf(buf, "%sContent-Type: text/html\r\n\r\n", buf);
                 write(client_socket, buf, strlen(buf));
-                writeHtml(client_socket,"home.html");
-                std::cout << "write done\n";
-                shutdown(client_socket,SHUT_RD);
-                ev.data.fd = client_socket;           //设置用于读操作的文件描述符
+                writeHtml(client_socket, "home.html");
+                shutdown(client_socket, SHUT_RD);
+                ev.data.fd = client_socket;    //设置用于读操作的文件描述符
                 ev.events = EPOLLIN | EPOLLET; //设置用于注册的读操作事件
                 //修改sockfd上要处理的事件为EPOLIN
                 epoll_ctl(epfd, EPOLL_CTL_MOD, client_socket, &ev);
