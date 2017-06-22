@@ -1,5 +1,5 @@
-#ifndef SERVER_H
-#define SERVER_H
+#ifndef BASIC_SERVER_H
+#define BASIC_SERVER_H
 
 #include <iostream>
 #include <string>
@@ -60,9 +60,6 @@ public:
   size_t responseHtml(const std::string &);
 };
 
-class Service
-{
-};
 }
 
 #endif
