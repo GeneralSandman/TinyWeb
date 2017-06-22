@@ -35,4 +35,13 @@ in_addr_t Inet_addr(const std::string &host);
 std::string Inet_ntop(int af, const void *src,
                       char *dst, socklen_t size);
 
+
+int setnoblocking(int fd);
+
+void epolladdfd(int epfd, int fd);
+void epollremovefd(int epfd,int fd);
+
+void add_signal(int sign,sighandler_t handler);
+void remove_signal(int sign);
+
 #endif

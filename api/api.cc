@@ -11,6 +11,8 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
+#include <sys/epoll.h>
+#include <signal.h>
 
 void handle_error(char *msg)
 {
@@ -291,4 +293,65 @@ std::string Inet_ntop(int af, const void *src,
         tmp++;
     }
     return result;
+}
+
+int setnoblocking(int fd)
+{
+    int status = fcntl(fd, F_GETFD);
+    if (status == -1)
+    {
+        char msg[] = "fcntl error";
+        handle_error(msg);
+    }
+    int newstatus = status | O_NONBLOCK;
+    int res = fcntl(fd, F_SETFD, newstatus);
+    if (res == -1)
+    {
+        char msg[] = "fctnl error";
+        handle_error(msg);
+    }
+    return status;
+}
+
+void epolladdfd(int epfd, int fd)
+{
+    epoll_event event;
+    event.data.fd = fd;
+    event.events = EPOLLIN | EPOLLET;
+    int res = epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &event);
+    if (res == -1)
+    {
+        char msg[] = "epoll add fd error";
+        handle_error(msg);
+    }
+    setnoblocking(fd);
+}
+
+void epollremovefd(int epfd, int fd)
+{
+    int res = epoll_ctl(epfd, EPOLL_CTL_DEL, fd, 0);
+    if (res == -1)
+    {
+        char msg[] = "epoll remove fd error";
+        handle_error(msg);
+    }
+}
+
+void add_signal(int sign, sighandler_t handler)
+{
+    struct sigaction sa;
+    memset(&sa, 0, sizeof(sa));
+    sa.sa_handler = handler;
+    sa.sa_flags |= SA_RESTART;
+    sigfillset(&sa.sa_mask);
+    int res = sigaction(sign, &sa, nullptr);
+    if (res == -1)
+    {
+        char msg[] = "add signal error";
+        handle_error(msg);
+    }
+}
+
+void remove_signal(int sign)
+{
 }
