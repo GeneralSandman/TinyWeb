@@ -335,6 +335,7 @@ void epollremovefd(int epfd, int fd)
         char msg[] = "epoll remove fd error";
         handle_error(msg);
     }
+    close(fd);
 }
 
 void add_signal(int sign, sighandler_t handler)
