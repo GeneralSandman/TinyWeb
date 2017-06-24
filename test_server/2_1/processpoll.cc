@@ -298,7 +298,7 @@ void Service::proc()
         {
             writeString(m_nConnectFd, t);
         }
-        std::string file = "home.html";
+        std::string file = "../../docs/home.html";
         writeHtml(m_nConnectFd, file);
     }
     close(m_nConnectFd);
