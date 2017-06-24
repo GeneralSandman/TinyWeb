@@ -1,6 +1,8 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#include <iostream>
+#include <string>
 namespace parser
 {
 enum CHECK_STATE
@@ -41,6 +43,14 @@ class Parser
     char m_nBuf[4096];
     int m_nReadIndex;
     int m_nCheckIndex;
+    CHECK_STATE m_nCheckStat;
+
+    int m_nLineStart;
+
+    std::string m_nMethod;
+    std::string m_nUrl;
+    std::string m_nHttpVersion;
+    std::string m_nHost;
 
 
 

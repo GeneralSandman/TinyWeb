@@ -14,28 +14,30 @@ int main()
     int data_recv = 0;
     int data_index = 0;
     int sockfd = 111;
-    parser::Parser *par = new parser::Parser();
+    parser::Parser *par = new parser::Parser(1);
     while (1)
     {
-        data_recv = read(sockfd, buf + data_index, sizeof(buf) - data_index);
+        data_recv = par->recv_data_continue();
         if (data_recv == -1)
         {
+            break;
         }
         else if (data_recv == 0)
         {
+            break;
         }
         else
         {
-            data_index += data_recv;
-
-            parser::HTTP_CODE result = par->parse_content(buf);
+            parser::HTTP_CODE result = par->parse_content();
             if (result == parser::HTTP_CODE::NO_REQUEST)
             {
                 //contiune recv data
+                continue;
             }
             else if (result == parser::HTTP_CODE::GET_REQUEST)
             {
                 //response
+                
             }
             else
             {

@@ -286,7 +286,7 @@ void Service::proc()
 {
 
     int res = read(m_nConnectFd, m_nBuf, sizeof(m_nBuf));
-    std::cout << "---------\n";
+    std::cout << "receive:"<<m_nBuf<<"---\n";
     if (res > 0)
     {
         using namespace std;
