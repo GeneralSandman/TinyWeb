@@ -37,7 +37,7 @@ class Parser
     HTTP_CODE parse_content();
     int recv_data_continue();
 
-  private:
+  public:
     int m_nSockfd;
 
     char m_nBuf[4096];

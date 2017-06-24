@@ -1,5 +1,5 @@
-#include "parser.h"
-#include "../api/api.h"
+#include "../../parser/parser.h"
+#include "../../api/api.h"
 
 #include <iostream>
 #include <unistd.h>
@@ -36,6 +36,10 @@ int main(int argc, char **argv)
 
     struct sockaddr client_addr;
     socklen_t client_len = sizeof(client_addr);
+
+    while(1){
+
+    
     int connectfd = accept(listen_fd, &client_addr, &client_len);
 
     
@@ -73,7 +77,7 @@ int main(int argc, char **argv)
                 {
                     writeString(connectfd, t);
                 }
-                std::string file = "../docs/";
+                std::string file = "../../docs";
                 file+=par->m_nUrl;
                 writeHtml(connectfd, file);
 
@@ -87,6 +91,8 @@ int main(int argc, char **argv)
     }
 
     delete par;
+
+    }
 
     return 0;
 }
