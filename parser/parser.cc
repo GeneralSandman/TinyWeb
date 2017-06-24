@@ -97,6 +97,7 @@ int Parser::recv_data_continue()
     else
     {
         m_nReadIndex += res;
+        std::cout<<"get data\n";
     }
 
     return res;
@@ -104,6 +105,10 @@ int Parser::recv_data_continue()
 
 parser::LINE_STATUS Parser::m_fParseLine()
 {
+    std::cout<<m_nBuf<<std::endl;
+    for(char *i=m_nBuf;*i!='\0';i++)
+        printf("%d ",*i);
+    std::cout<<"-------------\n";
     char check;
     for (; m_nCheckIndex < m_nReadIndex; m_nCheckIndex++)
     {
@@ -116,6 +121,7 @@ parser::LINE_STATUS Parser::m_fParseLine()
             }
             else if (m_nBuf[m_nCheckIndex + 1] == '\n')
             {
+                std::cout<<"get a line\n";
                 m_nBuf[m_nCheckIndex++] = '\0';
                 m_nBuf[m_nCheckIndex++] = '\0';
                 return LINE_OK;
@@ -139,14 +145,53 @@ parser::LINE_STATUS Parser::m_fParseLine()
             }
         }
     }
-
+    std::cout<<"-------------\n";
+    
     return LINE_OPEN;
 }
 
 parser::HTTP_CODE Parser::m_fParseRequestLine()
 {
-    
+    std::cout<<"int the function m_fParseRequsetLine()\n";
+    char *begin = m_nBuf;
+    char *end = strpbrk(begin, " ");
+    if (!end)
+    {
+        std::cout<<"bad request1\n";
+        return BAD_REQUEST;
+    }
+    for (char *i = begin; i < end; i++)
+    {
+        m_nMethod += *i;
+    }
+    *(end++) = '\0';
 
+    begin = end;
+    end=nullptr;
+    end = strpbrk(begin, " ");
+    if (!end)
+    {
+        std::cout<<"bad request2\n";        
+        return BAD_REQUEST;
+    }
+    for (char *i = begin; i < end; i++)
+    {
+        m_nUrl += *i;
+    }
+    *(end++) = '\0';
+
+    begin = end;
+
+    for (char *i = begin; *i!='\0'; i++)
+    {
+        m_nHttpVersion += *i;
+    }
+    
+    std::cout << "---------------------\n";
+    std::cout << "method:" << m_nMethod << std::endl;
+    std::cout << "url:" << m_nUrl << std::endl;
+    std::cout << "version:" << m_nHttpVersion << std::endl;
+    std::cout << "---------------------\n";
 
     m_nCheckStat = CHECK_STATE_HEADER; //change the statue
     return NO_REQUEST;
@@ -161,6 +206,10 @@ parser::HTTP_CODE Parser::m_fParseHeader()
     }
     else if (strncasecmp(linestart, "Host:", 5) == 0)
     {
+        char *end=strpbrk(linestart,"\r");
+        for(char *i=linestart+5;i<end;i++){
+            m_nHost+=*i;
+        }
     }
     else if (strncasecmp(linestart, "Referer:", 8) == 0)
     {
