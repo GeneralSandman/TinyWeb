@@ -1,0 +1,31 @@
+#include "exception.h"
+#include <execinfo.h>
+
+Exception::Exception(const char *msg)
+    : m_nName(msg)
+{
+    m_fFillStackTrace();
+}
+
+Exception::Exception(const std::string &msg)
+    : m_nName(msg)
+{
+    m_fFillStackTrace();
+}
+
+void Exception::m_fFillStackTrace()
+{
+    int size = 200;
+    void *buffer[size];
+    int nptrs = backtrace(buffer, size);
+    char **str = backtrace_symbols(buffer, nptrs);
+    if (str)
+    {
+        for (int i = 0; i < nptrs; i++)
+        {
+            m_nStack += str[i];
+            m_nStack += '\n';
+        }
+    }
+    free(str);
+}

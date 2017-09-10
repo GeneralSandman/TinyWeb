@@ -14,10 +14,24 @@
 #include <sys/epoll.h>
 #include <signal.h>
 
+#include <sys/syscall.h>
+#include <sys/types.h>
+
+pid_t gettid()
+{
+    return (pid_t)(syscall(SYS_gettid));
+}
 void handle_error(char *msg)
 {
     fprintf(stderr, "%s: %s\n", msg, strerror(errno));
     exit(-1);
+}
+
+void handle_error(const std::string &msg)
+{
+    const char *ms = new char[msg.size() + 1];
+    ms = msg.c_str();
+    handle_error(ms);
 }
 
 void setnonblocking(int sock)

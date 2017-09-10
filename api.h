@@ -7,7 +7,10 @@
 #include <map>
 #include <vector>
 
+pid_t gettid();
+
 void handle_error(char *msg);
+void handle_error(const std::string &msg);
 void setnonblocking(int sock);
 
 std::string cstr2string(const char *str);
