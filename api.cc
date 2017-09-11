@@ -21,13 +21,13 @@ pid_t gettid()
 {
     return (pid_t)(syscall(SYS_gettid));
 }
-void handle_error(char *msg)
+void handle_error(const char *msg)
 {
     fprintf(stderr, "%s: %s\n", msg, strerror(errno));
     exit(-1);
 }
 
-void handle_error(const std::string &msg)
+void handle_error_s(const std::string &msg)
 {
     const char *ms = new char[msg.size() + 1];
     ms = msg.c_str();

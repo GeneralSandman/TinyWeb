@@ -26,7 +26,7 @@ private:
   static AtomicInt32 m_nThreadsNum;
 
 public:
-  explicit Thread(const threadFun &, const std::string &);
+  explicit Thread(const threadFun &, const std::string &name="");
   //constructor don't create thread
   //start() create thread
   void start();

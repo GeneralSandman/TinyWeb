@@ -41,7 +41,7 @@ void Thread::start()
     int res = pthread_create(&m_nThreadId, NULL,
                              m_fStartThread, this);
     if (res != 0)
-        handle_error("pthread_create() error");
+        handle_error_s("pthread_create() error");
 }
 
 int Thread::join()
