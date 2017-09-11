@@ -3,17 +3,17 @@ gg = g++ -std=c++11 -c -o
 
 api_test:api_test.o api.o
 	$(ll) api_test api_test.o api.o
-thread_test:thread_test.o thread.o currentthread.o api.o -lpthread
-	$(ll) thread_test thread_test.o thread.o currentthread.o api.o -lpthread
-threadpool_test:threadpool_test.o
-	$(ll) threadpool_test threadpool_test.o
+thread_test:thread_test.o thread.o currentthread.o api.o
+	$(ll) thread_test thread_test.o thread.o threadpool_test.o currentthread.o api.o -lpthread
+threadpool_test:threadpool_test.o thread.o threadpool.o currentthread.o api.o
+	$(ll) threadpool_test threadpool_test.o thread.o threadpool.o currentthread.o api.o -lpthread
 
 api_test.o:api_test.cc
 	$(gg) api_test.o api_test.cc
 thread_test.o:thread_test.cc
 	$(gg) thread_test.o thread_test.cc
 threadpool_test.o:threadpool_test.cc
-	$(gg) threadpool.o threadpool_test.cc
+	$(gg) threadpool_test.o threadpool_test.cc
 
 api.o:../api.cc
 	$(gg) api.o ../api.cc
@@ -30,7 +30,7 @@ log.o:../log.cc
 thread.o:../thread.cc
 	$(gg) thread.o ../thread.cc
 threadpool.o:../threadpool.cc
-	$(gg) threadpool.o:../threadpool.cc
+	$(gg) threadpool.o ../threadpool.cc
 
 
 clean:
