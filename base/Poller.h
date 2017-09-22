@@ -1,3 +1,0 @@
-namespace muduo{
-    class Poller{};
-}

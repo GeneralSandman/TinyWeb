@@ -1,7 +1,0 @@
-
-namespace muduo
-{
-    class Channel{
-
-    };
-}
