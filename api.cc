@@ -327,11 +327,12 @@ int setnoblocking(int fd)
     return status;
 }
 
-void epolladdfd(int epfd, int fd)
+void epolladdfd(int epfd, int fd, int events)
 {
-    epoll_event event;
+    struct epoll_event event;
+    bzero(&event,sizeof(event));
     event.data.fd = fd;
-    event.events = EPOLLIN | EPOLLET;
+    event.events = events;
     int res = epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &event);
     if (res == -1)
     {
@@ -339,6 +340,10 @@ void epolladdfd(int epfd, int fd)
         handle_error(msg);
     }
     setnoblocking(fd);
+}
+
+void epoll_modfd(int epfd, int fd, int events)
+{
 }
 
 void epollremovefd(int epfd, int fd)
@@ -349,7 +354,6 @@ void epollremovefd(int epfd, int fd)
         char msg[] = "epoll remove fd error";
         handle_error(msg);
     }
-    close(fd);
 }
 
 void add_signal(int sign, sighandler_t handler)

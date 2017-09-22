@@ -1,6 +1,21 @@
 ll = g++ -o
 gg = g++ -std=c++11 -c -o
 
+
+link = g++ -o
+gcc11 = g++ -std=c++11 -c
+gcc11o = $(gcc11) -o
+
+
+lib = api channel condition currentthread epoller eventloop exception \
+	log
+lib.o = $(foreach file,$(lib),$(file).o)
+lib.cc = $(foreach file,$(lib),../$(file).cc)
+
+lib:$(lib.cc)
+	$(gcc11) $(lib.cc)
+base_test:base_test.o $(lib.o)
+	$(link) base_test base_test.o $(lib.o)
 api_test:api_test.o api.o
 	$(ll) api_test api_test.o api.o
 thread_test:thread_test.o thread.o currentthread.o api.o
@@ -8,6 +23,8 @@ thread_test:thread_test.o thread.o currentthread.o api.o
 threadpool_test:threadpool_test.o thread.o threadpool.o currentthread.o api.o
 	$(ll) threadpool_test threadpool_test.o thread.o threadpool.o currentthread.o api.o -lpthread
 
+base_test.o:base_test.cc
+	$(gcc11o) base_test.o base_test.cc
 api_test.o:api_test.cc
 	$(gg) api_test.o api_test.cc
 thread_test.o:thread_test.cc
@@ -15,23 +32,11 @@ thread_test.o:thread_test.cc
 threadpool_test.o:threadpool_test.cc
 	$(gg) threadpool_test.o threadpool_test.cc
 
-api.o:../api.cc
-	$(gg) api.o ../api.cc
-atomic.o:../atomic.cc
-	$(gg) atomic.o ../atomic.cc
-condition.o:../condition.cc
-	$(gg) condition.o ../condition.cc
-currentthread.o:../currentthread.cc
-	$(gg) currentthread.o ../currentthread.cc
-exception.o:../exception.cc
-	$(gg) exception.o ../exception.cc
-log.o:../log.cc
-	$(gg) log.o ../log.cc
-thread.o:../thread.cc
-	$(gg) thread.o ../thread.cc
-threadpool.o:../threadpool.cc
-	$(gg) threadpool.o ../threadpool.cc
 
 
 clean:
+	rm *.o
+
+cleanall:
+	rm *_test
 	rm *.o
