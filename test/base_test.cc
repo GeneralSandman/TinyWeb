@@ -11,7 +11,7 @@ EventLoop *g_loop = nullptr;
 void timeout()
 {
     cout << "Timeout!\n";
-    g_loop->quit();
+    // g_loop->quit();
 }
 
 int main()
@@ -26,7 +26,8 @@ int main()
 
     struct itimerspec howlong;
     bzero(&howlong, sizeof howlong);
-    howlong.it_value.tv_sec = 5;
+    howlong.it_value.tv_sec = 1;
+    howlong.it_interval.tv_sec = 1000;
     ::timerfd_settime(timerfd, 0, &howlong, NULL);
 
     g_loop->loop();
