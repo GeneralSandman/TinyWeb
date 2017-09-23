@@ -83,7 +83,7 @@ void EPoller::poll(std::vector<Channel *> &active)
 {
     m_nEventNum = epoll_wait(m_nEFd, &(*m_nEvents.begin()),
                              100, 5000);
-    std::cout << "epoll_wait return:" << m_nEventNum << std::endl;
+    // std::cout << "epoll_wait return:" << m_nEventNum << std::endl;
     if (m_nEventNum > 0)
         m_fFillActiveChannels(active);
     m_nEventNum = 0;

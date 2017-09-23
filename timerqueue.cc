@@ -39,8 +39,18 @@ void TimerQueue::m_fHandleRead()
 
 void TimerQueue::m_fInsertTimer(Timer *timer)
 {
+    bool mustResetTimeFd = false;
     Time time = timer->getTime();
+    if (m_nTimers.empty())
+        mustResetTimeFd = true;
+    else if (time < m_nTimers.begin()->first)
+        mustResetTimeFd = true;
+
     m_nTimers.insert(std::pair<Time, Timer *>(time, timer));
+    if (mustResetTimeFd)
+        m_fResetTimeFd(time);
+    //
+    //resetTimeFd()
 }
 
 void TimerQueue::m_fGetHappen(std::vector<Timer *> &happened)
@@ -80,7 +90,7 @@ void TimerQueue::m_fResetTimeFd(Time expiration)
     struct itimerspec newValue;
     bzero(&newValue, sizeof newValue);
     newValue.it_value = howMuchTimeFromNow(expiration);
-    int ret = ::timerfd_settime(timerfd, 0, &newValue, &oldValue);
+    int ret = ::timerfd_settime(m_nFd, 0, &newValue, NULL);
 }
 
 TimerQueue::TimerQueue(EventLoop *loop)

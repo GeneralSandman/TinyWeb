@@ -21,7 +21,7 @@ class TimerQueue
     void m_fInsertTimer(Timer *);
     void m_fGetHappen(std::vector<Timer *> &);
     void m_fResetHappened(std::vector<Timer *> &);
-    void m_fResetTimeFd();
+    void m_fResetTimeFd(Time expiration);
 
   public:
     TimerQueue(EventLoop *);
