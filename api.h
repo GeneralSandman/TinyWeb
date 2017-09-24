@@ -48,4 +48,9 @@ typedef void (*sighandler_t)(int);
 void add_signal(int sign, sighandler_t handler);
 void remove_signal(int sign);
 
+
+////////////////////// socket api////////////////////
+int createSocket();
+
+
 #endif

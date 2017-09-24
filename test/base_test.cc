@@ -25,6 +25,11 @@ void fun2()
     cout << "invoke per 2 seconds\n";
 }
 
+void fun3()
+{
+    cout << "invoke per 3 seconds\n";
+}
+
 int main()
 {
 
@@ -32,6 +37,7 @@ int main()
 
     g_loop->runEvery(1, boost::bind(fun1));
     g_loop->runEvery(2, boost::bind(fun2));
+    g_loop->runEvery(3, boost::bind(fun3));
     g_loop->runAfter(10, boost::bind(timeout));
 
     g_loop->loop();
