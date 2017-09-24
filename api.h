@@ -17,11 +17,15 @@ std::string cstr2string(const char *str);
 void splitString(const std::string &, const std::string &, std::vector<std::string> &);
 std::map<char, std::string> getOption(int argc, char *argv[]);
 
-int Socket(int domain, int type, int protocol);
-int Close(int fd);
+int createSocket(int domain, int type, int protocol);
+int createSocket();
+void Close(int fd);
 
 int Bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+int Bind(int sockfd, const struct sockaddr *addr);
 int Listen(int sockfd, int backlog);
+
+void shutdownWrite(int sockfd);
 
 int Open(const char *pathname, int flags, mode_t mode);
 int Stat(const char *pathname, struct stat *buf);
@@ -38,7 +42,11 @@ in_addr_t Inet_addr(const std::string &host);
 std::string Inet_ntop(int af, const void *src,
                       char *dst, socklen_t size);
 
-int setnoblocking(int fd);
+void IpPortToSockAddr(const char *, int, struct sockaddr_in *res);
+void SockAddrToIpPort(char *, int &, const struct sockaddr_in *src);
+
+int setNoBlock(int fd);
+int setCLOEXEC(int fd);
 
 void epoll_addfd(int epfd, int fd, int events);
 void epoll_modfd(int epfd, int fd, int events);
@@ -48,9 +56,24 @@ typedef void (*sighandler_t)(int);
 void add_signal(int sign, sighandler_t handler);
 void remove_signal(int sign);
 
-
 ////////////////////// socket api////////////////////
-int createSocket();
 
+uint16_t hostToNet16(uint16_t a)
+{
+    return htons(a);
+}
+uint32_t hostToNet32(uint32_t a)
+{
+    return htonl(a);
+}
+
+uint16_t netToHost16(uint16_t a)
+{
+    return ntohs(a);
+}
+uint32_t netToHost32(uint32_t a)
+{
+    return ntohl(a);
+}
 
 #endif

@@ -98,50 +98,57 @@ std::map<char, std::string> getOption(int argc, char *argv[])
     return result;
 }
 
-int Socket(int domain, int type, int protocol)
+int createSocket(int domain, int type, int protocol)
 {
     int res = socket(domain, type, protocol);
     if (res < 0)
-    {
-        char msg[] = "socket error";
-        handle_error(msg);
-    }
-
+        handle_error("socket error");
     return res;
 }
 
-int Close(int fd)
+int createSocket()
+{
+    int res = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (res < 0)
+        handle_error("socket error");
+    return res;
+}
+
+void Close(int fd)
 {
     int res = close(fd);
     if (res < 0)
-    {
-        char msg[] = "close error";
-        handle_error(msg);
-    }
-    return res;
+        handle_error("close error");
 }
 
 int Bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 {
     int res = bind(sockfd, addr, addrlen);
     if (res < 0)
-    {
-        char msg[] = "bind error";
-        handle_error(msg);
-    }
+        handle_error("bind error");
+    return res;
+}
+
+int Bind(int sockfd, const struct sockaddr *addr)
+{
+    int res = bind(sockfd, addr, sizeof(addr));
+    if (res < 0)
+        handle_error("bind error");
     return res;
 }
 
 int Listen(int sockfd, int backlog)
 {
-
-    int res = listen(sockfd, 20);
+    int res = listen(sockfd, backlog);
     if (res < 0)
-    {
-        char msg[] = "listen error";
-        handle_error(msg);
-    }
+        handle_error("listen error");
     return res;
+}
+
+void shutdownWrite(int sockfd)
+{
+    if (shutdown(sockfd, SHUT_WR) < 0)
+        handle_error("shutdownWrite error");
 }
 
 int Open(const char *pathname, int flags, mode_t mode)
@@ -309,28 +316,39 @@ std::string Inet_ntop(int af, const void *src,
     return result;
 }
 
-int setnoblocking(int fd)
+void IpPortToSockAddr(const char *ip, int port, struct sockaddr_in *res)
+{
+    res->sin_family = AF_INET;
+    res->sin_port = port;
+    inet_pton(AF_INET, ip, &res->sin_addr);
+}
+
+void SockAddrToIpPort(char *ip, int size, int &port, const struct sockaddr_in *src)
+{
+    inet_ntop(AF_INET, &(src->sin_addr), ip, size); //convert to ip
+    port = netToHost32(src->sin_port);
+}
+
+int setNoBlock(int fd)
 {
     int status = fcntl(fd, F_GETFD);
-    if (status == -1)
-    {
-        char msg[] = "fcntl error";
-        handle_error(msg);
-    }
     int newstatus = status | O_NONBLOCK;
     int res = fcntl(fd, F_SETFD, newstatus);
-    if (res == -1)
-    {
-        char msg[] = "fctnl error";
-        handle_error(msg);
-    }
+    return status;
+}
+
+int setCLOEXEC(int fd)
+{
+    int status = fcntl(fd, F_GETFD);
+    int newstatus = status | FD_CLOEXEC;
+    int res = fcntl(fd, F_SETFD, newstatus);
     return status;
 }
 
 void epolladdfd(int epfd, int fd, int events)
 {
     struct epoll_event event;
-    bzero(&event,sizeof(event));
+    bzero(&event, sizeof(event));
     event.data.fd = fd;
     event.events = events;
     int res = epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &event);
