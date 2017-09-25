@@ -19,11 +19,14 @@ std::map<char, std::string> getOption(int argc, char *argv[]);
 
 int createSocket(int domain, int type, int protocol);
 int createSocket();
+
+int createNoBlockSocket(int, int, int);
+int createNoBlockSocket();
 void Close(int fd);
 
-int Bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
-int Bind(int sockfd, const struct sockaddr *addr);
+int Bind(int sockfd, const struct sockaddr_in *addr, socklen_t addrlen = sizeof(struct sockaddr_in));
 int Listen(int sockfd, int backlog);
+int Accept(int, struct sockaddr_in *peraddr);
 
 void shutdownWrite(int sockfd);
 
@@ -43,7 +46,7 @@ std::string Inet_ntop(int af, const void *src,
                       char *dst, socklen_t size);
 
 void IpPortToSockAddr(const char *, int, struct sockaddr_in *res);
-void SockAddrToIpPort(char *, int &, const struct sockaddr_in *src);
+void SockAddrToIpPort(char *ip, int size, int &port, const struct sockaddr_in *src);
 
 int setNoBlock(int fd);
 int setCLOEXEC(int fd);
@@ -58,20 +61,20 @@ void remove_signal(int sign);
 
 ////////////////////// socket api////////////////////
 
-uint16_t hostToNet16(uint16_t a)
+inline uint16_t hostToNet16(uint16_t a)
 {
     return htons(a);
 }
-uint32_t hostToNet32(uint32_t a)
+inline uint32_t hostToNet32(uint32_t a)
 {
     return htonl(a);
 }
 
-uint16_t netToHost16(uint16_t a)
+inline uint16_t netToHost16(uint16_t a)
 {
     return ntohs(a);
 }
-uint32_t netToHost32(uint32_t a)
+inline uint32_t netToHost32(uint32_t a)
 {
     return ntohl(a);
 }

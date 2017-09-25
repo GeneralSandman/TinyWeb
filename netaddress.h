@@ -10,13 +10,14 @@ private:
   struct sockaddr_in m_nAddress;
 
 public:
+  NetAddress();
   NetAddress(int port);
   NetAddress(const std::string &ip, int port);
   NetAddress(const std::string &ipport);
   NetAddress(struct sockaddr_in &addr);
 
   std::string getIp();
-  std::string getPort();
+  int getPort();
   std::string getIpPort();
 
   const struct sockaddr_in getAddr() { return m_nAddress; }

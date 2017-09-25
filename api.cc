@@ -114,6 +114,22 @@ int createSocket()
     return res;
 }
 
+int createNoBlockSocket(int domain, int type, int protocol)
+{
+    int res = createSocket(domain, type, protocol);
+    setNoBlock(res);
+    setCLOEXEC(res);
+    return res;
+}
+
+int createNoBlockSocket()
+{
+    int res = createSocket();
+    setNoBlock(res);
+    setCLOEXEC(res);
+    return res;
+}
+
 void Close(int fd)
 {
     int res = close(fd);
@@ -121,17 +137,9 @@ void Close(int fd)
         handle_error("close error");
 }
 
-int Bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
+int Bind(int sockfd, const struct sockaddr_in *addr, socklen_t addrlen)
 {
-    int res = bind(sockfd, addr, addrlen);
-    if (res < 0)
-        handle_error("bind error");
-    return res;
-}
-
-int Bind(int sockfd, const struct sockaddr *addr)
-{
-    int res = bind(sockfd, addr, sizeof(addr));
+    int res = bind(sockfd, (const struct sockaddr *)addr, addrlen);
     if (res < 0)
         handle_error("bind error");
     return res;
@@ -142,6 +150,15 @@ int Listen(int sockfd, int backlog)
     int res = listen(sockfd, backlog);
     if (res < 0)
         handle_error("listen error");
+    return res;
+}
+
+int Accept(int sockfd, struct sockaddr_in *peraddr)
+{
+    socklen_t len = sizeof(struct sockaddr_in);
+    int res = accept(sockfd, (struct sockaddr *)peraddr, &len);
+    if (res <= 0)
+        handle_error("accept error");
     return res;
 }
 
@@ -319,14 +336,17 @@ std::string Inet_ntop(int af, const void *src,
 void IpPortToSockAddr(const char *ip, int port, struct sockaddr_in *res)
 {
     res->sin_family = AF_INET;
-    res->sin_port = port;
-    inet_pton(AF_INET, ip, &res->sin_addr);
+    res->sin_port = hostToNet16(port);
+    inet_pton(AF_INET, ip, &(res->sin_addr));
 }
 
 void SockAddrToIpPort(char *ip, int size, int &port, const struct sockaddr_in *src)
 {
+    //before we use this function,we have to promise the length of ip
+    //have INET_ADDRSETRLEN
+
     inet_ntop(AF_INET, &(src->sin_addr), ip, size); //convert to ip
-    port = netToHost32(src->sin_port);
+    port = netToHost16(src->sin_port);
 }
 
 int setNoBlock(int fd)
@@ -357,7 +377,7 @@ void epolladdfd(int epfd, int fd, int events)
         char msg[] = "epoll add fd error";
         handle_error(msg);
     }
-    setnoblocking(fd);
+    setnonblocking(fd);
 }
 
 void epoll_modfd(int epfd, int fd, int events)

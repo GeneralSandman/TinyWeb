@@ -16,21 +16,20 @@ void Socket::bindAddress(NetAddress &address)
 {
     int len;
     struct sockaddr_in s = address.getAddr();
-    Bind(m_nFd, (const struct sockaddr *)(&s));
+    Bind(m_nFd, &s);
 }
 void Socket::listen()
 {
     Listen(m_nFd, 100);
 }
 
-int Socket::accept(NetAddress &res)
+int Socket::accept(NetAddress &per)
 {
-    struct sockaddr addr;
+    struct sockaddr_in addr;
     bzero(&addr, sizeof(addr));
-    int len;
-    int connectfd = accept(m_nFd, &addr, &len);
-    res.setAddr((struct sockaddr_in)addr);
-    
+    int connectfd = Accept(m_nFd, &addr);
+    per.setAddr(addr);
+    return connectfd;
 }
 
 Socket::~Socket()
