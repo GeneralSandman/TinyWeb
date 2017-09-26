@@ -52,6 +52,8 @@ int setNoBlock(int fd);
 int setCLOEXEC(int fd);
 int setSocketReuseAddress(int fd);
 
+struct sockaddr_in getLocalAddr(int sockfd);
+
 void epoll_addfd(int epfd, int fd, int events);
 void epoll_modfd(int epfd, int fd, int events);
 void epoll_removefd(int epfd, int fd);

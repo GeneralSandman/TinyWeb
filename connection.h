@@ -2,7 +2,7 @@
 #define CONNECTION_H
 
 #include "channel.h"
-
+#include "netaddress.h"
 #include <boost/function.hpp>
 
 typedef boost::function<void()> connectCallback;
@@ -14,7 +14,7 @@ enum Connection_State
   Connected
 };
 
-class EventLoop;  
+class EventLoop;
 
 class Connection
 {
@@ -23,9 +23,13 @@ private:
   Channel m_nChannel; //connect fd
   connectCallback m_nConnectCallback;
   messageCallback m_nMessageCallback;
+  NetAddress m_nLocalAddress;
+  NetAddress m_nPeerAddress;
+
+  void m_fHeadleRead();
 
 public:
-  Connection(EventLoop *, int );
+  Connection(EventLoop *, int, const NetAddress &, const NetAddress &);
   void setConenctCallback(connectCallback c)
   {
     m_nConnectCallback = c;
@@ -34,6 +38,8 @@ public:
   {
     m_nMessageCallback = c;
   }
+
+  void establishConnection();
   ~Connection();
 };
 

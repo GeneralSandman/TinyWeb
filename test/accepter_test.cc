@@ -1,8 +1,11 @@
-#include "../accepter.cc"
+#include "../accepter.h"
 #include "../eventloop.h"
+#include "../netaddress.h"
+#include "../api.h"
 
 #include <iostream>
 #include <unistd.h>
+#include <boost/bind.hpp>
 
 using namespace std;
 

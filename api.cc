@@ -372,6 +372,16 @@ int setSocketReuseAddress(int sockfd_)
                &optval, sizeof optval);
 }
 
+struct sockaddr_in getLocalAddr(int sockfd)
+{
+    struct sockaddr_in localaddr;
+    bzero(&localaddr, sizeof localaddr);
+    socklen_t addrlen = sizeof(localaddr);
+    if (getsockname(sockfd, (struct sockaddr *)(&localaddr), &addrlen) < 0)
+        handle_error("getsockname error");
+    return localaddr;
+}
+
 void epolladdfd(int epfd, int fd, int events)
 {
     struct epoll_event event;
