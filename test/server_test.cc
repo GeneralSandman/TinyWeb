@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <unistd.h>
+#include <signal.h>
 #include <boost/bind.hpp>
 
 using namespace std;
@@ -24,7 +25,7 @@ void MessageCallback()
 void fun1()
 {
     Time time(Time::now());
-    cout << "invoke per second:" << time.toString() << endl;
+    cout << "invoke per second:" << time.toFormattedString() << endl;
 }
 
 void timeout()
@@ -33,8 +34,16 @@ void timeout()
     g_loop->quit();
 }
 
+static void signal_handler(int sig)
+{
+    std::cout << "receive signal " << sig << std::endl;
+    g_loop->quit();
+}
+
 int main()
 {
+    add_signal(SIGTERM, signal_handler);
+    add_signal(SIGINT, signal_handler);
 
     g_loop = new EventLoop();
     g_loop->runEvery(1, boost::bind(fun1));
