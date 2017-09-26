@@ -50,6 +50,7 @@ void SockAddrToIpPort(char *ip, int size, int &port, const struct sockaddr_in *s
 
 int setNoBlock(int fd);
 int setCLOEXEC(int fd);
+int setSocketReuseAddress(int fd);
 
 void epoll_addfd(int epfd, int fd, int events);
 void epoll_modfd(int epfd, int fd, int events);

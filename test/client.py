@@ -7,7 +7,8 @@ def client(ip, port):
     print 'localaddress:', s.getsockname()
     s.connect((ip, int(port)))
     print 'peeraddress:', s.getpeername()
-    s.send("information")
+    buf=s.recv(15)
+    print buf
     s.close()
 
 

@@ -9,10 +9,11 @@
 Socket::Socket(int fd)
 {
     m_nFd = fd;
+    setSocketReuseAddress(fd);//SO_REUSEADDR
     LOG(Debug) << "class Socket constructor\n";
 }
 
-void Socket::bindAddress(NetAddress &address)
+void Socket::bindAddress(const NetAddress &address)
 {
     int len;
     struct sockaddr_in s = address.getAddr();

@@ -53,7 +53,7 @@ NetAddress::NetAddress(struct sockaddr_in &addr)
     m_nAddress = addr;
 }
 
-std::string NetAddress::getIp()
+std::string NetAddress::getIp() const
 {
     char ip[INET_ADDRSTRLEN];
     int port;
@@ -64,7 +64,7 @@ std::string NetAddress::getIp()
     return res;
 }
 
-int NetAddress::getPort()
+int NetAddress::getPort() const
 {
     char ip[INET_ADDRSTRLEN];
     int port;
@@ -72,7 +72,7 @@ int NetAddress::getPort()
     return port;
 }
 
-std::string NetAddress::getIpPort()
+std::string NetAddress::getIpPort() const
 {
     char ip[INET_ADDRSTRLEN];
     int port;

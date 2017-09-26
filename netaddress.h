@@ -16,11 +16,11 @@ public:
   NetAddress(const std::string &ipport);
   NetAddress(struct sockaddr_in &addr);
 
-  std::string getIp();
-  int getPort();
-  std::string getIpPort();
+  std::string getIp() const;
+  int getPort() const;
+  std::string getIpPort() const;
 
-  const struct sockaddr_in getAddr() { return m_nAddress; }
+  const struct sockaddr_in getAddr() const { return m_nAddress; }
   void setAddr(struct sockaddr_in a) { m_nAddress = a; }
 
   ~NetAddress();

@@ -365,6 +365,13 @@ int setCLOEXEC(int fd)
     return status;
 }
 
+int setSocketReuseAddress(int sockfd_)
+{
+    int optval = 1;
+    setsockopt(sockfd_, SOL_SOCKET, SO_REUSEADDR,
+               &optval, sizeof optval);
+}
+
 void epolladdfd(int epfd, int fd, int events)
 {
     struct epoll_event event;

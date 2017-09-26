@@ -10,7 +10,8 @@ private:
 
 public:
   Socket(int);
-  void bindAddress(NetAddress &);
+  int getFd() { return m_nFd; }
+  void bindAddress(const NetAddress &);
   void listen();
   int accept(NetAddress &res);
   ~Socket();
