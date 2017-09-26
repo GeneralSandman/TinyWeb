@@ -2,6 +2,7 @@
 #include "eventloop.h"
 #include "log.h"
 
+
 void Channel::m_fUpdate()
 {
     m_pEventLoop->updateChannel(this);
@@ -23,6 +24,21 @@ void Channel::handleEvent()
     {
         if (m_fReadCallback)
             m_fReadCallback();
+    }
+    else if (m_nREvent == EPOLLOUT)
+    {
+        if (m_fWriteCallback)
+            m_fWriteCallback();
+    }
+    else if (m_nREvent == EPOLLERR)
+    {
+        if (m_fErrorCallback)
+            m_fErrorCallback();
+    }
+    else if (m_nREvent == EPOLLHUP)
+    {
+        if (m_fCloseCallback)
+            m_fCloseCallback();
     }
 }
 

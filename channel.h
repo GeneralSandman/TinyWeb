@@ -10,6 +10,10 @@ static int ChannelFlag_New = -1;
 static int ChannelFlag_Added = -2;
 static int ChannelFlag_Deleted = -3;
 
+static int kNoneEvent = 0;
+static int kReadEvent = EPOLLIN | EPOLLPRI;
+static int kWriteEvent = EPOLLOUT;
+
 typedef boost::function<void()> callback;
 
 class Channel
@@ -18,9 +22,10 @@ private:
   EventLoop *m_pEventLoop;
   int m_nFd;
   callback m_fReadCallback;
-  //
-  //
-  //
+  callback m_fWriteCallback;
+  callback m_fErrorCallback;
+  callback m_fCloseCallback;
+
   int m_nEvent;
   int m_nREvent;
   int m_nFlag; //used by EPoller::m_nEvents;
@@ -40,25 +45,43 @@ public:
   void setREvent(int event) { m_nREvent = event; }
 
   void setReadCallback(const callback &c) { m_fReadCallback = c; };
-  // void setWriteCallback();
-  // void setCloseCallback();
-  // void setErrorCallback();
+  void setWriteCallback(const callback &c) { m_fWriteCallback = c; };
+  void setCloseCallback(const callback &c) { m_fErrorCallback = c; };
+  void setErrorCallback(const callback &c) { m_fCloseCallback = c; };
 
   void enableRead()
   {
-    m_nEvent |= EPOLLIN;
+    m_nEvent |= kReadEvent;
+
     m_fUpdate();
   }
-  // void enableWrite();
-  // void enableAll();
+  void enableWrite()
+  {
+    m_nEvent |= kWriteEvent;
+    m_fUpdate();
+  }
+  void enableAll()
+  {
+    m_nEvent |= kReadEvent;
+    m_nEvent |= kWriteEvent;
+    m_fUpdate();    
+  }
 
   void disableRead()
   {
-    m_nEvent &= ~EPOLLIN;
+    m_nEvent &= ~kReadEvent;
     m_fUpdate();
   }
-  // void disableWrite();
-  // void disableAll();
+  void disableWrite()
+  {
+    m_nEvent &= ~kWriteEvent;
+    m_fUpdate();
+  }
+  void disableAll()
+  {
+    m_nEvent = kNoneEvent;
+    m_fUpdate();
+  }
 
   ~Channel();
 };

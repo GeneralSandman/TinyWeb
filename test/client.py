@@ -5,8 +5,9 @@ def client(ip, port):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind(("127.0.0.1", 1234))
     s.connect((ip, int(port)))
+    print 'server address:', s.getpeername()    
     time.sleep(5)
-    print 'peeraddress:', s.getpeername()
+    print "send message"
     info="I'm client"
     s.send(info)
     buf=s.recv(30)

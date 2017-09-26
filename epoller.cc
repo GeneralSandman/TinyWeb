@@ -9,10 +9,10 @@
 
 void EPoller::m_fFillActiveChannels(std::vector<Channel *> &active)
 {
-    for (int i = 0; i < m_nEventNum; i++)
+    for (int i = 0; i < m_nActiveEventNum; i++)
     {
-        Channel *channel = (Channel *)m_nEvents[i].data.ptr;
-        int revent = m_nEvents[i].events;
+        Channel *channel = (Channel *)m_nActiveEvents[i].data.ptr;
+        int revent = m_nActiveEvents[i].events;
         channel->setREvent(revent);
         active.push_back(channel);
     }
@@ -33,8 +33,8 @@ void EPoller::m_fUpdate(int opt, Channel *channel)
 EPoller::EPoller()
 {
     m_nEFd = epoll_create(10000);
-    m_nEventNum = 0; //no event happened;
-    m_nEvents.resize(100);
+    m_nActiveEventNum = 0; //no event happened;
+    m_nActiveEvents.resize(100);
     LOG(Debug) << "class EPoller constructor\n";
 }
 
@@ -79,14 +79,19 @@ void EPoller::updateChannel(Channel *channel)
     }
 }
 
+void EPoller::removeChannel(Channel *channel)
+{
+    //don't finished
+}
+
 void EPoller::poll(std::vector<Channel *> &active)
 {
-    m_nEventNum = epoll_wait(m_nEFd, &(*m_nEvents.begin()),
-                             100, 5000);
-    // std::cout << "epoll_wait return:" << m_nEventNum << std::endl;
-    if (m_nEventNum > 0)
+    m_nActiveEventNum = epoll_wait(m_nEFd, &(*m_nActiveEvents.begin()),
+                                   100, 5000);
+    // std::cout << "epoll_wait return:" << m_nActiveEventNum << std::endl;
+    if (m_nActiveEventNum > 0)
         m_fFillActiveChannels(active);
-    m_nEventNum = 0;
+    m_nActiveEventNum = 0;
 }
 
 EPoller::~EPoller()

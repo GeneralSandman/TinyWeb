@@ -7,11 +7,15 @@
 
 typedef boost::function<void()> connectCallback;
 typedef boost::function<void()> messageCallback;
+typedef boost::function<void()> closeCallback;
+typedef boost::function<void()> errorCallback;
 
 enum Connection_State
 {
   Connecting,
-  Connected
+  Connected,
+  DisConnecting,
+  DisConnected
 };
 
 class EventLoop;
@@ -23,10 +27,16 @@ private:
   Channel m_nChannel; //connect fd
   connectCallback m_nConnectCallback;
   messageCallback m_nMessageCallback;
+  closeCallback m_nCloseCallback;
+  errorCallback m_nErrorCallback;
+
   NetAddress m_nLocalAddress;
   NetAddress m_nPeerAddress;
 
-  void m_fHeadleRead();
+  void m_fHandleRead();
+  void m_fHandleWrite();
+  void m_fHandleClose();
+  void m_fHandleError();
 
 public:
   Connection(EventLoop *, int, const NetAddress &, const NetAddress &);
@@ -38,8 +48,13 @@ public:
   {
     m_nMessageCallback = c;
   }
+  void setCloseCallback(closeCallback c)
+  {
+    m_nCloseCallback = c;
+  }
 
   void establishConnection();
+  void destoryConnection();
   ~Connection();
 };
 

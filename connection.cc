@@ -7,19 +7,42 @@
 #include <boost/bind.hpp>
 #include <iostream>
 
-void Connection::m_fHeadleRead()
+void Connection::m_fHandleRead()
 {
 
     char buf[65536];
     ssize_t n = ::read(m_nChannel.getFd(), buf, sizeof buf);
     std::cout << buf << std::endl;
 
-    if (m_nMessageCallback)
+    if (n > 0)
     {
-        m_nMessageCallback();
-        writeString(m_nChannel.getFd(), "I Get you message");
-        close(m_nChannel.getFd());
+        if (m_nMessageCallback)
+            m_nMessageCallback();
     }
+    else if (n == 0)
+    {
+        m_fHandleClose();
+    }
+    else
+    {
+        m_fHandleError();
+    }
+}
+
+void Connection::m_fHandleWrite()
+{
+}
+
+void Connection::m_fHandleClose()
+{
+    m_nChannel.disableAll();
+    if (m_nCloseCallback)
+        m_nCloseCallback();
+}
+
+void Connection::m_fHandleError()
+{
+    std::cout << "socket error\n";
 }
 
 Connection::Connection(EventLoop *loop, int connectfd,
@@ -29,7 +52,7 @@ Connection::Connection(EventLoop *loop, int connectfd,
       m_nLocalAddress(local),
       m_nPeerAddress(peer)
 {
-    m_nChannel.setReadCallback(boost::bind(&Connection::m_fHeadleRead, this));
+    m_nChannel.setReadCallback(boost::bind(&Connection::m_fHandleRead, this));
     LOG(Debug) << "class Connection constructor\n";
 }
 
@@ -38,6 +61,11 @@ void Connection::establishConnection()
     m_nState = Connected;
     m_nChannel.enableRead();
     m_nConnectCallback();
+}
+
+void Connection::destoryConnection()
+{
+    m_nState = DisConnected;
 }
 
 Connection::~Connection()
