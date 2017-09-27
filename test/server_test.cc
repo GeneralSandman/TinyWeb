@@ -42,7 +42,7 @@ void timeout()
 
 static void signal_handler(int sig)
 {
-    std::cout << "receive signal " << sig << std::endl;
+    std::cout << "receive signal:" << sig << std::endl;
     g_loop->quit();
 }
 
