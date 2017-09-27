@@ -21,9 +21,9 @@ private:
 public:
   EventLoop();
   void updateChannel(Channel *);
+  void removeChannel(Channel *);
   void loop();
   void quit() { m_nRunning = false; }
-
   void runAt(Time, timerReadCallback);
   void runAfter(double, timerReadCallback);
   void runEvery(double, timerReadCallback);

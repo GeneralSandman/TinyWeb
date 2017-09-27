@@ -6,13 +6,14 @@
 #include "netaddress.h"
 
 #include <boost/function.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
 
 #include <vector>
 #include <map>
+#include <set>
 
 typedef boost::function<void()> connectCallback;
 typedef boost::function<void()> messageCallback;
+typedef boost::function<void()> closeCallback;
 
 class EventLoop;
 class Connection;
@@ -25,11 +26,13 @@ private:
   NetAddress m_nListenAddress;
   EventLoop *m_pEventLoop;
   Accepter m_nAccepter;
-  boost::ptr_vector<Connection> m_nConnections;
+  std::set<Connection *> m_nConnections;
   connectCallback m_nConnectCallback;
   messageCallback m_nMessageCallback;
+  closeCallback m_nCloseCallback;
 
   void m_fHandleRead(int, const NetAddress &);
+  void m_fHandleClose(Connection *);
 
 public:
   Server(EventLoop *, const NetAddress &);
@@ -40,6 +43,10 @@ public:
   void setMessageCallback(messageCallback c)
   {
     m_nMessageCallback = c;
+  }
+  void setCloseCallback(closeCallback c)
+  {
+    m_nCloseCallback = c;
   }
   void start();
   ~Server();

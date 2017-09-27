@@ -17,6 +17,11 @@ void EventLoop::updateChannel(Channel *channel)
     m_pPoller->updateChannel(channel);
 }
 
+void EventLoop::removeChannel(Channel *channel)
+{
+    m_pPoller->removeChannel(channel);
+}
+
 void EventLoop::loop()
 {
     while (m_nRunning)

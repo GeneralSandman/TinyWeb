@@ -3,6 +3,7 @@
 #include "../netaddress.h"
 #include "../time.h"
 #include "../api.h"
+#include "../log.h"
 
 #include <iostream>
 #include <unistd.h>
@@ -12,14 +13,19 @@
 using namespace std;
 EventLoop *g_loop = nullptr;
 
-void ConnectionCallback()
+void madeConnection()
 {
-    cout << "new Connection:" << endl;
+    cout << "+++new Connection+++" << endl;
 }
 
-void MessageCallback()
+void getMessage()
 {
-    cout << "get message\n";
+    cout << "+++get message+++\n";
+}
+
+void lostConnection()
+{
+    cout << "+++lost Connection+++\n";
 }
 
 void fun1()
@@ -42,17 +48,21 @@ static void signal_handler(int sig)
 
 int main()
 {
+    setLogLevel(Info);
+
     add_signal(SIGTERM, signal_handler);
     add_signal(SIGINT, signal_handler);
 
     g_loop = new EventLoop();
     g_loop->runEvery(1, boost::bind(fun1));
-    g_loop->runAfter(100, boost::bind(timeout));
+    g_loop->runAfter(60, boost::bind(timeout));
 
     NetAddress address("127.0.0.1:9898");
     Server server(g_loop, address);
-    server.setMessageCallback(MessageCallback);
-    server.setConenctCallback(ConnectionCallback);
+
+    server.setConenctCallback(madeConnection);
+    server.setMessageCallback(getMessage);
+    server.setCloseCallback(lostConnection);
     server.start();
 
     g_loop->loop();

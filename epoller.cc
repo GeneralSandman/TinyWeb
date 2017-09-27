@@ -81,7 +81,12 @@ void EPoller::updateChannel(Channel *channel)
 
 void EPoller::removeChannel(Channel *channel)
 {
-    //don't finished
+    //delete the channel's event struct
+    if (channel->isNoneEvent())
+    {
+        channel->setFlag(ChannelFlag_Deleted);
+        m_fUpdate(EPOLL_CTL_DEL, channel);
+    }
 }
 
 void EPoller::poll(std::vector<Channel *> &active)

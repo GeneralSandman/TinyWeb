@@ -1,19 +1,22 @@
 import socket, sys,time
 
 
-def client(ip, port):
+def client(localport,ip, port):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(("127.0.0.1", 1234))
+    s.bind(("127.0.0.1", int(localport)))
     s.connect((ip, int(port)))
-    print 'server address:', s.getpeername()    
-    time.sleep(5)
+    print 'server address:', s.getpeername()
+    print "sleep 7 seconds" 
+    time.sleep(7)
     print "send message"
-    info="I'm client"
-    s.send(info)
-    buf=s.recv(30)
-    print buf
+    s.send("I'm client")
+    # buf=s.recv(30)
+    # print buf
+    print "sleep 7 seconds" 
+    time.sleep(7)
+    print "close connection"
     s.close()
 
 
 if __name__ == "__main__":
-    client(sys.argv[1], sys.argv[2])
+    client(sys.argv[1], sys.argv[2], sys.argv[3])

@@ -3,7 +3,7 @@
 #include "log.h"
 #include "api.h"
 
-#include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/ptr_container/ptr_set.hpp>
 #include <boost/bind.hpp>
 #include <iostream>
 #include <memory>
@@ -17,8 +17,20 @@ void Server::m_fHandleRead(int connectfd, const NetAddress &address)
     std::cout << m_nConNum << std::endl;
     newCon->setConenctCallback(m_nConnectCallback);
     newCon->setMessageCallback(m_nMessageCallback);
-    m_nConnections.push_back(newCon);
+    newCon->setCloseCallback(boost::bind(&Server::m_fHandleClose, this, _1));
+    m_nConnections.insert(newCon);
     newCon->establishConnection();
+}
+
+void Server::m_fHandleClose(Connection *con)
+{
+    if (m_nCloseCallback)
+        m_nCloseCallback();
+    // std::cout << "lib code:remove connection\n";
+    con->destoryConnection();
+    auto p = m_nConnections.find(con);
+    delete (*p);
+    m_nConnections.erase(p);
 }
 
 Server::Server(EventLoop *loop, const NetAddress &address)

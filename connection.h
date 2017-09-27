@@ -5,9 +5,11 @@
 #include "netaddress.h"
 #include <boost/function.hpp>
 
+class Connection;
+
 typedef boost::function<void()> connectCallback;
 typedef boost::function<void()> messageCallback;
-typedef boost::function<void()> closeCallback;
+typedef boost::function<void(Connection *)> closeCallback_;
 typedef boost::function<void()> errorCallback;
 
 enum Connection_State
@@ -23,12 +25,13 @@ class EventLoop;
 class Connection
 {
 private:
+  EventLoop *m_pEventLoop;
   Connection_State m_nState;
-  Channel m_nChannel; //connect fd
+  Channel *m_pChannel; //connect fd
   connectCallback m_nConnectCallback;
   messageCallback m_nMessageCallback;
-  closeCallback m_nCloseCallback;
-  errorCallback m_nErrorCallback;
+  closeCallback_ m_nCloseCallback;
+  // errorCallback m_nErrorCallback;
 
   NetAddress m_nLocalAddress;
   NetAddress m_nPeerAddress;
@@ -48,7 +51,7 @@ public:
   {
     m_nMessageCallback = c;
   }
-  void setCloseCallback(closeCallback c)
+  void setCloseCallback(closeCallback_ c)
   {
     m_nCloseCallback = c;
   }
