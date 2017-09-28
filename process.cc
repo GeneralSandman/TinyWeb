@@ -5,29 +5,40 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-Process::Process(const std::string &name)
+Process::Process(const std::string &name, int number)
 {
-    m_nName = name;
-    m_nPid = getpid();
-    m_nStarted = false;
-    m_nExited = false;
-    LOG(Debug) << "class Process constructor\n";
-}
-void Process::start()
-{
-    if ("main" == m_nName)
+    int res = fork();
+    if (res > 0)
     {
-        // send message
+        return;
+    }
+    else if (res == 0)
+    {
+        m_nName = name;
+        m_nNumber = number;
+        m_nPid = getpid();
+        m_nStarted = false;
+        m_nExited = false;
+        m_fSetupSigHandler();
+        LOG(Debug) << "class Process constructor\n";
+        m_fProcessStart();
+    }
+}
+void Process::m_fProcessStart()
+{
+    if (-1 != m_nNumber)
+    {
+        //child
+        m_nStarted = true;
+        std::cout << "child process:" << m_nName << std::endl;
+        pause();
+        exit(0);
     }
     else
     {
-        //wait and get message
     }
 }
 int Process::join() {}
-bool Process::started() {}
-pid_t Process::getPid() {}
-const std::string &Process::getName() {}
 
 Process::~Process()
 {

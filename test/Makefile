@@ -8,7 +8,8 @@ gcc11o = $(gcc11) -o
 
 
 lib = api channel condition currentthread epoller eventloop exception \
-	log time timer timerqueue socket netaddress connection server accepter
+	log time timer timerqueue socket netaddress connection server accepter \
+	process processpool
 lib.o = $(foreach file,$(lib),$(file).o)
 lib.cc = $(foreach file,$(lib),../$(file).cc)
 
@@ -22,6 +23,8 @@ thread_test:thread_test.o thread.o currentthread.o api.o
 	$(ll) thread_test thread_test.o thread.o threadpool_test.o currentthread.o api.o -lpthread
 threadpool_test:threadpool_test.o thread.o threadpool.o currentthread.o api.o
 	$(ll) threadpool_test threadpool_test.o thread.o threadpool.o currentthread.o api.o -lpthread
+processpool_test:processpool_test.o $(lib.o)
+	$(ll) processpool_test processpool_test.o $(lib.o)
 time_test:time_test.o time.o
 	$(link) time_test time_test.o time.o
 socket_test:socket_test.o $(lib.o)
@@ -40,6 +43,8 @@ thread_test.o:thread_test.cc
 	$(gg) thread_test.o thread_test.cc
 threadpool_test.o:threadpool_test.cc
 	$(gg) threadpool_test.o threadpool_test.cc
+processpool_test.o:processpool_test.cc
+	$(gcc11) processpool_test.cc
 time_test.o:time_test.cc
 	$(gcc11) time_test.cc
 socket_test.o:socket_test.cc
