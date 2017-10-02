@@ -11,7 +11,6 @@
 #include <vector>
 #include <map>
 #include <sys/epoll.h>
-#include "./server/basic_server.h"
 #include "./api/api.h"
 
 int main__(int argc, char **argv)

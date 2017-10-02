@@ -1,8 +1,7 @@
 #ifndef POLL_H
 #define POLL_H
-#include "../../api/api.h"
+#include "../../api.h"
 #include "processpoll.h"
-#include "../../api/api.h"
 #include <sys/epoll.h>
 #include <sys/types.h>
 #include <sys/socket.h>

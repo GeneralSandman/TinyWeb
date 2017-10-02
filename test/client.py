@@ -3,7 +3,7 @@ import socket, sys,time
 
 def client(localport,ip, port):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(("127.0.0.1", int(localport)))
+    s.bind(("192.168.1.6", int(localport)))
     s.connect((ip, int(port)))
     print 'server address:', s.getpeername()
     print "sleep 7 seconds" 

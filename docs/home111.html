@@ -1,38 +1,94 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-	<meta charset="utf-8"> 
-	<title>菜鸟教程在线编辑器</title>
+	<meta charset="utf-8">
+	<title>c++在线编辑器</title>
 </head>
+
 <body>
 
 	<style>
-		body{min-height:300px;padding-top:90px;background: #f6f6f6;}.container{width:98%;padding-right:15px;padding-left:15px;margin-right:auto;margin-left:auto}.CodeMirror{min-height:300px}#textareaCode{min-height:300px}#iframeResult{display: block;overflow: hidden;border:0!important;min-width:100px;width:100%;min-height:300px;background-color:#fff}@media screen and (max-width:768px){#textareaCode{height:300px}.CodeMirror{height:300px}#iframeResult{height:300px}.form-inline{padding:6px 0 2px 0}}.logo h1{background-image:url(/images/logo-domain-white.png);background-repeat:no-repeat;text-indent:-9999px;width:160px;height:39px;margin-top:10px;display:block}
+		body {
+			min-height: 300px;
+			padding-top: 90px;
+			background: #f6f6f6;
+		}
+
+		.container {
+			width: 98%;
+			padding-right: 15px;
+			padding-left: 15px;
+			margin-right: auto;
+			margin-left: auto
+		}
+
+		.CodeMirror {
+			min-height: 300px
+		}
+
+		#textareaCode {
+			min-height: 300px
+		}
+
+		#iframeResult {
+			display: block;
+			overflow: hidden;
+			border: 0!important;
+			min-width: 100px;
+			width: 100%;
+			min-height: 300px;
+			background-color: #fff
+		}
+
+		@media screen and (max-width:768px) {
+			#textareaCode {
+				height: 300px
+			}
+			.CodeMirror {
+				height: 300px
+			}
+			#iframeResult {
+				height: 300px
+			}
+			.form-inline {
+				padding: 6px 0 2px 0
+			}
+		}
+
+		.logo h1 {
+			background-image: url(/images/logo-domain-white.png);
+			background-repeat: no-repeat;
+			text-indent: -9999px;
+			width: 160px;
+			height: 39px;
+			margin-top: 10px;
+			display: block
+		}
 	</style>
 
-	<div class="panel-body">
-		<textarea class="form-control" cols=80 rows=4 id="textareaCode" name="textareaCode"></textarea>
-	</div>
+	<div>
+		<div class="panel-body">
+			<textarea class="form-control" cols=70 rows=20></textarea>
+		</div>
 
-	<form action="index.php" method="get">
-		
-	</form>
-	<form class="form-inline" action="index.php">
-		<button type="button" class="btn btn-default">源代码：</button>
-		<button type="button" ><span class="glyphicon glyphicon-send"></span> 点击运行</button>
-	</form>
+		<form action="index.php" method="get">
 
-	<dir>
-		<form name= "form1" action="InsertWord.asp" method='get'> 
-			<textarea id="edtInputWord" name ="txt" rows="25" cols="80"></textarea></td>
-			<dir>
-				<input type="submit" value="submit">
-				
-			</dir>
 		</form>
-	</dir>
+		<form class="form-inline" action="index.php">
+			<button type="button">清空</button>
+			<button type="button">点击运行</button>
+		</form>
 
+		<div>
+			<form name="form1" action="InsertWord.asp" method='get'>
+				<textarea id="edtInputWord" name="txt" rows="25" cols="80"></textarea></td>
+			</form>
+		</div>
+
+	</div>
 
 
 </body>
+
 </html>

@@ -63,4 +63,19 @@
 
 
 
+> 1.如何进行测试
+
+server_test 监听80端口，600s后终止程序
+```
+make lib
+make server_test
+sudo ./server_test
+```
+
+client.py 作为客户端连接
+```
+python client.py 9090 139.199.13.50 80
+```
+
+
 
