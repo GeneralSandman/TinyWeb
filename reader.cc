@@ -1,5 +1,14 @@
+/*
+*Author:GeneralSandman
+*Code:https://github.com/GeneralSandman/TinyWeb
+*E-mail:generalsandman@163.com
+*Web:www.generalsandman.cn
+*/
+
 #include "reader.h"
 #include "api.h"
+#include "log.h"
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -26,6 +35,8 @@ Reader::Reader(const std::string &file)
     m_nCurrLine = 0;
 
     m_fCountLine();
+
+    LOG(Debug) << "class Reader constructor\n";
 }
 
 std::string Reader::readLine(void)
@@ -47,4 +58,6 @@ void Reader::resetToHead(void)
 Reader::~Reader()
 {
     m_nFileStream.close();
+
+    LOG(Debug) << "class Reader destructor\n";
 }

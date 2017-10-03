@@ -1,3 +1,15 @@
+/*
+*Author:GeneralSandman
+*Code:https://github.com/GeneralSandman/TinyWeb
+*E-mail:generalsandman@163.com
+*Web:www.generalsandman.cn
+*/
+
+/*---Configer Class---
+*
+****************************************
+*
+*/
 #ifndef CONFIG_H
 #define CONFIG_H
 

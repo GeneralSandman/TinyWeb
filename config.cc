@@ -1,3 +1,10 @@
+/*
+*Author:GeneralSandman
+*Code:https://github.com/GeneralSandman/TinyWeb
+*E-mail:generalsandman@163.com
+*Web:www.generalsandman.cn
+*/
+
 #include "config.h"
 #include "reader.h"
 #include "log.h"
@@ -34,5 +41,5 @@ Configer::~Configer()
 {
     delete m_pFileReader;
     m_pFileReader = nullptr;
-    LOG(Debug) << "class Configer constructor\n";
+    LOG(Debug) << "class Configer destructor\n";
 }
