@@ -33,7 +33,6 @@ Reader::Reader(const std::string &file)
         handle_error("fail not exists");
     m_nLine = 0;
     m_nCurrLine = 0;
-
     m_fCountLine();
 
     LOG(Debug) << "class Reader constructor\n";

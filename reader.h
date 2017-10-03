@@ -9,6 +9,7 @@
 *Reader is a class which is used to read configure file.
 *This class doesn't use IO(buffer)-class.
 *We need to upgrade this class.
+*Before we use readLine(),make sure invoke resetToHead()
 ****************************************
 *readLine():return current line content
 *getCurrLineNu():return current line number
