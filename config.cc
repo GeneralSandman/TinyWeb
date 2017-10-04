@@ -24,14 +24,19 @@ bool Configer::m_fParseLine(const std::string &s,
         return false;
     key.resize(argv[0].size());
     transform(argv[0].begin(), argv[0].end(), key.begin(), tolower);
+    eraseSpace(key);
+    
+
     if (argv.size() == 2)
     {
         auto end = argv[1].end();
         if (*(end - 1) == '\n')
             end--;
+        //erase "\n"
 
         value.resize(end - argv[1].begin());
         transform(argv[1].begin(), end, value.begin(), tolower);
+        eraseSpace(value);
     }
 
     return true;
@@ -47,11 +52,11 @@ Configer::Configer(const std::string &config_file)
 
 void Configer::init()
 {
-    m_nValue["listen"] = "";
-    m_nValue["processpoll"] = "";
+    m_nValue["listen"] = "80";
+    m_nValue["processpoll"] = "8";
     m_nValue["docs"] = "";
     m_nValue["hostname"] = "";
-    m_nValue["loglevel"] = "";
+    m_nValue["loglevel"] = "Info";
     m_nValue["logpath"] = "";
     m_nValue["debugfile"] = "";
     m_nValue["infofile"] = "";

@@ -37,7 +37,7 @@ class Configer
     {
         for (auto t : m_nValue)
         {
-            std::cout << t.first << "=" << t.second << std::endl;
+            std::cout << "-" << t.first << "=" << t.second << "-" << std::endl;
         }
     }
     ~Configer();

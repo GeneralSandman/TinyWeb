@@ -1,4 +1,12 @@
+/*
+*Author:GeneralSandman
+*Code:https://github.com/GeneralSandman/TinyWeb
+*E-mail:generalsandman@163.com
+*Web:www.generalsandman.cn
+*/
+
 #include "api.h"
+
 #include <iostream>
 #include <string.h>
 #include <map>
@@ -79,6 +87,27 @@ void splitString(const std::string &s, const std::string &p,
 
     if (begin != s.size())
         result.push_back(s.substr(begin));
+}
+
+void eraseSpace(std::string &s)
+{
+    if (!s.empty())
+    {
+        s.erase(0, s.find_first_not_of(" "));
+        s.erase(s.find_last_not_of(" ") + 1);
+    }
+}
+
+void eraseAllSpace(std::string &s)
+{
+    int index = 0;
+    if (!s.empty())
+    {
+        while ((index = s.find(' ', index)) != std::string::npos)
+        {
+            s.erase(index, 1);
+        }
+    }
 }
 
 std::map<char, std::string> getOption(int argc, char *argv[])

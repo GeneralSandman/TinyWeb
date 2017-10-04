@@ -1,5 +1,13 @@
+/*
+*Author:GeneralSandman
+*Code:https://github.com/GeneralSandman/TinyWeb
+*E-mail:generalsandman@163.com
+*Web:www.generalsandman.cn
+*/
+
 #ifndef API_H
 #define API_H
+
 #include <unistd.h>
 #include <netinet/in.h>
 #include <iostream>
@@ -15,6 +23,8 @@ void setnonblocking(int sock);
 
 std::string cstr2string(const char *str);
 void splitString(const std::string &, const std::string &, std::vector<std::string> &);
+void eraseSpace(std::string &);
+void eraseAllSpace(std::string &);
 std::map<char, std::string> getOption(int argc, char *argv[]);
 
 int createSocket(int domain, int type, int protocol);

@@ -1,3 +1,10 @@
+/*
+*Author:GeneralSandman
+*Code:https://github.com/GeneralSandman/TinyWeb
+*E-mail:generalsandman@163.com
+*Web:www.generalsandman.cn
+*/
+
 #include "../log.h"
 #include "../api.h"
 #include "../config.h"
@@ -12,6 +19,8 @@ int main()
         Configer conf("../TinyWeb.conf");
         conf.loadConfig();
         conf.test();
+        cout << conf.getValue("loglevel");
     }
+
     return 0;
 }
