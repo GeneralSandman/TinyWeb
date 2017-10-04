@@ -1,3 +1,10 @@
+/*
+*Author:GeneralSandman
+*Code:https://github.com/GeneralSandman/TinyWeb
+*E-mail:generalsandman@163.com
+*Web:www.generalsandman.cn
+*/
+
 #include "../server.h"
 #include "../eventloop.h"
 #include "../netaddress.h"
@@ -11,6 +18,7 @@
 #include <boost/bind.hpp>
 
 using namespace std;
+
 EventLoop *g_loop = nullptr;
 
 void madeConnection()
