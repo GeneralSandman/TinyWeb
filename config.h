@@ -6,7 +6,8 @@
 */
 
 /*---Configer Class---
-*
+*We need to upgrade this class
+*in order to handle config file error
 ****************************************
 *
 */
