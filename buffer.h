@@ -14,9 +14,15 @@
 #ifndef BUFFER_H
 #define BUFFER_H
 
+#include <vector>
+
 class Buffer
 {
   private:
+    std::vector<char> m_nDatas;
+    int m_nReadIndex;
+    int m_nWriteIndex;
+
   public:
     Buffer();
     ~Buffer();
