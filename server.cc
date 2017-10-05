@@ -1,3 +1,16 @@
+/*
+*Author:GeneralSandman
+*Code:https://github.com/GeneralSandman/TinyWeb
+*E-mail:generalsandman@163.com
+*Web:www.generalsandman.cn
+*/
+
+/*---XXX---
+*
+****************************************
+*
+*/
+
 #include "server.h"
 #include "connection.h"
 #include "log.h"
@@ -14,7 +27,7 @@ void Server::m_fHandleRead(int connectfd, const NetAddress &address)
     Connection *newCon =
         new Connection(m_pEventLoop, connectfd, m_nListenAddress, address);
     m_nConNum++;
-    std::cout << m_nConNum << std::endl;
+    // std::cout << m_nConNum << std::endl;
     newCon->setConenctCallback(m_nConnectCallback);
     newCon->setMessageCallback(m_nMessageCallback);
     newCon->setCloseCallback(boost::bind(&Server::m_fHandleClose, this, _1));

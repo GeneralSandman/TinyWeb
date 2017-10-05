@@ -1,3 +1,16 @@
+/*
+*Author:GeneralSandman
+*Code:https://github.com/GeneralSandman/TinyWeb
+*E-mail:generalsandman@163.com
+*Web:www.generalsandman.cn
+*/
+
+/*---XXX---
+*
+****************************************
+*
+*/
+
 #include "connection.h"
 #include "netaddress.h"
 #include "eventloop.h"
@@ -46,8 +59,10 @@ void Connection::m_fHandleError()
     std::cout << "socket error\n";
 }
 
-Connection::Connection(EventLoop *loop, int connectfd,
-                       const NetAddress &local, const NetAddress &peer)
+Connection::Connection(EventLoop *loop,
+                       int connectfd,
+                       const NetAddress &local,
+                       const NetAddress &peer)
     : m_pEventLoop(loop),
       m_nState(Connecting),
       m_pChannel(new Channel(loop, connectfd)),

@@ -1,8 +1,22 @@
+/*
+*Author:GeneralSandman
+*Code:https://github.com/GeneralSandman/TinyWeb
+*E-mail:generalsandman@163.com
+*Web:www.generalsandman.cn
+*/
+
+/*---XXX---
+*
+****************************************
+*
+*/
+
 #ifndef CONNECTION_H
 #define CONNECTION_H
 
 #include "channel.h"
 #include "netaddress.h"
+
 #include <boost/function.hpp>
 
 class Connection;
