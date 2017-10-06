@@ -14,29 +14,39 @@
 #include <string>
 #include <vector>
 
-bool Configer::m_fParseLine(const std::string &s,
+bool Configer::m_fParseLine(std::string &s,
                             std::string &key, std::string &value)
 {
+    eraseAllSpace(s);
+    if (s[s.size() - 1] == '\n')
+        s.erase(s.end() - 1);
+
+    // std::cout << "-" << s << "-" << std::endl;
+    if (s.empty())
+    {
+        // std::cout << "null line\n";        
+        return true;
+        //block line
+    }
+    else if (s[0] == '#')
+    {
+        // std::cout << "comment line\n";
+        return true;
+        //comment line
+    }
+
     std::vector<std::string> argv;
     splitString(s, "=", argv);
-
-    if (argv.size() > 2)
+    if (argv.size() > 2 || argv.size() == 0)
         return false;
+
     key.resize(argv[0].size());
     transform(argv[0].begin(), argv[0].end(), key.begin(), tolower);
-    eraseSpace(key);
-    
 
     if (argv.size() == 2)
     {
-        auto end = argv[1].end();
-        if (*(end - 1) == '\n')
-            end--;
-        //erase "\n"
-
-        value.resize(end - argv[1].begin());
-        transform(argv[1].begin(), end, value.begin(), tolower);
-        eraseSpace(value);
+        value.resize(argv[1].size());
+        transform(argv[1].begin(), argv[1].end(), value.begin(), tolower);
     }
 
     return true;
@@ -73,12 +83,18 @@ bool Configer::loadConfig()
     {
         std::string s, key, value;
         s = m_pFileReader->readLine();
-        if (!m_fParseLine(s, key, value))
-            return false;
-        if (m_nValue.find(key) != m_nValue.end())
-            value_tmp[key] = value;
+
+        if (m_fParseLine(s, key, value))
+        {
+            if (key != "" && m_nValue.find(key) != m_nValue.end())
+            {
+                value_tmp[key] = value;
+            }
+        }
         else
+        {
             return false;
+        }
     }
 
     for (auto t : value_tmp)

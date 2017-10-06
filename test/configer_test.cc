@@ -17,7 +17,10 @@ int main()
 {
     {
         Configer conf("../TinyWeb.conf");
-        conf.loadConfig();
+        if (conf.loadConfig())
+            std::cout << "load config successfull\n";
+        else
+            std::cout << "load config failed\n";
         conf.test();
         cout << conf.getValue("loglevel");
     }

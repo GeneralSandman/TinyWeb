@@ -27,7 +27,7 @@ class Configer
     std::string m_nFile;
     Reader *m_pFileReader;
     std::map<std::string, std::string> m_nValue;
-    bool m_fParseLine(const std::string &, std::string &, std::string &);
+    bool m_fParseLine(std::string &, std::string &, std::string &);
 
   public:
     Configer(const std::string &config_file);
