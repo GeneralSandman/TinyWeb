@@ -1,3 +1,17 @@
+/*
+*Author:GeneralSandman
+*Code:https://github.com/GeneralSandman/TinyWeb
+*E-mail:generalsandman@163.com
+*Web:www.generalsandman.cn
+*/
+
+/*---Configer Class---
+*We need to upgrade this class
+*in order to handle config file error
+****************************************
+*
+*/
+
 #ifndef ATOMIC_H
 #define ATOMIC_H
 

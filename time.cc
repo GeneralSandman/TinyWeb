@@ -1,4 +1,18 @@
+/*
+*Author:GeneralSandman
+*Code:https://github.com/GeneralSandman/TinyWeb
+*E-mail:generalsandman@163.com
+*Web:www.generalsandman.cn
+*/
+
+/*---XXX---
+*
+****************************************
+*
+*/
+ 
 #include "time.h"
+
 #include <iostream>
 #include <sys/time.h>
 #include <stdio.h>

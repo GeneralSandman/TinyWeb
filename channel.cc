@@ -1,7 +1,20 @@
+/*
+*Author:GeneralSandman
+*Code:https://github.com/GeneralSandman/TinyWeb
+*E-mail:generalsandman@163.com
+*Web:www.generalsandman.cn
+*/
+
+/*---Configer Class---
+*We need to upgrade this class
+*in order to handle config file error
+****************************************
+*
+*/
+
 #include "channel.h"
 #include "eventloop.h"
 #include "log.h"
-
 
 void Channel::m_fUpdate()
 {

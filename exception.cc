@@ -1,5 +1,19 @@
-#include "exception.h"
+/*
+*Author:GeneralSandman
+*Code:https://github.com/GeneralSandman/TinyWeb
+*E-mail:generalsandman@163.com
+*Web:www.generalsandman.cn
+*/
+
+/*---XXX---
+*
+****************************************
+*
+*/
+ 
 #include <execinfo.h>
+
+#include "exception.h"
 
 Exception::Exception(const char *msg)
     : m_nName(msg)

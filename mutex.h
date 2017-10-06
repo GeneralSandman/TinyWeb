@@ -1,8 +1,22 @@
+/*
+*Author:GeneralSandman
+*Code:https://github.com/GeneralSandman/TinyWeb
+*E-mail:generalsandman@163.com
+*Web:www.generalsandman.cn
+*/
+
+/*---XXX---
+*
+****************************************
+*
+*/
+ 
 #ifndef __MUTEX_H
 #define __MUTEX_H
 
 #include <boost/noncopyable.hpp>
 #include <pthread.h>
+
 #include "api.h"
 
 class MutexLock : boost::noncopyable

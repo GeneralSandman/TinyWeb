@@ -1,9 +1,22 @@
-#include "log.h"
+/*
+*Author:GeneralSandman
+*Code:https://github.com/GeneralSandman/TinyWeb
+*E-mail:generalsandman@163.com
+*Web:www.generalsandman.cn
+*/
+
+/*---XXX---
+*
+****************************************
+*
+*/
+ 
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
 #include <memory>
 
+#include "log.h"
 
 std::ofstream Logger::m_nNullStream(0);
 

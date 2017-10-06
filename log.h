@@ -1,7 +1,22 @@
+/*
+*Author:GeneralSandman
+*Code:https://github.com/GeneralSandman/TinyWeb
+*E-mail:generalsandman@163.com
+*Web:www.generalsandman.cn
+*/
+
+/*---XXX---
+*
+****************************************
+*
+*/
+ 
 #ifndef LOG_H
 #define LOG_H
+
 #include <fstream>
 #include <iostream>
+
 typedef enum log_level {
   Debug = 0,
   Info,

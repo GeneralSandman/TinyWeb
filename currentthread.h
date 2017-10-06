@@ -1,7 +1,21 @@
+/*
+*Author:GeneralSandman
+*Code:https://github.com/GeneralSandman/TinyWeb
+*E-mail:generalsandman@163.com
+*Web:www.generalsandman.cn
+*/
+
+/*---XXX---
+*
+****************************************
+*
+*/
+
 #ifndef CURRENT_THREAD_H
 #define CURRENT_THREAD_H
 
 #include "unistd.h"
+
 namespace CurrentThread
 {
 extern __thread int t_cachedTid;

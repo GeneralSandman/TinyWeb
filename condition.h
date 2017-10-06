@@ -1,11 +1,25 @@
+/*
+*Author:GeneralSandman
+*Code:https://github.com/GeneralSandman/TinyWeb
+*E-mail:generalsandman@163.com
+*Web:www.generalsandman.cn
+*/
+
+/*---Configer Class---
+*We need to upgrade this class
+*in order to handle config file error
+****************************************
+*
+*/
+
 #ifndef CONDITION_H
 #define CONDITION_H
 
-#include <boost/noncopyable.hpp>
-#include <pthread.h>
-
 #include "api.h"
 #include "mutex.h"
+
+#include <boost/noncopyable.hpp>
+#include <pthread.h>
 
 class Condition : boost::noncopyable
 {
