@@ -44,6 +44,22 @@
 
 
 > # 一、TinyWeb配置方法
+名称不区分大小写，数值区分
+|名称|含义|
+|-|-|
+|listen|监听端口|
+|processpoll|进程池数量|
+|Docs|html路径|
+|HostName|网址|
+|***日志配置***|
+|LogLevel|日志等级|
+|LogPath|日志路径|
+|DebugFile||
+|InfoFile||
+|WarnFile||
+|ErrorFile||
+|FatalFile||
+
 
 
 
