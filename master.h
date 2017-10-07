@@ -10,9 +10,12 @@
 
 class Master
 {
-  public:
-    Master();
-    ~Master();
+private:
+  void m_fSwitchtoDaemon();
+
+public:
+  Master();
+  ~Master();
 };
 
 #endif // !MASTER_H
