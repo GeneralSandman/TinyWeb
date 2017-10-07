@@ -14,6 +14,21 @@
 #include <string>
 #include <vector>
 
+void Configer::m_fInit()
+{
+    m_nValue["listen"] = "80";
+    m_nValue["processpoll"] = "8";
+    m_nValue["docs"] = "";
+    m_nValue["hostname"] = "";
+    m_nValue["loglevel"] = "Info";
+    m_nValue["logpath"] = "";
+    m_nValue["debugfile"] = "";
+    m_nValue["infofile"] = "";
+    m_nValue["warnfile"] = "";
+    m_nValue["errorfile"] = "";
+    m_nValue["fatalfile"] = "";
+}
+
 bool Configer::m_fParseLine(std::string &s,
                             std::string &key, std::string &value)
 {
@@ -24,7 +39,7 @@ bool Configer::m_fParseLine(std::string &s,
     // std::cout << "-" << s << "-" << std::endl;
     if (s.empty())
     {
-        // std::cout << "null line\n";        
+        // std::cout << "null line\n";
         return true;
         //block line
     }
@@ -56,23 +71,8 @@ Configer::Configer(const std::string &config_file)
     : m_nFile(config_file),
       m_pFileReader(new Reader(config_file))
 {
-    init();
+    m_fInit();
     LOG(Debug) << "class Configer constructor\n";
-}
-
-void Configer::init()
-{
-    m_nValue["listen"] = "80";
-    m_nValue["processpoll"] = "8";
-    m_nValue["docs"] = "";
-    m_nValue["hostname"] = "";
-    m_nValue["loglevel"] = "Info";
-    m_nValue["logpath"] = "";
-    m_nValue["debugfile"] = "";
-    m_nValue["infofile"] = "";
-    m_nValue["warnfile"] = "";
-    m_nValue["errorfile"] = "";
-    m_nValue["fatalfile"] = "";
 }
 
 bool Configer::loadConfig()

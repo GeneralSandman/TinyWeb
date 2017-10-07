@@ -6,13 +6,20 @@
 */
 
 #include "master.h"
+#include "eventloop.h"
+#include "server.h"
+#include "protocol.h"
+#include "config.h"
 #include "log.h"
 #include "api.h"
 
 #include <unistd.h>
+#include <signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+
+EventLoop *m_pEventLoop = nullptr;
 
 void Master::m_fSwitchtoDaemon()
 {
@@ -67,18 +74,56 @@ void Master::m_fSwitchtoDaemon()
     close(fd);
 }
 
-Master::Master()
+void Master::m_fInit()
+{
+    //first step:
+    //add signal handler
+    add_signal(SIGTERM, m_fSignalHandler);
+    add_signal(SIGINT, m_fSignalHandler);
+}
+
+void Master::m_fSignalHandler(int sig)
+{
+    if (m_pEventLoop)
+        m_pEventLoop->quit();
+}
+
+Master::Master(const std::string &configfile)
 {
     LOG(Debug) << "class Master constructor\n";
-    // if (m_nLeveel != Debug)
-    // {
-    // m_fSwitchtoDaemon();
-    // }
+    if (!m_pEventLoop)
+        m_pEventLoop = new EventLoop();
+
+    m_nConfigFile = configfile;
+    m_pConfiger = new Configer(m_nConfigFile);
+    m_nAddress = NetAddress(80);
+    m_pProtocol = new WebProtocol();
+    m_pServer = new Server(m_pEventLoop, m_nAddress);
+    //upgrade:Server's constructor need pararms Protocol to set callback
+    //m_pServer = new Server(m_pEventLoop, m_nAddress,m_pProtocols);
+
+    m_fSwitchtoDaemon();
+    m_fInit();
     //if log level is debug don't switch to daemaon
-    
+}
+
+void Master::start()
+{
+    m_pServer->start();
+    m_pEventLoop->loop();
 }
 
 Master::~Master()
 {
+    delete m_pEventLoop;
+    delete m_pConfiger;
+    delete m_pProtocol;
+    delete m_pServer;
+
+    m_pEventLoop = nullptr;
+    m_pConfiger = nullptr;
+    m_pProtocol = nullptr;
+    m_pServer = nullptr;
+
     LOG(Debug) << "class Master destructor\n";
 }
