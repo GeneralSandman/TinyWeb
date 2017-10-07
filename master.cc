@@ -19,7 +19,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-EventLoop *m_pEventLoop = nullptr;
+EventLoop *Master::m_pEventLoop = nullptr;
 
 void Master::m_fSwitchtoDaemon()
 {
@@ -96,13 +96,15 @@ Master::Master(const std::string &configfile)
 
     m_nConfigFile = configfile;
     m_pConfiger = new Configer(m_nConfigFile);
+    m_pConfiger->loadConfig();
+
     m_nAddress = NetAddress(80);
     m_pProtocol = new WebProtocol();
     m_pServer = new Server(m_pEventLoop, m_nAddress);
     //upgrade:Server's constructor need pararms Protocol to set callback
     //m_pServer = new Server(m_pEventLoop, m_nAddress,m_pProtocols);
 
-    m_fSwitchtoDaemon();
+    // m_fSwitchtoDaemon();
     m_fInit();
     //if log level is debug don't switch to daemaon
 }

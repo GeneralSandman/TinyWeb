@@ -5,7 +5,7 @@
 *Web:www.generalsandman.cn
 */
 
-#include "../master.h"
+#include "master.h"
 
 #include <iostream>
 #include <getopt.h>

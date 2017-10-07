@@ -55,6 +55,7 @@
 - 添加protocol类，在此类中定义通信的格式，如何对信息做出回应
 - Server类的constructor应该用protocol类作为参数，Server类从中获取回调函数并初始化相关信息
 - Configer类升级为单例模式，以便于各个类的使用（类似与Logger）
+- Protocol 派生类类只需要重载```connectionMade();dataReceived();connectionLost();```
 - ./master -c 
 
 国庆学习计划
@@ -82,12 +83,12 @@ python client.py 9090 139.199.13.50 80
 
 > # 2.如何启动
 
-- 直接启动，默认配置文件为```/TinyWeb.conf```，如果该配置文件不存在，将会创建此文件
+- 直接启动，默认配置文件为```/TinyWeb.conf```，该文件不存在，或格式错误时返回错误
 ```
-./TinyWeb
+sudo ./TinyWeb
 ```
 
-- 启动时指定配置文件路径
+- 启动时指定配置文件路径,该文件不存在，或格式错误时返回错误
 ```
-./TinyWeb -c /home/li/TinyWeb.conf
+sudo ./TinyWeb -c /home/li/TinyWeb.conf
 ```
