@@ -58,6 +58,10 @@
 - Protocol 派生类类只需要重载```connectionMade();dataReceived();connectionLost();```
 - 优化loggger
 
+进程池使用的内部类
+- Semphore
+- SharedMemory
+
 国庆学习计划
 - 入门negix
 - 完成muduo的相关功能
