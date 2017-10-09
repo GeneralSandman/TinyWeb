@@ -4,12 +4,6 @@
 *E-mail:generalsandman@163.com
 *Web:www.generalsandman.cn
 */
-
-/*---XXX---
-*
-****************************************
-*
-*/
  
 #include <execinfo.h>
 

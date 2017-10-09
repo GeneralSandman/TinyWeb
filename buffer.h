@@ -5,27 +5,34 @@
 *Web:www.generalsandman.cn
 */
 
-/*---XXX---
+/*---class Buffer---
 *
 ****************************************
 *
+*put(fd):read date from fd and store into vector<char>
+*get():fetch readable date
 */
 
 #ifndef BUFFER_H
 #define BUFFER_H
 
 #include <vector>
+#include <string>
+#include <unistd.h>
 
 class Buffer
 {
-  private:
-    std::vector<char> m_nDatas;
-    int m_nReadIndex;
-    int m_nWriteIndex;
+private:
+  std::vector<char> m_nDatas;
+  int m_nReadIndex;
+  int m_nWriteIndex;
 
-  public:
-    Buffer();
-    ~Buffer();
+public:
+  Buffer();
+  size_t put(int fd);
+  std::string get();
+
+  ~Buffer();
 };
 
 #endif // !BUFFER_H

@@ -23,7 +23,7 @@ private:
   Semaphore *m_pFull;
   void *m_pSharedDate;
 
-  void m_fSync();
+  void m_fSync();//FIXME
 
 public:
   SharedMemory();

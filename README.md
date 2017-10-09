@@ -51,7 +51,6 @@
 升级计划
 - 完成buffer类
 - 提升程序为demon进程（demon程序标准输入输出如何处理?）
-- 检测80端口，提空http服务
 - 添加protocol类，在此类中定义通信的格式，如何对信息做出回应
 - Server类的constructor应该用protocol类作为参数，Server类从中获取回调函数并初始化相关信息
 - Configer类升级为单例模式，以便于各个类的使用（类似与Logger）

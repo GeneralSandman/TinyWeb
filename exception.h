@@ -5,7 +5,7 @@
 *Web:www.generalsandman.cn
 */
 
-/*---XXX---
+/*---class Exception---
 *
 ****************************************
 *
