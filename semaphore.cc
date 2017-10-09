@@ -14,20 +14,39 @@
 #include "semaphore.h"
 #include "log.h"
 
-Semphore::Semphore()
+#include <semaphore.h>
+
+Semaphore::Semaphore(int value)
 {
-        LOG(Debug) << "class Semaphore constructor\n";
+    sem_init(&m_nSem, 1, value);
+    //The semaphore is shared between process
+    LOG(Debug) << "class Semaphore constructor\n";
 }
 
-void Semphore::wait()
+void Semaphore::wait()
 {
+    sem_wait(&m_nSem);
 }
 
-void Semphore::post()
+void Semaphore::tryWait()
 {
+    sem_trywait(&m_nSem);
 }
 
-Semphore::~Semphore()
+void Semaphore::post()
 {
-        LOG(Debug) << "class Semaphore destructor\n";    
+    sem_post(&m_nSem);
+}
+
+int Semaphore::getValue()
+{
+    int res;
+    sem_getvalue(&m_nSem, &res);
+    return res;
+}
+
+Semaphore::~Semaphore()
+{
+    sem_destroy(&m_nSem);
+    LOG(Debug) << "class Semaphore destructor\n";
 }

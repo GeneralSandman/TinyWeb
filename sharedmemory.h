@@ -14,13 +14,22 @@
 #ifndef SHAREDMEMORY_H
 #define SHAREDMEMORY_H
 
+class Semaphore;
+
 class SharedMemory
 {
-  private:
-  public:
-    SharedMemory();
+private:
+  Semaphore *m_pEmpty;
+  Semaphore *m_pFull;
+  void *m_pSharedDate;
 
-    ~SharedMemory();
+  void m_fSync();
+
+public:
+  SharedMemory();
+  void put();
+  void get();
+  ~SharedMemory();
 };
 
 #endif // !SHAREDMEMORY_H
