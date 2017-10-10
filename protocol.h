@@ -19,9 +19,9 @@ class Protocol
 private:
 public:
   Protocol();
-  virtual void connectionMade();
-  virtual void dataReceived();
-  virtual void connectionLost();
+  virtual void connectionMade(){}
+  virtual void dataReceived(){}
+  virtual void connectionLost(){}
   virtual ~Protocol();
 };
 
