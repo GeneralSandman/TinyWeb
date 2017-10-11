@@ -31,12 +31,12 @@ Channel::Channel(EventLoop *loop, int fd)
     LOG(Debug) << "class Channel constructor\n";
 }
 
-void Channel::handleEvent()
+void Channel::handleEvent(Time time)
 {
     if (m_nREvent == EPOLLIN)
     {
         if (m_fReadCallback)
-            m_fReadCallback();
+            m_fReadCallback(time);
     }
     else if (m_nREvent == EPOLLOUT)
     {

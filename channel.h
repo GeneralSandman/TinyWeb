@@ -15,6 +15,9 @@
 #ifndef CHANNEL_H
 #define CHANNEL_H
 
+#include "callback.h"
+#include "time.h"
+
 #include <sys/epoll.h>
 #include <boost/function.hpp>
 
@@ -29,13 +32,14 @@ static int kReadEvent = EPOLLIN | EPOLLPRI;
 static int kWriteEvent = EPOLLOUT;
 
 typedef boost::function<void()> callback;
+typedef boost::function<void(Time)> readCallback;
 
 class Channel
 {
 private:
   EventLoop *m_pEventLoop;
   int m_nFd;
-  callback m_fReadCallback;
+  readCallback m_fReadCallback;
   callback m_fWriteCallback;
   callback m_fErrorCallback;
   callback m_fCloseCallback;
@@ -54,11 +58,11 @@ public:
   void setFlag(int f) { m_nFlag = f; }
 
   int getEvent() { return m_nEvent; }
-  void handleEvent();
+  void handleEvent(Time);
 
   void setREvent(int event) { m_nREvent = event; }
 
-  void setReadCallback(const callback &c) { m_fReadCallback = c; };
+  void setReadCallback(const readCallback &c) { m_fReadCallback = c; };
   void setWriteCallback(const callback &c) { m_fWriteCallback = c; };
   void setCloseCallback(const callback &c) { m_fErrorCallback = c; };
   void setErrorCallback(const callback &c) { m_fCloseCallback = c; };
@@ -78,7 +82,7 @@ public:
   {
     m_nEvent |= kReadEvent;
     m_nEvent |= kWriteEvent;
-    m_fUpdate();    
+    m_fUpdate();
   }
 
   void disableRead()

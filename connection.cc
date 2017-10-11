@@ -15,23 +15,21 @@
 #include "netaddress.h"
 #include "eventloop.h"
 #include "channel.h"
+#include "time.h"
 #include "api.h"
 #include "log.h"
 
 #include <boost/bind.hpp>
 #include <iostream>
 
-void Connection::m_fHandleRead()
+void Connection::m_fHandleRead(Time arrive)
 {
-
-    char buf[65536];
-    ssize_t n = ::read(m_pChannel->getFd(), buf, sizeof buf);
-    // std::cout << buf << std::endl;
+    ssize_t n = m_nInputBuffer.put(m_pChannel->getFd());
 
     if (n > 0)
     {
         if (m_nMessageCallback)
-            m_nMessageCallback();
+            m_nMessageCallback(this, &m_nInputBuffer, arrive);
     }
     else if (n == 0)
     {

@@ -49,7 +49,6 @@
 
 
 升级计划
-- 完成buffer类
 - 提升程序为demon进程（demon程序标准输入输出如何处理?）
 - 添加protocol类，在此类中定义通信的格式，如何对信息做出回应
 - Server类的constructor应该用protocol类作为参数，Server类从中获取回调函数并初始化相关信息

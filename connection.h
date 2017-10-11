@@ -15,6 +15,8 @@
 #define CONNECTION_H
 
 #include "channel.h"
+#include "buffer.h"
+#include "time.h"
 #include "netaddress.h"
 
 #include <boost/function.hpp>
@@ -22,7 +24,8 @@
 class Connection;
 
 typedef boost::function<void()> connectCallback;
-typedef boost::function<void()> messageCallback;
+typedef boost::function<void(Connection *, Buffer *, Time)>
+    messageCallback;
 typedef boost::function<void(Connection *)> closeCallback_;
 typedef boost::function<void()> errorCallback;
 
@@ -47,10 +50,13 @@ private:
   closeCallback_ m_nCloseCallback;
   // errorCallback m_nErrorCallback;
 
+  Buffer m_nInputBuffer;
+  Buffer m_nOutputBuffer;
+
   NetAddress m_nLocalAddress;
   NetAddress m_nPeerAddress;
 
-  void m_fHandleRead();
+  void m_fHandleRead(Time arrive);
   void m_fHandleWrite();
   void m_fHandleClose();
   void m_fHandleError();
