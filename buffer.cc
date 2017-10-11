@@ -15,6 +15,7 @@
 #include "log.h"
 
 #include <sys/uio.h>
+#include <algorithm>
 
 inline size_t Buffer::m_fPrependableBytes() const
 {
@@ -61,9 +62,23 @@ inline const char *Buffer::m_fWriteableBegin() const
     return m_fBegin() + m_nWriteIndex;
 }
 
+void Buffer::hasReadBytes(size_t len)
+{
+    if (len < m_fReadableBytes())
+        m_nReadIndex += len;
+    else
+        m_fClearAll();
+}
+
+void Buffer::m_fEnsureWritableBytes(size_t len)
+{
+    if (m_fWriteableBytes() < len)
+        m_fMakeSpace(len);
+}
+
 inline void Buffer::m_fMakeSpace(size_t len)
 {
-    if (m_fPrependableBytes() + m_fWriteableBytes() < len + 8)
+    if (m_fPrependableBytes() + m_fWriteableBytes() < len + K_Buffer_Prepend)
     {
         m_nDatas.resize(m_nWriteIndex + len);
     }
@@ -72,15 +87,31 @@ inline void Buffer::m_fMakeSpace(size_t len)
         size_t read = m_fReadableBytes();
         std::copy(m_fReadableBegin(),
                   m_fWriteableBegin(),
-                  m_fBegin() + 8);
-        m_nReadIndex = 8;
+                  m_fBegin() + K_Buffer_Prepend);
+        m_nReadIndex = K_Buffer_Prepend;
         m_nWriteIndex = m_nReadIndex + read;
     }
 }
 
+void Buffer::m_fClearAll()
+{
+    m_nReadIndex = K_Buffer_Prepend;
+    m_nWriteIndex = K_Buffer_Prepend;
+}
+
 Buffer::Buffer()
+    : m_nDatas(K_Buffer_Prepend + K_Buffer_Size),
+      m_nReadIndex(K_Buffer_Prepend),
+      m_nWriteIndex(K_Buffer_Prepend)
 {
     LOG(Debug) << "class Buffer constructor\n";
+}
+
+void Buffer::swap(Buffer &r)
+{
+    m_nDatas.swap(r.m_nDatas);
+    std::swap(m_nReadIndex, r.m_nReadIndex);
+    std::swap(m_nWriteIndex, r.m_nWriteIndex);
 }
 
 size_t Buffer::put(int fd)
@@ -98,27 +129,73 @@ size_t Buffer::put(int fd)
     ssize_t n = readv(fd, result, 2);
     if (n < 0)
     {
-        *savedErrno = errno;
+        //error
     }
-    else if (implicit_cast<size_t>(n) <= writable)
+    else if (size_t(n) <= writable)
     {
-        writerIndex_ += n;
+        m_nWriteIndex += n;
     }
     else
     {
-        writerIndex_ = buffer_.size();
+        m_nWriteIndex = m_nDatas.size();
         append(extrabuf, n - writable);
     }
-    // if (n == writable + sizeof extrabuf)
-    // {
-    //   goto line_30;
-    // }
     return n;
 }
 
-std::string Buffer::get()
+std::string Buffer::get(size_t len)
 {
-    //fetch readable date
+    if (len > m_fReadableBytes())
+        len = m_fReadableBytes();
+    std::string result(m_fReadableBegin(), len);
+    hasReadBytes(len);
+    return result;
+}
+
+std::string Buffer::getAll()
+{
+    return get(m_fReadableBytes());
+}
+
+void Buffer::shrink()
+{
+    Buffer tmp;
+    tmp.append(getAll());
+    swap(tmp);
+}
+
+void Buffer::append(const std::string &str)
+{
+    append(str.c_str(), str.size());
+}
+
+void Buffer::append(const char *str, int len)
+{
+    std::copy(str, str + len, m_fWriteableBegin());
+    m_nWriteIndex += len;
+}
+
+void Buffer::prepend(const void * /*restrict*/ data, size_t len)
+{
+    m_nReadIndex -= len;
+    const char *d = static_cast<const char *>(data);
+    std::copy(d, d + len, m_fReadableBegin());
+}
+
+const char *Buffer::findCRLF() const
+{
+    const char *crlf = std::search(m_fReadableBegin(),
+                                   m_fWriteableBegin(),
+                                   kCRLF, kCRLF + 2);
+    return crlf == m_fWriteableBegin() ? NULL : crlf;
+}
+
+const char *Buffer::findCRLF(const char *start) const
+{
+    const char *crlf = std::search(start,
+                                   m_fWriteableBegin(),
+                                   kCRLF, kCRLF + 2);
+    return crlf == m_fWriteableBegin() ? NULL : crlf;
 }
 
 Buffer::~Buffer()

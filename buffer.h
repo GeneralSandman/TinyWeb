@@ -20,6 +20,10 @@
 #include <string>
 #include <unistd.h>
 
+#define K_Buffer_Prepend 8
+#define K_Buffer_Size 1024
+const char kCRLF[] = "\r\n";
+
 class Buffer
 {
 private:
@@ -30,54 +34,29 @@ private:
   size_t m_fPrependableBytes() const;
   size_t m_fReadableBytes() const;
   size_t m_fWriteableBytes() const;
-
   char *m_fBegin();
   const char *m_fBegin() const;
-
   char *m_fReadableBegin();
   const char *m_fReadableBegin() const;
   char *m_fWriteableBegin();
   const char *m_fWriteableBegin() const;
-
-  void m_fEnsureWritableBytes(size_t len)
-  {
-    if (m_fWriteableBytes() < len)
-      m_fMakeSpace(len);
-  }
+  void hasReadBytes(size_t len);
+  void m_fEnsureWritableBytes(size_t len);
   void m_fMakeSpace(size_t len);
-
-  void m_fClearAll()
-  {
-    m_nReadIndex = 8;
-    m_nWriteIndex = 8;
-  }
+  void m_fClearAll();
 
 public:
   Buffer();
+  void swap(Buffer &r);
   size_t put(int fd);
-  std::string get(size_t len)
-  {
-    if (len > m_fReadableBytes())
-      len = m_fReadableBytes();
-    std::string result(m_fBegin(), len);
-    //FIXME:
-    return result;
-  }
-  std::string getAll()
-  {
-    return get(m_fReadableBytes());
-  }
-  void append(const std::string &str)
-  {
-    append(str.c_str(), str.size());
-  }
-
-  void append(const char *str, int len)
-  {
-    std::copy(str, str + len, m_fWriteableBegin());
-    m_nWriteIndex += len;
-  }
-
+  std::string get(size_t len);
+  std::string getAll();
+  void shrink();
+  void append(const std::string &str);
+  void append(const char *str, int len);
+  void prepend(const void * /*restrict*/ data, size_t len);
+  const char *findCRLF() const;
+  const char *findCRLF(const char *start) const;
   ~Buffer();
 };
 
