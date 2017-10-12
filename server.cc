@@ -38,7 +38,7 @@ void Server::m_fHandleRead(int connectfd, const NetAddress &address)
 void Server::m_fHandleClose(Connection *con)
 {
     if (m_nCloseCallback)
-        m_nCloseCallback();
+        m_nCloseCallback(con);
     // std::cout << "lib code:remove connection\n";
     con->destoryConnection();
     auto p = m_nConnections.find(con);

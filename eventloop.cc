@@ -15,6 +15,7 @@
 #include "epoller.h"
 #include "channel.h"
 #include "timerqueue.h"
+#include "time.h"
 #include "log.h"
 
 EventLoop::EventLoop()
@@ -40,9 +41,9 @@ void EventLoop::loop()
     while (m_nRunning)
     {
         m_nActiveChannels.clear();
-        m_pPoller->poll(m_nActiveChannels);
+        Time arriveTime = m_pPoller->poll(m_nActiveChannels);
         for (auto t : m_nActiveChannels)
-            t->handleEvent();
+            t->handleEvent(arriveTime);
     }
 }
 

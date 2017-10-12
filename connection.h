@@ -16,18 +16,13 @@
 
 #include "channel.h"
 #include "buffer.h"
+#include "callback.h"
 #include "time.h"
 #include "netaddress.h"
 
 #include <boost/function.hpp>
 
 class Connection;
-
-typedef boost::function<void()> connectCallback;
-typedef boost::function<void(Connection *, Buffer *, Time)>
-    messageCallback;
-typedef boost::function<void(Connection *)> closeCallback_;
-typedef boost::function<void()> errorCallback;
 
 enum Connection_State
 {
@@ -45,10 +40,9 @@ private:
   EventLoop *m_pEventLoop;
   Connection_State m_nState;
   Channel *m_pChannel; //connect fd
-  connectCallback m_nConnectCallback;
-  messageCallback m_nMessageCallback;
-  closeCallback_ m_nCloseCallback;
-  // errorCallback m_nErrorCallback;
+  ConnectionCallback m_nConnectCallback;
+  MessageCallback m_nMessageCallback;
+  CloseCallback m_nCloseCallback;
 
   Buffer m_nInputBuffer;
   Buffer m_nOutputBuffer;
@@ -63,15 +57,15 @@ private:
 
 public:
   Connection(EventLoop *, int, const NetAddress &, const NetAddress &);
-  void setConenctCallback(connectCallback c)
+  void setConenctCallback(ConnectionCallback c)
   {
     m_nConnectCallback = c;
   }
-  void setMessageCallback(messageCallback c)
+  void setMessageCallback(MessageCallback c)
   {
     m_nMessageCallback = c;
   }
-  void setCloseCallback(closeCallback_ c)
+  void setCloseCallback(CloseCallback c)
   {
     m_nCloseCallback = c;
   }

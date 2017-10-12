@@ -20,14 +20,14 @@
 #include <boost/function.hpp>
 
 class Buffer;
-class TcpConnection;
+class Connection;
 
 typedef boost::function<void()> TimerCallback;
-typedef boost::function<void(const TcpConnection *)> ConnectionCallback;
-typedef boost::function<void(const TcpConnection *,
+typedef boost::function<void(Connection *)> ConnectionCallback;
+typedef boost::function<void(Connection *,
                              Buffer *buf,
                              Time)>
     MessageCallback;
-typedef boost::function<void(const TcpConnection *)> CloseCallback;
+typedef boost::function<void(Connection *)> CloseCallback;
 
 #endif // !CALL_BACK_H

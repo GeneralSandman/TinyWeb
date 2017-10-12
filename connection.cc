@@ -29,7 +29,9 @@ void Connection::m_fHandleRead(Time arrive)
     if (n > 0)
     {
         if (m_nMessageCallback)
-            m_nMessageCallback(this, &m_nInputBuffer, arrive);
+            m_nMessageCallback(this,
+                               &m_nInputBuffer,
+                               arrive);
     }
     else if (n == 0)
     {
@@ -67,7 +69,7 @@ Connection::Connection(EventLoop *loop,
       m_nLocalAddress(local),
       m_nPeerAddress(peer)
 {
-    m_pChannel->setReadCallback(boost::bind(&Connection::m_fHandleRead, this));
+    m_pChannel->setReadCallback(boost::bind(&Connection::m_fHandleRead, this, _1));
     m_pChannel->setWriteCallback(boost::bind(&Connection::m_fHandleWrite, this));
     m_pChannel->setCloseCallback(boost::bind(&Connection::m_fHandleClose, this));
     m_pChannel->setErrorCallback(boost::bind(&Connection::m_fHandleError, this));
@@ -79,7 +81,7 @@ void Connection::establishConnection()
 {
     m_nState = Connected;
     m_pChannel->enableRead();
-    m_nConnectCallback();
+    m_nConnectCallback(this);
 }
 
 void Connection::destoryConnection()

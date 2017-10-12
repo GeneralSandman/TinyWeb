@@ -3,12 +3,12 @@ import socket, sys,time
 
 def client(localport,ip, port):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(("192.168.1.5", int(localport)))
+    s.bind(("127.0.0.1", int(localport)))
     s.connect((ip, int(port)))
     print 'server address:', s.getpeername()
     print "sleep 7 seconds" 
     time.sleep(7)
-    print "send message"
+    print "send message:I'm client"
     s.send("I'm client")
     # buf=s.recv(30)
     # print buf

@@ -13,6 +13,7 @@
 
 #include "epoller.h"
 #include "channel.h"
+#include "time.h"
 #include "log.h"
 #include "api.h"
 
@@ -102,14 +103,16 @@ void EPoller::removeChannel(Channel *channel)
     }
 }
 
-void EPoller::poll(std::vector<Channel *> &active)
+Time EPoller::poll(std::vector<Channel *> &active)
 {
     m_nActiveEventNum = epoll_wait(m_nEFd, &(*m_nActiveEvents.begin()),
                                    100, 5000);
     // std::cout << "epoll_wait return:" << m_nActiveEventNum << std::endl;
+    Time arriveTime(Time::now());
     if (m_nActiveEventNum > 0)
         m_fFillActiveChannels(active);
     m_nActiveEventNum = 0;
+    return arriveTime;
 }
 
 EPoller::~EPoller()

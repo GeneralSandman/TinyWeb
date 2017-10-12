@@ -8,6 +8,8 @@
 #include "../server.h"
 #include "../eventloop.h"
 #include "../netaddress.h"
+#include "../connection.h"
+#include "../buffer.h"
 #include "../time.h"
 #include "../api.h"
 #include "../log.h"
@@ -21,17 +23,20 @@ using namespace std;
 
 EventLoop *g_loop = nullptr;
 
-void madeConnection()
+void madeConnection(Connection *con)
 {
     cout << "+++new Connection+++" << endl;
 }
 
-void getMessage()
+void getMessage(Connection *con,
+                Buffer *input,
+                Time arriveTime)
 {
-    cout << "+++get message+++\n";
+    cout << "+++get message+++:";
+    cout << input->getAll() << std::endl;
 }
 
-void lostConnection()
+void lostConnection(Connection *con)
 {
     cout << "+++lost Connection+++\n";
 }

@@ -16,16 +16,13 @@
 
 #include "channel.h"
 #include "accepter.h"
+#include "callback.h"
 #include "netaddress.h"
 
 #include <boost/function.hpp>
 #include <vector>
 #include <map>
 #include <set>
-
-typedef boost::function<void()> connectCallback;
-typedef boost::function<void()> messageCallback;
-typedef boost::function<void()> closeCallback;
 
 class EventLoop;
 class Connection;
@@ -39,24 +36,24 @@ private:
   EventLoop *m_pEventLoop;
   Accepter m_nAccepter;
   std::set<Connection *> m_nConnections;
-  connectCallback m_nConnectCallback;
-  messageCallback m_nMessageCallback;
-  closeCallback m_nCloseCallback;
+  ConnectionCallback m_nConnectCallback;
+  MessageCallback m_nMessageCallback;
+  CloseCallback m_nCloseCallback;
 
   void m_fHandleRead(int, const NetAddress &);
   void m_fHandleClose(Connection *);
 
 public:
   Server(EventLoop *, const NetAddress &);
-  void setConenctCallback(connectCallback c)
+  void setConenctCallback(ConnectionCallback c)
   {
     m_nConnectCallback = c;
   }
-  void setMessageCallback(messageCallback c)
+  void setMessageCallback(MessageCallback c)
   {
     m_nMessageCallback = c;
   }
-  void setCloseCallback(closeCallback c)
+  void setCloseCallback(CloseCallback c)
   {
     m_nCloseCallback = c;
   }

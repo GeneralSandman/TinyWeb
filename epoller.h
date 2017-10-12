@@ -14,6 +14,8 @@
 #ifndef EPOLLER_H
 #define EPOLLER_H
 
+#include "time.h"
+
 #include <vector>
 #include <map>
 
@@ -34,7 +36,7 @@ public:
   EPoller();
   void updateChannel(Channel *);
   void removeChannel(Channel *);
-  void poll(std::vector<Channel *> &); //epoll_wait to push_back the active channels
+  Time poll(std::vector<Channel *> &); //epoll_wait to push_back the active channels
   ~EPoller();
 };
 
