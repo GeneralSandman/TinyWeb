@@ -6,14 +6,15 @@ def client(localport,ip, port):
     s.bind(("127.0.0.1", int(localport)))
     s.connect((ip, int(port)))
     print 'server address:', s.getpeername()
-    print "sleep 7 seconds" 
-    time.sleep(7)
+    print "sleep 3 seconds" 
+    time.sleep(3)
     print "send message:I'm client"
     s.send("I'm client")
-    # buf=s.recv(30)
-    # print buf
-    print "sleep 7 seconds" 
-    time.sleep(7)
+    time.sleep(1)
+    buf=s.recv(30)
+    print buf
+    print "sleep 3 seconds" 
+    time.sleep(3)
     print "close connection"
     s.close()
 

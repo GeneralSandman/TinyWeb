@@ -45,6 +45,24 @@ void Connection::m_fHandleRead(Time arrive)
 
 void Connection::m_fHandleWrite()
 {
+    if (m_pChannel->isWriting())
+    {
+        std::string send = m_nInputBuffer.getAll();
+        size_t n = writeString(m_pChannel->getFd(),
+                               send);
+        if (n > 0)
+        {
+            std::cout<<"write "<<send<<std::endl;
+        }
+        else
+        {
+            //error
+        }
+    }
+    else
+    {
+        //connection close down ,don't write
+    }
 }
 
 void Connection::m_fHandleClose()
@@ -75,6 +93,13 @@ Connection::Connection(EventLoop *loop,
     m_pChannel->setErrorCallback(boost::bind(&Connection::m_fHandleError, this));
 
     LOG(Debug) << "class Connection constructor\n";
+}
+
+void Connection::send(const std::string &mes)
+{
+    m_nOutputBuffer.append(mes);
+    if (!m_pChannel->isWriting())
+        m_pChannel->enableWrite();
 }
 
 void Connection::establishConnection()

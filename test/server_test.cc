@@ -26,6 +26,8 @@ EventLoop *g_loop = nullptr;
 void madeConnection(Connection *con)
 {
     cout << "+++new Connection+++" << endl;
+    string msg = "I have get you connect\n";
+    // con->send(msg);
 }
 
 void getMessage(Connection *con,
@@ -34,6 +36,8 @@ void getMessage(Connection *con,
 {
     cout << "+++get message+++:";
     cout << input->getAll() << std::endl;
+    string msg = "I have get you message\n";
+    con->send(msg);
 }
 
 void lostConnection(Connection *con)
@@ -70,7 +74,7 @@ int main()
     g_loop->runEvery(1, boost::bind(fun1));
     g_loop->runAfter(60, boost::bind(timeout));
 
-    NetAddress address("127.0.0.1:80");
+    NetAddress address("127.0.0.1:9898");
     Server server(g_loop, address);
 
     server.setConenctCallback(madeConnection);

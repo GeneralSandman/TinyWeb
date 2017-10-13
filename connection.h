@@ -57,6 +57,7 @@ private:
 
 public:
   Connection(EventLoop *, int, const NetAddress &, const NetAddress &);
+  void send(const std::string&);
   void setConenctCallback(ConnectionCallback c)
   {
     m_nConnectCallback = c;

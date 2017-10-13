@@ -101,6 +101,11 @@ public:
     m_fUpdate();
   }
 
+  bool isWriting()
+  {
+    return m_nEvent & kWriteEvent;
+  }
+
   ~Channel();
 };
 
