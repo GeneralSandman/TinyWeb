@@ -5,7 +5,7 @@ gcc11o = $(gcc11) -o
 
 lib = api channel condition currentthread epoller eventloop exception \
 	log time timer timerqueue socket netaddress connection server accepter \
-	process processpool config reader master protocol
+	process processpool configer reader master protocol
 lib.o = $(foreach file,$(lib),$(file).o)
 lib.cc = $(foreach file,$(lib),$(file).cc)
 

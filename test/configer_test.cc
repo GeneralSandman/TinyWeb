@@ -15,19 +15,19 @@ using namespace std;
 
 int main()
 {
-    // {
-    //     std::string a = "../TinyWeb.conf";
-    //     Configer &configer = Configer::getConfigerInstance();
+    {
+        std::string a = "../TinyWeb.conf";
+        Configer &configer = Configer::getConfigerInstance();
 
-    //     configer.setConfigerFile(a);
+        configer.setConfigerFile(a);
 
-    //     if (configer.loadConfig())
-    //         std::cout << "load config successfull\n";
-    //     else
-    //         std::cout << "load config failed\n";
-    //     configer.test();
-    //     cout << configer.getConfigValue("loglevel");
-    // }
+        if (configer.loadConfig())
+            std::cout << "load config successfull\n";
+        else
+            std::cout << "load config failed\n";
+        configer.test();
+        cout << configer.getConfigValue("loglevel");
+    }
 
     {//
         std::string a = "../TinyWeb.conf";

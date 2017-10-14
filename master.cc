@@ -9,7 +9,7 @@
 #include "eventloop.h"
 #include "server.h"
 #include "protocol.h"
-#include "config.h"
+#include "configer.h"
 #include "log.h"
 #include "api.h"
 
@@ -95,8 +95,9 @@ Master::Master(const std::string &configfile)
         m_pEventLoop = new EventLoop();
 
     m_nConfigFile = configfile;
-    m_pConfiger = new Configer(m_nConfigFile);
-    m_pConfiger->loadConfig();
+
+    setConfigerFile(configfile);
+    loadConfig();
 
     m_nAddress = NetAddress(80);
     m_pProtocol = new WebProtocol();
@@ -118,12 +119,10 @@ void Master::start()
 Master::~Master()
 {
     delete m_pEventLoop;
-    delete m_pConfiger;
     delete m_pProtocol;
     delete m_pServer;
 
     m_pEventLoop = nullptr;
-    m_pConfiger = nullptr;
     m_pProtocol = nullptr;
     m_pServer = nullptr;
 

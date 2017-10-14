@@ -24,7 +24,6 @@
 #include <string>
 
 class EventLoop;
-class Configer;
 class Server;
 class Protocol;
 
@@ -34,7 +33,6 @@ private:
   static EventLoop *m_pEventLoop;
 
   std::string m_nConfigFile;
-  Configer *m_pConfiger;
   
   NetAddress m_nAddress;
   Protocol *m_pProtocol;
