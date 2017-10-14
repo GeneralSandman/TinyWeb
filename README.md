@@ -54,7 +54,7 @@
 - Server类的constructor应该用protocol类作为参数，Server类从中获取回调函数并初始化相关信息
 - Configer类升级为单例模式，以便于各个类的使用（类似与Logger）
 - Protocol 派生类类只需要重载```connectionMade();dataReceived();connectionLost();```
-- 优化loggger
+- 优化loggger，解决logger声明周期过短的问题
 
 进程池使用的内部类
 - Semphore
@@ -93,4 +93,68 @@ sudo ./TinyWeb
 - 启动时指定配置文件路径,该文件不存在，或格式错误时返回错误
 ```
 sudo ./TinyWeb -c /home/li/TinyWeb.conf
+```
+
+
+------------------
+
+> # 1.Configer的使用方法
+- 获得Configer实例（配置项还未加载，需调用loadConfig()）
+```
+Configer &getConfigerInstance(const std::string file = "")
+```
+
+- 调整confige文件
+```
+setConfigerFile(const std::string &file)
+```
+
+- 装载配置文件（不需调用，setConfigerFile会装载配置文件）
+```
+loadConfig()
+```
+
+- 获取配置项数值
+```
+std::string getConfigValue(const std::string &);
+```
+
+- 注意
+
+这样会出错：
+```
+Configer configer = Configer::getConfigerInstance();
+```
+
+必须用引用接受：
+```
+Configer &configer = Configer::getConfigerInstance();
+```
+
+推荐用法 1：
+```
+std::string a = "../TinyWeb.conf";
+setConfigerFile(a);
+if (loadConfig())
+    std::cout << "load config successfull\n";
+else
+    std::cout << "load config failed\n";
+Configer::getConfigerInstance().test();
+cout << getConfigValue("loglevel");
+```
+
+使用方法 2：
+```
+Configer &configer = Configer::getConfigerInstance();
+configer.setConfigerFile("../TinyWeb.conf");
+if (configer.loadConfig())
+    std::cout << "load config successfull\n";
+else
+    std::cout << "load config failed\n";
+configer.test();
+cout << configer.getConfigValue("loglevel");
+```
+
+```
+
 ```

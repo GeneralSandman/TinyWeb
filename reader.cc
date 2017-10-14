@@ -14,6 +14,16 @@
 #include <string>
 #include <cstring>
 
+void Reader::m_fInit(void)
+{
+    m_nFileStream.open(m_nFile, std::ios_base::in);
+    if (m_nFileStream.fail())
+        handle_error("fail not exists");
+    m_nLine = 0;
+    m_nCurrLine = 0;
+    m_fCountLine();
+}
+
 void Reader::m_fCountLine(void)
 {
     std::string tmp;
@@ -28,14 +38,15 @@ void Reader::m_fCountLine(void)
 Reader::Reader(const std::string &file)
 {
     m_nFile = file;
-    m_nFileStream.open(file, std::ios_base::in);
-    if (m_nFileStream.fail())
-        handle_error("fail not exists");
-    m_nLine = 0;
-    m_nCurrLine = 0;
-    m_fCountLine();
-
+    m_fInit();
     LOG(Debug) << "class Reader constructor\n";
+}
+
+void Reader::setFile(const std::string &f)
+{
+    m_nFile = f;
+    m_nFileStream.close();
+    m_fInit();
 }
 
 std::string Reader::readLine(void)

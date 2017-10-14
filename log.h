@@ -73,7 +73,7 @@ public:
 
   friend void setLogLevel(log_level level)
   {
-    Logger logger = getLoggerInstance();
+    // Logger logger = getLoggerInstance();
     Logger::m_nLevel = level;
   }
   ~Logger();

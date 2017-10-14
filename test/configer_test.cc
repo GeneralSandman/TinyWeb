@@ -7,7 +7,7 @@
 
 #include "../log.h"
 #include "../api.h"
-#include "../config.h"
+#include "../configer.h"
 
 #include <iostream>
 
@@ -15,14 +15,29 @@ using namespace std;
 
 int main()
 {
-    {
-        Configer conf("../TinyWeb.conf");
-        if (conf.loadConfig())
+    // {
+    //     std::string a = "../TinyWeb.conf";
+    //     Configer &configer = Configer::getConfigerInstance();
+
+    //     configer.setConfigerFile(a);
+
+    //     if (configer.loadConfig())
+    //         std::cout << "load config successfull\n";
+    //     else
+    //         std::cout << "load config failed\n";
+    //     configer.test();
+    //     cout << configer.getConfigValue("loglevel");
+    // }
+
+    {//
+        std::string a = "../TinyWeb.conf";
+        setConfigerFile(a);
+        if (loadConfig())
             std::cout << "load config successfull\n";
         else
             std::cout << "load config failed\n";
-        conf.test();
-        cout << conf.getValue("loglevel");
+        Configer::getConfigerInstance().test();
+        cout << getConfigValue("loglevel");
     }
 
     return 0;

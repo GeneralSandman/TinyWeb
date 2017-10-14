@@ -12,29 +12,43 @@
 *
 */
 
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef CONFIGER_H
+#define CONFIGER_H
+
+#include "reader.h"
 
 #include <map>
 #include <string>
 #include <iostream>
 
-class Reader;
+void setConfigerFile(const std::string &file);
+bool loadConfig();
+std::string getConfigValue(const std::string &key);
 
 class Configer
 {
   private:
-    std::string m_nFile;
-    Reader *m_pFileReader;
+    static std::string m_nFile;
+    static Reader m_nFileReader;
     std::map<std::string, std::string> m_nValue;
 
-    void m_fInit();    
+    void m_fInit();
     bool m_fParseLine(std::string &, std::string &, std::string &);
+    Configer();
+    Configer(const Configer &c) //disable
+    {
+    }
 
   public:
-    Configer(const std::string &config_file);
+    static Configer &getConfigerInstance()
+    {
+        static Configer ConfigerInstance;
+        return ConfigerInstance;
+    }
+
+    void setConfigerFile(const std::string &file);
     bool loadConfig();
-    std::string getValue(const std::string &);
+    std::string getConfigValue(const std::string &);
     void test()
     {
         for (auto t : m_nValue)

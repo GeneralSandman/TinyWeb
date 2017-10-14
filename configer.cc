@@ -5,7 +5,7 @@
 *Web:www.generalsandman.cn
 */
 
-#include "config.h"
+#include "configer.h"
 #include "reader.h"
 #include "api.h"
 #include "log.h"
@@ -13,6 +13,22 @@
 #include <algorithm>
 #include <string>
 #include <vector>
+
+std::string Configer::m_nFile = "/TinyWeb.conf";
+Reader Configer::m_nFileReader("/TinyWeb.conf");
+
+void setConfigerFile(const std::string &file)
+{
+    Configer::getConfigerInstance().setConfigerFile(file);
+}
+bool loadConfig()
+{
+    return Configer::getConfigerInstance().loadConfig();
+}
+std::string getConfigValue(const std::string &key)
+{
+    return Configer::getConfigerInstance().getConfigValue(key);
+}
 
 void Configer::m_fInit()
 {
@@ -36,18 +52,13 @@ bool Configer::m_fParseLine(std::string &s,
     if (s[s.size() - 1] == '\n')
         s.erase(s.end() - 1);
 
-    // std::cout << "-" << s << "-" << std::endl;
     if (s.empty())
     {
-        // std::cout << "null line\n";
         return true;
-        //block line
     }
     else if (s[0] == '#')
     {
-        // std::cout << "comment line\n";
         return true;
-        //comment line
     }
 
     std::vector<std::string> argv;
@@ -67,22 +78,26 @@ bool Configer::m_fParseLine(std::string &s,
     return true;
 }
 
-Configer::Configer(const std::string &config_file)
-    : m_nFile(config_file),
-      m_pFileReader(new Reader(config_file))
+Configer::Configer()
 {
     m_fInit();
     LOG(Debug) << "class Configer constructor\n";
+}
+
+void Configer::setConfigerFile(const std::string &file)
+{
+    m_nFile = file;
+    m_nFileReader.setFile(file);
 }
 
 bool Configer::loadConfig()
 {
     std::map<std::string, std::string> value_tmp;
 
-    while (m_pFileReader->haveMore())
+    while (m_nFileReader.haveMore())
     {
         std::string s, key, value;
-        s = m_pFileReader->readLine();
+        s = m_nFileReader.readLine();
 
         if (m_fParseLine(s, key, value))
         {
@@ -104,7 +119,7 @@ bool Configer::loadConfig()
     //successful
 }
 
-std::string Configer::getValue(const std::string &key)
+std::string Configer::getConfigValue(const std::string &key)
 {
     if (m_nValue.find(key) != m_nValue.end())
         return m_nValue[key];
@@ -113,7 +128,5 @@ std::string Configer::getValue(const std::string &key)
 
 Configer::~Configer()
 {
-    delete m_pFileReader;
-    m_pFileReader = nullptr;
     LOG(Debug) << "class Configer destructor\n";
 }

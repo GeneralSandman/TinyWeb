@@ -32,10 +32,12 @@ private:
   int m_nLine;
   int m_nCurrLine;
 
+  void m_fInit(void);
   void m_fCountLine(void);
 
 public:
   Reader(const std::string &f);
+  void setFile(const std::string &f);
   std::string readLine(void);
   int getCurrLineNu(void) { return m_nCurrLine; }
   int getLineNu(void) { return m_nLine; }

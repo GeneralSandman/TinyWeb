@@ -9,7 +9,7 @@ gcc11o = $(gcc11) -o
 
 lib = api channel condition currentthread epoller eventloop exception \
 	log time timer timerqueue socket netaddress connection server accepter \
-	process processpool config reader master buffer protocol\
+	process processpool reader configer buffer protocol\
 	sharedmemory semaphore
 lib.o = $(foreach file,$(lib),$(file).o)
 lib.cc = $(foreach file,$(lib),../$(file).cc)
@@ -34,8 +34,10 @@ accepter_test:accepter_test.o $(lib.o)
 	$(link) accepter_test accepter_test.o $(lib.o)
 server_test:server_test.o $(lib.o)
 	$(link) server_test server_test.o $(lib.o)
+reader_test:reader_test.o $(lib.o)
+	$(link) reader_test reader_test.o $(lib.o) -lpthread
 configer_test:configer_test.o $(lib.o)
-	$(link) configer_test configer_test.o $(lib.o)
+	$(link) configer_test configer_test.o $(lib.o) -lpthread
 sharedmemory_consume_test:sharedmemory_consume_test.o $(lib.o)
 	$(link) sharedmemory_consume_test sharedmemory_consume_test.o $(lib.o) -lpthread
 sharedmemory_product_test:sharedmemory_product_test.o $(lib.o)
@@ -63,6 +65,8 @@ server_test.o:server_test.cc
 	$(gcc11) server_test.cc
 configer_test.o:configer_test.cc
 	$(gcc11) configer_test.cc
+reader_test.o:reader_test.cc
+	$(gcc11) reader_test.cc
 sharedmemory_consume_test.o:sharedmemory_consume_test.cc
 	$(gcc11) sharedmemory_consume_test.cc
 sharedmemory_product_test.o:sharedmemory_product_test.cc
