@@ -27,6 +27,7 @@ public:
   void bindAddress(const NetAddress &);
   void listen();
   int accept(NetAddress &res);
+  void shutdownWrite();
   ~Socket();
 };
 

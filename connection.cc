@@ -1,6 +1,12 @@
-/*
-*Author:GeneralSandman
-*Code:https://github.com/GeneralSandman/TinyWeb
+/* << "connection close down ,don't write\n";
+nO  std::cout
+   << "write " << n << " Bytes\n";
+nne m_pChannel->disableWrite(); //it's very important,you can try to delete the ifif(m_nOutputBuffer.readableBytes()==0)
+ction close down, ction close down, don't write\n";nOut nOutdon't write\n ";nOut nOut
+                                        pustd::cout t pus d::co t
+                                        << "co n<ctiontclose down ,don't write\n";
+u r pustd::cout << "connection close down ,don't write\n";
+tBuffer
 *E-mail:generalsandman@163.com
 *Web:www.generalsandman.cn
 */
@@ -14,6 +20,7 @@
 #include "connection.h"
 #include "netaddress.h"
 #include "eventloop.h"
+#include "socket.h"
 #include "channel.h"
 #include "time.h"
 #include "api.h"
@@ -47,21 +54,34 @@ void Connection::m_fHandleWrite()
 {
     if (m_pChannel->isWriting())
     {
-        std::string send = m_nInputBuffer.getAll();
+        std::string send = m_nOutputBuffer.getAll();
         size_t n = writeString(m_pChannel->getFd(),
                                send);
         if (n > 0)
         {
-            std::cout<<"write "<<send<<std::endl;
+            std::cout << "write " << n << " Bytes\n";
+            if (m_nOutputBuffer.readableBytes() == 0)
+            {
+                m_pChannel->disableWrite(); //it's very important,you can try to delete the if
+                if (m_nState == DisConnecting)
+                    m_fShutdownWrite();
+            }
+            else
+            {
+                //have more data to write
+            }
         }
+
         else
         {
             //error
+            std::cout << "write error\n";
         }
     }
     else
     {
         //connection close down ,don't write
+        std::cout << "connection close down ,don't write\n";
     }
 }
 
@@ -77,12 +97,21 @@ void Connection::m_fHandleError()
     std::cout << "socket error\n";
 }
 
+void Connection::m_fShutdownWrite()
+{
+    if (m_nState == Connected) //FIXME:
+        m_nState = DisConnecting;
+    if (!m_pChannel->isWriting())
+        m_pConnectSocket->shutdownWrite();
+}
+
 Connection::Connection(EventLoop *loop,
                        int connectfd,
                        const NetAddress &local,
                        const NetAddress &peer)
     : m_pEventLoop(loop),
       m_nState(Connecting),
+      m_pConnectSocket(new Socket(connectfd)),
       m_pChannel(new Channel(loop, connectfd)),
       m_nLocalAddress(local),
       m_nPeerAddress(peer)
@@ -97,9 +126,12 @@ Connection::Connection(EventLoop *loop,
 
 void Connection::send(const std::string &mes)
 {
-    m_nOutputBuffer.append(mes);
-    if (!m_pChannel->isWriting())
-        m_pChannel->enableWrite();
+    if (Connected == m_nState)
+    {
+        m_nOutputBuffer.append(mes);
+        if (!m_pChannel->isWriting())
+            m_pChannel->enableWrite();
+    }
 }
 
 void Connection::establishConnection()
@@ -114,11 +146,26 @@ void Connection::destoryConnection()
     m_nState = DisConnected;
     m_pChannel->disableAll();
     m_pEventLoop->removeChannel(m_pChannel);
+
+    delete m_pConnectSocket;
     delete m_pChannel;
+
+    m_pConnectSocket = nullptr;
     m_pChannel = nullptr;
 }
 
 Connection::~Connection()
 {
+    if (m_pConnectSocket != nullptr)
+    {
+        delete m_pConnectSocket;
+        m_pConnectSocket = nullptr;
+    }
+    if (m_pChannel != nullptr)
+    {
+        delete m_pChannel;
+        m_pChannel = nullptr;
+    }
+
     LOG(Debug) << "class Connection destructor\n";
 }

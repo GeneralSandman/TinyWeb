@@ -38,7 +38,7 @@ int Bind(int sockfd, const struct sockaddr_in *addr, socklen_t addrlen = sizeof(
 int Listen(int sockfd, int backlog);
 int Accept(int, struct sockaddr_in *peraddr);
 
-void shutdownWrite(int sockfd);
+void ShutdownWrite(int sockfd);
 
 int Open(const char *pathname, int flags, mode_t mode);
 int Stat(const char *pathname, struct stat *buf);

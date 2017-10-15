@@ -1,5 +1,5 @@
 /*
-*Author:GeneralSandman
+size_t readableBytes() { return m_fReadableBytes(); }
 *Code:https://github.com/GeneralSandman/TinyWeb
 *E-mail:generalsandman@163.com
 *Web:www.generalsandman.cn
@@ -49,6 +49,7 @@ public:
   Buffer();
   void swap(Buffer &r);
   size_t put(int fd);
+  size_t readableBytes(){return m_fReadableBytes();}
   std::string get(size_t len);
   std::string getAll();
   void shrink();

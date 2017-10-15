@@ -36,8 +36,9 @@ void getMessage(Connection *con,
 {
     cout << "+++get message+++:";
     cout << input->getAll() << std::endl;
-    string msg = "I have get you message\n";
+    string msg = "I am server:I have get you message";
     con->send(msg);
+    // con->shutdownWrite();//error
 }
 
 void lostConnection(Connection *con)
@@ -65,7 +66,7 @@ static void signal_handler(int sig)
 
 int main()
 {
-    setLogLevel(Info);
+    setLogLevel(Debug);
 
     add_signal(SIGTERM, signal_handler);
     add_signal(SIGINT, signal_handler);

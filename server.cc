@@ -69,5 +69,13 @@ void Server::start()
 
 Server::~Server()
 {
+    std::cout << "last connection number:" << m_nConnections.size() << std::endl;
+    
+    //have connection not done
+    for (auto t : m_nConnections)
+    {
+        // t->destoryConnection();
+        delete t;
+    }
     LOG(Debug) << "class Server destructor\n";
 }

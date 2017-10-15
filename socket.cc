@@ -46,6 +46,10 @@ int Socket::accept(NetAddress &per)
     return connectfd;
 }
 
+void Socket::shutdownWrite(){
+    ShutdownWrite(m_nFd);
+}
+
 Socket::~Socket()
 {
     close(m_nFd);

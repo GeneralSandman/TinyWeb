@@ -33,7 +33,7 @@ socket_test:socket_test.o $(lib.o)
 accepter_test:accepter_test.o $(lib.o)
 	$(link) accepter_test accepter_test.o $(lib.o)
 server_test:server_test.o $(lib.o)
-	$(link) server_test server_test.o $(lib.o)
+	$(link) server_test server_test.o $(lib.o) -lpthread
 reader_test:reader_test.o $(lib.o)
 	$(link) reader_test reader_test.o $(lib.o) -lpthread
 configer_test:configer_test.o $(lib.o)
@@ -42,6 +42,8 @@ sharedmemory_consume_test:sharedmemory_consume_test.o $(lib.o)
 	$(link) sharedmemory_consume_test sharedmemory_consume_test.o $(lib.o) -lpthread
 sharedmemory_product_test:sharedmemory_product_test.o $(lib.o)
 	$(link) sharedmemory_product_test sharedmemory_product_test.o $(lib.o) -lpthread
+buffer_test:buffer_test.o $(lib.o)
+	$(link) buffer_test buffer_test.o $(lib.o) -lpthread
 
 
 
@@ -71,6 +73,8 @@ sharedmemory_consume_test.o:sharedmemory_consume_test.cc
 	$(gcc11) sharedmemory_consume_test.cc
 sharedmemory_product_test.o:sharedmemory_product_test.cc
 	$(gcc11) sharedmemory_product_test.cc
+buffer_test.o:buffer_test.cc
+	$(gcc11) buffer_test.cc
 
 
 

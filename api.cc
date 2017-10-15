@@ -191,7 +191,7 @@ int Accept(int sockfd, struct sockaddr_in *peraddr)
     return res;
 }
 
-void shutdownWrite(int sockfd)
+void ShutdownWrite(int sockfd)
 {
     if (shutdown(sockfd, SHUT_WR) < 0)
         handle_error("shutdownWrite error");

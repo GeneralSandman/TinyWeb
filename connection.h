@@ -23,6 +23,7 @@
 #include <boost/function.hpp>
 
 class Connection;
+class Socket;
 
 enum Connection_State
 {
@@ -39,7 +40,8 @@ class Connection
 private:
   EventLoop *m_pEventLoop;
   Connection_State m_nState;
-  Channel *m_pChannel; //connect fd
+  Socket *m_pConnectSocket; //have difference between ListenSocket
+  Channel *m_pChannel;      //connect fd
   ConnectionCallback m_nConnectCallback;
   MessageCallback m_nMessageCallback;
   CloseCallback m_nCloseCallback;
@@ -55,9 +57,11 @@ private:
   void m_fHandleClose();
   void m_fHandleError();
 
+  void m_fShutdownWrite();
+
 public:
   Connection(EventLoop *, int, const NetAddress &, const NetAddress &);
-  void send(const std::string&);
+  void send(const std::string &);
   void setConenctCallback(ConnectionCallback c)
   {
     m_nConnectCallback = c;
@@ -70,7 +74,7 @@ public:
   {
     m_nCloseCallback = c;
   }
-
+  void shutdownWrite() { m_fShutdownWrite(); }
   void establishConnection();
   void destoryConnection();
   ~Connection();
