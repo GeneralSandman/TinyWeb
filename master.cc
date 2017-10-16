@@ -101,7 +101,7 @@ Master::Master(const std::string &configfile)
 
     m_nAddress = NetAddress(80);
     m_pProtocol = new WebProtocol();
-    m_pServer = new Server(m_pEventLoop, m_nAddress);
+    m_pServer = new Server(m_pEventLoop, m_nAddress, m_pProtocol);
     //upgrade:Server's constructor need pararms Protocol to set callback
     //m_pServer = new Server(m_pEventLoop, m_nAddress,m_pProtocols);
 

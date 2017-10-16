@@ -1,15 +1,28 @@
+/*
+*Author:GeneralSandman
+*Code:https://github.com/GeneralSandman/TinyWeb
+*E-mail:generalsandman@163.com
+*Web:www.generalsandman.cn
+*/
+
+/*---XXX---
+*
+****************************************
+*
+*/
+
 #ifndef PARSER_H
 #define PARSER_H
 
 #include <iostream>
 #include <string>
-namespace parser
-{
+
 enum CHECK_STATE
 {
     CHECK_STATE_REQUESTLINE = 0,
     CHECK_STATE_HEADER
 };
+
 enum LINE_STATUS
 {
     LINE_OK = 0,
@@ -27,10 +40,8 @@ enum HTTP_CODE
     CLOSED_CONNECTION
 };
 
-
 class Parser
 {
-
   public:
     Parser(int connectfd);
     ~Parser();
@@ -52,14 +63,9 @@ class Parser
     std::string m_nHttpVersion;
     std::string m_nHost;
 
-
-
     LINE_STATUS m_fParseLine();
     HTTP_CODE m_fParseRequestLine();
     HTTP_CODE m_fParseHeader();
-
-    
 };
-}
 
 #endif

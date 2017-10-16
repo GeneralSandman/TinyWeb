@@ -13,6 +13,7 @@
 
 #include "server.h"
 #include "connection.h"
+#include "protocol.h"
 #include "log.h"
 #include "api.h"
 
@@ -46,15 +47,22 @@ void Server::m_fHandleClose(Connection *con)
     m_nConnections.erase(p);
 }
 
-Server::Server(EventLoop *loop, const NetAddress &address)
+Server::Server(EventLoop *loop, const NetAddress &address, Protocol *prot)
     : m_nStarted(false),
       m_nConNum(0),
       m_nListenAddress(address),
       m_pEventLoop(loop),
-      m_nAccepter(loop, address)
+      m_nAccepter(loop, address),
+      m_pProtocol(prot)
 {
     m_nAccepter.setConnectionCallback(
         boost::bind(&Server::m_fHandleRead, this, _1, _2));
+    if (m_pProtocol != nullptr)
+    {
+        setConenctCallback(m_pProtocol->connectCallback());
+        setMessageCallback(m_pProtocol->getMessageCallback());
+        setCloseCallback(m_pProtocol->closeConnectionCallback());
+    }
     LOG(Debug) << "class Server constructor\n";
 }
 
@@ -70,7 +78,7 @@ void Server::start()
 Server::~Server()
 {
     std::cout << "last connection number:" << m_nConnections.size() << std::endl;
-    
+
     //have connection not done
     for (auto t : m_nConnections)
     {

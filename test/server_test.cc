@@ -9,6 +9,7 @@
 #include "../eventloop.h"
 #include "../netaddress.h"
 #include "../connection.h"
+#include "../protocol.h"
 #include "../buffer.h"
 #include "../time.h"
 #include "../api.h"
@@ -76,14 +77,16 @@ int main()
     g_loop->runAfter(60, boost::bind(timeout));
 
     NetAddress address("127.0.0.1:9898");
-    Server server(g_loop, address);
+    Protocol *prot = new WebProtocol();
+    Server server(g_loop, address, prot);
 
-    server.setConenctCallback(madeConnection);
-    server.setMessageCallback(getMessage);
-    server.setCloseCallback(lostConnection);
+    // server.setConenctCallback(madeConnection);
+    // server.setMessageCallback(getMessage);
+    // server.setCloseCallback(lostConnection);
     server.start();
 
     g_loop->loop();
     delete g_loop;
+    delete prot;
     return 0;
 }

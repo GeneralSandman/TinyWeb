@@ -16,10 +16,6 @@ def client(localport,ip, port):
     print "send message:I'm client"
     s.send("I'm client")
 
-    sleepSecond(1)    
-    buf=s.recv(100)
-    print buf
-
     sleepSecond(3)
     print "close connection"
     s.close()

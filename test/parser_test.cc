@@ -1,5 +1,5 @@
-#include "parser.h"
-#include "../api/api.h"
+#include "../parser.h"
+#include "../api.h"
 
 #include <iostream>
 #include <unistd.h>
@@ -38,8 +38,7 @@ int main(int argc, char **argv)
     socklen_t client_len = sizeof(client_addr);
     int connectfd = accept(listen_fd, &client_addr, &client_len);
 
-    
-    parser::Parser *par = new parser::Parser(connectfd);
+    Parser *par = new Parser(connectfd);
     while (1)
     {
         data_recv = par->recv_data_continue();
@@ -53,17 +52,14 @@ int main(int argc, char **argv)
         }
         else
         {
-            parser::HTTP_CODE result = par->parse_content();
-            if (result == parser::HTTP_CODE::NO_REQUEST)
+            HTTP_CODE result = par->parse_content();
+            if (result == HTTP_CODE::NO_REQUEST)
             {
                 //contiune recv data
                 continue;
             }
-            else if (result == parser::HTTP_CODE::GET_REQUEST)
+            else if (result == HTTP_CODE::GET_REQUEST)
             {
-                //response
-                std::cout << "---------\n";
-
                 using namespace std;
                 vector<string> header;
                 header.reserve(3);
@@ -73,8 +69,8 @@ int main(int argc, char **argv)
                 {
                     writeString(connectfd, t);
                 }
-                std::string file = "../docs/";
-                file+=par->m_nUrl;
+                std::string file = "../www/";
+                file += par->m_nUrl;
                 writeHtml(connectfd, file);
 
                 close(connectfd);

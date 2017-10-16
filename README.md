@@ -50,9 +50,6 @@
 
 升级计划
 - 提升程序为demon进程（demon程序标准输入输出如何处理?）
-- 添加protocol类，在此类中定义通信的格式，如何对信息做出回应
-- Server类的constructor应该用protocol类作为参数，Server类从中获取回调函数并初始化相关信息
-- Protocol 派生类类只需要重载```connectionMade();dataReceived();connectionLost();```
 - 优化loggger，解决logger生命周期过短的问题
 - client 如果没有足够的内存接受数据，connection会一直存在（不属于bug）
 - Semphore
@@ -156,3 +153,9 @@ cout << configer.getConfigValue("loglevel");
 ```
 
 ```
+
+
+> # 2. Protocol 使用方法
+
+- 如果想要自定义协议类，只需要继承Protocol,并重载相关函数（见WebProtocol定义）
+

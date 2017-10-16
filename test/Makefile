@@ -1,15 +1,10 @@
-ll = g++ -o
-gg = g++ -std=c++11 -c -o
-
-
 link = g++ -o
 gcc11 = g++ -std=c++11 -c
 gcc11o = $(gcc11) -o
 
-
 lib = api channel condition currentthread epoller eventloop exception \
 	log time timer timerqueue socket netaddress connection server accepter \
-	process processpool reader configer buffer protocol\
+	process processpool reader configer buffer protocol parser \
 	sharedmemory semaphore master
 lib.o = $(foreach file,$(lib),$(file).o)
 lib.cc = $(foreach file,$(lib),../$(file).cc)
@@ -19,13 +14,13 @@ lib:$(lib.cc)
 base_test:base_test.o $(lib.o)
 	$(link) base_test base_test.o $(lib.o)
 api_test:api_test.o api.o
-	$(ll) api_test api_test.o api.o
+	$(link) api_test api_test.o api.o
 thread_test:thread_test.o thread.o currentthread.o api.o
-	$(ll) thread_test thread_test.o thread.o threadpool_test.o currentthread.o api.o -lpthread
+	$(link) thread_test thread_test.o thread.o threadpool_test.o currentthread.o api.o -lpthread
 threadpool_test:threadpool_test.o thread.o threadpool.o currentthread.o api.o
-	$(ll) threadpool_test threadpool_test.o thread.o threadpool.o currentthread.o api.o -lpthread
+	$(link) threadpool_test threadpool_test.o thread.o threadpool.o currentthread.o api.o -lpthread
 processpool_test:processpool_test.o $(lib.o)
-	$(ll) processpool_test processpool_test.o $(lib.o)
+	$(link) processpool_test processpool_test.o $(lib.o)
 time_test:time_test.o time.o
 	$(link) time_test time_test.o time.o
 socket_test:socket_test.o $(lib.o)
@@ -44,17 +39,19 @@ sharedmemory_product_test:sharedmemory_product_test.o $(lib.o)
 	$(link) sharedmemory_product_test sharedmemory_product_test.o $(lib.o) -lpthread
 buffer_test:buffer_test.o $(lib.o)
 	$(link) buffer_test buffer_test.o $(lib.o) -lpthread
+parser_test:parser_test.o $(lib.o)
+	$(link) parser_test parser_test.o $(lib.o) -lpthread
 
 
 
 base_test.o:base_test.cc
-	$(gcc11o) base_test.o base_test.cc
+	$(gcc11) base_test.cc
 api_test.o:api_test.cc
-	$(gg) api_test.o api_test.cc
+	$(gcc11) api_test.cc
 thread_test.o:thread_test.cc
-	$(gg) thread_test.o thread_test.cc
+	$(gcc11) thread_test.cc
 threadpool_test.o:threadpool_test.cc
-	$(gg) threadpool_test.o threadpool_test.cc
+	$(gcc11) threadpool_test.cc
 processpool_test.o:processpool_test.cc
 	$(gcc11) processpool_test.cc
 time_test.o:time_test.cc
@@ -75,6 +72,8 @@ sharedmemory_product_test.o:sharedmemory_product_test.cc
 	$(gcc11) sharedmemory_product_test.cc
 buffer_test.o:buffer_test.cc
 	$(gcc11) buffer_test.cc
+parser_test.o:parser_test.cc
+	$(gcc11) parser_test.cc
 
 
 

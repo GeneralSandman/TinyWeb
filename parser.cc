@@ -1,12 +1,25 @@
+/*
+*Author:GeneralSandman
+*Code:https://github.com/GeneralSandman/TinyWeb
+*E-mail:generalsandman@163.com
+*Web:www.generalsandman.cn
+*/
+
+/*---XXX---
+*
+****************************************
+*
+*/
+
 #include "parser.h"
+#include "log.h"
+
 #include <sys/socket.h>
 #include <string.h>
 #include <unistd.h>
 #include <iostream>
 #include <vector>
 
-namespace parser
-{
 Parser::Parser(int connectfd) : m_nSockfd(connectfd),
                                 m_nReadIndex(0),
                                 m_nCheckIndex(0),
@@ -14,15 +27,18 @@ Parser::Parser(int connectfd) : m_nSockfd(connectfd),
                                 m_nLineStart(0)
 {
     memset(m_nBuf, '\0', sizeof(m_nBuf));
+    LOG(Debug) << "class Parser constructor\n";
 }
 
 Parser::~Parser()
 {
+    LOG(Debug) << "class Parser destructor\n";
 }
-parser::HTTP_CODE Parser::parse_content()
+
+HTTP_CODE Parser::parse_content()
 {
 
-    parser::LINE_STATUS linestatus = LINE_OK;
+    LINE_STATUS linestatus = LINE_OK;
     while ((linestatus = m_fParseLine()) == LINE_OK)
     {
 
@@ -97,18 +113,17 @@ int Parser::recv_data_continue()
     else
     {
         m_nReadIndex += res;
-        std::cout<<"get data\n";
+        std::cout << "get data\n";
     }
 
     return res;
 }
 
-parser::LINE_STATUS Parser::m_fParseLine()
+LINE_STATUS Parser::m_fParseLine()
 {
-    std::cout<<m_nBuf<<std::endl;
-    for(char *i=m_nBuf;*i!='\0';i++)
-        printf("%d ",*i);
-    std::cout<<"-------------\n";
+    std::cout << m_nBuf << std::endl;
+    // for (char *i = m_nBuf; *i != '\0'; i++)
+    //     printf("%d ", *i);
     char check;
     for (; m_nCheckIndex < m_nReadIndex; m_nCheckIndex++)
     {
@@ -121,7 +136,6 @@ parser::LINE_STATUS Parser::m_fParseLine()
             }
             else if (m_nBuf[m_nCheckIndex + 1] == '\n')
             {
-                std::cout<<"get a line\n";
                 m_nBuf[m_nCheckIndex++] = '\0';
                 m_nBuf[m_nCheckIndex++] = '\0';
                 return LINE_OK;
@@ -145,19 +159,15 @@ parser::LINE_STATUS Parser::m_fParseLine()
             }
         }
     }
-    std::cout<<"-------------\n";
-    
     return LINE_OPEN;
 }
 
-parser::HTTP_CODE Parser::m_fParseRequestLine()
+HTTP_CODE Parser::m_fParseRequestLine()
 {
-    std::cout<<"int the function m_fParseRequsetLine()\n";
     char *begin = m_nBuf;
     char *end = strpbrk(begin, " ");
     if (!end)
     {
-        std::cout<<"bad request1\n";
         return BAD_REQUEST;
     }
     for (char *i = begin; i < end; i++)
@@ -167,11 +177,10 @@ parser::HTTP_CODE Parser::m_fParseRequestLine()
     *(end++) = '\0';
 
     begin = end;
-    end=nullptr;
+    end = nullptr;
     end = strpbrk(begin, " ");
     if (!end)
     {
-        std::cout<<"bad request2\n";        
         return BAD_REQUEST;
     }
     for (char *i = begin; i < end; i++)
@@ -182,21 +191,19 @@ parser::HTTP_CODE Parser::m_fParseRequestLine()
 
     begin = end;
 
-    for (char *i = begin; *i!='\0'; i++)
+    for (char *i = begin; *i != '\0'; i++)
     {
         m_nHttpVersion += *i;
     }
-    
-    std::cout << "---------------------\n";
-    std::cout << "method:" << m_nMethod << std::endl;
-    std::cout << "url:" << m_nUrl << std::endl;
-    std::cout << "version:" << m_nHttpVersion << std::endl;
-    std::cout << "---------------------\n";
+
+    // std::cout << "method:" << m_nMethod << std::endl;
+    // std::cout << "url:" << m_nUrl << std::endl;
+    // std::cout << "version:" << m_nHttpVersion << std::endl;
 
     m_nCheckStat = CHECK_STATE_HEADER; //change the statue
     return NO_REQUEST;
 }
-parser::HTTP_CODE Parser::m_fParseHeader()
+HTTP_CODE Parser::m_fParseHeader()
 {
     char *linestart = m_nBuf + m_nLineStart;
     m_nLineStart = m_nCheckIndex; //start the new line
@@ -206,9 +213,10 @@ parser::HTTP_CODE Parser::m_fParseHeader()
     }
     else if (strncasecmp(linestart, "Host:", 5) == 0)
     {
-        char *end=strpbrk(linestart,"\r");
-        for(char *i=linestart+5;i<end;i++){
-            m_nHost+=*i;
+        char *end = strpbrk(linestart, "\r");
+        for (char *i = linestart + 5; i < end; i++)
+        {
+            m_nHost += *i;
         }
     }
     else if (strncasecmp(linestart, "Referer:", 8) == 0)
@@ -219,5 +227,4 @@ parser::HTTP_CODE Parser::m_fParseHeader()
     }
 
     return NO_REQUEST; //not a complete request
-}
 }
