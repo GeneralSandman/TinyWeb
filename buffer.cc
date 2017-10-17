@@ -198,6 +198,20 @@ const char *Buffer::findCRLF(const char *start) const
     return crlf == m_fWriteableBegin() ? NULL : crlf;
 }
 
+bool Buffer::getALine(std::string &line)
+{
+    const char *line_end = findCRLF();
+    if (line_end == nullptr)
+        return false; //This Buffer hasn't complete line
+
+    int len = line_end - m_fReadableBegin();
+
+    std::string tmp(m_fReadableBegin(), len);
+    line.swap(tmp);
+    hasReadBytes(len + 2); //leave the crlf
+    return true;
+}
+
 Buffer::~Buffer()
 {
     LOG(Debug) << "class Buffer destructor\n";

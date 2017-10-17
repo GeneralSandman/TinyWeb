@@ -8,6 +8,7 @@
 /*---class Protocol---
 *This class is will used by class Server
 *The only thing we should do is to defind a new drive-Protocol
+*This class will is be used to 
 ****************************************
 *
 *
@@ -17,7 +18,11 @@
 #define PROTOCOL_H
 
 #include "callback.h"
+#include "connection.h"
+#include "parser.h"
+#include "buffer.h"
 #include "time.h"
+#include "api.h"
 
 #include <iostream>
 #include <boost/bind.hpp>
@@ -25,9 +30,12 @@
 class Connection;
 class Buffer;
 
+/*-------Protocol------------*/
 class Protocol
 {
 private:
+  // Parser m_nParser;
+
 public:
   Protocol();
   //used by server
@@ -68,6 +76,7 @@ public:
   virtual ~Protocol();
 };
 
+/*-------EchoProtocol------------*/
 class EchoProtocol : public Protocol
 {
 public:
@@ -90,25 +99,20 @@ public:
   virtual ~EchoProtocol();
 };
 
+/*----WebProtocol-----------*/
+
 class WebProtocol : public Protocol
 {
+private:
+  HttpParser m_nParser;
+
+  void m_fResponse(HttpRequestHeader *header, HttpRequestContent *content);
+
 public:
   WebProtocol();
-  void connectionMade(Connection *con)
-  {
-    std::cout << "(WebProtocol) "
-              << "get a new connection\n";
-  }
-  void dataReceived(Connection *con, Buffer *input, Time time)
-  {
-    std::cout << "(WebProtocol) "
-              << "get a new message\n";
-  }
-  void connectionLost(Connection *con)
-  {
-    std::cout << "(WebProtocol) "
-              << "lost a connection\n";
-  }
+  void connectionMade(Connection *con);
+  void dataReceived(Connection *con, Buffer *input, Time time);
+  void connectionLost(Connection *con);
   virtual ~WebProtocol();
 };
 

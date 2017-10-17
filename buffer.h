@@ -49,7 +49,7 @@ public:
   Buffer();
   void swap(Buffer &r);
   size_t put(int fd);
-  size_t readableBytes(){return m_fReadableBytes();}
+  size_t readableBytes() { return m_fReadableBytes(); }
   std::string get(size_t len);
   std::string getAll();
   void shrink();
@@ -58,6 +58,7 @@ public:
   void prepend(const void * /*restrict*/ data, size_t len);
   const char *findCRLF() const;
   const char *findCRLF(const char *start) const;
+  bool getALine(std::string &res);
   ~Buffer();
 };
 

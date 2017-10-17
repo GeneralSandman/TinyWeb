@@ -12,6 +12,7 @@
 */
 
 #include "parser.h"
+#include "api.h"
 #include "log.h"
 
 #include <sys/socket.h>
@@ -227,4 +228,75 @@ HTTP_CODE Parser::m_fParseHeader()
     }
 
     return NO_REQUEST; //not a complete request
+}
+
+//---------HttpParser---------/
+
+bool HttpParser::m_fParseRequestHeader(const std::string &line,
+                                       struct HttpRequestHeader *header)
+{
+    std::vector<std::string> res;
+    splitString(line, " ", res);
+    if (res.size() != 3)
+        return false;
+    //FIXME:
+    // header->method = res[0];
+    // header->url = res[1];
+    // header->version = res[2];
+    return true;
+}
+
+bool HttpParser::m_fParseRequestContent(const std::string &line,
+                                        struct HttpRequestContent *content)
+{
+    std::vector<std::string> res;
+    splitString(line, ": ", res);
+    if (res.size() != 2)
+        return false;
+
+    if (res[0] == "Host")
+    {
+        content->host = res[1];
+    }
+    //leave another optionFIXME:
+
+    return true;
+}
+
+HttpParser::HttpParser()
+    : m_nCheckStat(CHECK_STATE_HEADER)
+{
+    LOG(Debug) << "class HttpParser constructor\n";
+}
+
+bool HttpParser::parseRequestLine(const std::string &line,
+                                  struct HttpRequestHeader *header,
+                                  struct HttpRequestContent *content)
+{
+    if (CHECK_STATE_HEADER == m_nCheckStat)
+    {
+        bool res = m_fParseRequestHeader(line, header);
+        if (res)
+        {
+            m_nCheckStat = CHECK_STATE_REQUESTLINE;
+        }
+        return false; //we have to wait content
+    }
+    else if (CHECK_STATE_REQUESTLINE == m_nCheckStat && line != "")
+    {
+        bool res = m_fParseRequestContent(line, content);
+        if (res)
+        {
+        }
+        return false;
+    }
+    else if (CHECK_STATE_REQUESTLINE == m_nCheckStat && line == "")
+    {
+        return true; //we have to response a httpresponse
+    }
+}
+
+HttpParser::~HttpParser()
+{
+    LOG(Debug) << "class HttpParser destructor\n";
 }

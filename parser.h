@@ -5,8 +5,9 @@
 *Web:www.generalsandman.cn
 */
 
-/*---XXX---
-*
+/*---class Parser---
+*function:to parse the data have received and
+*get line data or 
 ****************************************
 *
 */
@@ -66,6 +67,41 @@ class Parser
     LINE_STATUS m_fParseLine();
     HTTP_CODE m_fParseRequestLine();
     HTTP_CODE m_fParseHeader();
+};
+
+//-------HttpParser--------//
+
+struct HttpRequestHeader
+{
+    std::string method;
+    std::string url;
+    std::string version;
+};
+
+struct HttpRequestContent
+{
+    std::string host;
+    std::string connection;
+    std::string user_agent;
+    std::string accept;
+    std::string cookie;
+};
+
+class HttpParser
+{
+  private:
+    CHECK_STATE m_nCheckStat;
+
+    bool m_fParseRequestHeader(const std::string &line, struct HttpRequestHeader *header);
+    bool m_fParseRequestContent(const std::string &line, struct HttpRequestContent *content);
+
+  public:
+    HttpParser();
+    bool parseRequestLine(const std::string &line,
+                          struct HttpRequestHeader *header,
+                          struct HttpRequestContent *content);
+
+    ~HttpParser();
 };
 
 #endif

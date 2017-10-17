@@ -54,6 +54,16 @@
 - client 如果没有足够的内存接受数据，connection会一直存在（不属于bug）
 - Semphore
 - SharedMemory
+- parser 可以精确地识别出路径名，和url（需要更加健壮）
+- Connection::shutdownWrite应该也要销毁部分资源？？？？？
+- distingush HttpRequset & TcpConnection
+- 一段时间内，多个http request可能使用一个TcpConnection
+- 所以生命周期：TcpConnection>HttpRequest
+
+bug
+- server写完文件之后如果关闭写端口则不能监听connectionlost 事件
+- web浏览器在server还没有shutdownWrite的时候不能呈现html页面
+- 其实shutdown也属于关闭连接
 
 国庆学习计划
 - 入门negix

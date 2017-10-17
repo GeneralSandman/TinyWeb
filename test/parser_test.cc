@@ -10,7 +10,67 @@
 #include <netinet/in.h>
 using namespace std;
 
-int main(int argc, char **argv)
+int main()
+{
+    // GET / index.htm2 HTTP / 1.0
+    string method = "[A-Z_a-z]*";
+    string url = "/^([\\/][\\w-]+)*$/";
+    string version = "";
+    string pattern = "[A-Z_a-z]*\\s\\s";
+
+    return 0;
+}
+
+int main__()
+{
+    {
+        HttpParser parser;
+
+        vector<string> request;
+
+        std::string httpRequest = "GET / HTTP/1.0";
+        std::string httpRequest2 = "Host: localhost:9595";
+        std::string httpRequest3 = "Accept: text/html";
+        std::string httpRequest4 = "Accept-Encoding: gzip, compress, bzip2";
+        std::string httpRequest5 = "Accept-Language: en";
+        std::string httpRequest6 = "User-Agent: Lynx/2.8.9dev.8 libwww-FM/2.14 SSL-MM/1.4.1 GNUTLS/3.4.9";
+        std::string end = "";
+
+        request.push_back(httpRequest);
+        request.push_back(httpRequest2);
+        request.push_back(httpRequest3);
+        request.push_back(httpRequest4);
+        request.push_back(httpRequest5);
+        request.push_back(httpRequest6);
+        request.push_back(end);
+
+        struct HttpRequestHeader header;
+        struct HttpRequestContent content;
+
+        for (auto t : request)
+        {
+            parser.parseRequestLine(t, &header, &content);
+        }
+
+        std::cout << "header values:\n"
+                  << "method" << header.method << std::endl
+                  << "url" << header.url << std::endl
+                  << "version" << header.version << std::endl;
+
+        std::cout << "---------\n";
+
+        std::cout << "content values:\n"
+                  << "host" << content.host << std::endl
+                  << "connection" << content.connection << std::endl
+                  << "user_agent" << content.user_agent << std::endl
+                  << "accept" << content.accept << std::endl
+                  << "cookie" << content.cookie << std::endl;
+    }
+
+    return 0;
+}
+
+int main_(int argc, char **argv)
 {
 
     if (argc < 2)
