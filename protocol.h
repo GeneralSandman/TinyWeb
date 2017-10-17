@@ -105,7 +105,7 @@ class WebProtocol : public Protocol
 private:
   HttpParser m_nParser;
 
-  void m_fResponse(HttpRequestHeader *header, HttpRequestContent *content);
+  void m_fResponse(Connection *con, struct HttpRequest &);
 
 public:
   WebProtocol();

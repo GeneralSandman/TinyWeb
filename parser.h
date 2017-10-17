@@ -15,6 +15,8 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#include "http.h"
+
 #include <iostream>
 #include <string>
 
@@ -22,6 +24,13 @@ enum CHECK_STATE
 {
     CHECK_STATE_REQUESTLINE = 0,
     CHECK_STATE_HEADER
+};
+
+enum ParseHttpResponseStatus
+{
+    Status_ParseLine = 0,
+    Status_ParseHeader,
+    Status_ParseBody
 };
 
 enum LINE_STATUS
@@ -71,35 +80,22 @@ class Parser
 
 //-------HttpParser--------//
 
-struct HttpRequestHeader
-{
-    std::string method;
-    std::string url;
-    std::string version;
-};
-
-struct HttpRequestContent
-{
-    std::string host;
-    std::string connection;
-    std::string user_agent;
-    std::string accept;
-    std::string cookie;
-};
-
 class HttpParser
 {
   private:
-    CHECK_STATE m_nCheckStat;
+    ParseHttpResponseStatus m_nCheckStat;
 
-    bool m_fParseRequestHeader(const std::string &line, struct HttpRequestHeader *header);
-    bool m_fParseRequestContent(const std::string &line, struct HttpRequestContent *content);
+    bool m_fParseRequestLine(const std::string &line,
+                             struct HttpRequestLine &res);
+    bool m_fParseRequestHeader(const std::string &line,
+                               struct HttpRequestHeader &res);
+    bool m_fParseRequestBody(const std::string &line,
+                             struct HttpRequestEntiyBody &res);
 
   public:
     HttpParser();
     bool parseRequestLine(const std::string &line,
-                          struct HttpRequestHeader *header,
-                          struct HttpRequestContent *content);
+                          struct HttpRequest &request);
 
     ~HttpParser();
 };

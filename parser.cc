@@ -14,6 +14,7 @@
 #include "parser.h"
 #include "api.h"
 #include "log.h"
+#include "http.h"
 
 #include <sys/socket.h>
 #include <string.h>
@@ -232,67 +233,121 @@ HTTP_CODE Parser::m_fParseHeader()
 
 //---------HttpParser---------/
 
-bool HttpParser::m_fParseRequestHeader(const std::string &line,
-                                       struct HttpRequestHeader *header)
+bool HttpParser::m_fParseRequestLine(const std::string &line,
+                                     struct HttpRequestLine &res)
 {
-    std::vector<std::string> res;
-    splitString(line, " ", res);
-    if (res.size() != 3)
+    std::vector<std::string> vec;
+    splitString(line, " ", vec);
+    if (vec.size() != 3)
         return false;
-    //FIXME:
-    // header->method = res[0];
-    // header->url = res[1];
-    // header->version = res[2];
+    //FIXME:upgrade with regex
+    // for (auto t : vec)
+    // std::cout << t;
+    // std::cout << std::endl;
+    res.method = vec[0];
+    res.url = vec[1];
+    res.version = vec[2];
+
+    // std::cout << res.method << std::endl;
     return true;
 }
 
-bool HttpParser::m_fParseRequestContent(const std::string &line,
-                                        struct HttpRequestContent *content)
+bool HttpParser::m_fParseRequestHeader(const std::string &line,
+                                       struct HttpRequestHeader &res)
 {
-    std::vector<std::string> res;
-    splitString(line, ": ", res);
-    if (res.size() != 2)
+    std::vector<std::string> vec;
+    splitString(line, ": ", vec);
+    if (vec.size() != 2)
         return false;
 
-    if (res[0] == "Host")
+    // for (auto t : vec)
+    // std::cout << t;
+    // std::cout << std::endl;
+
+    if (vec[0] == "Host")
     {
-        content->host = res[1];
+        res.host = vec[1];
     }
     //leave another optionFIXME:
 
     return true;
 }
 
+bool HttpParser::m_fParseRequestBody(const std::string &line,
+                                     struct HttpRequestEntiyBody &res)
+{
+    res.text += line;
+}
+
 HttpParser::HttpParser()
-    : m_nCheckStat(CHECK_STATE_HEADER)
+    : m_nCheckStat(Status_ParseLine)
 {
     LOG(Debug) << "class HttpParser constructor\n";
 }
 
 bool HttpParser::parseRequestLine(const std::string &line,
-                                  struct HttpRequestHeader *header,
-                                  struct HttpRequestContent *content)
+                                  struct HttpRequest &request)
 {
-    if (CHECK_STATE_HEADER == m_nCheckStat)
+    if (Status_ParseLine == m_nCheckStat) //line
     {
-        bool res = m_fParseRequestHeader(line, header);
+        std::cout << "1\n";
+        bool res = m_fParseRequestLine(line, request.line);
         if (res)
         {
-            m_nCheckStat = CHECK_STATE_REQUESTLINE;
+            std::cout << "12\n";
+            // printHttpRequestLine(request.line);
+            m_nCheckStat = Status_ParseHeader;
         }
         return false; //we have to wait content
     }
-    else if (CHECK_STATE_REQUESTLINE == m_nCheckStat && line != "")
+    else if (Status_ParseHeader == m_nCheckStat) //header
     {
-        bool res = m_fParseRequestContent(line, content);
-        if (res)
+        std::cout << "2\n";
+
+        if (line != "")
         {
+            std::cout << "22\n";
+
+            bool res = m_fParseRequestHeader(line, request.header);
+            if (res)
+            {
+                // printHttpRequestLine(request.line);
+            }
+            return false;
         }
-        return false;
+        else //Encounter an empth line between header and body
+        {
+            std::cout << "23\n";
+            // printHttpRequestLine(request.line);
+
+            if (request.line.method == "GET")
+            {
+                std::cout << "232\n";
+                m_nCheckStat = Status_ParseLine;
+                return true;
+            }
+            m_nCheckStat = Status_ParseBody;
+            return false; //we have to response a httpresponse
+        }
     }
-    else if (CHECK_STATE_REQUESTLINE == m_nCheckStat && line == "")
+    else if (Status_ParseBody == m_nCheckStat) //body
     {
-        return true; //we have to response a httpresponse
+        std::cout << "3\n";
+
+        if ("GET" == request.line.method)
+        {
+
+            std::cout << "32\n";
+
+            //Parser neglect the body
+        }
+        else
+        {
+            std::cout << "33\n";
+
+            //Parser handle the body
+            bool res = m_fParseRequestBody(line, request.body);
+        }
     }
 }
 

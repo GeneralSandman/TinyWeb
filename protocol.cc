@@ -60,8 +60,20 @@ WebProtocol::WebProtocol()
     LOG(Debug) << "class WebProtocol constructor\n";
 }
 
-void WebProtocol::m_fResponse(HttpRequestHeader *header, HttpRequestContent *content)
+void WebProtocol::m_fResponse(Connection *con, struct HttpRequest &request)
 {
+    std::string h = "HTTP/1.0 200 OK\r\n";
+    std::string c = "Content-Type: text/html\r\n\r\n";
+    std::string html = "hello world";
+
+    std::string res = h + c + html;
+    con->send(res);
+    con->shutdownWrite();
+    //If we don't close this connection,
+    //the html can't be showed in browser.
+    //[Http protocol]
+
+    printHttpRequest(request);
 }
 
 void WebProtocol::connectionMade(Connection *con)
@@ -78,26 +90,14 @@ void WebProtocol::dataReceived(Connection *con, Buffer *input, Time time)
 
     std::string line;
     int i = 0;
+    struct HttpRequest request;
+
     while (input->getALine(line))
     {
         // std::cout << i++ << "-" << line << "-\n";
-        struct HttpRequestHeader header;
-        struct HttpRequestContent content;
-        if (m_nParser.parseRequestLine(line, &header, &content))
+        if (m_nParser.parseRequestLine(line, request))
         {
-            // m_fResponse(&header, &content);
-            // writeHtml(con->get,"/home/li/TinyWeb/www/index.html");
-
-            std::string h = "HTTP/1.0 200 OK\r\n";
-            std::string c = "%sContent-Type: text/html\r\n\r\n";
-            std::string html = "hello world";
-
-            std::string res = h + c + html;
-            con->send(res);
-            con->shutdownWrite();
-            //If we don't close this connection,
-            //the html can't be showed in browser.
-            //[Http protocol]
+            m_fResponse(con, request);
         }
 
         line = "";

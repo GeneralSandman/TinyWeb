@@ -66,7 +66,7 @@ bug
 - server写完文件之后如果关闭写端口则不能监听connectionlost 事件
 - web浏览器在server还没有shutdownWrite的时候不能呈现html页面
 - 其实shutdown也属于关闭连接
-
+- 一个类管理上下文，Factory管理这些类
 国庆学习计划
 - 入门negix
 - 完成muduo的相关功能
