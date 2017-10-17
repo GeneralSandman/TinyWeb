@@ -10,3 +10,4 @@ touch error.log
 touch info.log
 touch warn.log
 touch fatal.log
+touch TinyWeb.log

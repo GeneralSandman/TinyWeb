@@ -48,6 +48,11 @@ int main()
         std::string fatalfile = logpath + getConfigValue("fatalfile");
 
         std::cout << debugfile << std::endl;
+        std::cout << infofile << std::endl;
+        std::cout << warnfile << std::endl;
+        std::cout << errorfile << std::endl;
+        std::cout << fatalfile << std::endl;
+        
 
         initLogger(debugfile,
                    infofile,
@@ -56,6 +61,14 @@ int main()
                    fatalfile,
                    convertStringToLoglevel(loglevel)); //error used
         //FIXME:
+        LOG(Debug) << endl;
+        LOG(Info) << endl;
+        LOG(Warn) << endl;
+        LOG(Error) << endl;
+        LOG(Fatal) << endl;
+
+        setDebugLogFile("/home/li/TinyWeb/log/TinyWeb.log");
+
         LOG(Debug) << endl;
         LOG(Info) << endl;
         LOG(Warn) << endl;

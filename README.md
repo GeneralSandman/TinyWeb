@@ -61,7 +61,7 @@
 - 所以生命周期：TcpConnection>HttpRequest
 - 增加HttpResponse&HttpRequest
 - 应该为维护一个map集合<连接，请求内容>
-
+- 优化logger，处理没有打开文件的异常,存在严重bug，需要重新架构
 bug
 - server写完文件之后如果关闭写端口则不能监听connectionlost 事件
 - web浏览器在server还没有shutdownWrite的时候不能呈现html页面

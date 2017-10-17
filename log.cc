@@ -63,13 +63,21 @@ void initLogger(const std::string &debug_log_filename,
                 const std::string &fatal_log_filename,
                 log_level level)
 {
-    Logger::m_nDebugLogFile.open(debug_log_filename.c_str(), std::ios::in | std::ios::app);
-    Logger::m_nInfoLogFile.open(info_log_filename.c_str(), std::ios::in | std::ios::app);
-    Logger::m_nWarnLogFile.open(warn_log_filename.c_str(), std::ios::in | std::ios::app);
-    Logger::m_nErrLogFile.open(error_log_filename.c_str(), std::ios::in | std::ios::app);
-    Logger::m_nFatalLogFile.open(fatal_log_filename.c_str(), std::ios::in | std::ios::app);
+    // Logger::m_nDebugLogFile.open(debug_log_filename.c_str(), std::ios::in | std::ios::app);
+    // Logger::m_nInfoLogFile.open(info_log_filename.c_str(), std::ios::in | std::ios::app);
+    // Logger::m_nWarnLogFile.open(warn_log_filename.c_str(), std::ios::in | std::ios::app);
+    // Logger::m_nErrLogFile.open(error_log_filename.c_str(), std::ios::in | std::ios::app);
+    // Logger::m_nFatalLogFile.open(fatal_log_filename.c_str(), std::ios::in | std::ios::app);
 
-    Logger::m_nLevel = level;
+    // Logger::m_nLevel = level;
+
+    setDebugLogFile(debug_log_filename);
+    setInfoLogFile(info_log_filename);
+    setWarnLogFile(warn_log_filename);
+    setErrorLogFile(error_log_filename);
+    setFatalLogFile(fatal_log_filename);
+
+    setLogLevel(level);
 }
 
 std::ostream &Logger::getStream(log_level level)
