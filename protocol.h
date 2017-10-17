@@ -14,6 +14,18 @@
 *
 */
 
+/*---class EchoProtocol---
+*
+****************************************
+*
+*/
+
+/*---class WebProtocol---
+*
+****************************************
+*
+*/
+
 #ifndef PROTOCOL_H
 #define PROTOCOL_H
 
@@ -30,7 +42,7 @@
 class Connection;
 class Buffer;
 
-/*-------Protocol------------*/
+/*----------Protocol------------*/
 class Protocol
 {
 private:
@@ -81,26 +93,13 @@ class EchoProtocol : public Protocol
 {
 public:
   EchoProtocol();
-  void connectionMade(Connection *con)
-  {
-    std::cout << "(EchoProtocol) "
-              << "get a new connection\n";
-  }
-  void dataReceived(Connection *con, Buffer *input, Time time)
-  {
-    std::cout << "(EchoProtocol) "
-              << "get a new message\n";
-  }
-  void connectionLost(Connection *con)
-  {
-    std::cout << "(EchoProtocol) "
-              << "lost a connection\n";
-  }
+  void connectionMade(Connection *con);
+  void dataReceived(Connection *con, Buffer *input, Time time);
+  void connectionLost(Connection *con);
   virtual ~EchoProtocol();
 };
 
-/*----WebProtocol-----------*/
-
+/*--------WebProtocol-----------*/
 class WebProtocol : public Protocol
 {
 private:

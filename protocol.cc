@@ -14,6 +14,7 @@
 #include "protocol.h"
 #include "log.h"
 
+//----------Protocol api----------//
 Protocol::Protocol()
 {
     LOG(Debug) << "class Protocol constructor\n";
@@ -24,11 +25,36 @@ Protocol::~Protocol()
     LOG(Debug) << "class Protocol destructor\n";
 }
 
-//////////////////////////////////////////////////
-//////////////////////////////////////////////////
-//////////////////////////////////////////////////
-//////////////////////////////////////////////////
+//--------EchoProtocol api-------------//
+EchoProtocol::EchoProtocol()
+{
+    LOG(Debug) << "class EchoProtocol constructor\n";
+}
 
+void EchoProtocol::connectionMade(Connection *con)
+{
+    std::cout << "(EchoProtocol) "
+              << "get a new connection\n";
+}
+
+void EchoProtocol::dataReceived(Connection *con, Buffer *input, Time time)
+{
+    std::cout << "(EchoProtocol) "
+              << "get a new message\n";
+}
+
+void EchoProtocol::connectionLost(Connection *con)
+{
+    std::cout << "(EchoProtocol) "
+              << "lost a connection\n";
+}
+
+EchoProtocol::~EchoProtocol()
+{
+    LOG(Debug) << "class EchoProtocol destructor\n";
+}
+
+//--------WebProtocol api-------------//
 WebProtocol::WebProtocol()
 {
     LOG(Debug) << "class WebProtocol constructor\n";
@@ -54,7 +80,7 @@ void WebProtocol::dataReceived(Connection *con, Buffer *input, Time time)
     int i = 0;
     while (input->getALine(line))
     {
-        std::cout << i++ << "-" << line << "-\n";
+        // std::cout << i++ << "-" << line << "-\n";
         struct HttpRequestHeader header;
         struct HttpRequestContent content;
         if (m_nParser.parseRequestLine(line, &header, &content))

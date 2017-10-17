@@ -10,6 +10,7 @@
 #include "../netaddress.h"
 #include "../connection.h"
 #include "../protocol.h"
+#include "../configer.h"
 #include "../buffer.h"
 #include "../time.h"
 #include "../api.h"
@@ -17,6 +18,7 @@
 
 #include <iostream>
 #include <unistd.h>
+#include <stdlib.h>
 #include <signal.h>
 #include <boost/bind.hpp>
 
@@ -67,8 +69,30 @@ static void signal_handler(int sig)
 
 int main()
 {
-    setLogLevel(Debug);
 
+    //config
+    std::string configeFile = "/home/li/TinyWeb/TinyWeb.conf";
+    setConfigerFile(configeFile);
+    if (!loadConfig())
+        std::cout << "load config failly\n";
+
+    //log
+    std::string loglevel = getConfigValue("loglevel");
+    std::string logpath = getConfigValue("logpath");
+    std::string debugfile = logpath + getConfigValue("debugfile");
+    std::string infofile = logpath + getConfigValue("infofile");
+    std::string warnfile = logpath + getConfigValue("warnfile");
+    std::string errorfile = logpath + getConfigValue("errorfile");
+    std::string fatalfile = logpath + getConfigValue("fatalfile");
+
+    initLogger(debugfile,
+               infofile,
+               warnfile,
+               errorfile,
+               fatalfile,
+               convertStringToLoglevel(loglevel));//error used
+
+    //signal
     add_signal(SIGTERM, signal_handler);
     add_signal(SIGINT, signal_handler);
 
@@ -76,7 +100,8 @@ int main()
     g_loop->runEvery(1, boost::bind(fun1));
     g_loop->runAfter(60, boost::bind(timeout));
 
-    NetAddress address("127.0.0.1:9898");
+    int port = atoi(getConfigValue("listen").c_str());
+    NetAddress address(port);
     Protocol *prot = new WebProtocol();
     Server server(g_loop, address, prot);
 

@@ -71,8 +71,9 @@ bool Configer::m_fParseLine(std::string &s,
 
     if (argv.size() == 2)
     {
-        value.resize(argv[1].size());
-        transform(argv[1].begin(), argv[1].end(), value.begin(), tolower);
+        value = argv[1];
+        // value.resize(argv[1].size());
+        // transform(argv[1].begin(), argv[1].end(), value.begin(), tolower);
     }
 
     return true;
@@ -81,7 +82,7 @@ bool Configer::m_fParseLine(std::string &s,
 Configer::Configer()
 {
     m_fInit();
-    LOG(Debug) << "class Configer constructor\n";
+    // LOG(Debug) << "class Configer constructor\n";
 }
 
 void Configer::setConfigerFile(const std::string &file)
@@ -128,5 +129,5 @@ std::string Configer::getConfigValue(const std::string &key)
 
 Configer::~Configer()
 {
-    LOG(Debug) << "class Configer destructor\n";
+    // LOG(Debug) << "class Configer destructor\n";
 }

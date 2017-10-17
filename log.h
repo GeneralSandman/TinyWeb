@@ -10,7 +10,7 @@
 ****************************************
 *
 */
- 
+
 #ifndef LOG_H
 #define LOG_H
 
@@ -20,10 +20,12 @@
 typedef enum log_level {
   Debug = 0,
   Info,
-  Warning,
+  Warn,
   Error,
   Fatal
 } log_level;
+
+log_level convertStringToLoglevel(const std::string &);
 
 void initLogger(const std::string &debug_log_filename,
                 const std::string &info_log_filename,

@@ -10,13 +10,41 @@
 ****************************************
 *
 */
- 
+
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
 #include <memory>
+#include <string>
+#include <algorithm>
 
 #include "log.h"
+
+log_level convertStringToLoglevel(const std::string &s)
+{
+    std::string tmp;
+    transform(s.begin(), s.end(), tmp.begin(), tolower);
+    if ("debug" == tmp)
+    {
+        return Debug;
+    }
+    else if ("info" == tmp)
+    {
+        return Info;
+    }
+    else if ("warn" == tmp)
+    {
+        return Warn;
+    }
+    else if ("Error" == tmp)
+    {
+        return Error;
+    }
+    else if ("Fatal" == tmp)
+    {
+        return Fatal;
+    }
+}
 
 std::ofstream Logger::m_nNullStream(0);
 
@@ -69,7 +97,7 @@ std::ostream &Logger::getStream(log_level level)
             return std::cout;
         }
     }
-    else if (Warning == level)
+    else if (Warn == level)
     {
         if (m_nWarnLogFile.is_open())
         {
@@ -125,8 +153,8 @@ std::ostream &Logger::log(log_level level,
     case Info:
         level_string = "Info";
         break;
-    case Warning:
-        level_string = "Warning";
+    case Warn:
+        level_string = "Warn";
         break;
     case Error:
         level_string = "Error";

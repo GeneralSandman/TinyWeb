@@ -27,7 +27,7 @@
 
 
 > # 一、TinyWeb配置方法
-名称不区分大小写，数值区分;#开头为注释行
+名称不区分大小写，数值区分大小写;#开头为注释行
 |名称|含义|
 |-|-|
 |listen|监听端口|
@@ -54,11 +54,13 @@
 - client 如果没有足够的内存接受数据，connection会一直存在（不属于bug）
 - Semphore
 - SharedMemory
-- parser 可以精确地识别出路径名，和url（需要更加健壮）
+- parser 可以精确地识别出路径名，和url（需要更加健壮）(应用正则表达式验证正确性)
 - Connection::shutdownWrite应该也要销毁部分资源？？？？？
 - distingush HttpRequset & TcpConnection
 - 一段时间内，多个http request可能使用一个TcpConnection
 - 所以生命周期：TcpConnection>HttpRequest
+- 增加HttpResponse&HttpRequest
+- 应该为维护一个map集合<连接，请求内容>
 
 bug
 - server写完文件之后如果关闭写端口则不能监听connectionlost 事件
@@ -70,11 +72,10 @@ bug
 - 完成muduo的相关功能
 - 实现进程池
 - 实现红黑树，set集合
-- 
 
 
 
-> 1.如何进行测试
+> # 1.如何进行测试
 
 server_test 监听80端口，600s后终止程序
 ```
@@ -90,7 +91,7 @@ python client.py 9090 139.199.13.50 80
 
 > # 2.如何启动
 
-- 直接启动，默认配置文件为```/TinyWeb.conf```，该文件不存在，或格式错误时返回错误
+- 直接启动，默认配置文件为```/TinyWeb.conf```，该文件不存在，或格式错误时均返回错误
 ```
 sudo ./TinyWeb
 ```
@@ -104,6 +105,7 @@ sudo ./TinyWeb -c /home/li/TinyWeb.conf
 ------------------
 
 > # 1.Configer的使用方法
+
 - 获得Configer实例（配置项还未加载，需调用loadConfig()）
 ```
 Configer &getConfigerInstance(const std::string file = "")

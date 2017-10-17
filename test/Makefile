@@ -41,6 +41,8 @@ buffer_test:buffer_test.o $(lib.o)
 	$(link) buffer_test buffer_test.o $(lib.o) -lpthread
 parser_test:parser_test.o $(lib.o)
 	$(link) parser_test parser_test.o $(lib.o) -lpthread
+log_test:log_test.o
+	$(link) log_test log_test.o log.o
 
 
 
@@ -74,6 +76,8 @@ buffer_test.o:buffer_test.cc
 	$(gcc11) buffer_test.cc
 parser_test.o:parser_test.cc
 	$(gcc11) parser_test.cc
+log_test.o:log_test.cc
+	$(gcc11) log_test.cc
 
 
 

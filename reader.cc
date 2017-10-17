@@ -39,7 +39,7 @@ Reader::Reader(const std::string &file)
 {
     m_nFile = file;
     m_fInit();
-    LOG(Debug) << "class Reader constructor\n";
+    // LOG(Debug) << "class Reader constructor\n";
 }
 
 void Reader::setFile(const std::string &f)
@@ -69,5 +69,5 @@ Reader::~Reader()
 {
     m_nFileStream.close();
 
-    LOG(Debug) << "class Reader destructor\n";
+    // LOG(Debug) << "class Reader destructor\n";
 }
