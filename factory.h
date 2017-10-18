@@ -35,11 +35,6 @@ private:
 public:
   Factory(const Protocol &prot);
 
-  // void doStart();
-  // void doStop();
-  // void startFactory();
-  // void stopFactory();
-
   ConnectionCallback connectCallback()
   {
     return ConnectionCallback(boost::bind(&Factory::createConnection,
@@ -64,7 +59,7 @@ public:
                   Time time);
   void lostConnection(Connection *con);
 
-  virtual void buildProtocol();
+  virtual void buildProtocol(Protocol *newProt);
   // {
   //can be override
   // }

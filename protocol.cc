@@ -15,17 +15,27 @@
 #include "connection.h"
 #include "log.h"
 
-//----------Protocol api----------//
-// Protocol::Protocol()
-// {
-//     LOG(Debug) << "class Protocol constructor\n";
-// }
+std::string
+getName(const Protocol *p)
+{
+    std::stringstream s;
+    s << typeid(*p).name();
+    std::string tmp(s.str().c_str());
 
-// Protocol::~Protocol()
-// {
-//     LOG(Debug) << "class Protocol destructor\n";
-// }
+    std::string res;
+    for (int i = 0; i < tmp.size(); i++)
+        if (!(tmp[i] >= 48 && tmp[i] <= 57))
+            res += tmp[i];
+    return res;
+}
 
+//----------Reflect api----------//
+std::map<std::string, createProtocol> Reflect::m_nProts;
+
+Protocol *getInstanceByPointer(const Protocol *p)
+{
+    return Reflect::getReflectInstance().getProtocolByName(getName(p));
+}
 //----------Protocol api----------//
 Protocol::Protocol()
 {
@@ -75,6 +85,8 @@ Protocol::~Protocol()
     LOG(Debug) << "class Protocol destructor\n";
 }
 
+RegistProtocol(Protocol);
+
 //------DiscardProtocol api-------------//
 DiscardProtocol::DiscardProtocol()
 {
@@ -100,6 +112,8 @@ DiscardProtocol::~DiscardProtocol()
 {
     LOG(Debug) << "class DiscardProtocol destructor\n";
 }
+
+RegistProtocol(DiscardProtocol);
 
 //------EchoProtocol api-------------//
 EchoProtocol::EchoProtocol()
@@ -129,21 +143,23 @@ EchoProtocol::~EchoProtocol()
     LOG(Debug) << "class EchoProtocol destructor\n";
 }
 
+RegistProtocol(EchoProtocol);
+
 //--------WebProtocol api-------------//
 WebProtocol::WebProtocol()
 {
     LOG(Debug) << "class WebProtocol constructor\n";
 }
 
-void WebProtocol::m_fResponse(Connection *con, struct HttpRequest &request)
+void WebProtocol::m_fResponse(struct HttpRequest &request)
 {
     std::string h = "HTTP/1.0 200 OK\r\n";
     std::string c = "Content-Type: text/html\r\n\r\n";
     std::string html = "hello world";
 
     std::string res = h + c + html;
-    con->send(res);
-    con->shutdownWrite();
+    sendMessage(res);
+    m_pConnection->shutdownWrite();
     //If we don't close this connection,
     //the html can't be showed in browser.
     //[Http protocol]
@@ -151,37 +167,31 @@ void WebProtocol::m_fResponse(Connection *con, struct HttpRequest &request)
     printHttpRequest(request);
 }
 
-void WebProtocol::connectionMade(Connection *con)
+void WebProtocol::connectionMade()
 {
-    std::cout << "(WebProtocol) "
+    std::cout << "[WebProtocol] "
               << "get a new connection\n";
 }
 
-void WebProtocol::dataReceived(Connection *con, Buffer *input, Time time)
+void WebProtocol::dataReceived(const std::string &data)
 {
-    std::cout << "(WebProtocol) "
+    std::cout << "[WebProtocol] "
               << "get a new message\n";
     //class Parser to parse the data received;
 
     std::string line;
     int i = 0;
     struct HttpRequest request;
-
-    while (input->getALine(line))
+    // std::cout << i++ << "-" << line << "-\n";
+    if (m_nParser.parseRequestLine(data, request))
     {
-        // std::cout << i++ << "-" << line << "-\n";
-        if (m_nParser.parseRequestLine(line, request))
-        {
-            m_fResponse(con, request);
-        }
-
-        line = "";
+        m_fResponse(request);
     }
 }
 
-void WebProtocol::connectionLost(Connection *con)
+void WebProtocol::connectionLost()
 {
-    std::cout << "(WebProtocol) "
+    std::cout << "[WebProtocol] "
               << "lost a connection\n";
 }
 
@@ -189,3 +199,5 @@ WebProtocol::~WebProtocol()
 {
     LOG(Debug) << "class WebProtocol destructor\n";
 }
+
+RegistProtocol(WebProtocol);

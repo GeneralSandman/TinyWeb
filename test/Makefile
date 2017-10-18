@@ -43,6 +43,8 @@ parser_test:parser_test.o $(lib.o)
 	$(link) parser_test parser_test.o $(lib.o) -lpthread
 log_test:log_test.o
 	$(link) log_test log_test.o log.o
+protocol_test:protocol_test.o
+	$(link) protocol_test protocol_test.o $(lib.o) -lpthread
 test:test.o $(lib.o)
 	$(link) test test.o $(lib.o) -lpthread
 
@@ -80,6 +82,8 @@ parser_test.o:parser_test.cc
 	$(gcc11) parser_test.cc
 log_test.o:log_test.cc
 	$(gcc11) log_test.cc
+protocol_test.o:protocol_test.cc
+	$(gcc11) protocol_test.cc
 test.o:test.cc
 	$(gcc11) test.cc
 

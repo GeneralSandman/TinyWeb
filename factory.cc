@@ -28,12 +28,13 @@ void Factory::createConnection(Connection *newCon)
 {
     //It's used by Server
     //can't be override
-    Protocol *newProt = new EchoProtocol();//FIXME:
-    newProt->m_pConnection = newCon;
-    newProt->m_nNumber = (++m_nNumProts);
+    Protocol *newProt = getInstanceByPointer(m_pProtocol); //FIXME:
     newProt->m_pFactory = this;
+    newProt->m_nNumber = (++m_nNumProts);
+    newProt->m_pConnection = newCon;
     m_nProtocols[newCon] = newProt;
     newProt->makeConnection();
+    buildProtocol(newProt);
 }
 
 void Factory::getMessage(Connection *con,
@@ -45,7 +46,8 @@ void Factory::getMessage(Connection *con,
     auto p = m_nProtocols.find(con);
     if (p != m_nProtocols.end())
     {
-        std::string line = input->getAll();
+        std::string line;
+        input->getALine(line);
         Protocol *prot = p->second;
         prot->getMessage(line);
     }
@@ -66,7 +68,7 @@ void Factory::lostConnection(Connection *con)
     }
 }
 
-void Factory::buildProtocol()
+void Factory::buildProtocol(Protocol *newProt)
 {
     // can be override
 }
