@@ -67,6 +67,16 @@ bug
 - web浏览器在server还没有shutdownWrite的时候不能呈现html页面
 - 其实shutdown也属于关闭连接
 - 一个类管理上下文，Factory管理这些类
+- Factory::bulidProtocol 产生一个逻辑连接类,并管理这些连接类
+- distingush Protocol & Connection
+    - Protocol 用来处理用户逻辑，简单的维护用户上下文，不负责数据传输，
+        通过简单的重载basic Protocol的共有函数来实现处理Connection读到
+        Buffer中的数据。
+    - Connection 用来与底层的IO-Multiplexing 进行交互，负责数据的传输，
+        维护者数据缓冲，监听着各种连接事件
+    - 简单来说：Connection负责数据传输，不处理用户逻辑；Protocol不处理数据传输，
+     负责处理逻辑
+
 国庆学习计划
 - 入门negix
 - 完成muduo的相关功能

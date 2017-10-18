@@ -12,14 +12,38 @@
 */
 
 #include "factory.h"
+#include "protocol.h"
 #include "log.h"
 
-Factory::Factory()
+//---ServerFactory api--------------//
+ServerFactory::ServerFactory()
 {
-    LOG(Debug) << "class Factory constructor\n";
+    LOG(Debug) << "class ServerFactory constructor\n";
 }
 
-Factory::~Factory()
+ServerFactory::~ServerFactory()
 {
-    LOG(Debug) << "class Factory destructor\n";
+    LOG(Debug) << "class ServerFactory destructor\n";
+}
+
+//---EchoServerFactory api--------------//
+EchoServerFactory::EchoServerFactory()
+{
+    LOG(Debug) << "class EchoServerFactory constructor\n";
+}
+
+EchoServerFactory::~EchoServerFactory()
+{
+    LOG(Debug) << "class EchoServerFactory destructor\n";
+}
+
+//---WebServerFactory api--------------//
+WebServerFactory::WebServerFactory()
+{
+    LOG(Debug) << "class WebServerFactory constructor\n";
+}
+
+WebServerFactory::~WebServerFactory()
+{
+    LOG(Debug) << "class WebServerFactory destructor\n";
 }
