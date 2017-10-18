@@ -12,13 +12,14 @@
 */
 
 #include "factory.h"
+#include "buffer.h"
 #include "protocol.h"
 #include "log.h"
 
 //---Factory api--------------//
 Factory::Factory(const Protocol &prot)
     : m_nNumProts(0),
-      m_nProtocol(prot)
+      m_pProtocol(&prot)
 {
     LOG(Debug) << "class Factory constructor\n";
 }
@@ -27,7 +28,7 @@ void Factory::createConnection(Connection *newCon)
 {
     //It's used by Server
     //can't be override
-    Protocol *newProt = new Protocol();
+    Protocol *newProt = new EchoProtocol();//FIXME:
     newProt->m_pConnection = newCon;
     newProt->m_nNumber = (++m_nNumProts);
     newProt->m_pFactory = this;
@@ -36,7 +37,7 @@ void Factory::createConnection(Connection *newCon)
 }
 
 void Factory::getMessage(Connection *con,
-                         Buffer *buf,
+                         Buffer *input,
                          Time time)
 {
     //It's used by Server
@@ -44,8 +45,9 @@ void Factory::getMessage(Connection *con,
     auto p = m_nProtocols.find(con);
     if (p != m_nProtocols.end())
     {
+        std::string line = input->getAll();
         Protocol *prot = p->second;
-        prot->getMessage();
+        prot->getMessage(line);
     }
 }
 
@@ -64,7 +66,7 @@ void Factory::lostConnection(Connection *con)
     }
 }
 
-Protocol *Factory::buildProtocol()
+void Factory::buildProtocol()
 {
     // can be override
 }

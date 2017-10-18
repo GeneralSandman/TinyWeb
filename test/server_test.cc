@@ -107,7 +107,7 @@ int main()
     // int port = atoi(getConfigValue("listen").c_str());
     NetAddress address("127.0.0.1:9898");
 
-    NewProtocol prot;
+    EchoProtocol prot;
     Factory *factory = new Factory(prot);
     Server server(g_loop, address, factory);
 

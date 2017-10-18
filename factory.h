@@ -28,7 +28,8 @@ class Factory
 {
 private:
   int m_nNumProts;
-  Protocol m_nProtocol;
+  const Protocol *m_pProtocol;
+  const std::string m_nProtocolName;
   std::map<Connection *, Protocol *> m_nProtocols;
 
 public:

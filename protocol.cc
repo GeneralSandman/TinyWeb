@@ -12,6 +12,7 @@
 */
 
 #include "protocol.h"
+#include "connection.h"
 #include "log.h"
 
 //----------Protocol api----------//
@@ -31,21 +32,16 @@ Protocol::Protocol()
     LOG(Debug) << "class Protocol constructor\n";
 }
 
-Protocol::Protocol(const Protocol &p)
-{
-    LOG(Debug) << "class Protocol constructor\n";
-}
-
 void Protocol::makeConnection()
 {
     //It is used by Factory
     connectionMade();
 }
 
-void Protocol::getMessage()
+void Protocol::getMessage(const std::string &data)
 {
     //It is used by Factory
-    dataReceived();
+    dataReceived(data);
 }
 
 void Protocol::loseConnection()
@@ -54,22 +50,24 @@ void Protocol::loseConnection()
     connectionLost();
 }
 
+void Protocol::sendMessage(const std::string &data)
+{
+    m_pConnection->send(data);
+}
+
 void Protocol::connectionMade()
 {
     //It can be override
-    std::cout << "++++new Connection++++" << std::endl;
 }
 
-void Protocol::dataReceived()
+void Protocol::dataReceived(const std::string &data)
 {
     //It can be override
-    std::cout << "++++get message++++" << std::endl;
 }
 
 void Protocol::connectionLost()
 {
     //It can be override
-    std::cout << "++++lost Connection++++" << std::endl;
 }
 
 Protocol::~Protocol()
@@ -77,28 +75,53 @@ Protocol::~Protocol()
     LOG(Debug) << "class Protocol destructor\n";
 }
 
-//++++++++--EchoProtocol api-------------//
+//------DiscardProtocol api-------------//
+DiscardProtocol::DiscardProtocol()
+{
+    LOG(Debug) << "class DiscardProtocol constructor\n";
+}
+
+void DiscardProtocol::connectionMade()
+{
+    std::cout << "[Discard] new connection\n";
+}
+
+void DiscardProtocol::dataReceived(const std::string &)
+{
+    std::cout << "[Discard] data redeived\n";
+}
+
+void DiscardProtocol::connectionLost()
+{
+    std::cout << "[Discard] lost connection\n";
+}
+
+DiscardProtocol::~DiscardProtocol()
+{
+    LOG(Debug) << "class DiscardProtocol destructor\n";
+}
+
+//------EchoProtocol api-------------//
 EchoProtocol::EchoProtocol()
+    : Protocol()
 {
     LOG(Debug) << "class EchoProtocol constructor\n";
 }
 
-void EchoProtocol::connectionMade(Connection *con)
+void EchoProtocol::connectionMade()
 {
-    std::cout << "(EchoProtocol) "
-              << "get a new connection\n";
+    std::cout << "[Echo] new Connection\n";
 }
 
-void EchoProtocol::dataReceived(Connection *con, Buffer *input, Time time)
+void EchoProtocol::dataReceived(const std::string &data)
 {
-    std::cout << "(EchoProtocol) "
-              << "get a new message\n";
+    std::cout << "[Echo] get data:" << data << "\n";
+    sendMessage(data);
 }
 
-void EchoProtocol::connectionLost(Connection *con)
+void EchoProtocol::connectionLost()
 {
-    std::cout << "(EchoProtocol) "
-              << "lost a connection\n";
+    std::cout << "[Echo] lost Connection\n";
 }
 
 EchoProtocol::~EchoProtocol()

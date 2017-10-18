@@ -38,7 +38,9 @@
 #include "log.h"
 
 #include <iostream>
+#include <sstream>
 #include <boost/bind.hpp>
+#include <typeinfo>
 
 class Connection;
 class Buffer;
@@ -90,6 +92,25 @@ class Buffer;
 // };
 
 class Factory;
+class Protocol;
+
+// class Reflect
+// {
+
+// };
+
+std::string getName(Protocol *p)
+{
+  std::stringstream s;
+  s << std::typeid(*p).name();
+  std::string tmp(s.str().c_str());
+
+  std::string res;
+  for (int i = 0; i < tmp.size(); i++)
+    if (!(tmp[i] >= 48 && tmp[i] <= 57))
+      res += tmp[i];
+  return res;
+}
 
 class Protocol
 {
@@ -98,17 +119,33 @@ private:
   int m_nNumber;
   Connection *m_pConnection;
 
+  // virtual Protocol *get
+
 public:
   Protocol();
-  Protocol(const Protocol &);
   void makeConnection();
-  void getMessage();
+  void getMessage(const std::string &);
   void loseConnection();
+
+  void sendMessage(const std::string &);
+
   virtual void connectionMade();
-  virtual void dataReceived();
+  virtual void dataReceived(const std::string &);
   virtual void connectionLost();
-  ~Protocol();
+  virtual ~Protocol();
+
   friend class Factory;
+};
+
+/*-------DiscardProtocol------------*/
+class DiscardProtocol : public Protocol
+{
+public:
+  DiscardProtocol();
+  virtual void connectionMade();
+  virtual void dataReceived(const std::string &);
+  virtual void connectionLost();
+  virtual ~DiscardProtocol();
 };
 
 /*-------EchoProtocol------------*/
@@ -116,9 +153,9 @@ class EchoProtocol : public Protocol
 {
 public:
   EchoProtocol();
-  void connectionMade(Connection *con);
-  void dataReceived(Connection *con, Buffer *input, Time time);
-  void connectionLost(Connection *con);
+  virtual void connectionMade();
+  virtual void dataReceived(const std::string &);
+  virtual void connectionLost();
   virtual ~EchoProtocol();
 };
 
@@ -132,9 +169,9 @@ private:
 
 public:
   WebProtocol();
-  void connectionMade(Connection *con);
-  void dataReceived(Connection *con, Buffer *input, Time time);
-  void connectionLost(Connection *con);
+  virtual void connectionMade(Connection *con);
+  virtual void dataReceived(Connection *con, Buffer *input, Time time);
+  virtual void connectionLost(Connection *con);
   virtual ~WebProtocol();
 };
 
