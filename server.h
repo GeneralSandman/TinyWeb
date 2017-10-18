@@ -26,7 +26,7 @@
 
 class EventLoop;
 class Connection;
-class Protocol;
+class Factory;
 
 class Server
 {
@@ -41,13 +41,13 @@ private:
   MessageCallback m_nMessageCallback;
   CloseCallback m_nCloseCallback;
 
-  Protocol *m_pProtocol;
+  Factory *m_pFactory;
 
   void m_fHandleRead(int, const NetAddress &);
   void m_fHandleClose(Connection *);
 
 public:
-  Server(EventLoop *, const NetAddress &, Protocol *);
+  Server(EventLoop *, const NetAddress &, Factory *);
   void setConenctCallback(ConnectionCallback c)
   {
     m_nConnectCallback = c;

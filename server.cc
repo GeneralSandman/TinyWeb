@@ -13,7 +13,7 @@
 
 #include "server.h"
 #include "connection.h"
-#include "protocol.h"
+#include "factory.h"
 #include "log.h"
 #include "api.h"
 
@@ -47,21 +47,21 @@ void Server::m_fHandleClose(Connection *con)
     m_nConnections.erase(p);
 }
 
-Server::Server(EventLoop *loop, const NetAddress &address, Protocol *prot)
+Server::Server(EventLoop *loop, const NetAddress &address, Factory *prot)
     : m_nStarted(false),
       m_nConNum(0),
       m_nListenAddress(address),
       m_pEventLoop(loop),
       m_nAccepter(loop, address),
-      m_pProtocol(prot)
+      m_pFactory(prot)
 {
     m_nAccepter.setConnectionCallback(
         boost::bind(&Server::m_fHandleRead, this, _1, _2));
-    if (m_pProtocol != nullptr)
+    if (m_pFactory != nullptr)
     {
-        setConenctCallback(m_pProtocol->connectCallback());
-        setMessageCallback(m_pProtocol->getMessageCallback());
-        setCloseCallback(m_pProtocol->closeConnectionCallback());
+        setConenctCallback(m_pFactory->connectCallback());
+        setMessageCallback(m_pFactory->getMessageCallback());
+        setCloseCallback(m_pFactory->closeConnectionCallback());
     }
     LOG(Debug) << "class Server constructor\n";
 }

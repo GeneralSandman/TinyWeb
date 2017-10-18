@@ -10,6 +10,7 @@
 #include "../netaddress.h"
 #include "../connection.h"
 #include "../protocol.h"
+#include "../factory.h"
 #include "../configer.h"
 #include "../buffer.h"
 #include "../time.h"
@@ -71,28 +72,31 @@ int main()
 {
 
     //config
-    std::string configeFile = "/home/li/TinyWeb/TinyWeb.conf";
-    setConfigerFile(configeFile);
-    if (!loadConfig())
-        std::cout << "load config failly\n";
+    // std::string configeFile = "/home/li/TinyWeb/TinyWeb.conf";
+    // setConfigerFile(configeFile);
+    // if (!loadConfig())
+    //     std::cout << "load config failly\n";
 
     //log
-    std::string loglevel = getConfigValue("loglevel");
-    std::string logpath = getConfigValue("logpath");
-    std::string debugfile = logpath + getConfigValue("debugfile");
-    std::string infofile = logpath + getConfigValue("infofile");
-    std::string warnfile = logpath + getConfigValue("warnfile");
-    std::string errorfile = logpath + getConfigValue("errorfile");
-    std::string fatalfile = logpath + getConfigValue("fatalfile");
+    // std::string loglevel = getConfigValue("loglevel");
+    // std::string logpath = getConfigValue("logpath");
+    // std::string debugfile = logpath + getConfigValue("debugfile");
+    // std::string infofile = logpath + getConfigValue("infofile");
+    // std::string warnfile = logpath + getConfigValue("warnfile");
+    // std::string errorfile = logpath + getConfigValue("errorfile");
+    // std::string fatalfile = logpath + getConfigValue("fatalfile");
 
-    initLogger(debugfile,
-               infofile,
-               warnfile,
-               errorfile,
-               fatalfile,
-               convertStringToLoglevel(loglevel));//error used
+    // initLogger(debugfile,
+    //            infofile,
+    //            warnfile,
+    //            errorfile,
+    //            fatalfile,
+    //            convertStringToLoglevel(loglevel)); //error used
 
     //signal
+
+    setLogLevel(Debug);
+
     add_signal(SIGTERM, signal_handler);
     add_signal(SIGINT, signal_handler);
 
@@ -100,10 +104,12 @@ int main()
     g_loop->runEvery(1, boost::bind(fun1));
     g_loop->runAfter(60, boost::bind(timeout));
 
-    int port = atoi(getConfigValue("listen").c_str());
-    NetAddress address(port);
-    Protocol *prot = new WebProtocol();
-    Server server(g_loop, address, prot);
+    // int port = atoi(getConfigValue("listen").c_str());
+    NetAddress address("127.0.0.1:9898");
+
+    NewProtocol prot;
+    Factory *factory = new Factory(prot);
+    Server server(g_loop, address, factory);
 
     // server.setConenctCallback(madeConnection);
     // server.setMessageCallback(getMessage);
@@ -112,6 +118,6 @@ int main()
 
     g_loop->loop();
     delete g_loop;
-    delete prot;
+    delete factory;
     return 0;
 }

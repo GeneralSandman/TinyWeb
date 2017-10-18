@@ -35,6 +35,7 @@
 #include "buffer.h"
 #include "time.h"
 #include "api.h"
+#include "log.h"
 
 #include <iostream>
 #include <boost/bind.hpp>
@@ -43,49 +44,71 @@ class Connection;
 class Buffer;
 
 /*----------Protocol------------*/
+// class Protocol
+// {
+// private:
+//   // Parser m_nParser;
+
+// public:
+//   Protocol();
+//   //used by server
+//   ConnectionCallback connectCallback()
+//   {
+//     return ConnectionCallback(boost::bind(&Protocol::connectionMade,
+//                                           this, _1));
+//   }
+
+//   MessageCallback getMessageCallback()
+//   {
+//     return MessageCallback(boost::bind(&Protocol::dataReceived,
+//                                        this, _1, _2, _3));
+//   }
+
+//   CloseCallback closeConnectionCallback()
+//   {
+//     return CloseCallback(boost::bind(&Protocol::connectionLost,
+//                                      this, _1));
+//   }
+
+//   //used by user
+//   virtual void connectionMade(Connection *con)
+//   {
+//     std::cout << "(base Protocol) "
+//               << "get a new connection\n";
+//   }
+//   virtual void dataReceived(Connection *con, Buffer *input, Time time)
+//   {
+//     std::cout << "(base Protocol) "
+//               << "get a new message\n";
+//   }
+//   virtual void connectionLost(Connection *con)
+//   {
+//     std::cout << "(base Protocol) "
+//               << "lost a connection\n";
+//   }
+//   virtual ~Protocol();
+// };
+
+class Factory;
+
 class Protocol
 {
 private:
-  // Parser m_nParser;
+  Factory *m_pFactory;
+  int m_nNumber;
+  Connection *m_pConnection;
 
 public:
   Protocol();
-  //used by server
-  ConnectionCallback connectCallback()
-  {
-    return ConnectionCallback(boost::bind(&Protocol::connectionMade,
-                                          this, _1));
-  }
-
-  MessageCallback getMessageCallback()
-  {
-    return MessageCallback(boost::bind(&Protocol::dataReceived,
-                                       this, _1, _2, _3));
-  }
-
-  CloseCallback closeConnectionCallback()
-  {
-    return CloseCallback(boost::bind(&Protocol::connectionLost,
-                                     this, _1));
-  }
-
-  //used by user
-  virtual void connectionMade(Connection *con)
-  {
-    std::cout << "(base Protocol) "
-              << "get a new connection\n";
-  }
-  virtual void dataReceived(Connection *con, Buffer *input, Time time)
-  {
-    std::cout << "(base Protocol) "
-              << "get a new message\n";
-  }
-  virtual void connectionLost(Connection *con)
-  {
-    std::cout << "(base Protocol) "
-              << "lost a connection\n";
-  }
-  virtual ~Protocol();
+  Protocol(const Protocol &);
+  void makeConnection();
+  void getMessage();
+  void loseConnection();
+  virtual void connectionMade();
+  virtual void dataReceived();
+  virtual void connectionLost();
+  ~Protocol();
+  friend class Factory;
 };
 
 /*-------EchoProtocol------------*/

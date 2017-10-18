@@ -15,9 +15,61 @@
 #include "log.h"
 
 //----------Protocol api----------//
+// Protocol::Protocol()
+// {
+//     LOG(Debug) << "class Protocol constructor\n";
+// }
+
+// Protocol::~Protocol()
+// {
+//     LOG(Debug) << "class Protocol destructor\n";
+// }
+
+//----------Protocol api----------//
 Protocol::Protocol()
 {
     LOG(Debug) << "class Protocol constructor\n";
+}
+
+Protocol::Protocol(const Protocol &p)
+{
+    LOG(Debug) << "class Protocol constructor\n";
+}
+
+void Protocol::makeConnection()
+{
+    //It is used by Factory
+    connectionMade();
+}
+
+void Protocol::getMessage()
+{
+    //It is used by Factory
+    dataReceived();
+}
+
+void Protocol::loseConnection()
+{
+    //It is used by Factory
+    connectionLost();
+}
+
+void Protocol::connectionMade()
+{
+    //It can be override
+    std::cout << "++++new Connection++++" << std::endl;
+}
+
+void Protocol::dataReceived()
+{
+    //It can be override
+    std::cout << "++++get message++++" << std::endl;
+}
+
+void Protocol::connectionLost()
+{
+    //It can be override
+    std::cout << "++++lost Connection++++" << std::endl;
 }
 
 Protocol::~Protocol()
@@ -25,7 +77,7 @@ Protocol::~Protocol()
     LOG(Debug) << "class Protocol destructor\n";
 }
 
-//--------EchoProtocol api-------------//
+//++++++++--EchoProtocol api-------------//
 EchoProtocol::EchoProtocol()
 {
     LOG(Debug) << "class EchoProtocol constructor\n";
