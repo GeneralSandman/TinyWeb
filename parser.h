@@ -19,6 +19,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 
 enum CHECK_STATE
 {
@@ -83,7 +84,10 @@ class Parser
 class HttpParser
 {
   private:
+    std::string m_nLastOpenLine;
+
     ParseHttpResponseStatus m_nCheckStat;
+    void m_fGetRequestLines(const std::string &s, std::vector<std::string> &res, std::string &restOpenLine);
 
     bool m_fParseRequestLine(const std::string &line,
                              struct HttpRequestLine &res);
@@ -94,8 +98,8 @@ class HttpParser
 
   public:
     HttpParser();
-    bool parseRequestLine(const std::string &line,
-                          struct HttpRequest &request);
+    bool parseRequest(const std::string &data,
+                      struct HttpRequest &request);
 
     ~HttpParser();
 };

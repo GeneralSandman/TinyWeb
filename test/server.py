@@ -35,7 +35,7 @@ def webServer(ip,port):
     res = h + c + html
     conn.send(res)
 
-    sleepSecond(10)
+    sleepSecond(3)
     conn.close()    
     s.close()
 

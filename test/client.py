@@ -37,7 +37,9 @@ def webClient(localport,ip,port=80):
 
     buf =s.recv(200)
     print buf
+
+    sleepSecond(3)
     s.close()
 
 if __name__ == "__main__":
-    client(sys.argv[3], sys.argv[1], sys.argv[2])
+    webClient(sys.argv[3], sys.argv[1], sys.argv[2])

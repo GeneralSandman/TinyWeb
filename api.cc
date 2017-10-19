@@ -59,6 +59,11 @@ void setnonblocking(int sock)
     }
 }
 
+void getLines(const std::string &s,std::vector<std::string> &res, std::string &resOpenLine)
+{
+
+}
+
 std::string cstr2string(const char *str)
 {
     std::string result;

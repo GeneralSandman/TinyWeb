@@ -15,6 +15,8 @@
 #include "connection.h"
 #include "log.h"
 
+#include <vector>
+
 std::string
 getName(const Protocol *p)
 {
@@ -98,9 +100,9 @@ void DiscardProtocol::connectionMade()
     std::cout << "[Discard] new connection\n";
 }
 
-void DiscardProtocol::dataReceived(const std::string &)
+void DiscardProtocol::dataReceived(const std::string &data)
 {
-    std::cout << "[Discard] data redeived\n";
+    std::cout << "[Discard] data redeived:" << data << "\n";
 }
 
 void DiscardProtocol::connectionLost()
@@ -159,7 +161,7 @@ void WebProtocol::m_fResponse(struct HttpRequest &request)
 
     std::string res = h + c + html;
     sendMessage(res);
-    m_pConnection->shutdownWrite();
+    m_pConnection->shutdownWrite();//FIXME:
     //If we don't close this connection,
     //the html can't be showed in browser.
     //[Http protocol]
@@ -177,16 +179,14 @@ void WebProtocol::dataReceived(const std::string &data)
 {
     std::cout << "[WebProtocol] "
               << "get a new message\n";
-    //class Parser to parse the data received;
-
-    std::string line;
-    int i = 0;
     struct HttpRequest request;
-    // std::cout << i++ << "-" << line << "-\n";
-    if (m_nParser.parseRequestLine(data, request))
+    std::cout << "-" << data << "-\n";
+    if (m_nParser.parseRequest(data, request))
     {
         m_fResponse(request);
     }
+
+
 }
 
 void WebProtocol::connectionLost()

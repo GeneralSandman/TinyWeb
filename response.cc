@@ -10,3 +10,17 @@
 ****************************************
 *
 */
+
+#include "response.h"
+#include "http.h"
+#include "log.h"
+
+HttpResponse::HttpResponse()
+{
+    LOG(Debug) << "class HttpResponse constructor\n";
+}
+
+HttpResponse::~HttpResponse()
+{
+    LOG(Debug) << "class HttpResponse destructor\n";
+}

@@ -55,19 +55,13 @@
 - Semphore
 - SharedMemory
 - parser 可以精确地识别出路径名，和url（需要更加健壮）(应用正则表达式验证正确性)
-- Connection::shutdownWrite应该也要销毁部分资源？？？？？
-- distingush HttpRequset & TcpConnection
+- Connection::shutdownWrite应该也要销毁部分资源(已修复)
 - 一段时间内，多个http request可能使用一个TcpConnection
-- 所以生命周期：TcpConnection>HttpRequest
-- 增加HttpResponse&HttpRequest
-- 应该为维护一个map集合<连接，请求内容>
 - 优化logger，处理没有打开文件的异常,存在严重bug，需要重新架构
 bug
 - server写完文件之后如果关闭写端口则不能监听connectionlost 事件
 - web浏览器在server还没有shutdownWrite的时候不能呈现html页面
 - 其实shutdown也属于关闭连接
-- 一个类管理上下文，Factory管理这些类
-- Factory::bulidProtocol 产生一个逻辑连接类,并管理这些连接类
 - distingush Protocol & Connection
     - Protocol 用来处理用户逻辑，简单的维护用户上下文，不负责数据传输，
         通过简单的重载basic Protocol的共有函数来实现处理Connection读到

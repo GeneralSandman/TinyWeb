@@ -21,6 +21,7 @@ void handle_error(const char *msg);
 void handle_error_s(const std::string &msg);
 void setnonblocking(int sock);
 
+void getLines(const std::string &s, std::vector<std::string> &res, std::string &resOpenLine);
 std::string cstr2string(const char *str);
 void splitString(const std::string &, const std::string &, std::vector<std::string> &);
 void eraseSpace(std::string &);

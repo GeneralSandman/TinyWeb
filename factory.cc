@@ -46,10 +46,10 @@ void Factory::getMessage(Connection *con,
     auto p = m_nProtocols.find(con);
     if (p != m_nProtocols.end())
     {
-        std::string line;
-        input->getALine(line);
+        std::string all = input->getAll();
+        // LOG(Debug) << all << std::endl;
         Protocol *prot = p->second;
-        prot->getMessage(line);
+        prot->getMessage(all);
     }
 }
 

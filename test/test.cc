@@ -3,6 +3,7 @@
 #include <vector>
 #include <typeinfo>
 #include <sstream>
+#include <algorithm>
 
 #include "../api.h"
 #include "../protocol.h"
@@ -19,8 +20,6 @@ class D : public B
 {
 };
 
-
-
 // int len;
 // const char *str = typeid(*p).name();
 
@@ -33,8 +32,49 @@ class D : public B
 //     str++;
 // }
 
+void m_fGetLines(const std::string &s, std::vector<std::string> &res, std::string &restOpenLine)
+{
+    const char crlf[] = "\r\n";
+
+    auto search_begin = s.begin();
+    auto line_end = s.end();
+
+    while ((line_end = std::search(search_begin, s.end(), crlf, crlf + 2)) != s.end())
+    {
+        std::string tmp(search_begin, line_end);
+        res.push_back(tmp);
+        search_begin = line_end + 2;
+    }
+
+    //stroe restOpenLine
+    if (s.end() > search_begin)
+    {
+        restOpenLine.resize(s.end() - search_begin);
+        std::copy(search_begin, s.end(), restOpenLine.begin());
+    }
+}
 
 int main()
+{
+    std::string h = "HTTP/1.0 200 OK\r\n";
+    std::string c = "Content-Type: text/html\r\n\r\n";
+    std::string html = "hello world";
+
+    const std::string s = h + c + html;
+
+    std::vector<std::string> res;
+    std::string rest;
+
+    m_fGetLines(s, res, rest);
+
+    for (auto t : res)
+        cout << "-" << t << "-\n";
+    cout << rest << endl;
+
+    return 0;
+}
+
+int ____main()
 {
     D d;
     const B *p2 = &d;
