@@ -124,11 +124,25 @@ Connection::Connection(EventLoop *loop,
     LOG(Debug) << "class Connection constructor\n";
 }
 
-void Connection::send(const std::string &mes)
+void Connection::send(const std::string &message)
 {
-    if (Connected == m_nState)
+    ssize_t nwrote = 0;
+    if (!m_pChannel->isWriting() && m_nOutputBuffer.readableBytes() == 0)
     {
-        m_nOutputBuffer.append(mes);
+        nwrote = ::write(m_pChannel->getFd(), message.data(), message.size());
+        if (nwrote >= 0)
+        {
+        }
+        else
+        {
+            nwrote = 0;
+            //error
+        }
+    }
+
+    if (nwrote < message.size())
+    {
+        m_nOutputBuffer.append(message.data() + nwrote, message.size() - nwrote);
         if (!m_pChannel->isWriting())
             m_pChannel->enableWrite();
     }

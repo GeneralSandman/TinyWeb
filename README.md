@@ -71,6 +71,8 @@ bug
     - 简单来说：Connection负责数据传输，不处理用户逻辑；Protocol不处理数据传输，
      负责处理逻辑
 
+- 优化Connection::send () 如果缓冲区没有数据直接写入socket
+
 国庆学习计划
 - 入门negix
 - 完成muduo的相关功能

@@ -149,6 +149,7 @@ RegistProtocol(EchoProtocol);
 
 //--------WebProtocol api-------------//
 WebProtocol::WebProtocol()
+    : m_nResponser(this)
 {
     LOG(Debug) << "class WebProtocol constructor\n";
 }
@@ -161,12 +162,10 @@ void WebProtocol::m_fResponse(struct HttpRequest &request)
 
     std::string res = h + c + html;
     sendMessage(res);
-    m_pConnection->shutdownWrite();//FIXME:
+    m_pConnection->shutdownWrite();
     //If we don't close this connection,
     //the html can't be showed in browser.
     //[Http protocol]
-
-    printHttpRequest(request);
 }
 
 void WebProtocol::connectionMade()
@@ -180,13 +179,12 @@ void WebProtocol::dataReceived(const std::string &data)
     std::cout << "[WebProtocol] "
               << "get a new message\n";
     struct HttpRequest request;
-    std::cout << "-" << data << "-\n";
+    // std::cout << "-" << data << "-\n";
     if (m_nParser.parseRequest(data, request))
     {
-        m_fResponse(request);
+        // printHttpRequest(request);
+        m_nResponser.response(request);
     }
-
-
 }
 
 void WebProtocol::connectionLost()

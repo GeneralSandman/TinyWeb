@@ -32,6 +32,7 @@
 #include "callback.h"
 #include "connection.h"
 #include "parser.h"
+#include "responser.h"
 #include "buffer.h"
 #include "time.h"
 #include "api.h"
@@ -154,6 +155,7 @@ class WebProtocol : public Protocol
 {
 private:
   HttpParser m_nParser;
+  HttpResponser m_nResponser;
   void m_fResponse(struct HttpRequest &);
 
 public:
@@ -162,6 +164,8 @@ public:
   virtual void dataReceived(const std::string &);
   virtual void connectionLost();
   virtual ~WebProtocol();
+
+  friend class HttpResponser;
 };
 
 #endif // !PROTOCOL_H
