@@ -74,4 +74,76 @@ void printHttpResponseEntiyBody(const struct HttpResponseEntiyBody &body)
               << "\tbody:" << body.text << "\n";
 }
 
-void printHttpResponse(const struct HttpResponse &) {}
+void printHttpResponse(const struct HttpResponse &response)
+{
+    std::cout << "<--------HttpResponse------------>" << std::endl;
+    printHttpResponseStatusLine(response.line);
+    printHttpResponseHeader(response.header);
+    printHttpResponseEntiyBody(response.body);
+    std::cout << "<------------------------------->" << std::endl;
+}
+
+void convertHttpResponseStatusLineToString(const struct HttpResponseStatusLine &statusLine,
+                                           std::string &res)
+{
+    res += statusLine.version;
+    res += " ";
+    res += statusLine.statusCode;
+    res += " ";
+    res += statusLine.status;
+    res += "\r\n";
+}
+
+void convertHttpResponseHeaderToString(const struct HttpResponseHeader &header,
+                                       std::string &res)
+{
+    if (header.date != "")
+    {
+        res += "Date: ";
+        res += header.date;
+        res += "\r\n";
+    }
+
+    if (header.server != "")
+    {
+        res += "Server: ";
+        res += header.server;
+        res += "\r\n";
+    }
+
+    if (header.lastModified != "")
+    {
+        res += "Last-Modified: ";
+        res += header.lastModified;
+        res += "\r\n";
+    }
+
+    if (header.contentLength != "")
+    {
+        res += "Content-Length: ";
+        res += header.contentLength;
+        res += "\r\n";
+    }
+
+    if (header.contentType != "")
+    {
+        res += "Content-Type: ";
+        res += header.contentType;
+        res += "\r\n";
+    }
+}
+
+void convertHttpResponseEntiyBodyToString(const struct HttpResponseEntiyBody &body,
+                                          std::string &res)
+{
+    res += body.text;
+}
+
+void convertHttpResponseToString(const struct HttpResponse &response,
+                                 std::string &res)
+{
+    convertHttpResponseStatusLineToString(response.line, res);
+    convertHttpResponseHeaderToString(response.header, res);
+    res += "\r\n";
+    convertHttpResponseEntiyBodyToString(response.body, res);
+}

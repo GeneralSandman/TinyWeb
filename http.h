@@ -29,6 +29,13 @@
 
 #include <string>
 
+struct HtmlFileStatus
+{
+    std::string name;
+    long long size;
+    char lastModified[33];
+};
+
 //request
 struct HttpRequestLine
 {
@@ -96,5 +103,14 @@ void printHttpResponseStatusLine(const struct HttpResponseStatusLine &);
 void printHttpResponseHeader(const struct HttpResponseHeader &);
 void printHttpResponseEntiyBody(const struct HttpResponseEntiyBody &);
 void printHttpResponse(const struct HttpResponse &);
+
+void convertHttpResponseStatusLineToString(const struct HttpResponseStatusLine &,
+                                           std::string &);
+void convertHttpResponseHeaderToString(const struct HttpResponseHeader &,
+                                       std::string &);
+void convertHttpResponseEntiyBodyToString(const struct HttpResponseEntiyBody &,
+                                          std::string &);
+void convertHttpResponseToString(const struct HttpResponse &,
+                                 std::string &);
 
 #endif

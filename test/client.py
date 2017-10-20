@@ -30,12 +30,12 @@ def webClient(localport,ip,port=80):
     print 'server address:', s.getpeername()
 
     r1 = "GET / HTTP/1.0\r\n"
-    r2 = "Host: localhost:9595\r\n\r\n"
+    r2 = "Host: localhost:9999\r\n\r\n"
     r=r1+r2
 
     s.send(r)
 
-    buf =s.recv(200)
+    buf =s.recv(1000)
     print buf
 
     sleepSecond(3)

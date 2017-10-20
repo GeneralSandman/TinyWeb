@@ -154,20 +154,6 @@ WebProtocol::WebProtocol()
     LOG(Debug) << "class WebProtocol constructor\n";
 }
 
-void WebProtocol::m_fResponse(struct HttpRequest &request)
-{
-    std::string h = "HTTP/1.0 200 OK\r\n";
-    std::string c = "Content-Type: text/html\r\n\r\n";
-    std::string html = "hello world";
-
-    std::string res = h + c + html;
-    sendMessage(res);
-    m_pConnection->shutdownWrite();
-    //If we don't close this connection,
-    //the html can't be showed in browser.
-    //[Http protocol]
-}
-
 void WebProtocol::connectionMade()
 {
     std::cout << "[WebProtocol] "
@@ -179,7 +165,7 @@ void WebProtocol::dataReceived(const std::string &data)
     std::cout << "[WebProtocol] "
               << "get a new message\n";
     struct HttpRequest request;
-    // std::cout << "-" << data << "-\n";
+    std::cout << "-" << data << "-\n";
     if (m_nParser.parseRequest(data, request))
     {
         // printHttpRequest(request);

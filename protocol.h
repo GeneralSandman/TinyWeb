@@ -156,7 +156,6 @@ class WebProtocol : public Protocol
 private:
   HttpParser m_nParser;
   HttpResponser m_nResponser;
-  void m_fResponse(struct HttpRequest &);
 
 public:
   WebProtocol();
