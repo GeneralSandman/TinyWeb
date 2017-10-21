@@ -33,6 +33,7 @@ struct HtmlFileStatus
 {
     std::string name;
     long long size;
+    std::string contentType;
     char lastModified[33];
 };
 

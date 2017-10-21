@@ -45,23 +45,46 @@ bool setStatus(const std::string &file, struct HtmlFileStatus &res)
     *(head++) = '\0'; // very very important
     ////////
     struct stat sbuf;
-    Stat(filename, &sbuf);
+    if (stat(filename, &sbuf) < 0)
+    {
+        std::cout << "can't find this file\n";
+        return false;
+    }
     if (!S_ISREG(sbuf.st_mode))
         return false;
 
     res.size = sbuf.st_size;
+    res.contentType = getType(file);
     convertToStr(&sbuf.st_mtim.tv_sec, res.lastModified, 33, true);
 
     return true;
 }
 
-void HttpResponser::m_fCreateResponse(const struct HttpRequest &request,
+std::string getType(const std::string &f)
+{
+    std::string res;
+    int flag = 0;
+    bool findPoint = false;
+    for (int i = f.size() - 1; i >= 0; i--)
+    {
+        if (f[i] == '.')
+        {
+            findPoint = true;
+            break;
+        }
+        res = f[i] + res;
+    }
+    if (!findPoint)
+        res = "";
+    return res;
+}
+
+bool HttpResponser::m_fCreateResponse(const struct HttpRequest &request,
                                       struct HttpResponse &response)
 {
-    std::string docs = "../www";
+    std::string docs = "/home/li/TinyWeb/www";
     std::string file = docs + request.line.url;
-    // std::string file = docs + "/404/404.html";
-    
+
     struct HtmlFileStatus fileStatus;
     if (setStatus(file, fileStatus))
     {
@@ -75,7 +98,19 @@ void HttpResponser::m_fCreateResponse(const struct HttpRequest &request,
         response.header.server = "ubuntu";
         response.header.lastModified = fileStatus.lastModified;
         response.header.contentLength = std::to_string(fileStatus.size);
-        response.header.contentType = "text/html";
+
+        if (fileStatus.contentType == "html")
+        {
+            response.header.contentType = "text/html";
+        }
+        else if (fileStatus.contentType == "js")
+        {
+            response.header.contentType = "application/javascript";
+        }
+        else if (fileStatus.contentType == "css")
+        {
+            response.header.contentType = "text/css";
+        }
 
         //
         int filefd = Open(file.c_str(), O_RDONLY, 0);
@@ -84,6 +119,24 @@ void HttpResponser::m_fCreateResponse(const struct HttpRequest &request,
         response.body.text.resize(fileStatus.size);
         std::copy(srcp, srcp + fileStatus.size, response.body.text.begin());
         Munmap(srcp, fileStatus.size);
+    }
+
+    else
+    {
+        //
+        response.line.version = "HTTP/1.1";
+        response.line.statusCode = "200";
+        response.line.status = "OK";
+
+        //
+        response.header.date = "test local time";
+        response.header.server = "ubuntu";
+        response.header.lastModified = "----";
+        response.header.contentLength = "----";
+
+        response.header.contentType = "text";
+
+        response.body.text = "default content";
     }
 }
 

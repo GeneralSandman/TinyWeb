@@ -18,6 +18,7 @@
 
 void convertToStr(const time_t *src, char *buf, int size, bool isLocal);
 bool setStatus(const std::string &file, struct HtmlFileStatus &res);
+std::string getType(const std::string &f);
 
 class WebProtocol;
 
@@ -26,7 +27,7 @@ class HttpResponser
 private:
   WebProtocol *m_pProtocol;
 
-  void m_fCreateResponse(const struct HttpRequest &, struct HttpResponse &);
+  bool m_fCreateResponse(const struct HttpRequest &, struct HttpResponse &);
   void m_fSendResponse(const struct HttpResponse &);
 
   size_t m_fGetFileSize(const std::string &f);
