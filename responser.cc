@@ -94,14 +94,15 @@ bool HttpResponser::m_fCreateResponse(const struct HttpRequest &request,
         response.line.status = "OK";
 
         //
-        response.header.date = "test local time";
+        response.header.date = fileStatus.lastModified;
         response.header.server = "ubuntu";
         response.header.lastModified = fileStatus.lastModified;
         response.header.contentLength = std::to_string(fileStatus.size);
+        response.header.connection = "Keep-Alive";
 
         if (fileStatus.contentType == "html")
         {
-            response.header.contentType = "text/html";
+            response.header.contentType = "text/html;charset=utf-8";
         }
         else if (fileStatus.contentType == "js")
         {
@@ -135,6 +136,7 @@ bool HttpResponser::m_fCreateResponse(const struct HttpRequest &request,
         response.header.contentLength = "----";
 
         response.header.contentType = "text";
+        response.header.connection = "keep-alive";
 
         response.body.text = "default content";
     }
@@ -158,10 +160,11 @@ void HttpResponser::response(const struct HttpRequest &request)
     struct HttpResponse resp;
     m_fCreateResponse(request, resp);
     m_fSendResponse(resp);
-    m_pProtocol->m_pConnection->shutdownWrite(); //FIXME:
+    // m_pProtocol->m_pConnection->shutdownWrite(); //FIXME:
+    // m_pProtocol->m_pConnection->shutdownWrite(); //FIXME:
 
-    printHttpRequest(request);
-    printHttpResponse(resp);
+    // printHttpRequest(request);
+    // printHttpResponse(resp);
 }
 
 HttpResponser::~HttpResponser()

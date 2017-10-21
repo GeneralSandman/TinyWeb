@@ -29,17 +29,19 @@ def webClient(localport,ip,port=80):
     s.connect((ip, int(port)))
     print 'server address:', s.getpeername()
 
-    r1 = "GET / HTTP/1.0\r\n"
+    r1 = "GET /index.html HTTP/1.1\r\n"
     r2 = "Host: localhost:9999\r\n\r\n"
+    r3="connection: keep-alive"
     r=r1+r2
 
-    s.send(r)
+    for num in range(1,1000):
+        s.send(r)
+        buf =s.recv(5000)
+        # print len(buf)
+        print num
+        # s.close()
 
-    buf =s.recv(1000)
-    print buf
 
-    sleepSecond(3)
-    s.close()
 
 if __name__ == "__main__":
     webClient(sys.argv[3], sys.argv[1], sys.argv[2])

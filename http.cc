@@ -65,7 +65,8 @@ void printHttpResponseHeader(const struct HttpResponseHeader &header)
               << "\tserver:" << header.server << "\n"
               << "\tlastModified:" << header.lastModified << "\n"
               << "\tcontentLength:" << header.contentLength << "\n"
-              << "\tcontentType:" << header.contentType << "\n";
+              << "\tcontentType:" << header.contentType << "\n"
+              << "\tconnection:" << header.connection << "\n";
 }
 
 void printHttpResponseEntiyBody(const struct HttpResponseEntiyBody &body)
@@ -120,7 +121,7 @@ void convertHttpResponseHeaderToString(const struct HttpResponseHeader &header,
 
     if (header.contentLength != "")
     {
-        res += "Content-Length: ";
+        res += "content-length: ";
         res += header.contentLength;
         res += "\r\n";
     }
@@ -129,6 +130,13 @@ void convertHttpResponseHeaderToString(const struct HttpResponseHeader &header,
     {
         res += "Content-Type: ";
         res += header.contentType;
+        res += "\r\n";
+    }
+
+    if (header.connection != "")
+    {
+        res += "connection: ";
+        res += header.connection;
         res += "\r\n";
     }
 }

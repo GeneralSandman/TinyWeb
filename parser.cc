@@ -317,10 +317,12 @@ bool HttpParser::parseRequest(const std::string &data,
 {
     // request=lines+empty_line+body
     std::vector<std::string> lines;
-    m_fGetRequestLines(data + m_nLastOpenLine, lines, m_nLastOpenLine);
+    // std::cout << "last open line:" << m_nLastOpenLine.size() << std::endl;
+    m_fGetRequestLines(data, lines, m_nLastOpenLine);
     for (auto line : lines)
     {
         // LOG(Debug) << line << std::endl;
+        // std::cout << "line:-" << line << "-\n";
 
         if (Status_ParseLine == m_nCheckStat) //line
         {
@@ -337,6 +339,7 @@ bool HttpParser::parseRequest(const std::string &data,
         }
         else if (Status_ParseHeader == m_nCheckStat) //header
         {
+
             // std::cout << "2\n";
 
             if (line != "")
@@ -368,10 +371,12 @@ bool HttpParser::parseRequest(const std::string &data,
         // std::cout << "3\n";
 
         bool res = m_fParseRequestBody(m_nLastOpenLine, request.body);
+        if (res)
+            m_nCheckStat = Status_ParseLine;
         if (!res)
             return false;
     }
-    // LOG(Debug) << m_nLastOpenLine.size() << std::endl;
+    LOG(Debug) << m_nLastOpenLine.size() << std::endl;
 }
 
 HttpParser::~HttpParser()

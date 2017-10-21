@@ -165,10 +165,11 @@ void WebProtocol::dataReceived(const std::string &data)
     std::cout << "[WebProtocol] "
               << "get a new message\n";
     struct HttpRequest request;
-    std::cout << "-" << data << "-\n";
+    // std::cout << "-" << data << "-\n";
     if (m_nParser.parseRequest(data, request))
     {
         // printHttpRequest(request);
+        printHttpRequestLine(request.line);
         m_nResponser.response(request);
     }
 }

@@ -81,6 +81,7 @@ struct HttpResponseHeader
     std::string lastModified;
     std::string contentLength;
     std::string contentType;
+    std::string connection;
 };
 
 struct HttpResponseEntiyBody
