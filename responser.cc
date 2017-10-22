@@ -126,16 +126,16 @@ bool HttpResponser::m_fCreateResponse(const struct HttpRequest &request,
     {
         //
         response.line.version = "HTTP/1.1";
-        response.line.statusCode = "200";
+        response.line.statusCode = "404";
         response.line.status = "OK";
 
         //
         response.header.date = "test local time";
         response.header.server = "ubuntu";
-        response.header.lastModified = "----";
-        response.header.contentLength = "----";
+        // response.header.lastModified = "----";
+        response.header.contentLength = "0";
 
-        response.header.contentType = "text";
+        response.header.contentType = "text/html";
         response.header.connection = "keep-alive";
 
         response.body.text = "default content";
@@ -161,7 +161,10 @@ void HttpResponser::response(const struct HttpRequest &request)
     m_fCreateResponse(request, resp);
     m_fSendResponse(resp);
     // m_pProtocol->m_pConnection->shutdownWrite(); //FIXME:
-    // m_pProtocol->m_pConnection->shutdownWrite(); //FIXME:
+    // g_loop->runAfter(60,
+                    //  boost::bind(m_pProtocol->m_pConnection->shutdownWrite()));
+    //FIXME:upgrade eventloop class as signal class paradia
+    //we will close this connection in 100 seconds
 
     // printHttpRequest(request);
     // printHttpResponse(resp);

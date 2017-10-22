@@ -156,14 +156,12 @@ WebProtocol::WebProtocol()
 
 void WebProtocol::connectionMade()
 {
-    std::cout << "[WebProtocol] "
-              << "get a new connection\n";
+    std::cout << "[WebProtocol] +++ get a new connection +++\n";
 }
 
 void WebProtocol::dataReceived(const std::string &data)
 {
-    std::cout << "[WebProtocol] "
-              << "get a new message\n";
+    // std::cout << "[WebProtocol] === get a message ===\n";
     struct HttpRequest request;
     // std::cout << "-" << data << "-\n";
     if (m_nParser.parseRequest(data, request))
@@ -176,8 +174,7 @@ void WebProtocol::dataReceived(const std::string &data)
 
 void WebProtocol::connectionLost()
 {
-    std::cout << "[WebProtocol] "
-              << "lost a connection\n";
+    std::cout << "[WebProtocol] --- lost a connection ---\n";
 }
 
 WebProtocol::~WebProtocol()
