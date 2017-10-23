@@ -12,6 +12,7 @@
 */
 
 #include "protocol.h"
+#include "factory.h"
 #include "connection.h"
 #include "log.h"
 
@@ -65,6 +66,16 @@ void Protocol::loseConnection()
 void Protocol::sendMessage(const std::string &data)
 {
     m_pConnection->send(data);
+}
+
+void Protocol::closeProtocol()
+{
+    m_pFactory->closeProtocol(this);
+}
+
+void Protocol::closeProtocolAfter(int seconds)
+{
+    m_pFactory->closeProtocolAfter(this, seconds);
 }
 
 void Protocol::connectionMade()
@@ -169,6 +180,7 @@ void WebProtocol::dataReceived(const std::string &data)
         // printHttpRequest(request);
         printHttpRequestLine(request.line);
         m_nResponser.response(request);
+        closeProtocolAfter(10);
     }
 }
 

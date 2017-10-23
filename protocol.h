@@ -117,6 +117,8 @@ public:
   void loseConnection();
 
   void sendMessage(const std::string &);
+  void closeProtocol();
+  void closeProtocolAfter(int seconds);
 
   virtual void connectionMade();
   virtual void dataReceived(const std::string &);

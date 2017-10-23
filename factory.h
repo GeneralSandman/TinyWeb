@@ -24,31 +24,37 @@
 #include <iostream>
 #include <boost/bind.hpp>
 
+class EventLoop;
+
 class Factory
 {
 private:
+  EventLoop *m_pLoop;
   int m_nNumProts;
   const Protocol *m_pProtocol;
   const std::string m_nProtocolName;
   std::map<Connection *, Protocol *> m_nProtocols;
 
 public:
-  Factory(const Protocol &prot);
+  Factory(EventLoop *m_pLoop, const Protocol &prot);
 
   ConnectionCallback connectCallback()
   {
+    //It is used by Server to set event callback;
     return ConnectionCallback(boost::bind(&Factory::createConnection,
                                           this, _1));
   }
 
   MessageCallback getMessageCallback()
   {
+    //It is used by Server to set event callback;
     return MessageCallback(boost::bind(&Factory::getMessage,
                                        this, _1, _2, _3));
   }
 
   CloseCallback closeConnectionCallback()
   {
+    //It is used by Server to set event callback;
     return CloseCallback(boost::bind(&Factory::lostConnection,
                                      this, _1));
   }
@@ -58,6 +64,9 @@ public:
                   Buffer *buf,
                   Time time);
   void lostConnection(Connection *con);
+
+  void closeProtocol(Protocol *);//used by protocol
+  void closeProtocolAfter(Protocol *, int seconds);//used by protocol
 
   virtual void buildProtocol(Protocol *newProt);
   // {

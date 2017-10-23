@@ -13,12 +13,14 @@
 
 #include "factory.h"
 #include "buffer.h"
+#include "eventloop.h"
 #include "protocol.h"
 #include "log.h"
 
 //---Factory api--------------//
-Factory::Factory(const Protocol &prot)
-    : m_nNumProts(0),
+Factory::Factory(EventLoop *loop, const Protocol &prot)
+    : m_pLoop(loop),
+      m_nNumProts(0),
       m_pProtocol(&prot)
 {
     LOG(Debug) << "class Factory constructor\n";
@@ -66,6 +68,27 @@ void Factory::lostConnection(Connection *con)
         delete prot;
         m_nProtocols.erase(p);
     }
+}
+
+void Factory::closeProtocol(Protocol *protocol)
+{
+    auto p = m_nProtocols.find(protocol->m_pConnection);
+    if (p != m_nProtocols.end())
+    {
+        Connection *con = p->first;
+        Protocol *prot = p->second;
+        
+        con->shutdownWrite();
+        prot->loseConnection();
+
+        delete prot;
+        m_nProtocols.erase(p);
+    }
+}
+
+void Factory::closeProtocolAfter(Protocol *protocol, int seconds)
+{
+    m_pLoop->runAfter(seconds, boost::bind(&Factory::closeProtocol, this, protocol));
 }
 
 void Factory::buildProtocol(Protocol *newProt)

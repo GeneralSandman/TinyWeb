@@ -6,7 +6,7 @@
 */
 
 /*---Client class---
-*
+*This class have same function like Server
 ****************************************
 *
 */

@@ -6,7 +6,7 @@
 */
 
 /*---Connector class---
-*
+*This class has same function like Accepter
 ****************************************
 *
 */
