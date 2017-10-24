@@ -101,11 +101,11 @@ int main()
     add_signal(SIGINT, signal_handler);
 
     g_loop = new EventLoop();
-    // g_loop->runEvery(1, boost::bind(fun1));
+    g_loop->runEvery(1, boost::bind(fun1));
     // g_loop->runAfter(60, boost::bind(timeout));
 
     // int port = atoi(getConfigValue("listen").c_str());
-    NetAddress address("80");
+    NetAddress address("127.0.0.1:80");
 
     WebProtocol prot;
     Factory *factory = new Factory(g_loop,prot);

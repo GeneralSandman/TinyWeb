@@ -73,6 +73,7 @@ bug
 - 添加proxy
 - add MIME type
 - 为Connection添加close()功能来作为对shutdownWrite()的补充
+- 如何支持中文url
 
 国庆学习计划
 - 入门negix

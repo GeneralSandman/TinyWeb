@@ -72,6 +72,8 @@ std::string getType(const std::string &f)
             findPoint = true;
             break;
         }
+        if (f[i] == '/')
+            break; //encounter a slash
         res = f[i] + res;
     }
     if (!findPoint)
@@ -132,6 +134,25 @@ bool HttpResponser::m_fCreateResponse(const struct HttpRequest &request,
         file = docs + request.line.url;
     else
         file = docs + vec[0];
+
+    bool findPoint = false;
+
+    for (int i = file.size(); i >= 0; i--)
+    {
+        if (file[i] == '.')
+        {
+            findPoint = true;
+            break;
+        }
+        else if (file[i] == '/')
+        {
+            break;
+        }
+    }
+
+    if (!findPoint)
+        file += "/index.html";
+
     std::cout << file << std::endl;
 
     struct HtmlFileStatus fileStatus;
