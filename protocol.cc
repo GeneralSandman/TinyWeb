@@ -160,7 +160,8 @@ RegistProtocol(EchoProtocol);
 
 //--------WebProtocol api-------------//
 WebProtocol::WebProtocol()
-    : m_nResponser(this)
+    : m_nKeepAlive(false),
+      m_nResponser(this)
 {
     LOG(Debug) << "class WebProtocol constructor\n";
 }
@@ -178,9 +179,17 @@ void WebProtocol::dataReceived(const std::string &data)
     if (m_nParser.parseRequest(data, request))
     {
         // printHttpRequest(request);
-        printHttpRequestLine(request.line);
+        // printHttpRequestLine(request.line);
         m_nResponser.response(request);
-        closeProtocolAfter(10);
+        if (request.header.connection == "keep-alive")
+            closeProtocolAfter(10);
+        else
+            closeProtocol();
+    }
+    else
+    {
+        //The request message has format error
+        closeProtocol();
     }
 }
 

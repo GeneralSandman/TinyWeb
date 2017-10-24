@@ -5,8 +5,8 @@
 *Web:www.generalsandman.cn
 */
 
-/*---XXX---
-*
+/*---Response class---
+*This class will get HttpRequest and create HttpResponse
 ****************************************
 *
 */

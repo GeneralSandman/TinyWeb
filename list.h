@@ -5,7 +5,7 @@
 *Web:www.generalsandman.cn
 */
 
-/*---XXX---
+/*---template List class---
 *
 ****************************************
 *
@@ -26,6 +26,11 @@
 #define Before 1
 
 template <typename T>
+class List;
+template <typename T>
+class ListIter;
+
+template <typename T>
 class ListNode
 {
 public:
@@ -40,17 +45,12 @@ public:
   {
     LOG(Debug) << "class ListNode constructor\n";
   }
-  ListNode *getPrev() { return m_pPrev; }
-  ListNode *getNext() { return m_pNext; }
-  T getValue() { return m_nValue; }
-
-  void setPrev(ListNode *node) { m_pPrev = node; }
-  void setNext(ListNode *node) { m_pNext = node; }
-  void setValue(const T &v) { m_nValue = v; }
   ~ListNode()
   {
     LOG(Debug) << "class ListNode destuctor\n";
   }
+  friend class List<T>;
+  friend class ListIter<T>;
 };
 
 template <typename T>
@@ -361,7 +361,7 @@ bool List<T>::getByIndex(int index, T &value)
     {
       if (i == index)
       {
-        value = next->getValue();
+        value = next->m_nValue;
         break;
       }
       i++;
@@ -387,7 +387,7 @@ bool List<T>::setByIndex(int index, const T &value)
     {
       if (i == index)
       {
-        next->setValue(value);
+        next->m_nValue = value;
         break;
       }
       i++;
@@ -419,7 +419,7 @@ bool List<T>::getByRange(std::vector<T> &res, int begin, int end)
     }
     else if (begin <= list_index && list_index < end)
     {
-      res[vector_index] = next->getValue();
+      res[vector_index] = next->m_nValue;
       vector_index++;
       list_index++;
     }

@@ -70,10 +70,9 @@ bug
 - 如何处理url中包含```../```的问题
 - 添加内存缓存 mushroom
 - 将sigil升级为一个高效的内存缓存系统，为web缓存提供帮助
+- 添加proxy
 - add MIME type
-- 由Factory提供定时关闭连接的功能
-- 升级EventLoop为单例模式，为全局提供runEvery(),runAfter()
-- 为Protocol添加定时关闭的功能，
+- 为Connection添加close()功能来作为对shutdownWrite()的补充
 
 国庆学习计划
 - 入门negix

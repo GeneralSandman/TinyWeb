@@ -79,11 +79,60 @@ std::string getType(const std::string &f)
     return res;
 }
 
+std::string getMIMEType(const std::string &type)
+{
+    std::string res;
+
+    if ("html" == type)
+    {
+        res = "text/html";
+    }
+    else if ("htm" == type)
+    {
+        res = "text/htm";
+    }
+    else if ("css" == type)
+    {
+        res = "text/css";
+    }
+    else if ("js" == type)
+    {
+        res = "application/javascript";
+    }
+    else if ("" == type)
+    {
+        res = "image/bmp";
+    }
+    else if ("" == type)
+    {
+        res = "image/gif";
+    }
+    else if ("" == type)
+    {
+        res = "image/jpeg";
+    }
+    else if ("" == type)
+    {
+        res = "image/png";
+    }
+
+    return res;
+}
+
 bool HttpResponser::m_fCreateResponse(const struct HttpRequest &request,
                                       struct HttpResponse &response)
 {
-    std::string docs = "/home/li/TinyWeb/www";
-    std::string file = docs + request.line.url;
+    std::string docs = "/home/li/TinyWeb/www/hexo";
+
+    std::vector<std::string> vec;
+    splitString(request.line.url, "?", vec);
+
+    std::string file;
+    if (vec.size() == 0)
+        file = docs + request.line.url;
+    else
+        file = docs + vec[0];
+    std::cout << file << std::endl;
 
     struct HtmlFileStatus fileStatus;
     if (setStatus(file, fileStatus))
@@ -99,19 +148,7 @@ bool HttpResponser::m_fCreateResponse(const struct HttpRequest &request,
         response.header.lastModified = fileStatus.lastModified;
         response.header.contentLength = std::to_string(fileStatus.size);
         response.header.connection = "Keep-Alive";
-
-        if (fileStatus.contentType == "html")
-        {
-            response.header.contentType = "text/html;charset=utf-8";
-        }
-        else if (fileStatus.contentType == "js")
-        {
-            response.header.contentType = "application/javascript";
-        }
-        else if (fileStatus.contentType == "css")
-        {
-            response.header.contentType = "text/css";
-        }
+        response.header.contentType = getMIMEType(fileStatus.contentType);
 
         //
         int filefd = Open(file.c_str(), O_RDONLY, 0);
@@ -123,22 +160,31 @@ bool HttpResponser::m_fCreateResponse(const struct HttpRequest &request,
     }
 
     else
-    {
+    { //haven't this file,return 404 file
         //
+        file = docs + "/404.html";
+
+        setStatus(file, fileStatus);
         response.line.version = "HTTP/1.1";
         response.line.statusCode = "404";
         response.line.status = "OK";
 
         //
-        response.header.date = "test local time";
+        response.header.date = fileStatus.lastModified;
         response.header.server = "ubuntu";
-        // response.header.lastModified = "----";
-        response.header.contentLength = "0";
+        response.header.lastModified = fileStatus.lastModified;
+        ;
+        response.header.contentLength = std::to_string(fileStatus.size);
 
         response.header.contentType = "text/html";
-        response.header.connection = "keep-alive";
+        response.header.connection = "close";
 
-        response.body.text = "default content";
+        int filefd = Open(file.c_str(), O_RDONLY, 0);
+        char *srcp = (char *)Mmap(0, fileStatus.size, PROT_READ, MAP_PRIVATE, filefd, 0); //line:netp:servestatic:mmap
+        Close(filefd);
+        response.body.text.resize(fileStatus.size);
+        std::copy(srcp, srcp + fileStatus.size, response.body.text.begin());
+        Munmap(srcp, fileStatus.size);
     }
 }
 
@@ -162,7 +208,7 @@ void HttpResponser::response(const struct HttpRequest &request)
     m_fSendResponse(resp);
     // m_pProtocol->m_pConnection->shutdownWrite(); //FIXME:
     // g_loop->runAfter(60,
-                    //  boost::bind(m_pProtocol->m_pConnection->shutdownWrite()));
+    //  boost::bind(m_pProtocol->m_pConnection->shutdownWrite()));
     //FIXME:upgrade eventloop class as signal class paradia
     //we will close this connection in 100 seconds
 

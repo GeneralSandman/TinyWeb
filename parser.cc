@@ -286,13 +286,20 @@ bool HttpParser::m_fParseRequestHeader(const std::string &line,
     if (vec.size() != 2)
         return false;
 
+    transform(vec[0].begin(), vec[0].end(), vec[0].begin(), tolower);
+    transform(vec[1].begin(), vec[1].end(), vec[1].begin(), tolower);
+
     // for (auto t : vec)
     // std::cout << t;
     // std::cout << std::endl;
 
-    if (vec[0] == "Host")
+    if (vec[0] == "host")
     {
         res.host = vec[1];
+    }
+    else if (vec[0] == "connection")
+    {
+        res.connection = vec[1];
     }
     //leave another optionFIXME:
 

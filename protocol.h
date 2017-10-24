@@ -156,6 +156,7 @@ public:
 class WebProtocol : public Protocol
 {
 private:
+  bool m_nKeepAlive;
   HttpParser m_nParser;
   HttpResponser m_nResponser;
 

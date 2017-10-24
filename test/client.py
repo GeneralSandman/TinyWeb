@@ -30,9 +30,9 @@ def webClient(localport,ip,port=80):
     print 'server address:', s.getpeername()
 
     r1 = "GET /index.html HTTP/1.1\r\n"
-    r2 = "Host: localhost:9999\r\n\r\n"
-    r3="connection: keep-alive"
-    r=r1+r2
+    r2 = "host: localhost:9999\r\n"
+    r3="connection: Close\r\n\r\n"
+    r=r1+r2+r3
 
     # for num in range(1,1000):
     s.send(r)
