@@ -35,6 +35,8 @@ reader_test:reader_test.o $(lib.o)
 	$(link) reader_test reader_test.o $(lib.o) -lpthread
 configer_test:configer_test.o $(lib.o)
 	$(link) configer_test configer_test.o $(lib.o) -lpthread
+daemon_test:daemon_test.o $(lib.o)
+	$(link) daemon_test daemon_test.o $(lib.o) -lpthread
 sharedmemory_consume_test:sharedmemory_consume_test.o $(lib.o)
 	$(link) sharedmemory_consume_test sharedmemory_consume_test.o $(lib.o) -lpthread
 sharedmemory_product_test:sharedmemory_product_test.o $(lib.o)
@@ -74,6 +76,8 @@ master_test.o:master_test.cc
 	$(gcc11) master_test.cc	
 configer_test.o:configer_test.cc
 	$(gcc11) configer_test.cc
+daemon_test.o:daemon_test.cc
+	$(gcc11) daemon_test.cc
 reader_test.o:reader_test.cc
 	$(gcc11) reader_test.cc
 sharedmemory_consume_test.o:sharedmemory_consume_test.cc

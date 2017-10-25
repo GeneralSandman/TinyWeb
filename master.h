@@ -27,6 +27,8 @@ class EventLoop;
 class Server;
 class Factory;
 
+void logSecond();
+
 class Master
 {
 private:

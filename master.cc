@@ -22,6 +22,11 @@
 
 EventLoop *Master::m_pEventLoop = nullptr;
 
+void logSecond()
+{
+    LOG(Info) << "Info--\n";
+}
+
 void Master::m_fSwitchtoDaemon()
 {
     //how to create daemon process
@@ -136,6 +141,9 @@ Master::Master(const std::string &configfile)
     m_pServer = new Server(m_pEventLoop, m_nAddress, m_pFactory);
 
     m_fInit();
+
+    m_pEventLoop->runEvery(1, boost::bind(logSecond));
+
     LOG(Debug) << "class Master constructor\n";
 }
 

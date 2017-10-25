@@ -16,7 +16,7 @@ using namespace std;
 int main(int argc, char **argv)
 {
     {
-        string config_file = "/TinyWeb.conf";
+        string config_file = "/home/li/TinyWeb/TinyWeb.conf";
         //default config file
 
         //parse arg line

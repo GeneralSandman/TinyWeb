@@ -18,9 +18,21 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#include "../server.h"
+#include "../eventloop.h"
+#include "../netaddress.h"
+#include "../connection.h"
+#include "../protocol.h"
+#include "../factory.h"
+#include "../configer.h"
+#include "../buffer.h"
+#include "../time.h"
 #include "../api.h"
+#include "../log.h"
 
 using namespace std;
+
+EventLoop *g_loop = nullptr;
 
 void m_fSwitchtoDaemon()
 {
@@ -82,9 +94,70 @@ void m_fSwitchtoDaemon()
     close(fd);
 }
 
+static void m_fSignalHandler(int sig)
+{
+    if (g_loop)
+        g_loop->quit();
+}
+
+void m_fInit()
+{
+    //first step:
+    //add signal handler
+    add_signal(SIGTERM, m_fSignalHandler);
+    add_signal(SIGINT, m_fSignalHandler);
+}
+
+void fun1()
+{
+    LOG(Info) << "info-\n";
+}
+
 int main()
 {
     m_fSwitchtoDaemon();
-    pause();
+
+    //config
+    std::string configeFile = "/home/li/TinyWeb/TinyWeb.conf";
+    setConfigerFile(configeFile);
+    loadConfig();
+
+    //log
+    std::string loglevel = getConfigValue("loglevel");
+    std::string logpath = getConfigValue("logpath");
+    std::string debugfile = logpath + getConfigValue("debugfile");
+    std::string infofile = logpath + getConfigValue("infofile");
+    std::string warnfile = logpath + getConfigValue("warnfile");
+    std::string errorfile = logpath + getConfigValue("errorfile");
+    std::string fatalfile = logpath + getConfigValue("fatalfile");
+
+    initLogger(debugfile,
+               infofile,
+               warnfile,
+               errorfile,
+               fatalfile,
+               convertStringToLoglevel(loglevel)); //error used
+
+    //signal
+
+    setLogLevel(Debug);
+
+    add_signal(SIGTERM, m_fSignalHandler);
+    add_signal(SIGINT, m_fSignalHandler);
+
+    g_loop = new EventLoop();
+    g_loop->runEvery(1, boost::bind(fun1));
+
+    NetAddress address("127.0.0.1:80");
+
+    WebProtocol prot;
+    Factory *factory = new Factory(g_loop, prot);
+    Server server(g_loop, address, factory);
+
+    server.start();
+
+    g_loop->loop();
+    delete g_loop;
+    delete factory;
     return 0;
 }
