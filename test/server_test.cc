@@ -27,29 +27,6 @@ using namespace std;
 
 EventLoop *g_loop = nullptr;
 
-void madeConnection(Connection *con)
-{
-    cout << "+++new Connection+++" << endl;
-    string msg = "I have get you connect\n";
-    // con->send(msg);
-}
-
-void getMessage(Connection *con,
-                Buffer *input,
-                Time arriveTime)
-{
-    cout << "+++get message+++:";
-    cout << input->getAll() << std::endl;
-    string msg = "I am server:I have get you message";
-    con->send(msg);
-    // con->shutdownWrite();//error
-}
-
-void lostConnection(Connection *con)
-{
-    cout << "+++lost Connection+++\n";
-}
-
 void fun1()
 {
     Time time(Time::now());
@@ -108,12 +85,9 @@ int main()
     NetAddress address("127.0.0.1:80");
 
     WebProtocol prot;
-    Factory *factory = new Factory(g_loop,prot);
+    Factory *factory = new Factory(g_loop, prot);
     Server server(g_loop, address, factory);
 
-    // server.setConenctCallback(madeConnection);
-    // server.setMessageCallback(getMessage);
-    // server.setCloseCallback(lostConnection);
     server.start();
 
     g_loop->loop();

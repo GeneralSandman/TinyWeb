@@ -5,23 +5,24 @@
 *Web:www.generalsandman.cn
 */
 
-#include "master.h"
-#include "eventloop.h"
-#include "server.h"
-#include "protocol.h"
-#include "configer.h"
-#include "log.h"
-#include "api.h"
+/*---XXX---
+*
+****************************************
+*
+*/
 
+#include <iostream>
 #include <unistd.h>
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 
-EventLoop *Master::m_pEventLoop = nullptr;
+#include "../api.h"
 
-void Master::m_fSwitchtoDaemon()
+using namespace std;
+
+void m_fSwitchtoDaemon()
 {
     //how to create daemon process
     //https://en.wikipedia.org/wiki/Daemon_(computing)
@@ -81,57 +82,9 @@ void Master::m_fSwitchtoDaemon()
     close(fd);
 }
 
-void Master::m_fInit()
+int main()
 {
-    //first step:
-    //add signal handler
-    add_signal(SIGTERM, m_fSignalHandler);
-    add_signal(SIGINT, m_fSignalHandler);
-}
-
-void Master::m_fSignalHandler(int sig)
-{
-    if (m_pEventLoop)
-        m_pEventLoop->quit();
-}
-
-Master::Master(const std::string &configfile)
-{
-    LOG(Debug) << "class Master constructor\n";
-    if (!m_pEventLoop)
-        m_pEventLoop = new EventLoop();
-
-    m_nConfigFile = configfile;
-
-    setConfigerFile(configfile);
-    loadConfig();
-
-    m_nAddress = NetAddress(80);
-    m_pProtocol = new WebProtocol();
-    m_pServer = new Server(m_pEventLoop, m_nAddress, m_pProtocol);
-    //upgrade:Server's constructor need pararms Protocol to set callback
-    //m_pServer = new Server(m_pEventLoop, m_nAddress,m_pProtocols);
-
-    // m_fSwitchtoDaemon();
-    m_fInit();
-    //if log level is debug don't switch to daemaon
-}
-
-void Master::start()
-{
-    m_pServer->start();
-    m_pEventLoop->loop();
-}
-
-Master::~Master()
-{
-    delete m_pEventLoop;
-    delete m_pProtocol;
-    delete m_pServer;
-
-    m_pEventLoop = nullptr;
-    m_pProtocol = nullptr;
-    m_pServer = nullptr;
-
-    LOG(Debug) << "class Master destructor\n";
+    m_fSwitchtoDaemon();
+    pause();
+    return 0;
 }

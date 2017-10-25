@@ -23,6 +23,7 @@
 log_level convertStringToLoglevel(const std::string &s)
 {
     std::string tmp;
+    tmp.resize(s.size());
     transform(s.begin(), s.end(), tmp.begin(), tolower);
     if ("debug" == tmp)
     {
@@ -36,11 +37,11 @@ log_level convertStringToLoglevel(const std::string &s)
     {
         return Warn;
     }
-    else if ("Error" == tmp)
+    else if ("error" == tmp)
     {
         return Error;
     }
-    else if ("Fatal" == tmp)
+    else if ("fatal" == tmp)
     {
         return Fatal;
     }

@@ -74,6 +74,17 @@ bug
 - add MIME type
 - 为Connection添加close()功能来作为对shutdownWrite()的补充
 - 如何支持中文url
+- 如何使用进程池来处理多个连接
+    - master进程负责EventLoop.loop()循环，负责分配连接
+    - slaver进程监听与master的socket，接受请求，工作
+    - 一个Connection只能属于一个进程，不能多个进程同时处理
+    - Connection的读，写，关闭事件均有master进程负责，
+        并把相应的事件传给slaver
+
+- EventLoop与ProcessPoll的逻辑关系如何设计？？？？？
+- 每个Process均有一个EventLoop，不过监听的event不同
+    - master监听网络事件
+    - slaver监听master的通信事件，和每个Connection的定时器事件
 
 国庆学习计划
 - 入门negix

@@ -383,7 +383,6 @@ bool HttpParser::parseRequest(const std::string &data,
         if (!res)
             return false;
     }
-    LOG(Debug) << m_nLastOpenLine.size() << std::endl;
 }
 
 HttpParser::~HttpParser()

@@ -101,19 +101,19 @@ std::string getMIMEType(const std::string &type)
     {
         res = "application/javascript";
     }
-    else if ("" == type)
+    else if ("bmp" == type)
     {
         res = "image/bmp";
     }
-    else if ("" == type)
+    else if ("gif" == type)
     {
         res = "image/gif";
     }
-    else if ("" == type)
+    else if ("jpeg" == type)
     {
         res = "image/jpeg";
     }
-    else if ("" == type)
+    else if ("png" == type)
     {
         res = "image/png";
     }
@@ -194,7 +194,6 @@ bool HttpResponser::m_fCreateResponse(const struct HttpRequest &request,
         response.header.date = fileStatus.lastModified;
         response.header.server = "ubuntu";
         response.header.lastModified = fileStatus.lastModified;
-        ;
         response.header.contentLength = std::to_string(fileStatus.size);
 
         response.header.contentType = "text/html";
