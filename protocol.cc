@@ -108,17 +108,17 @@ DiscardProtocol::DiscardProtocol()
 
 void DiscardProtocol::connectionMade()
 {
-    std::cout << "[Discard] new connection\n";
+    LOG(Info) << "new connection\n";
 }
 
 void DiscardProtocol::dataReceived(const std::string &data)
 {
-    std::cout << "[Discard] data redeived:" << data << "\n";
+    LOG(Info) << "data redeived\n";
 }
 
 void DiscardProtocol::connectionLost()
 {
-    std::cout << "[Discard] lost connection\n";
+    LOG(Info) << "lost connection\n";
 }
 
 DiscardProtocol::~DiscardProtocol()
@@ -137,18 +137,18 @@ EchoProtocol::EchoProtocol()
 
 void EchoProtocol::connectionMade()
 {
-    std::cout << "[Echo] new Connection\n";
+    LOG(Info) << "new Connection \n";
 }
 
 void EchoProtocol::dataReceived(const std::string &data)
 {
-    std::cout << "[Echo] get data:" << data << "\n";
+    LOG(Info) << "get data \n";
     sendMessage(data);
 }
 
 void EchoProtocol::connectionLost()
 {
-    std::cout << "[Echo] lost Connection\n";
+    LOG(Info) << "lost Connection \n";
 }
 
 EchoProtocol::~EchoProtocol()
@@ -168,12 +168,12 @@ WebProtocol::WebProtocol()
 
 void WebProtocol::connectionMade()
 {
-    std::cout << "[WebProtocol] +++ get a new connection +++\n";
+    LOG(Info) << "get a new connection\n";
 }
 
 void WebProtocol::dataReceived(const std::string &data)
 {
-    // std::cout << "[WebProtocol] === get a message ===\n";
+    LOG(Info) << "get a message\n";
     struct HttpRequest request;
     // std::cout << "-" << data << "-\n";
     if (m_nParser.parseRequest(data, request))
@@ -195,7 +195,7 @@ void WebProtocol::dataReceived(const std::string &data)
 
 void WebProtocol::connectionLost()
 {
-    std::cout << "[WebProtocol] --- lost a connection ---\n";
+    LOG(Info) << "lost a connection\n";
 }
 
 WebProtocol::~WebProtocol()

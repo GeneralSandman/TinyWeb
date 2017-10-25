@@ -124,7 +124,7 @@ std::string getMIMEType(const std::string &type)
 bool HttpResponser::m_fCreateResponse(const struct HttpRequest &request,
                                       struct HttpResponse &response)
 {
-    std::string docs = "/home/li/TinyWeb/www/hexo";
+    std::string docs = "/home/li/TinyWeb/www";
 
     std::vector<std::string> vec;
     splitString(request.line.url, "?", vec);
@@ -153,7 +153,8 @@ bool HttpResponser::m_fCreateResponse(const struct HttpRequest &request,
     if (!findPoint)
         file += "/index.html";
 
-    std::cout << file << std::endl;
+    // std::cout << file << std::endl;
+    LOG(Info) << file << std::endl;
 
     struct HtmlFileStatus fileStatus;
     if (setStatus(file, fileStatus))
@@ -213,6 +214,7 @@ void HttpResponser::m_fSendResponse(const struct HttpResponse &response)
     std::string to_write;
     convertHttpResponseToString(response, to_write);
     m_pProtocol->sendMessage(to_write);
+    LOG(Info) << "response :" << std::endl;
 }
 
 HttpResponser::HttpResponser(WebProtocol *prot)

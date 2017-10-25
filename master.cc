@@ -10,6 +10,7 @@
 #include "server.h"
 #include "protocol.h"
 #include "configer.h"
+#include "factory.h"
 #include "log.h"
 #include "api.h"
 
@@ -97,24 +98,45 @@ void Master::m_fSignalHandler(int sig)
 
 Master::Master(const std::string &configfile)
 {
-    LOG(Debug) << "class Master constructor\n";
-    if (!m_pEventLoop)
-        m_pEventLoop = new EventLoop();
-
+    //init configer
     m_nConfigFile = configfile;
-
     setConfigerFile(configfile);
     loadConfig();
 
-    m_nAddress = NetAddress(80);
-    m_pProtocol = new WebProtocol();
-    m_pServer = new Server(m_pEventLoop, m_nAddress, m_pProtocol);
-    //upgrade:Server's constructor need pararms Protocol to set callback
-    //m_pServer = new Server(m_pEventLoop, m_nAddress,m_pProtocols);
+    //get log args and init log
+    std::string loglevel = getConfigValue("loglevel");
+    std::string logpath = getConfigValue("logpath");
+    std::string debugfile = logpath + getConfigValue("debugfile");
+    std::string infofile = logpath + getConfigValue("infofile");
+    std::string warnfile = logpath + getConfigValue("warnfile");
+    std::string errorfile = logpath + getConfigValue("errorfile");
+    std::string fatalfile = logpath + getConfigValue("fatalfile");
 
-    // m_fSwitchtoDaemon();
+    initLogger(debugfile,
+               infofile,
+               warnfile,
+               errorfile,
+               fatalfile,
+               convertStringToLoglevel(loglevel)); //error used
+
+    //change to daemon process
+    if (!(Debug == convertStringToLoglevel(loglevel)))
+        m_fSwitchtoDaemon();
+
+    //init listen Address
+    std::string listen = getConfigValue("listen");
+    int listenPort = atoi(listen.c_str());
+    m_nAddress = NetAddress(listenPort);
+
+    //init member
+    if (!m_pEventLoop)
+        m_pEventLoop = new EventLoop();
+    WebProtocol prot;
+    m_pFactory = new Factory(m_pEventLoop, prot);
+    m_pServer = new Server(m_pEventLoop, m_nAddress, m_pFactory);
+
     m_fInit();
-    //if log level is debug don't switch to daemaon
+    LOG(Debug) << "class Master constructor\n";
 }
 
 void Master::start()
@@ -126,11 +148,11 @@ void Master::start()
 Master::~Master()
 {
     delete m_pEventLoop;
-    delete m_pProtocol;
+    delete m_pFactory;
     delete m_pServer;
 
     m_pEventLoop = nullptr;
-    m_pProtocol = nullptr;
+    m_pFactory = nullptr;
     m_pServer = nullptr;
 
     LOG(Debug) << "class Master destructor\n";

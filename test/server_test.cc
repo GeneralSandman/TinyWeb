@@ -49,19 +49,19 @@ int main()
 {
 
     //config
-    // std::string configeFile = "/home/li/TinyWeb/TinyWeb.conf";
-    // setConfigerFile(configeFile);
-    // if (!loadConfig())
-    //     std::cout << "load config failly\n";
+    std::string configeFile = "/home/li/TinyWeb/TinyWeb.conf";
+    setConfigerFile(configeFile);
+    if (!loadConfig())
+        std::cout << "load config failed\n";
 
     //log
-    // std::string loglevel = getConfigValue("loglevel");
-    // std::string logpath = getConfigValue("logpath");
-    // std::string debugfile = logpath + getConfigValue("debugfile");
-    // std::string infofile = logpath + getConfigValue("infofile");
-    // std::string warnfile = logpath + getConfigValue("warnfile");
-    // std::string errorfile = logpath + getConfigValue("errorfile");
-    // std::string fatalfile = logpath + getConfigValue("fatalfile");
+    std::string loglevel = getConfigValue("loglevel");
+    std::string logpath = getConfigValue("logpath");
+    std::string debugfile = logpath + getConfigValue("debugfile");
+    std::string infofile = logpath + getConfigValue("infofile");
+    std::string warnfile = logpath + getConfigValue("warnfile");
+    std::string errorfile = logpath + getConfigValue("errorfile");
+    std::string fatalfile = logpath + getConfigValue("fatalfile");
 
     // initLogger(debugfile,
     //            infofile,
@@ -72,13 +72,13 @@ int main()
 
     //signal
 
-    setLogLevel(Info);
+    setLogLevel(Debug);
 
     add_signal(SIGTERM, signal_handler);
     add_signal(SIGINT, signal_handler);
 
     g_loop = new EventLoop();
-    g_loop->runEvery(1, boost::bind(fun1));
+    // g_loop->runEvery(1, boost::bind(fun1));
     // g_loop->runAfter(60, boost::bind(timeout));
 
     // int port = atoi(getConfigValue("listen").c_str());

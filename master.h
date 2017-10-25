@@ -25,17 +25,15 @@
 
 class EventLoop;
 class Server;
-class Protocol;
+class Factory;
 
 class Master
 {
 private:
   static EventLoop *m_pEventLoop;
-
   std::string m_nConfigFile;
-  
   NetAddress m_nAddress;
-  Protocol *m_pProtocol;
+  Factory *m_pFactory;
   Server *m_pServer;
 
   void m_fSwitchtoDaemon();
