@@ -84,6 +84,7 @@ Server::~Server()
     {
         // t->destoryConnection();
         delete t;
+        //bug 
     }
     LOG(Debug) << "class Server destructor\n";
 }

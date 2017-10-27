@@ -85,7 +85,9 @@ bug
 - 每个Process均有一个EventLoop，不过监听的event不同
     - master监听网络事件
     - slaver监听master的通信事件，和每个Connection的定时器事件
-
+- 残留的Connection应该有Server释放
+- 残留的Protocol应该由Factory释放
+- Connection不知道Protocol的存在，Server不知道Factory的存在
 国庆学习计划
 - 入门negix
 - 完成muduo的相关功能

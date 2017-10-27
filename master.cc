@@ -157,7 +157,7 @@ Master::Master(const std::string &configfile)
     m_fSetSignalsHandler();
 
     //test
-    m_pEventLoop->runEvery(1, boost::bind(logSecond));
+    // m_pEventLoop->runEvery(1, boost::bind(logSecond));
     LOG(Debug) << "class Master constructor\n";
 }
 

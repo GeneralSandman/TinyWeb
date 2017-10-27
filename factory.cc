@@ -77,7 +77,7 @@ void Factory::closeProtocol(Protocol *protocol)
     {
         Connection *con = p->first;
         Protocol *prot = p->second;
-        
+
         con->shutdownWrite();
         prot->loseConnection();
 
@@ -98,6 +98,13 @@ void Factory::buildProtocol(Protocol *newProt)
 
 Factory::~Factory()
 {
+    for (auto t : m_nProtocols)
+    {
+        if (t.second != nullptr)
+        {
+            delete t.second;
+        }
+    }
     LOG(Debug) << "class Factory destructor\n";
 }
 
