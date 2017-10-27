@@ -10,7 +10,7 @@
 ****************************************
 *
 */
- 
+
 #ifndef NET_ADDRESS_H
 #define NET_ADDRESS_H
 
@@ -24,10 +24,12 @@ private:
 
 public:
   NetAddress();
+  NetAddress(const NetAddress &);
   NetAddress(int port);
   NetAddress(const std::string &ip, int port);
   NetAddress(const std::string &ipport);
   NetAddress(struct sockaddr_in &addr);
+  NetAddress &operator=(const NetAddress &);
 
   std::string getIp() const;
   int getPort() const;

@@ -16,8 +16,8 @@ using namespace std;
 int main(int argc, char **argv)
 {
     {
+        //default config file        
         string config_file = "/home/li/TinyWeb/TinyWeb.conf";
-        //default config file
 
         //parse arg line
         struct option longopts[] = {

@@ -58,7 +58,7 @@ void Master::m_fSwitchtoDaemon()
     }
     else if (pid < 0)
         handle_error("fork error\n");
-    std::cout << "pid:" << getpid() << std::endl;
+    std::cout << "switch daemon ( pid:" << getpid() << " )" << std::endl;
 
     //Forth step:
     //setting the root directory
@@ -87,7 +87,7 @@ void Master::m_fSwitchtoDaemon()
     close(fd);
 }
 
-void Master::m_fInit()
+void Master::m_fSetSignalsHandler()
 {
     //first step:
     //add signal handler
@@ -97,6 +97,7 @@ void Master::m_fInit()
 
 void Master::m_fSignalHandler(int sig)
 {
+    //quit EventLoop
     if (m_pEventLoop)
         m_pEventLoop->quit();
 }
@@ -106,44 +107,57 @@ Master::Master(const std::string &configfile)
     //init configer
     m_nConfigFile = configfile;
     setConfigerFile(configfile);
-    loadConfig();
+    if (!loadConfig())
+        std::cout << "load config failed (using default config)\n";
+
+    //if not debug ,change to daemon process
+    std::string loglevel_s = getConfigValue("loglevel");
+    log_level loglevel = convertStringToLoglevel(loglevel_s);
+    setLogLevel(loglevel);
+    if (!(Debug == loglevel))
+        m_fSwitchtoDaemon();
 
     //get log args and init log
-    std::string loglevel = getConfigValue("loglevel");
     std::string logpath = getConfigValue("logpath");
     std::string debugfile = logpath + getConfigValue("debugfile");
     std::string infofile = logpath + getConfigValue("infofile");
     std::string warnfile = logpath + getConfigValue("warnfile");
     std::string errorfile = logpath + getConfigValue("errorfile");
     std::string fatalfile = logpath + getConfigValue("fatalfile");
-
     initLogger(debugfile,
                infofile,
                warnfile,
                errorfile,
                fatalfile,
-               convertStringToLoglevel(loglevel)); //error used
-
-    //change to daemon process
-    if (!(Debug == convertStringToLoglevel(loglevel)))
-        m_fSwitchtoDaemon();
+               loglevel); //error used
 
     //init listen Address
-    std::string listen = getConfigValue("listen");
-    int listenPort = atoi(listen.c_str());
-    m_nAddress = NetAddress(listenPort);
+    std::string listenPort_s = getConfigValue("listen");
+    int listenPort = atoi(listenPort_s.c_str());
+
+    if ((Debug == loglevel))
+    {
+        //set loop address;
+        std::string loopAddress = "127.0.0.1:" + listenPort_s;
+        m_nAddress = NetAddress(loopAddress);
+    }
+    else
+    {
+        m_nAddress = NetAddress(listenPort);
+    }
 
     //init member
-    if (!m_pEventLoop)
+    if (m_pEventLoop == nullptr)
         m_pEventLoop = new EventLoop();
-    WebProtocol prot;
-    m_pFactory = new Factory(m_pEventLoop, prot);
+    m_pProtocol = new WebProtocol();
+    m_pFactory = new Factory(m_pEventLoop, m_pProtocol);
     m_pServer = new Server(m_pEventLoop, m_nAddress, m_pFactory);
 
-    m_fInit();
+    //init signal handler
+    m_fSetSignalsHandler();
 
+    //test
     m_pEventLoop->runEvery(1, boost::bind(logSecond));
-
     LOG(Debug) << "class Master constructor\n";
 }
 
@@ -157,10 +171,12 @@ Master::~Master()
 {
     delete m_pEventLoop;
     delete m_pFactory;
+    delete m_pProtocol;
     delete m_pServer;
 
     m_pEventLoop = nullptr;
     m_pFactory = nullptr;
+    m_pProtocol = nullptr;
     m_pServer = nullptr;
 
     LOG(Debug) << "class Master destructor\n";

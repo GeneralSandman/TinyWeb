@@ -25,6 +25,7 @@
 
 class EventLoop;
 class Server;
+class Protocol;
 class Factory;
 
 void logSecond();
@@ -35,11 +36,12 @@ private:
   static EventLoop *m_pEventLoop;
   std::string m_nConfigFile;
   NetAddress m_nAddress;
+  Protocol *m_pProtocol;
   Factory *m_pFactory;
   Server *m_pServer;
 
   void m_fSwitchtoDaemon();
-  void m_fInit();
+  void m_fSetSignalsHandler();
   static void m_fSignalHandler(int);
 
 public:

@@ -10,7 +10,7 @@
 ****************************************
 *
 */
- 
+
 #include "netaddress.h"
 #include "api.h"
 #include "log.h"
@@ -21,6 +21,11 @@
 NetAddress::NetAddress()
 {
     bzero(&m_nAddress, sizeof(m_nAddress));
+}
+
+NetAddress::NetAddress(const NetAddress &address)
+{
+    m_nAddress = address.m_nAddress;
 }
 
 NetAddress::NetAddress(int port)
@@ -64,6 +69,13 @@ NetAddress::NetAddress(const std::string &ipport)
 NetAddress::NetAddress(struct sockaddr_in &addr)
 {
     m_nAddress = addr;
+}
+
+NetAddress &NetAddress::operator=(const NetAddress &address)
+{
+    if (this != &address)
+        m_nAddress = address.m_nAddress;
+    return (*this);
 }
 
 std::string NetAddress::getIp() const

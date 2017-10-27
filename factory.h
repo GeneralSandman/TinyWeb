@@ -36,7 +36,7 @@ private:
   std::map<Connection *, Protocol *> m_nProtocols;
 
 public:
-  Factory(EventLoop *m_pLoop, const Protocol &prot);
+  Factory(EventLoop *m_pLoop, Protocol *prot);
 
   ConnectionCallback connectCallback()
   {

@@ -18,10 +18,10 @@
 #include "log.h"
 
 //---Factory api--------------//
-Factory::Factory(EventLoop *loop, const Protocol &prot)
+Factory::Factory(EventLoop *loop, Protocol *prot)
     : m_pLoop(loop),
       m_nNumProts(0),
-      m_pProtocol(&prot)
+      m_pProtocol(prot)
 {
     LOG(Debug) << "class Factory constructor\n";
 }

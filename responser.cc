@@ -13,6 +13,7 @@
 
 #include "responser.h"
 #include "protocol.h"
+#include "configer.h"
 #include "http.h"
 #include "api.h"
 #include "log.h"
@@ -124,7 +125,7 @@ std::string getMIMEType(const std::string &type)
 bool HttpResponser::m_fCreateResponse(const struct HttpRequest &request,
                                       struct HttpResponse &response)
 {
-    std::string docs = "/home/li/TinyWeb/www";
+    std::string docs = getConfigValue("docs");
 
     std::vector<std::string> vec;
     splitString(request.line.url, "?", vec);

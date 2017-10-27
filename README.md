@@ -120,6 +120,8 @@ sudo ./TinyWeb
 sudo ./TinyWeb -c /home/li/TinyWeb.conf
 ```
 
+- 如果日志等级为```Debug```,不会切换至daemon进程，可由终端控制
+
 
 ------------------
 
