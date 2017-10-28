@@ -102,7 +102,7 @@ void Master::m_fSignalHandler(int sig)
         m_pEventLoop->quit();
 }
 
-Master::Master(const std::string &configfile)
+Master::Master(const std::string &configfile, bool debug)
 {
     //init configer
     m_nConfigFile = configfile;
@@ -111,9 +111,18 @@ Master::Master(const std::string &configfile)
         std::cout << "load config failed (using default config)\n";
 
     //if not debug ,change to daemon process
-    std::string loglevel_s = getConfigValue("loglevel");
-    log_level loglevel = convertStringToLoglevel(loglevel_s);
+    log_level loglevel;
+    if (debug)
+    { //Command line parameters have higer priority
+        loglevel = Debug;
+    }
+    else
+    { //if we dont use "-d",get loglevel by confige file
+        std::string loglevel_s = getConfigValue("loglevel");
+        loglevel = convertStringToLoglevel(loglevel_s);
+    }
     setLogLevel(loglevel);
+
     if (!(Debug == loglevel))
         m_fSwitchtoDaemon();
 
@@ -135,16 +144,7 @@ Master::Master(const std::string &configfile)
     std::string listenPort_s = getConfigValue("listen");
     int listenPort = atoi(listenPort_s.c_str());
 
-    if ((Debug == loglevel))
-    {
-        //set loop address;
-        std::string loopAddress = "127.0.0.1:" + listenPort_s;
-        m_nAddress = NetAddress(loopAddress);
-    }
-    else
-    {
-        m_nAddress = NetAddress(listenPort);
-    }
+    m_nAddress = NetAddress(listenPort);
 
     //init member
     if (m_pEventLoop == nullptr)

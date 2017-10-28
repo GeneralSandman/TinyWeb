@@ -16,21 +16,27 @@ using namespace std;
 int main(int argc, char **argv)
 {
     {
-        //default config file        
+        //default config file
         string config_file = "/home/li/TinyWeb/TinyWeb.conf";
+        bool debug = false;
 
         //parse arg line
         struct option longopts[] = {
             {"configfile", 1, NULL, 'c'},
+            {"debug", 0, NULL, 'd'},
             {0, 0, 0, 0},
         };
-        const char *short_options = "c:";
+        const char *short_options = "c:d";
         int c;
         while ((c = getopt_long(argc, argv, short_options, longopts, NULL)) != -1)
         {
             if (c == 'c')
             {
                 config_file = optarg;
+            }
+            else if (c == 'd')
+            {
+                debug = true;
             }
         }
         //
@@ -42,7 +48,7 @@ int main(int argc, char **argv)
             exit(-1);
         }
 
-        Master master(config_file);
+        Master master(config_file,debug);
         master.start();
     }
 

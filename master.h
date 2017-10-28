@@ -45,7 +45,7 @@ private:
   static void m_fSignalHandler(int);
 
 public:
-  Master(const std::string &configfile);
+  Master(const std::string &configfile, bool Debug = false);
   void start();
   ~Master();
 };
