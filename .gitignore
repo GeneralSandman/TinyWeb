@@ -34,5 +34,6 @@
 
 .vscode
 .idea
-.log
+*.log
 *_test
+./log/*

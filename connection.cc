@@ -1,12 +1,6 @@
-/* << "connection close down ,don't write\n";
-nO  std::cout
-   << "write " << n << " Bytes\n";
-nne m_pChannel->disableWrite(); //it's very important,you can try to delete the ifif(m_nOutputBuffer.readableBytes()==0)
-ction close down, ction close down, don't write\n";nOut nOutdon't write\n ";nOut nOut
-                                        pustd::cout t pus d::co t
-                                        << "co n<ctiontclose down ,don't write\n";
-u r pustd::cout << "connection close down ,don't write\n";
-tBuffer
+/*
+*Author:GeneralSandman
+*Code:https://github.com/GeneralSandman/TinyWeb
 *E-mail:generalsandman@163.com
 *Web:www.generalsandman.cn
 */

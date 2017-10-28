@@ -63,8 +63,7 @@
 - Semphore
 - SharedMemory
 - parser 可以精确地识别出路径名，和url（需要更加健壮）(应用正则表达式验证正确性)
-- 优化logger，处理没有打开文件的异常,存在严重bug，需要重新架构
-bug
+- 优化logger，
 - 如何处理请求目录
 - 通过list维护一批请求头，响应头
 - 如何处理url中包含```../```的问题
@@ -73,7 +72,7 @@ bug
 - 添加proxy
 - add MIME type
 - 为Connection添加close()功能来作为对shutdownWrite()的补充
-- 如何支持中文url
+- 如何支持中文url??????
 - 如何使用进程池来处理多个连接
     - master进程负责EventLoop.loop()循环，负责分配连接
     - slaver进程监听与master的socket，接受请求，工作
@@ -85,9 +84,15 @@ bug
 - 每个Process均有一个EventLoop，不过监听的event不同
     - master监听网络事件
     - slaver监听master的通信事件，和每个Connection的定时器事件
+
 - 残留的Connection应该有Server释放
 - 残留的Protocol应该由Factory释放
 - Connection不知道Protocol的存在，Server不知道Factory的存在
+
+
+- 为每项功能添加日志！！！！！！！！
+    （Two days)
+
 国庆学习计划
 - 入门negix
 - 完成muduo的相关功能
