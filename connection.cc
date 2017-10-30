@@ -53,7 +53,6 @@ void Connection::m_fHandleWrite()
                                send);
         if (n > 0)
         {
-            std::cout << "write " << n << " Bytes\n";
             if (m_nOutputBuffer.readableBytes() == 0)
             {
                 m_pChannel->disableWrite(); //it's very important,you can try to delete the if
@@ -69,13 +68,14 @@ void Connection::m_fHandleWrite()
         else
         {
             //error
-            std::cout << "write error\n";
+            // std::cout << "write error\n";
+            LOG(Warn) << "write error\n";
         }
     }
     else
     {
         //connection close down ,don't write
-        std::cout << "connection close down ,don't write\n";
+        LOG(Warn) << "connection close down ,don't write\n";
     }
 }
 
@@ -88,7 +88,7 @@ void Connection::m_fHandleClose()
 
 void Connection::m_fHandleError()
 {
-    std::cout << "socket error\n";
+    LOG(Warn) << "socket error\n";
 }
 
 void Connection::m_fShutdownWrite()
@@ -114,6 +114,8 @@ Connection::Connection(EventLoop *loop,
     m_pChannel->setWriteCallback(boost::bind(&Connection::m_fHandleWrite, this));
     m_pChannel->setCloseCallback(boost::bind(&Connection::m_fHandleClose, this));
     m_pChannel->setErrorCallback(boost::bind(&Connection::m_fHandleError, this));
+
+    LOG(Info) << "get connection" << m_nPeerAddress.getIpPort() << std::endl;
 
     LOG(Debug) << "class Connection constructor\n";
 }
@@ -151,6 +153,8 @@ void Connection::establishConnection()
 
 void Connection::destoryConnection()
 {
+    LOG(Info) << "lose connection" << m_nPeerAddress.getIpPort() << std::endl;
+
     m_nState = DisConnected;
     m_pChannel->disableAll();
     m_pEventLoop->removeChannel(m_pChannel);

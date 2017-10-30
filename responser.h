@@ -27,15 +27,16 @@ class HttpResponser
 private:
   WebProtocol *m_pProtocol;
 
-  bool m_fCreateResponse(const struct HttpRequest &, struct HttpResponse &);
+  bool m_fCreateResponse(const struct HttpRequest &request,
+                         struct HttpResponse &response);  
   void m_fSendResponse(const struct HttpResponse &);
-
   size_t m_fGetFileSize(const std::string &f);
   size_t m_fWriteFile(const std::string &f);
 
 public:
   HttpResponser(WebProtocol *prot);
-  void response(const struct HttpRequest &);
+  bool buildHttpResponse(const struct HttpRequest &, struct HttpResponse &);
+  void sendResponse(struct HttpResponse &);
   ~HttpResponser();
 };
 

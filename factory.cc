@@ -17,7 +17,7 @@
 #include "protocol.h"
 #include "log.h"
 
-//---Factory api--------------//
+//---------Factory api--------------//
 Factory::Factory(EventLoop *loop, Protocol *prot)
     : m_pLoop(loop),
       m_nNumProts(0),
@@ -49,7 +49,6 @@ void Factory::getMessage(Connection *con,
     if (p != m_nProtocols.end())
     {
         std::string all = input->getAll();
-        // LOG(Debug) << all << std::endl;
         Protocol *prot = p->second;
         prot->getMessage(all);
     }
@@ -107,6 +106,8 @@ Factory::~Factory()
     }
     LOG(Debug) << "class Factory destructor\n";
 }
+
+//--------end-Factory api--------------//
 
 //---ServerFactory api--------------//
 // ServerFactory::ServerFactory()

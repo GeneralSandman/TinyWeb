@@ -48,7 +48,7 @@ bool setStatus(const std::string &file, struct HtmlFileStatus &res)
     struct stat sbuf;
     if (stat(filename, &sbuf) < 0)
     {
-        std::cout << "can't find this file\n";
+        // std::cout << "can't find this file\n";
         return false;
     }
     if (!S_ISREG(sbuf.st_mode))
@@ -122,6 +122,8 @@ std::string getMIMEType(const std::string &type)
     return res;
 }
 
+//-----------HttpResponser api-----------------//
+
 bool HttpResponser::m_fCreateResponse(const struct HttpRequest &request,
                                       struct HttpResponse &response)
 {
@@ -154,9 +156,6 @@ bool HttpResponser::m_fCreateResponse(const struct HttpRequest &request,
     if (!findPoint)
         file += "/index.html";
 
-    // std::cout << file << std::endl;
-    LOG(Info) << file << std::endl;
-
     struct HtmlFileStatus fileStatus;
     if (setStatus(file, fileStatus))
     {
@@ -181,7 +180,6 @@ bool HttpResponser::m_fCreateResponse(const struct HttpRequest &request,
         std::copy(srcp, srcp + fileStatus.size, response.body.text.begin());
         Munmap(srcp, fileStatus.size);
     }
-
     else
     { //haven't this file,return 404 file
         //
@@ -215,7 +213,6 @@ void HttpResponser::m_fSendResponse(const struct HttpResponse &response)
     std::string to_write;
     convertHttpResponseToString(response, to_write);
     m_pProtocol->sendMessage(to_write);
-    LOG(Info) << "response :" << std::endl;
 }
 
 HttpResponser::HttpResponser(WebProtocol *prot)
@@ -224,22 +221,20 @@ HttpResponser::HttpResponser(WebProtocol *prot)
     LOG(Debug) << "class HttpResponse constructor\n";
 }
 
-void HttpResponser::response(const struct HttpRequest &request)
+bool HttpResponser::buildHttpResponse(const struct HttpRequest &request,
+                                      struct HttpResponse &response)
 {
-    struct HttpResponse resp;
-    m_fCreateResponse(request, resp);
-    m_fSendResponse(resp);
-    // m_pProtocol->m_pConnection->shutdownWrite(); //FIXME:
-    // g_loop->runAfter(60,
-    //  boost::bind(m_pProtocol->m_pConnection->shutdownWrite()));
-    //FIXME:upgrade eventloop class as signal class paradia
-    //we will close this connection in 100 seconds
+    return m_fCreateResponse(request, response);
+}
 
-    // printHttpRequest(request);
-    // printHttpResponse(resp);
+void HttpResponser::sendResponse(struct HttpResponse &resp)
+{
+    m_fSendResponse(resp);
 }
 
 HttpResponser::~HttpResponser()
 {
     LOG(Debug) << "class HttpResponse destructor\n";
 }
+
+//----------end-HttpResponser api-----------------//

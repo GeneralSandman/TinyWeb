@@ -16,6 +16,7 @@
 *start():invoke Server::start(),EventLoop::loop()
 *~Server():delete the resource;
 */
+
 #ifndef MASTER_H
 #define MASTER_H
 

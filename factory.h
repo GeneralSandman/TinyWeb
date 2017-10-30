@@ -5,11 +5,10 @@
 *Web:www.generalsandman.cn
 */
 
-/*
-    This is a factory which produces protocols.
-
-    By default, buildProtocol will create a protocol of the class given in
-    self.protocol.
+/*---class Factory---
+*
+****************************************
+*
 */
 
 #ifndef FACTORY_H
@@ -65,8 +64,8 @@ public:
                   Time time);
   void lostConnection(Connection *con);
 
-  void closeProtocol(Protocol *);//used by protocol
-  void closeProtocolAfter(Protocol *, int seconds);//used by protocol
+  void closeProtocol(Protocol *);                   //used by protocol
+  void closeProtocolAfter(Protocol *, int seconds); //used by protocol
 
   virtual void buildProtocol(Protocol *newProt);
   // {

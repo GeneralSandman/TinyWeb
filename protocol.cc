@@ -39,10 +39,12 @@ Protocol *getInstanceByPointer(const Protocol *p)
 {
     return Reflect::getReflectInstance().getProtocolByName(getName(p));
 }
+
 //----------Protocol api----------//
+
 Protocol::Protocol()
 {
-    LOG(Debug) << "class Protocol constructor\n";
+    // LOG(Debug) << "class Protocol constructor\n";
 }
 
 void Protocol::makeConnection()
@@ -95,10 +97,12 @@ void Protocol::connectionLost()
 
 Protocol::~Protocol()
 {
-    LOG(Debug) << "class Protocol destructor\n";
+    // LOG(Debug) << "class Protocol destructor\n";
 }
 
 RegistProtocol(Protocol);
+
+//----------end Protocol api----------//
 
 //------DiscardProtocol api-------------//
 DiscardProtocol::DiscardProtocol()
@@ -127,6 +131,8 @@ DiscardProtocol::~DiscardProtocol()
 }
 
 RegistProtocol(DiscardProtocol);
+
+//------end-DiscardProtocol api-------------//
 
 //------EchoProtocol api-------------//
 EchoProtocol::EchoProtocol()
@@ -158,7 +164,10 @@ EchoProtocol::~EchoProtocol()
 
 RegistProtocol(EchoProtocol);
 
+//------end-EchoProtocol api-------------//
+
 //--------WebProtocol api-------------//
+
 WebProtocol::WebProtocol()
     : m_nKeepAlive(false),
       m_nResponser(this)
@@ -175,12 +184,14 @@ void WebProtocol::dataReceived(const std::string &data)
 {
     LOG(Info) << "get a message\n";
     struct HttpRequest request;
-    // std::cout << "-" << data << "-\n";
+    struct HttpResponse response;
+
     if (m_nParser.parseRequest(data, request))
     {
-        // printHttpRequest(request);
-        // printHttpRequestLine(request.line);
-        m_nResponser.response(request);
+        LOG(Info) << "request url<" << request.line.url << ">\n";
+        m_nResponser.buildHttpResponse(request, response);
+        m_nResponser.sendResponse(response);
+        LOG(Info) << "response url<" << request.line.url << ">\n";
         if (request.header.connection == "keep-alive")
             closeProtocolAfter(10);
         else
@@ -204,3 +215,5 @@ WebProtocol::~WebProtocol()
 }
 
 RegistProtocol(WebProtocol);
+
+//--------end-WebProtocol api-------------//
