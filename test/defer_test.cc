@@ -5,112 +5,7 @@
 
 #include "../log.h"
 #include "../exception.h"
-
-typedef boost::function<void()> callBack;
-typedef boost::function<void(Exception &)> errorBack;
-
-typedef std::pair<callBack, char **> callBackPair;
-typedef std::pair<errorBack, char **> errorBackPair;
-
-typedef std::pair<callBack, errorBack> Chain;
-
-void defaultFun()
-{
-    // std::cout << "defaultFun()\n";
-}
-
-void defauleFunExce(Exception &e)
-{
-    // std::c
-}
-
-class Defer
-{
-  private:
-    std::deque<callBack> m_nCallBackChains;
-    std::deque<errorBack> m_nErrorBackChains;
-
-    std::deque<Chain> m_nChains;
-
-  public:
-    Defer()
-    {
-        LOG(Debug) << "class Defer constructor\n";
-    }
-    void addCallBack(callBack c)
-    {
-        addCallBacks(c, defauleFunExce);
-    }
-    void addErrorBack(errorBack e)
-    {
-        addCallBacks(defaultFun, e);
-    }
-    void addCallBacks(callBack c, errorBack e)
-    {
-        m_nChains.push_back(Chain(c, e));
-    }
-
-    void runCallBacks(Exception &e)
-    {
-    }
-
-    void callback()
-    {
-        bool preStatusIsSucc = true;
-
-        Exception preException("noException");
-
-        while (!m_nChains.empty())
-        {
-            Chain tmp = m_nChains.front();
-            m_nChains.pop_front();
-            callBack c = tmp.first;
-            errorBack e = tmp.second;
-
-            if (preStatusIsSucc)
-            {
-                try
-                {
-                    c();
-                }
-                catch (Exception &e)
-                {
-                    preException = e;
-                    preStatusIsSucc = false;
-                }
-                catch (...)
-                {
-                    preStatusIsSucc = false;
-                }
-            }
-            else
-            {
-                try
-                {
-                    e(preException);
-                    //If no exception,set preStatusIsSucc as true;
-                    preStatusIsSucc = true;
-                }
-                catch (Exception &e)
-                {
-                    preException = e;
-                    preStatusIsSucc = false;
-                }
-                catch (...)
-                {
-                    preStatusIsSucc = false;
-                }
-            }
-        }
-    }
-    void errorback(const std::string &std)
-    {
-    }
-    ~Defer()
-    {
-        LOG(Debug) << "class Defer constructor\n";
-    }
-};
+#include "../defer.h"
 
 void succ1()
 {
@@ -173,29 +68,8 @@ int main()
     defer.addCallBack(succ3);
     defer.addErrorBack(fail3);
 
-    // defer.addCallBacks(doneSucc, doneFail);
-    // defer.addCallBack(doneSucc);
     defer.addErrorBack(doneFail);
 
     defer.callback();
-    return 0;
-}
-
-void fun()
-{
-    Exception e("111");
-    throw e;
-}
-
-int __main()
-{
-    try
-    {
-        fun();
-    }
-    catch (Exception &ex)
-    {
-        std::cout << ex.what() << std::endl;
-    }
     return 0;
 }

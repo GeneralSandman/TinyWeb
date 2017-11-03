@@ -5,7 +5,7 @@ gcc11o = $(gcc11) -o
 lib = api channel condition currentthread epoller eventloop exception \
 	log time timer timerqueue socket netaddress connection server accepter \
 	process processpool reader configer buffer protocol factory parser responser http \
-	sharedmemory semaphore master
+	sharedmemory semaphore master defer
 lib.o = $(foreach file,$(lib),$(file).o)
 lib.cc = $(foreach file,$(lib),../$(file).cc)
 
@@ -49,6 +49,8 @@ log_test:log_test.o
 	$(link) log_test log_test.o log.o
 protocol_test:protocol_test.o
 	$(link) protocol_test protocol_test.o $(lib.o) -lpthread
+defer_test:defer_test.o
+	$(link) defer_test defer_test.o $(lib.o) -lpthread
 test:test.o $(lib.o)
 	$(link) test test.o $(lib.o) -lpthread
 
@@ -92,6 +94,8 @@ log_test.o:log_test.cc
 	$(gcc11) log_test.cc
 protocol_test.o:protocol_test.cc
 	$(gcc11) protocol_test.cc
+defer_test.o:defer_test.cc
+	$(gcc11) defer_test.cc
 test.o:test.cc
 	$(gcc11) test.cc
 

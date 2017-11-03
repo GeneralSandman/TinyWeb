@@ -14,7 +14,63 @@
 #include "defer.h"
 #include "exception.h"
 
+void defaultFun()
+{
+}
+
+void defauleFunExce(Exception &e)
+{
+}
+
+void Defer::m_fRunCallBacks()
+{
+    while (!m_nChains.empty())
+    {
+        Chain tmp = m_nChains.front();
+        m_nChains.pop_front();
+        callBack c = tmp.first;
+        errorBack e = tmp.second;
+
+        if (m_nNextChain)
+        {
+            try
+            {
+                c();
+            }
+            catch (Exception &e)
+            {
+                m_nPreException = e;
+                m_nNextChain = false;
+            }
+            catch (...)
+            {
+                m_nNextChain = false;
+            }
+        }
+        else
+        {
+            try
+            {
+                e(m_nPreException);
+                //If no exception,set m_nNextChain as true;
+                m_nNextChain = true;
+            }
+            catch (Exception &e)
+            {
+                m_nPreException = e;
+                m_nNextChain = false;
+            }
+            catch (...)
+            {
+                m_nNextChain = false;
+            }
+        }
+    }
+}
+
 Defer::Defer()
+    : m_nNextChain(true),
+      m_nPreException("noException")
 {
     LOG(Debug) << "class Defer constructor\n";
 }
@@ -36,56 +92,15 @@ void Defer::addCallBacks(callBack c, errorBack e)
 
 void Defer::callback()
 {
-    bool preStatusIsSucc = true;
-
-    Exception preException("noException");
-
-    while (!m_nChains.empty())
-    {
-        Chain tmp = m_nChains.front();
-        m_nChains.pop_front();
-        callBack c = tmp.first;
-        errorBack e = tmp.second;
-
-        if (preStatusIsSucc)
-        {
-            try
-            {
-                c();
-            }
-            catch (Exception &e)
-            {
-                preException = e;
-                preStatusIsSucc = false;
-            }
-            catch (...)
-            {
-                preStatusIsSucc = false;
-            }
-        }
-        else
-        {
-            try
-            {
-                e(preException);
-                //If no exception,set preStatusIsSucc as true;
-                preStatusIsSucc = true;
-            }
-            catch (Exception &e)
-            {
-                preException = e;
-                preStatusIsSucc = false;
-            }
-            catch (...)
-            {
-                preStatusIsSucc = false;
-            }
-        }
-    }
+    m_nNextChain = true;
+    m_fRunCallBacks();
 }
 
-void Defer::errorback(const std::string &std)
+void Defer::errorback(Exception &exc)
 {
+    m_nNextChain = false;
+    m_nPreException = exc;
+    m_fRunCallBacks();
 }
 
 Defer::~Defer()

@@ -15,12 +15,11 @@
 #define DEFER_H
 
 #include "log.h"
+#include "exception.h"
 
 #include <deque>
 #include <string>
 #include <boost/function.hpp>
-
-class Exception;
 
 typedef boost::function<void()> callBack;
 typedef boost::function<void(Exception &)> errorBack;
@@ -30,31 +29,25 @@ typedef std::pair<errorBack, char **> errorBackPair;
 
 typedef std::pair<callBack, errorBack> Chain;
 
-void defaultFun()
-{
-}
-
-void defauleFunExce(Exception &e)
-{
-}
+void defaultFun();
+void defauleFunExce(Exception &e);
 
 class Defer
 {
   private:
     std::deque<Chain> m_nChains;
+    bool m_nNextChain;
+    Exception m_nPreException;
+
+    void m_fRunCallBacks();
 
   public:
     Defer();
     void addCallBack(callBack c);
     void addErrorBack(errorBack e);
     void addCallBacks(callBack c, errorBack e);
-
-    void runCallBacks(Exception &e)
-    {
-    }
-
     void callback();
-    void errorback(const std::string &std);
+    void errorback(Exception &);
     ~Defer();
 };
 
