@@ -4,7 +4,7 @@
 *E-mail:generalsandman@163.com
 *Web:www.generalsandman.cn
 */
- 
+
 #include <execinfo.h>
 
 #include "exception.h"
@@ -19,6 +19,22 @@ Exception::Exception(const std::string &msg)
     : m_nName(msg)
 {
     m_fFillStackTrace();
+}
+
+Exception::Exception(const Exception &e)
+{
+    m_nName = e.m_nName;
+    m_nStack = e.m_nStack;
+}
+
+Exception &Exception::operator=(const Exception &e)
+{
+    if ((&e) != this)
+    {
+        m_nName = e.m_nName;
+        m_nStack = e.m_nStack;
+        return (*this);
+    }
 }
 
 void Exception::m_fFillStackTrace()
