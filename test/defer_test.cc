@@ -1,11 +1,13 @@
+
+#include "../log.h"
+#include "../exception.h"
+#include "../defer.h"
+
 #include <iostream>
 #include <deque>
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 
-#include "../log.h"
-#include "../exception.h"
-#include "../defer.h"
 
 void succ1()
 {

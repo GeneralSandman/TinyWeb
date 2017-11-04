@@ -10,19 +10,21 @@
 ****************************************
 *
 */
- 
+
 #include "processpool.h"
 #include "process.h"
+#include "worker.h"
 #include "log.h"
 
-std::map<Process *, ProcStatus> ProcessPool::m_nProcess;
-int ProcessPool::m_nProNums = 0;
-bool ProcessPool::m_nStarted = false;
-bool ProcessPool::m_nStoped = false;
+// std::map<Process *, ProcStatus> ProcessPool::m_nProcess;
+// int ProcessPool::m_nProNums = 0;
+// bool ProcessPool::m_nStarted = false;
+// bool ProcessPool::m_nStoped = false;
 
-ProcessPool::ProcessPool()
+ProcessPool::ProcessPool(Master *master)
+    : m_pMaster(master)
 {
-    m_fSetupSigHandler();
+    // m_fSetupSigHandler();
     LOG(Debug) << "class ProcessPoll constructor\n";
 }
 
@@ -30,12 +32,10 @@ void ProcessPool::start(int nums)
 {
     for (int i = 0; i < nums; i++)
     {
-        Process *newProc = new Process(std::to_string(i), m_nProNums++);
+        Process *newProc = new Process(std::to_string(i), i, m_pWorker);
         m_nProcess[newProc] = Status_Started;
     }
 
-    m_nStarted = true;
-    pause();
     std::cout << "parent exited\n";
 }
 

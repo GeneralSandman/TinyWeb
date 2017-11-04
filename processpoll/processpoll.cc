@@ -6,8 +6,7 @@
 #include <signal.h>
 #include <sys/wait.h>
 
-namespace poll
-{
+
 Poll *Poll::m_pInstance = NULL; //must please in the .cc file
 //if he is in .h file,the complier will error
 
@@ -50,7 +49,6 @@ Poll::Poll(int listenfd, int process_number) : m_nListenfd(listenfd),
 
 void Poll::setup_sig_pipe(void)
 {
-    m_nEpollfd = epoll_create(8);
     if (m_nEpollfd == -1)
     {
         char msg[] = "epoll create error";
@@ -91,8 +89,6 @@ void Poll::m_fRunChild(void)
 
     epoll_event arrives[8];
 
-    Service *service = new Service();
-
     while (!m_nStop)
     {
         int number = epoll_wait(m_nEpollfd, arrives, 8, -1);
@@ -112,7 +108,6 @@ void Poll::m_fRunChild(void)
                     int connect_fd = accept(m_nListenfd, (struct sockaddr *)&client_addr, &client_len);
                     epolladdfd(m_nEpollfd, connect_fd);
                     //init the user function
-                    service->init(connect_fd, client_addr);
                 }
             }
             else if (sockfd == sigpipefd[0] && (arrives[i].events & EPOLLIN))
@@ -155,7 +150,6 @@ void Poll::m_fRunChild(void)
             {
                 //receive data from client
                 std::cout << "receive data\n";
-                service->proc();
             }
         }
     }
@@ -274,36 +268,4 @@ void Poll::m_fRunParent(void)
 
     // close(m_nListenfd);
     close(m_nEpollfd);
-}
-
-void Service::init(int sockfd, const sockaddr_in &client_addr)
-{
-    m_nConnectFd = sockfd;
-    m_nClientAddr = client_addr;
-}
-
-void Service::proc()
-{
-
-    int res = read(m_nConnectFd, m_nBuf, sizeof(m_nBuf));
-    std::cout << "receive:"<<m_nBuf<<"---\n";
-    for(char *tmp=m_nBuf;*tmp!='\0';tmp++)
-        printf("%d ",*tmp);
-    std::cout<<std::endl;
-    if (res > 0)
-    {
-        using namespace std;
-        vector<string> header;
-        header.reserve(3);
-        header.push_back("HTTP/1.0 200 OK\r\n");
-        header.push_back("Content-Type: text/html\r\n\r\n");
-        for (auto t : header)
-        {
-            writeString(m_nConnectFd, t);
-        }
-        std::string file = "home.html";
-        writeHtml(m_nConnectFd, file);
-    }
-    close(m_nConnectFd);
-}
 }

@@ -10,15 +10,17 @@
 ****************************************
 *
 */
- 
+
 #include "process.h"
+#include "worker.h"
 #include "log.h"
+
 #include <iostream>
 #include <string>
 #include <sys/types.h>
 #include <unistd.h>
 
-Process::Process(const std::string &name, int number)
+Process::Process(const std::string &name, int number, Worker *worker)
 {
     int res = fork();
     if (res > 0)
@@ -27,6 +29,7 @@ Process::Process(const std::string &name, int number)
     }
     else if (res == 0)
     {
+        m_pWorker = worker;
         m_nName = name;
         m_nNumber = number;
         m_nPid = getpid();
@@ -44,8 +47,7 @@ void Process::m_fProcessStart()
         //child
         m_nStarted = true;
         std::cout << "child process:" << m_nName << std::endl;
-        pause();
-        exit(0);
+        m_pWorker->work();
     }
     else
     {

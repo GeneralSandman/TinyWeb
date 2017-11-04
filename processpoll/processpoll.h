@@ -2,14 +2,11 @@
 #define POLL_H
 #include "../../api/api.h"
 #include "processpoll.h"
-#include "../../api/api.h"
 #include <sys/epoll.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <signal.h>
 
-namespace poll
-{
 class Process
 {
 public:
@@ -60,25 +57,5 @@ public:
     std::cout << "receive signal " << sig << std::endl;
   }
 };
-
-
-class Service
-{
-private:
-  static const int BUF_SIZE = 1024;
-  char m_nBuf[BUF_SIZE];
-
-  int m_nConnectFd;
-  struct sockaddr_in m_nClientAddr;
-
-public:
-  Service() {}
-  ~Service();
-  void init(int sockfd, const sockaddr_in &client_addr);
-  void proc();
-};
-
-
-}
 
 #endif

@@ -1,3 +1,0 @@
-Cache-Control: private
-Connection: Keep-Alive
-Content-Type: text/html;charset=utf-8

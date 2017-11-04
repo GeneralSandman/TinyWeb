@@ -10,7 +10,7 @@
 ****************************************
 *
 */
- 
+
 #ifndef PROCESS_H
 #define PROCESS_H
 
@@ -21,7 +21,6 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-
 #include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
 
@@ -33,13 +32,15 @@ enum ProcStatus
   Status_Exited
 };
 
+class Worker;
+
 class Process : boost::noncopyable
 {
 private:
+  Worker *m_pWorker;
   std::string m_nName; //parent process is "main"
   int m_nNumber;
   pid_t m_nPid;
-
   bool m_nStarted;
   bool m_nExited;
 
@@ -74,9 +75,7 @@ private:
   }
 
 public:
-  explicit Process(const std::string &name, int number);
-  int getNumber() { return m_nNumber; }
-  void setNumber(int n) { m_nNumber = n; }
+  explicit Process(const std::string &name, int number, Worker *worker);
   pid_t getPid()
   {
     if (m_nPid == 0)
@@ -85,8 +84,6 @@ public:
   }
   int join();
   bool started() { return true == m_nStarted; }
-  const std::string &getName() { return m_nName; }
-
   ~Process();
 };
 

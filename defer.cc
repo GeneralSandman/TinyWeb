@@ -70,7 +70,9 @@ void Defer::m_fRunCallBacks()
 
 Defer::Defer()
     : m_nNextChain(true),
-      m_nPreException("noException")
+      m_nPreException("noException"),
+      m_nIsCalling(false),
+      m_nCalled(false)
 {
     LOG(Debug) << "class Defer constructor\n";
 }
@@ -92,15 +94,25 @@ void Defer::addCallBacks(callBack c, errorBack e)
 
 void Defer::callback()
 {
+    if (m_nIsCalling || m_nCalled)
+        return;
     m_nNextChain = true;
+    m_nIsCalling = true;
+    m_nCalled = true;
     m_fRunCallBacks();
+    m_nIsCalling = false;
 }
 
 void Defer::errorback(Exception &exc)
 {
+    if (m_nIsCalling || m_nCalled)
+        return;
     m_nNextChain = false;
     m_nPreException = exc;
+    m_nIsCalling = true;
+    m_nCalled = true;
     m_fRunCallBacks();
+    m_nIsCalling = false;
 }
 
 Defer::~Defer()

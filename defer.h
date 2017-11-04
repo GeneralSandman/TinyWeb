@@ -34,21 +34,23 @@ void defauleFunExce(Exception &e);
 
 class Defer
 {
-  private:
-    std::deque<Chain> m_nChains;
-    bool m_nNextChain;
-    Exception m_nPreException;
+private:
+  std::deque<Chain> m_nChains;
+  bool m_nNextChain;
+  Exception m_nPreException;
 
-    void m_fRunCallBacks();
+  bool m_nIsCalling;
+  bool m_nCalled;
+  void m_fRunCallBacks();
 
-  public:
-    Defer();
-    void addCallBack(callBack c);
-    void addErrorBack(errorBack e);
-    void addCallBacks(callBack c, errorBack e);
-    void callback();
-    void errorback(Exception &);
-    ~Defer();
+public:
+  Defer();
+  void addCallBack(callBack c);
+  void addErrorBack(errorBack e);
+  void addCallBacks(callBack c, errorBack e);
+  void callback();
+  void errorback(Exception &);
+  ~Defer();
 };
 
 #endif // !DEFER_H
