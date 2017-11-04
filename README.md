@@ -104,6 +104,8 @@
     - 进程池机制（平滑启动）
     - memorypool
     - cache
+    - proxyer
+    - 负载均衡
 
 国庆学习计划
 - 入门negix
