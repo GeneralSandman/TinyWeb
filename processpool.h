@@ -28,14 +28,63 @@ class Worker;
 
 class ProcessPool
 {
-  private:
-    Master *m_pMaster;
-    std::map<Process *, ProcStatus> m_nProcess;
+private:
+  // Master *m_pMaster;
+  std::map<Process *, pid_t> m_nProcess;
+  //FIXME:
+  static void ParentSignalHandler(int sig)
+  {
+    int old_error = errno;
+    errno = old_error;
+    std::cout << "parent receive signal " << sig << std::endl;
+    if (sig == SIGKILL || sig == SIGINT || sig == SIGTERM)
+    {
+      std::cout << "kill all childern\n";
+    }
+    else if (sig == SIGCHLD)
+    {
+      std::cout << "child terminal\n";
+    }
+    else if (sig == SIGUSR1)
+    {
+      std::cout << "signal 1\n";
+    }
+    else if (sig == SIGUSR2)
+    {
+      std::cout << "signal 2\n";
+    }
+  }
+  static void ChildSignalHandler(int sig)
+  {
+    int old_error = errno;
+    errno = old_error;
+    std::cout << "child[" << getpid() << "] receive signal " << sig << std::endl;
+    if (sig == SIGKILL || sig == SIGINT || sig == SIGTERM)
+    {
+      std::cout << "kill myself\n";
+    }
+    else if (sig == SIGCHLD)
+    {
+      std::cout << "child terminal\n";
+    }
+    else if (sig == SIGUSR1)
+    {
+      std::cout << "signal 1\n";
+    }
+    else if (sig == SIGUSR2)
+    {
+      std::cout << "signal 2\n";
+    }
+  }
 
-  public:
-    ProcessPool(Master *);
-    void start(int nums);
-    ~ProcessPool();
+  void m_fInitSignal();
+
+public:
+  ProcessPool();
+  void start(int nums);
+  void killAll();
+  ~ProcessPool();
+  friend class Process;
 };
 
 #endif

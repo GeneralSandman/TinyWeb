@@ -9,7 +9,12 @@ int main()
     {
 
         ProcessPool pool;
-        pool.start(3);
+        pool.start(1);
+        // sleep(5);
+        // pool.killAll();
+        // sleep(5);
+
+        pause();
     }
 
     return 0;

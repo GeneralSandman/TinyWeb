@@ -19,10 +19,10 @@ thread_test:thread_test.o thread.o currentthread.o api.o
 	$(link) thread_test thread_test.o thread.o threadpool_test.o currentthread.o api.o -lpthread
 threadpool_test:threadpool_test.o thread.o threadpool.o currentthread.o api.o
 	$(link) threadpool_test threadpool_test.o thread.o threadpool.o currentthread.o api.o -lpthread
-process_test:process_test.o $(lib.o) -lpthread
+process_test:process_test.o $(lib.o)
 	$(link) process_test process_test.o $(lib.o) -lpthread
 processpool_test:processpool_test.o $(lib.o)
-	$(link) processpool_test processpool_test.o $(lib.o)
+	$(link) processpool_test processpool_test.o $(lib.o) -lpthread
 time_test:time_test.o time.o
 	$(link) time_test time_test.o time.o
 socket_test:socket_test.o $(lib.o)

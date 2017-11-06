@@ -32,59 +32,34 @@ enum ProcStatus
   Status_Exited
 };
 
+class ProcessPool;
 class Worker;
 
 class Process : boost::noncopyable
 {
 private:
-  Worker *m_pWorker;
+  // Worker *m_pWorker;
   std::string m_nName; //parent process is "main"
   int m_nNumber;
   pid_t m_nPid;
   bool m_nStarted;
   bool m_nExited;
 
+  void m_fInitSignal();
   void m_fProcessStart();
 
-  static void m_fSetupSigHandler(void)
-  {
-    add_signal(SIGHUP, m_fSignalHandler);
-    add_signal(SIGCHLD, m_fSignalHandler);
-    add_signal(SIGTERM, m_fSignalHandler);
-    add_signal(SIGINT, m_fSignalHandler);
-    add_signal(SIGPIPE, m_fSignalHandler);
-  }
-
-  static void m_fSignalHandler(int sig)
-  {
-    std::cout << sig << std::endl;
-    switch (sig)
-    {
-    case SIGTERM:
-    case SIGINT:
-    {
-      // m_nExited = true;
-      exit(0);
-      break;
-    }
-    default:
-    {
-      break;
-    }
-    }
-  }
-
 public:
-  explicit Process(const std::string &name, int number, Worker *worker);
+  explicit Process(const std::string &name, int number);
+  void start(); //invoke by processpool
   pid_t getPid()
   {
-    if (m_nPid == 0)
-      m_nPid = getpid();
     return m_nPid;
   }
   int join();
   bool started() { return true == m_nStarted; }
   ~Process();
+
+  friend class ProcessPool;
 };
 
 #endif // !PROCESS_H
