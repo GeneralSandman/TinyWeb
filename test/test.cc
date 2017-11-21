@@ -137,7 +137,7 @@ void funTest()
 /*
  * 
  */
-int main(void)
+int __main(void)
 {
     defer([]() { printf("defer a: %d\n", __LINE__); });
     defer([]() { printf("defer a: %d\n", __LINE__); });
@@ -164,4 +164,48 @@ int main(void)
     // funTest();
 
     return 0;
+}
+
+#include <unistd.h>
+#include <sys/types.h>
+
+class A
+{
+  public:
+    A()
+    {
+        std::cout << getpid() << "constructor\n";
+    }
+    ~A()
+    {
+        std::cout << getpid() << "destructor\n";
+    }
+};
+
+
+
+int main()
+{
+    {
+        A a;
+        pid_t res = fork();
+        if (res < 0)
+        {
+            //error
+        }
+        else if (res == 0)
+        {
+            // delete pa;
+            sleep(2);
+            std::cout << "child exits\n";
+            _exit(0);
+        }
+        else
+        {
+            // delete pa;
+
+            sleep(5);
+            std::cout << "parent exits\n";
+        }
+    }
 }

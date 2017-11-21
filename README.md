@@ -106,6 +106,9 @@
 
 - 思考：进程之间通信能不能用现有的Connection
 - fork 之后复制的内存如何销毁的问题！！！！！！！！
+- 优化创建进程的方式：通过vfork和exec
+
+
 
 - master和worker实际上是对processpoll和process的高层封装
     - 通过对他们的信号进行控制，进而实现对master对worker的控制，
