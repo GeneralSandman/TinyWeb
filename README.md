@@ -8,25 +8,18 @@
   |_| |_|_| |_|\__, | \_/\_/ \___|_.__/ 
                |___/                    
 ```
+TinyWeb是一款基于C++11开发的高性能Web服务器（性能还需要测试），他的基本方式进程池+事件驱动。在开发的时候参考Neginx的设计原理，后添加了自己的想法进行设计。他的优点主要是：高性能，配置方便，占用内存小，可方便进行热部署。实现了Web服务器的基本功能：代理，负载均衡，高性能日志。
+其中网络部分被抽出作为一个时间驱动式网络库，被应用在另一个独立项目：[Sigil（一个分布式键值数据库）](http://www.github.com/GeneralSandman/Sigil)
 
 
-
-```
-                           _                 
- _ __ ___     __ _   ___  | |_    ___   _ __ 
-| '_ ` _ \   / _` | / __| | __|  / _ \ | '__|
-| | | | | | | (_| | \__ \ | |_  |  __/ | |   
-|_| |_| |_|  \__,_| |___/  \__|  \___| |_|   
-
-```
-## diamond TinyWeb
-                                
-| version | type |
-|--------|-------|
+> # 一、如何安装TinyWeb
+git clone http://www.github.com/GeneralSandman/TinyWeb
+cd TinyWeb
+make TinyWeb
+make clean
 
 
-
-> # 一、TinyWeb配置方法
+> # 二、TinyWeb配置方法
 名称不区分大小写，数值区分大小写;#开头为注释行
 |名称|含义|
 |-|-|
@@ -54,6 +47,15 @@
         维护者数据缓冲，监听着各种连接事件
     - 简单来说：Connection负责数据传输，不处理用户逻辑；Protocol不处理数据传输，
      负责处理逻辑
+
+
+设计过程中遇到的难点及解决办法
+|难点|解决办法|
+|-|-|
+|如何搞笑的进程间通信，选用何种通信机制||
+|||
+|||
+|||
 
 
 
@@ -229,3 +231,19 @@ cout << configer.getConfigValue("loglevel");
 
 - 如果想要自定义协议类，只需要继承Protocol,并重载相关函数（见WebProtocol定义）
 
+
+
+参考文献：
+1.APUE
+
+2.UNP卷1
+
+3.UNP卷2
+
+4.C++ Primer
+
+5.[Linux 多线程服务端编程：使用 muduo C++ 网络库](https://github.com/chenshuo/documents)
+
+6.[C++ 官方参考手册](http://en.cppreference.com/w/cpp)
+
+7.[高性能服务器编程](http://blog.csdn.net/column/details/high-perf-network.html)
