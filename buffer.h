@@ -6,7 +6,8 @@ size_t readableBytes() { return m_fReadableBytes(); }
 */
 
 /*---class Buffer---
-*
+*It is very improtant to provied a network buffer to
+*socket,
 ****************************************
 *
 *put(fd):read date from fd and store into vector<char>

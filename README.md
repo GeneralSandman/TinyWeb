@@ -60,6 +60,8 @@ make clean
 
 
 升级计划
+- design cache class
+- nginx定义了结构体描述接受到信号的行为，定义一个数组注册收到信号的行为。
 - 提升程序为demon进程（demon程序标准输入输出如何处理?）
 - 优化loggger，解决logger生命周期过短的问题
 - Semphore

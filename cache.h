@@ -5,8 +5,8 @@
 *Web:www.generalsandman.cn
 */
 
-/*---XXX---
-*
+/*---class Cache---
+*how to design this class??
 ****************************************
 *
 */

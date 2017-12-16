@@ -5,10 +5,11 @@
 *Web:www.generalsandman.cn
 */
 
-/*---XXX---
-*
+/*---class Accepter---
+*This class is used by class Server to accept socket.
 ****************************************
-*
+*void setConnectionCallback(newConnectionCallback c);
+*void listen();//invoke system call listen()
 */
 
 #include "accepter.h"
@@ -32,6 +33,7 @@ void Accepter::m_fHandleRead()
     }
     else
     {
+        //FIXME:
         //handle error event
     }
 }

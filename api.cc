@@ -5,6 +5,11 @@
 *Web:www.generalsandman.cn
 */
 
+/*---XXX---
+*
+****************************************
+*
+*/
 #include "api.h"
 
 #include <iostream>

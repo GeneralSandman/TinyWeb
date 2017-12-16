@@ -5,6 +5,14 @@
 *Web:www.generalsandman.cn
 */
 
+/*---header api.h/cc---
+*This file is a set of apis which invoke system call and add
+*error detection.
+*TinyWeb don't invoke system call directly but use functions
+provied by this file.
+****************************************
+*
+*/
 #ifndef API_H
 #define API_H
 
