@@ -182,9 +182,37 @@ class A
     }
 };
 
+union obj {
+    union obj *next;
+    char data[1];
+};
 
+#include <stddef.h>
+
+#define ALIGN 8
+#define MAXSPACE 128
+#define LIST_SIZE MAXSPACE / ALIGN
+
+inline size_t ROUND_UP(size_t n)
+{
+    return (((n) + ALIGN - 1) & ~(ALIGN - 1));
+}
+
+inline size_t FREELIST_INDEX(size_t n)
+{
+    return ((n) + ALIGN - 1) / ALIGN - 1;
+}
 
 int main()
+{
+
+    for (int i = 0; i < 200; i++)
+    {
+        std::cout << i << "-" << ROUND_UP(i) << "-" << FREELIST_INDEX(i) << std::endl;
+    }
+}
+
+int main__()
 {
     {
         A a;
