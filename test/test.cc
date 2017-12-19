@@ -203,13 +203,35 @@ inline size_t FREELIST_INDEX(size_t n)
     return ((n) + ALIGN - 1) / ALIGN - 1;
 }
 
-int main()
+int mainn()
 {
 
     for (int i = 0; i < 200; i++)
     {
         std::cout << i << "-" << ROUND_UP(i) << "-" << FREELIST_INDEX(i) << std::endl;
     }
+}
+
+using namespace std;
+9
+int main()
+{
+    int *p = new int[4];
+
+    for (int i = 0; i < 4; i++)
+        *(p + i) = i;
+    for (int i = 0; i < 4; i++)
+        std::cout << *(p + i) << std::endl;
+
+    void *q1 = (void *)p;
+
+    for (int i = 0; i < 4; i++)
+    {
+        int *tmp = (int *)q1 + i;
+        std::cout << *tmp << "-" << tmp - q1 << std::endl;
+    }
+
+    delete[] p;
 }
 
 int main__()

@@ -20,6 +20,7 @@
 #define MAXSPACE 128
 #define LIST_SIZE MAXSPACE / ALIGN
 
+//Using union can reduce the expense of managing memory.
 union obj {
   union obj *freelist;
   char data[1];
@@ -38,13 +39,20 @@ inline size_t FREELIST_INDEX(size_t n)
 class MemoryPool
 {
 private:
-  size_t m_nAllocatedSpace;
+  size_t m_nAllocatedSpace; //Debug
   obj *m_nFreeList[LIST_SIZE];
+
+  //mark the boundary of heap
+  void *m_pHeapBegin;
+  void *m_pHeapEnd;
+
   void *m_fFindFreeBlock(size_t);
+  void m_fFillFreeList(size_t);
+  void m_fAddMoreHeap(size_t);
 
 public:
   MemoryPool();
-  size_t allocatedSpace() { return m_nAllocatedSpace; }
+  size_t allocatedSpace() { return m_nAllocatedSpace; } //Debug
   void *allocate(size_t);
   void deallocate(void *, size_t);
   void *reallocate(void *, size_t, size_t);
