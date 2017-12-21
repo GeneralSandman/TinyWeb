@@ -30,10 +30,6 @@ MemoryPool::MemoryPool()
     LOG(Debug) << "class MemoryPool constructor\n";
 }
 
-void *MemoryPool::m_fFindFreeBlock(size_t)
-{
-}
-
 void *MemoryPool::m_fFillFreeList(size_t s)
 {
     //if the heap size > block_num * s
@@ -61,7 +57,7 @@ void *MemoryPool::m_fFillFreeList(size_t s)
                 break;
             }
 
-            current_block->freelist = next_block;
+            current_block->p_next = next_block;
         }
     }
     else if (total_left >= s)
@@ -97,9 +93,9 @@ void *MemoryPool::m_fFillFreeList(size_t s)
         {
             current_chunk = next_chunk;
             next_chunk = (obj *)((char *)current_chunk + s);
-            current_chunk->freelist = next_chunk;
+            current_chunk->p_next = next_chunk;
         }
-        current_chunk->freelist = nullptr;
+        current_chunk->p_next = nullptr;
     }
     else
     {
@@ -136,28 +132,58 @@ char *MemoryPool::m_fAllocChunk(size_t s, int &chunk_num)
     {
         //Heap even can't provied one chunk.
         //Add more Heap space.
+
+        //reuse the last heap space
+        //add it to free list
+        size_t malloc_size = 0; //malloc_size%8==0
+        if (left_size > 0)
+        {
+            obj **list = m_nFreeList + FREELIST_INDEX(left_size);
+            ((obj *)m_pHeapBegin)->p_next = *list;
+            *list = (obj *)m_pHeapBegin;
+        }
+
+        m_pHeapBegin = (char *)malloc(malloc_size);
+        if (nullptr == m_pHeapBegin)
+        {
+            //reuse free list
+            obj **list_ = nullptr;
+            for (int i = s; i < MAXSPACE; i += ALIGN)
+            {
+                list_ = m_nFreeList + FREELIST_INDEX(i);
+                if ((*list_) != nullptr)
+                {
+                    //FIXME:
+                    *list_ = (*list_)->p_next;
+                    m_pHeapBegin = (char *)(*list_);
+                    m_pHeapEnd = m_pHeapBegin + i;
+
+                    //
+                }
+            }
+        }
     }
 }
 
-void MemoryPool::m_fAddMoreHeap(size_t)
+void MemoryPool::m_fAddMoreHeap(size_t s)
 {
     //invoke malloc() to get more heap memory
 }
 
 void *MemoryPool::allocate(size_t s)
 {
-    //if size > MAXSPACE : invoke alloc directly
-    //else :find a free block
+    //if size > MAXSPACE : invoke alloc directly,
+    //else :find a free block in free list.
     obj *result = nullptr;
     if (s > MAXSPACE)
     {
         result = (obj *)malloc(s);
         if (result == nullptr)
         {
+            //we have handle error
+            //set_new_handler
             std::cout << "malloc error\n";
         }
-        //we have handle error
-        //set_new_handler
     }
     else
     {
@@ -169,7 +195,7 @@ void *MemoryPool::allocate(size_t s)
             //this is a empty list,refill list
             return m_fFillFreeList(ROUND_UP(s));
         }
-        *list = result->freelist;
+        *list = result->p_next;
     }
     m_nAllocatedSpace += s;
     return result;
@@ -177,8 +203,8 @@ void *MemoryPool::allocate(size_t s)
 
 void MemoryPool::deallocate(void *p, size_t s)
 {
-    //if s > MAXSPACE ,free this space
-    //else add to free list
+    //if s > MAXSPACE :invoke free() directly,
+    //else :add it to free list
     if (s > MAXSPACE)
     {
         free(p);
@@ -187,7 +213,7 @@ void MemoryPool::deallocate(void *p, size_t s)
     {
         obj **list = m_nFreeList + FREELIST_INDEX(s);
         obj *newlist = (obj *)p;
-        newlist->freelist = *list;
+        newlist->p_next = *list;
         *list = newlist;
     }
     m_nAllocatedSpace -= s;

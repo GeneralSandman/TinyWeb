@@ -22,7 +22,7 @@
 
 //Using union can reduce the expense of managing memory.
 union obj {
-  union obj *freelist;
+  union obj *p_next;
   char data[1];
 };
 
@@ -46,7 +46,6 @@ private:
   char *m_pHeapBegin;
   char *m_pHeapEnd;
 
-  void *m_fFindFreeBlock(size_t);
   void *m_fFillFreeList(size_t);
   char *m_fAllocChunk(size_t, int&);
   void m_fAddMoreHeap(size_t);
