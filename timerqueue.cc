@@ -10,7 +10,7 @@
 ****************************************
 *
 */
- 
+
 #include "timerqueue.h"
 #include "timer.h"
 #include "channel.h"
@@ -19,6 +19,7 @@
 #include <sys/timerfd.h>
 #include <boost/bind.hpp>
 #include <unistd.h>
+#include <assert.h>
 #include <set>
 
 struct timespec howMuchTimeFromNow(Time when)
@@ -36,6 +37,8 @@ struct timespec howMuchTimeFromNow(Time when)
     return ts;
 }
 
+unsigned long long TimerQueue::m_nCreatedTimers = 0;
+
 void TimerQueue::m_fHandleRead()
 {
     //get happened and invoke the timer's callback
@@ -52,6 +55,8 @@ void TimerQueue::m_fHandleRead()
 
 void TimerQueue::m_fInsertTimer(Timer *timer)
 {
+    assert(m_nTimers.size() == m_nActiveTimers.size());
+
     bool mustResetTimeFd = false;
     Time time = timer->getTime();
     if (m_nTimers.empty())
@@ -59,11 +64,17 @@ void TimerQueue::m_fInsertTimer(Timer *timer)
     else if (time < m_nTimers.begin()->first)
         mustResetTimeFd = true;
 
+    //FIXME:handle the return value of insert.
     m_nTimers.insert(std::pair<Time, Timer *>(time, timer));
+    m_nActiveTimers.insert(std::pair<Timer *, unsigned long long>(timer, timer->getIdNum()));
+
     if (mustResetTimeFd)
         m_fResetTimeFd(time);
+
+    assert(m_nTimers.size() == m_nActiveTimers.size());
+
     //
-    //m_fResetTimeFd():If timer which we have added will happen before 
+    //m_fResetTimeFd():If timer which we have added will happen before
     //      make sure this timer can be invoked.
 }
 
@@ -79,7 +90,19 @@ void TimerQueue::m_fGetHappen(std::vector<Timer *> &happened)
     {
         happened.push_back(t.second);
     }
+
+    //make sure m_nTimers.size()==m_nActiveTimers.size()
+    //first:erase m_nTimers
     m_nTimers.erase(m_nTimers.begin(), end);
+
+    //second:erase m_nActiveTimers
+    for (auto t : happened)
+    {
+        std::pair<Timer *, unsigned long long> removeEntry(t, t->getIdNum());
+        m_nActiveTimers.erase(removeEntry);
+    }
+
+    assert(m_nTimers.size() == m_nActiveTimers.size());
 }
 
 void TimerQueue::m_fResetHappened(std::vector<Timer *> &happened)
@@ -111,6 +134,7 @@ TimerQueue::TimerQueue(EventLoop *loop)
 {
     //create a timer file descriptor:no block and close-on-exec
     //create a Channel to handle timer's read event.
+    m_pEventLoop = loop;
     m_nFd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
     m_pTimeChannel = new Channel(loop, m_nFd);
     m_pTimeChannel->setReadCallback(boost::bind(&TimerQueue::m_fHandleRead, this));
@@ -119,11 +143,17 @@ TimerQueue::TimerQueue(EventLoop *loop)
     LOG(Debug) << "class TimerQueue constructor\n";
 }
 
-void TimerQueue::addTimer(Time &time, timerReadCallback c, bool repet, double interval)
+TimerId TimerQueue::addTimer(Time &time, timerReadCallback c, bool repet, double interval)
 {
     //create timer and add it to queue.
     Timer *timer = new Timer(time, c, repet, interval);
     m_fInsertTimer(timer);
+    //FIXME:
+    return TimerId(timer, timer->getIdNum());
+}
+
+void TimerQueue::cancelTimer(TimerId &timerid)
+{
 }
 
 TimerQueue::~TimerQueue()

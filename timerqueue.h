@@ -14,11 +14,12 @@
 ****************************************
 *
 */
- 
+
 #ifndef TIMER_QUEUE_H
 #define TIMER_QUEUE_H
 
 #include "timer.h"
+#include "timerid.h"
 
 #include <vector>
 #include <set>
@@ -30,20 +31,28 @@ class EventLoop;
 
 class TimerQueue
 {
-  private:
-    std::set<std::pair<Time, Timer *>> m_nTimers;
-    int m_nFd;
-    Channel *m_pTimeChannel;
-    void m_fHandleRead();
-    void m_fInsertTimer(Timer *);
-    void m_fGetHappen(std::vector<Timer *> &);
-    void m_fResetHappened(std::vector<Timer *> &);
-    void m_fResetTimeFd(Time expiration);
+private:
+  static unsigned long long m_nCreatedTimers; //++
+  std::set<std::pair<Time, Timer *>> m_nTimers;
+  std::set<std::pair<Timer *, unsigned long long>> m_nActiveTimers; //++
+  //must m_nTimers.size()==m_nActiveTimers.size()
 
-  public:
-    TimerQueue(EventLoop *);
-    void addTimer(Time &time, timerReadCallback c, bool repet, double interval); //create Timer
-    ~TimerQueue();
+  EventLoop *m_pEventLoop;
+  int m_nFd;
+  Channel *m_pTimeChannel;
+  void m_fHandleRead();
+  void m_fInsertTimer(Timer *timer);
+  void m_fGetHappen(std::vector<Timer *> &happened);
+  void m_fResetHappened(std::vector<Timer *> &happened);
+  void m_fResetTimeFd(Time expiration);
+
+public:
+  TimerQueue(EventLoop *loop);
+  //getNextTimerId() only can be used by Timer.
+  static unsigned long long getNextTimerId() { return m_nCreatedTimers++; }       //++
+  TimerId addTimer(Time &time, timerReadCallback c, bool repet, double interval); //create Timer
+  void cancelTimer(TimerId &timerid);
+  ~TimerQueue();
 };
 
 #endif
