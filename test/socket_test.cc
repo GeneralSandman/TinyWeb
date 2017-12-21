@@ -1,13 +1,26 @@
+/*
+*Author:GeneralSandman
+*Code:https://github.com/GeneralSandman/TinyWeb
+*E-mail:generalsandman@163.com
+*Web:www.generalsandman.cn
+*/
+
+/*---XXX---
+*
+****************************************
+*
+*/
+
+#include "../socket.h"
+#include "../netaddress.h"
+#include "../api.h"
+
 #include <iostream>
 #include <vector>
 #include <string.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-
-#include "../socket.h"
-#include "../netaddress.h"
-#include "../api.h"
 
 using namespace std;
 

@@ -1,11 +1,24 @@
+/*
+*Author:GeneralSandman
+*Code:https://github.com/GeneralSandman/TinyWeb
+*E-mail:generalsandman@163.com
+*Web:www.generalsandman.cn
+*/
+
+/*---XXX---
+*
+****************************************
+*
+*/
+
+#include "../api.h"
+#include "../protocol.h"
+
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <typeinfo>
 #include <sstream>
-
-#include "../api.h"
-#include "../protocol.h"
 
 using namespace std;
 

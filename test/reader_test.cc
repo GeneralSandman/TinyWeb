@@ -5,9 +5,17 @@
 *Web:www.generalsandman.cn
 */
 
+/*---XXX---
+*
+****************************************
+*
+*/
+
 #include "../reader.h"
+
 #include <iostream>
 #include <string>
+
 using namespace std;
 
 int main()

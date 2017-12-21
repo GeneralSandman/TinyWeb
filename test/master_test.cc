@@ -5,6 +5,12 @@
 *Web:www.generalsandman.cn
 */
 
+/*---XXX---
+*
+****************************************
+*
+*/
+
 #include "../master.h"
 
 #include <iostream>

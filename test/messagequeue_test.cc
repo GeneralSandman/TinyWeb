@@ -1,11 +1,24 @@
+/*
+*Author:GeneralSandman
+*Code:https://github.com/GeneralSandman/TinyWeb
+*E-mail:generalsandman@163.com
+*Web:www.generalsandman.cn
+*/
+
+/*---XXX---
+*
+****************************************
+*
+*/
+
+#include "../api.h"
+
 #include <mqueue.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
-
-#include "../api.h"
 
 #define FILE_MODE (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
 

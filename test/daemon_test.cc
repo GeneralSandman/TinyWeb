@@ -11,13 +11,6 @@
 *
 */
 
-#include <iostream>
-#include <unistd.h>
-#include <signal.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-
 #include "../server.h"
 #include "../eventloop.h"
 #include "../netaddress.h"
@@ -29,6 +22,13 @@
 #include "../time.h"
 #include "../api.h"
 #include "../log.h"
+
+#include <iostream>
+#include <unistd.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 using namespace std;
 

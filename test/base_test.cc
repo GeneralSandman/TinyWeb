@@ -1,9 +1,22 @@
-#include <iostream>
-#include <sys/timerfd.h>
-#include <boost/bind.hpp>
+/*
+*Author:GeneralSandman
+*Code:https://github.com/GeneralSandman/TinyWeb
+*E-mail:generalsandman@163.com
+*Web:www.generalsandman.cn
+*/
+
+/*---XXX---
+*
+****************************************
+*
+*/
 
 #include "../eventloop.h"
 #include "../channel.h"
+
+#include <iostream>
+#include <sys/timerfd.h>
+#include <boost/bind.hpp>
 
 using namespace std;
 

@@ -1,9 +1,24 @@
+/*
+*Author:GeneralSandman
+*Code:https://github.com/GeneralSandman/TinyWeb
+*E-mail:generalsandman@163.com
+*Web:www.generalsandman.cn
+*/
+
+/*---XXX---
+*
+****************************************
+*
+*/
+
 #include "../currentthread.h"
 #include "../threadpool.h"
+
 #include <stdio.h>
 #include <string>
 #include <boost/bind.hpp>
 #include <unistd.h>
+
 void print()
 {
     printf("tid=%d\n", CurrentThread::tid());

@@ -5,6 +5,12 @@
 *Web:www.generalsandman.cn
 */
 
+/*---XXX---
+*
+****************************************
+*
+*/
+
 #include "../server.h"
 #include "../eventloop.h"
 #include "../netaddress.h"

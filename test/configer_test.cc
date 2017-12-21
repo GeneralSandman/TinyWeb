@@ -5,6 +5,13 @@
 *Web:www.generalsandman.cn
 */
 
+/*---XXX---
+*
+****************************************
+*
+*/
+
+
 #include "../log.h"
 #include "../api.h"
 #include "../configer.h"
