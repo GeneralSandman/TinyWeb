@@ -21,7 +21,6 @@
 #undef __STDC_FORMAT_MACROS
 
 #include <boost/static_assert.hpp>
-
 #include <string>
 
 BOOST_STATIC_ASSERT(sizeof(Time) == sizeof(int64_t));

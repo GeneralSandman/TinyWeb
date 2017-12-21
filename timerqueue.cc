@@ -63,7 +63,8 @@ void TimerQueue::m_fInsertTimer(Timer *timer)
     if (mustResetTimeFd)
         m_fResetTimeFd(time);
     //
-    //resetTimeFd()
+    //m_fResetTimeFd():If timer which we have added will happen before 
+    //      make sure this timer can be invoked.
 }
 
 void TimerQueue::m_fGetHappen(std::vector<Timer *> &happened)
@@ -88,7 +89,7 @@ void TimerQueue::m_fResetHappened(std::vector<Timer *> &happened)
         if (t->isRepet())
         {
             t->reset();
-            m_fInsertTimer(t); //reinsert
+            m_fInsertTimer(t); //reinsert timers which want repet.
         }
         else
         {
@@ -108,27 +109,33 @@ void TimerQueue::m_fResetTimeFd(Time expiration)
 
 TimerQueue::TimerQueue(EventLoop *loop)
 {
-    //have to create a timer file desp
+    //create a timer file descriptor:no block and close-on-exec
+    //create a Channel to handle timer's read event.
     m_nFd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
     m_pTimeChannel = new Channel(loop, m_nFd);
     m_pTimeChannel->setReadCallback(boost::bind(&TimerQueue::m_fHandleRead, this));
     m_pTimeChannel->enableRead();
+
     LOG(Debug) << "class TimerQueue constructor\n";
 }
 
 void TimerQueue::addTimer(Time &time, timerReadCallback c, bool repet, double interval)
 {
+    //create timer and add it to queue.
     Timer *timer = new Timer(time, c, repet, interval);
     m_fInsertTimer(timer);
 }
 
 TimerQueue::~TimerQueue()
 {
-    //delete all Timer*
+    //delete all Timers,
+    //close timer file descriptor,
+    //delete Channel
     for (auto t : m_nTimers)
         delete t.second;
     close(m_nFd);
     delete m_pTimeChannel;
     m_pTimeChannel = nullptr;
+
     LOG(Debug) << "class TimerQueue destructor\n";
 }

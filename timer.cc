@@ -21,6 +21,7 @@ Timer::Timer(Time &time, timerReadCallback c, bool repet, double interval)
     m_nRepet = repet;
     m_nInterval = interval;
     m_nCallback = c;
+    
     LOG(Debug) << "class Timer constructor\n";
 }
 

@@ -6,7 +6,12 @@
 */
 
 /*---Connector class---
-*This class has same function like Accepter
+*This class has same function like Accepter.
+*It is used by client to connect server.
+*It will handler more errors.
+* reconnect server
+* server refuse to connect
+* 
 ****************************************
 *
 */

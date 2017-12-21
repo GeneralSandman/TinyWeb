@@ -5,8 +5,12 @@
 *Web:www.generalsandman.cn
 */
 
-/*---XXX---
-*
+/*---class TimerQueue---
+*This class is used to manage class Timer.
+*If we get read event from timefd,we should
+*to find timers which are expires.
+*Timers we have added to TimerQueue multiplex
+*one timer file description.
 ****************************************
 *
 */
