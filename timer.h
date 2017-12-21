@@ -10,7 +10,7 @@
 ****************************************
 *
 */
- 
+
 #ifndef TIMER_H
 #define TIMER_H
 
@@ -22,19 +22,21 @@ typedef boost::function<void()> timerReadCallback;
 
 class Timer
 {
-  private:
-    Time m_nTime;
-    bool m_nRepet;
-    double m_nInterval;
-    timerReadCallback m_nCallback;
+private:
+  Time m_nTime;
+  unsigned long long m_nIdNum; //++++
+  bool m_nRepet;
+  double m_nInterval;
+  timerReadCallback m_nCallback;
 
-  public:
-    Timer(Time &time, timerReadCallback c, bool repet, double interval);
-    Time getTime() { return m_nTime; }
-    void run() { m_nCallback(); }
-    bool isRepet() { return m_nRepet; }
-    void reset();
-    ~Timer();
+public:
+  Timer(Time &time, timerReadCallback c, bool repet, double interval);
+  Time getTime() { return m_nTime; }
+  unsigned long long getIdNum() { return m_nIdNum; }//++
+  void run() { m_nCallback(); }
+  bool isRepet() { return m_nRepet; }
+  void reset();
+  ~Timer();
 };
 
 #endif // !TIMER_H
