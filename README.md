@@ -144,7 +144,6 @@ python client.py 9090 139.199.13.50 80
 - 残留的Connection应该有Server释放
 - 残留的Protocol应该由Factory释放
 - Connection不知道Protocol的存在，Server不知道Factory的存在
-- 为每项功能添加日志！！！！！！！！
 - processpoll和process通过底层的信号控制
 - 进程间通信用信号和共享内存
     - 信号控制进程的工作，停止
@@ -160,7 +159,6 @@ python client.py 9090 139.199.13.50 80
 就会进入睡眠状态,这会导致其他请求“饿死”。
 - master进程不需要处理网络事件,它不负责业务的执行,只会通过管理worker等子进程
 来实现重启服务、平滑升级、更换日志文件、配置文件实时生效等功能。
-- 添加定时器cancel功能，
 - 计划完成Client，Connector，memorypool类。
 - 重读代码，配置各个模块的日志结构。
 

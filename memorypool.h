@@ -43,11 +43,12 @@ private:
   obj *m_nFreeList[LIST_SIZE];
 
   //mark the boundary of heap
-  void *m_pHeapBegin;
-  void *m_pHeapEnd;
+  char *m_pHeapBegin;
+  char *m_pHeapEnd;
 
   void *m_fFindFreeBlock(size_t);
-  void m_fFillFreeList(size_t);
+  void *m_fFillFreeList(size_t);
+  char *m_fAllocChunk(size_t, int&);
   void m_fAddMoreHeap(size_t);
 
 public:

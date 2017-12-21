@@ -8,8 +8,8 @@
 /*---class Accepter---
 *This class is used by class Server to accept socket.
 ****************************************
-*void setConnectionCallback(newConnectionCallback c);
-*void listen();//invoke system call listen()
+*
+*
 */
 
 #ifndef ACCEPTER_H

@@ -26,6 +26,7 @@ MemoryPool::MemoryPool()
     for (int i = 0; i < LIST_SIZE; i++)
         m_nFreeList[i] = nullptr;
     m_nAllocatedSpace = 0;
+
     LOG(Debug) << "class MemoryPool constructor\n";
 }
 
@@ -33,7 +34,7 @@ void *MemoryPool::m_fFindFreeBlock(size_t)
 {
 }
 
-void MemoryPool::m_fFillFreeList(size_t s)
+void *MemoryPool::m_fFillFreeList(size_t s)
 {
     //if the heap size > block_num * s
     //  :add to this list block_num nodes
@@ -72,6 +73,70 @@ void MemoryPool::m_fFillFreeList(size_t s)
         //the heap size is small,add heap memory
         m_fAddMoreHeap(s);
     }
+
+    ///////////new begin//////////////
+    obj *result = nullptr;
+    int chunk_num = 15;
+    char *p_chunk = m_fAllocChunk(s, chunk_num);
+
+    if (1 == chunk_num)
+    {
+        result = (obj *)p_chunk;
+    }
+    else if (15 == chunk_num)
+    {
+        obj **list = m_nFreeList + FREELIST_INDEX(s);
+
+        obj *current_chunk = nullptr,
+            *next_chunk = nullptr;
+        result = (obj *)p_chunk;
+
+        current_chunk = next_chunk = (obj *)(p_chunk + s);
+
+        for (int i = 1; i < chunk_num - 1; i++)
+        {
+            current_chunk = next_chunk;
+            next_chunk = (obj *)((char *)current_chunk + s);
+            current_chunk->freelist = next_chunk;
+        }
+        current_chunk->freelist = nullptr;
+    }
+    else
+    {
+    }
+
+    return (void *)result;
+
+    ////////////
+}
+
+char *MemoryPool::m_fAllocChunk(size_t s, int &chunk_num)
+{
+    char *result = nullptr;
+
+    size_t request_size = s * chunk_num;
+    size_t left_size = m_pHeapEnd - m_pHeapBegin;
+    if (left_size >= request_size)
+    {
+        //Heap can provied chunk_num chunks to invoker.
+        result = m_pHeapBegin;
+        m_pHeapBegin += request_size;
+        return result;
+    }
+    else if (left_size >= s)
+    {
+        //The number of heap provied is between 1 and chunk_size.
+        chunk_num = left_size / s;
+        request_size = s * chunk_num;
+        result = m_pHeapBegin;
+        m_pHeapBegin += request_size;
+        return result;
+    }
+    else
+    {
+        //Heap even can't provied one chunk.
+        //Add more Heap space.
+    }
 }
 
 void MemoryPool::m_fAddMoreHeap(size_t)
@@ -81,8 +146,8 @@ void MemoryPool::m_fAddMoreHeap(size_t)
 
 void *MemoryPool::allocate(size_t s)
 {
-    //if size > MAXSPACE ,invoke alloc directly
-    //else find a free block
+    //if size > MAXSPACE : invoke alloc directly
+    //else :find a free block
     obj *result = nullptr;
     if (s > MAXSPACE)
     {
@@ -101,8 +166,8 @@ void *MemoryPool::allocate(size_t s)
         result = *list;
         if (result == nullptr)
         {
-            //refill list
-            m_fFillFreeList(s);
+            //this is a empty list,refill list
+            return m_fFillFreeList(ROUND_UP(s));
         }
         *list = result->freelist;
     }
