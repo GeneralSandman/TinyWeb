@@ -42,14 +42,16 @@ unsigned long long TimerQueue::m_nCreatedTimers = 0;
 void TimerQueue::m_fHandleRead()
 {
     //get happened and invoke the timer's callback
-    //if a timer will repet,reset
-    //else delete this timer
+    //checkout those timers if will repet
 
     std::vector<Timer *> happened;
     m_fGetHappen(happened);
+
+    m_nIsCallingExpiredTimers = true;
+    // m_nCancelingTimers.clear();//why
     for (auto t : happened)
         t->run();
-
+    m_nIsCallingExpiredTimers = false;
     m_fResetHappened(happened);
 }
 
@@ -107,10 +109,18 @@ void TimerQueue::m_fGetHappen(std::vector<Timer *> &happened)
 
 void TimerQueue::m_fResetHappened(std::vector<Timer *> &happened)
 {
+
     for (auto t : happened)
     {
-        if (t->isRepet())
+        std::pair<Timer *, unsigned long long>
+            timer(t, t->getIdNum());
+
+        if (t->isRepet() &&
+            m_nCancelingTimers.find(timer) ==
+                m_nCancelingTimers.end())
         {
+            //If this timer is a repet timer and
+            //haven't been canceled:reset.
             t->reset();
             m_fInsertTimer(t); //reinsert timers which want repet.
         }
@@ -120,6 +130,8 @@ void TimerQueue::m_fResetHappened(std::vector<Timer *> &happened)
             t = nullptr;
         }
     }
+
+    m_nCancelingTimers.clear();
 }
 
 void TimerQueue::m_fResetTimeFd(Time expiration)
@@ -152,8 +164,43 @@ TimerId TimerQueue::addTimer(Time &time, timerReadCallback c, bool repet, double
     return TimerId(timer, timer->getIdNum());
 }
 
-void TimerQueue::cancelTimer(TimerId &timerid)
+void TimerQueue::cancelTimer(const TimerId &timerid)
 {
+    assert(m_nTimers.size() == m_nActiveTimers.size());
+
+    Time time = timerid.m_pTimer->getTime();
+    Timer *timer = timerid.m_pTimer;
+    unsigned long long idnum = timerid.m_nIdNum;
+    
+    std::pair<Time, Timer *>
+        cancelTimer = std::make_pair(time, timer);
+    std::pair<Timer *, unsigned long long>
+        cancelTimer_ = std::make_pair(timer, idnum);
+
+    std::set<std::pair<Time, Timer *>>::iterator
+        p = m_nTimers.find(cancelTimer);
+    std::set<std::pair<Timer *, unsigned long long>>::iterator
+        p_ = m_nActiveTimers.find(cancelTimer_);
+
+    if (p_ != m_nActiveTimers.end())
+    {
+        m_nTimers.erase(cancelTimer);
+        m_nActiveTimers.erase(cancelTimer_);
+        delete timerid.m_pTimer;
+    }
+    else if (m_nIsCallingExpiredTimers)
+    {
+        m_nCancelingTimers.insert(cancelTimer_);
+        //defer the delect action to
+        //m_fResetHappened().
+    }
+    else
+    {
+        //this timerid is expired.
+        //ignorce.
+    }
+
+    assert(m_nTimers.size() == m_nActiveTimers.size());
 }
 
 TimerQueue::~TimerQueue()

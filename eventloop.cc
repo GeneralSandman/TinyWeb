@@ -15,6 +15,7 @@
 #include "epoller.h"
 #include "channel.h"
 #include "timerqueue.h"
+#include "timerid.h"
 #include "time.h"
 #include "log.h"
 
@@ -47,21 +48,26 @@ void EventLoop::loop()
     }
 }
 
-void EventLoop::runAt(Time time, timerReadCallback c)
+TimerId EventLoop::runAt(Time time, timerReadCallback c)
 {
-    m_pTimerQueue->addTimer(time, c, false, 0);
+    return m_pTimerQueue->addTimer(time, c, false, 0);
 }
 
-void EventLoop::runAfter(double second, timerReadCallback c)
+TimerId EventLoop::runAfter(double second, timerReadCallback c)
 {
     Time time = addTime(Time::now(), second);
-    m_pTimerQueue->addTimer(time, c, false, 0);
+    return m_pTimerQueue->addTimer(time, c, false, 0);
 }
 
-void EventLoop::runEvery(double interval, timerReadCallback c)
+TimerId EventLoop::runEvery(double interval, timerReadCallback c)
 {
     Time time = addTime(Time::now(), interval);
-    m_pTimerQueue->addTimer(time, c, true, interval);
+    return m_pTimerQueue->addTimer(time, c, true, interval);
+}
+
+void EventLoop::cancelTimerId(const TimerId &timerid)
+{
+    m_pTimerQueue->cancelTimer(timerid);
 }
 
 EventLoop::~EventLoop()

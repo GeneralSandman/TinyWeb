@@ -19,18 +19,21 @@
 
 class TimerId
 {
-  private:
-    Timer *m_pTimer;
-    unsigned long long m_nIdNum;
+private:
+  Timer *m_pTimer;
+  unsigned long long m_nIdNum;
 
-  public:
-    TimerId(Timer *timer = nullptr, unsigned long long idnum = 0)
-        : m_pTimer(timer),
-          m_nIdNum(idnum)
-    {
+public:
+  TimerId(Timer *timer = nullptr, unsigned long long idnum = 0)
+      : m_pTimer(timer),
+        m_nIdNum(idnum)
+  {
 
-        LOG(Debug) << "class TimerId construct\n";
-    }
+    LOG(Debug) << "class TimerId construct\n";
+  }
+
+  friend class Timer;
+  friend class TimerQueue;
 };
 
 #endif // !TIMER_ID_H

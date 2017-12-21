@@ -27,6 +27,8 @@ memorypool_test:memorypool_test.o $(lib.o)
 	$(link) memorypool_test memorypool_test.o $(lib.o) -lpthread
 time_test:time_test.o time.o
 	$(link) time_test time_test.o time.o
+timerqueue_test:timerqueue_test.o $(lib.o)
+	$(link) timerqueue_test timerqueue_test.o $(lib.o) -lpthread
 socket_test:socket_test.o $(lib.o)
 	$(link) socket_test socket_test.o $(lib.o)
 accepter_test:accepter_test.o $(lib.o)
@@ -76,6 +78,8 @@ memorypool_test.o:memorypool_test.cc
 	$(gcc11) memorypool_test.cc
 time_test.o:time_test.cc
 	$(gcc11) time_test.cc
+timerqueue_test.o:timerqueue_test.cc
+	$(gcc11) timerqueue_test.cc
 socket_test.o:socket_test.cc
 	$(gcc11) socket_test.cc
 accepter_test.o:accepter_test.cc

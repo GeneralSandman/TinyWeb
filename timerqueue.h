@@ -36,6 +36,8 @@ private:
   std::set<std::pair<Time, Timer *>> m_nTimers;
   std::set<std::pair<Timer *, unsigned long long>> m_nActiveTimers; //++
   //must m_nTimers.size()==m_nActiveTimers.size()
+  bool m_nIsCallingExpiredTimers;
+  std::set<std::pair<Timer *, unsigned long long>> m_nCancelingTimers; //++  
 
   EventLoop *m_pEventLoop;
   int m_nFd;
@@ -51,7 +53,7 @@ public:
   //getNextTimerId() only can be used by Timer.
   static unsigned long long getNextTimerId() { return m_nCreatedTimers++; }       //++
   TimerId addTimer(Time &time, timerReadCallback c, bool repet, double interval); //create Timer
-  void cancelTimer(TimerId &timerid);
+  void cancelTimer(const TimerId &timerid);
   ~TimerQueue();
 };
 

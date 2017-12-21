@@ -22,6 +22,7 @@
 class EPoller;
 class Channel;
 class TimerQueue;
+class TimerId;
 
 class EventLoop
 {
@@ -37,9 +38,10 @@ public:
   void removeChannel(Channel *);
   void loop();
   void quit() { m_nRunning = false; }
-  void runAt(Time, timerReadCallback);
-  void runAfter(double, timerReadCallback);
-  void runEvery(double, timerReadCallback);
+  TimerId runAt(Time, timerReadCallback);
+  TimerId runAfter(double, timerReadCallback);
+  TimerId runEvery(double, timerReadCallback);
+  void cancelTimerId(const TimerId &);
 
   ~EventLoop();
 };
