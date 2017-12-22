@@ -32,7 +32,7 @@ class Server
 {
 private:
   bool m_nStarted;
-  int m_nConNum;
+  unsigned long long m_nConNum;
   NetAddress m_nListenAddress;
   EventLoop *m_pEventLoop;
   Accepter m_nAccepter;
@@ -40,7 +40,6 @@ private:
   ConnectionCallback m_nConnectCallback;
   MessageCallback m_nMessageCallback;
   CloseCallback m_nCloseCallback;
-
   Factory *m_pFactory;
 
   void m_fHandleRead(int, const NetAddress &);

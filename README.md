@@ -116,18 +116,12 @@ python client.py 9090 139.199.13.50 80
     - 效率
 
 - 增加异步读磁盘
-- design cache class
 - nginx定义了结构体描述接受到信号的行为，定义一个数组注册收到信号的行为。
 - 提升程序为demon进程（demon程序标准输入输出如何处理?）
-- 优化loggger，解决logger生命周期过短的问题
-- Semphore
-- SharedMemory
-- parser 可以精确地识别出路径名，和url（需要更加健壮）(应用正则表达式验证正确性)
-- 优化logger，
-- 如何处理请求目录
+- Semphore,SharedMemory,Cache
+- 优化Parser
 - 通过list维护一批请求头，响应头
 - 如何处理url中包含```../```的问题
-- 添加proxy
 - add MIME type
 - 为Connection添加close()功能来作为对shutdownWrite()的补充
 - 如何支持中文url??????
@@ -141,14 +135,13 @@ python client.py 9090 139.199.13.50 80
 - 每个Process均有一个EventLoop，不过监听的event不同
     - master监听网络事件
     - slaver监听master的通信事件，和每个Connection的定时器事件
-- 残留的Connection应该有Server释放
+- 残留的Connection应该由Server释放
 - 残留的Protocol应该由Factory释放
 - Connection不知道Protocol的存在，Server不知道Factory的存在
 - processpoll和process通过底层的信号控制
 - 进程间通信用信号和共享内存
     - 信号控制进程的工作，停止
     - 共享内存更偏重于业务逻辑
-- 思考：进程之间通信能不能用现有的Connection
 - fork 之后复制的内存如何销毁的问题！！！！！！！！
 - 优化创建进程的方式：通过vfork和exec
 - master和worker实际上是对processpoll和process的高层封装
@@ -159,7 +152,7 @@ python client.py 9090 139.199.13.50 80
 就会进入睡眠状态,这会导致其他请求“饿死”。
 - master进程不需要处理网络事件,它不负责业务的执行,只会通过管理worker等子进程
 来实现重启服务、平滑升级、更换日志文件、配置文件实时生效等功能。
-- 计划完成Client，Connector，memorypool类。
+- 计划完成Client，Connector，Proxy,memorypool类。
 - 重读代码，配置各个模块的日志结构。
 
 ### 按什么原则划分请求的阶段
