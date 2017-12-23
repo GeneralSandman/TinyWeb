@@ -111,7 +111,8 @@ Factory::~Factory()
 //--------end-Factory api--------------//
 
 //---ServerFactory api--------------//
-ServerFactory::ServerFactory()
+ServerFactory::ServerFactory(EventLoop *loop, Protocol *protocol)
+    : Factory(loop, protocol)
 {
     LOG(Debug) << "class ServerFactory constructor\n";
 }
@@ -121,9 +122,9 @@ ServerFactory::~ServerFactory()
     LOG(Debug) << "class ServerFactory destructor\n";
 }
 
-
 //---ClientFactory api--------------//
-ClientFactory::ClientFactory()
+ClientFactory::ClientFactory(EventLoop *loop, Protocol *protocol)
+    : Factory(loop, protocol)
 {
     LOG(Debug) << "class ClientFactory constructor\n";
 }

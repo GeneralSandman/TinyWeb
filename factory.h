@@ -82,7 +82,7 @@ class ServerFactory : public Factory
 {
 private:
 public:
-  ServerFactory(Protocol *);
+  ServerFactory(EventLoop*,Protocol *);
   ~ServerFactory();
 };
 
@@ -92,7 +92,7 @@ class ClientFactory : public Factory
 {
 private:
 public:
-  ClientFactory(Protocol *);
+  ClientFactory(EventLoop*,Protocol *);
   ~ClientFactory();
 };
 
