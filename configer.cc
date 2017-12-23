@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 
+//default configuration file.
 std::string Configer::m_nFile = "/TinyWeb.conf";
 Reader Configer::m_nFileReader("/TinyWeb.conf");
 
@@ -21,16 +22,18 @@ void setConfigerFile(const std::string &file)
 {
     Configer::getConfigerInstance().setConfigerFile(file);
 }
+
 bool loadConfig()
 {
     return Configer::getConfigerInstance().loadConfig();
 }
+
 std::string getConfigValue(const std::string &key)
 {
     return Configer::getConfigerInstance().getConfigValue(key);
 }
 
-void Configer::m_fInit()
+void Configer::m_fInitDefaultKeyValue()
 {
     m_nValue["listen"] = "80";
     m_nValue["processpoll"] = "8";
@@ -46,7 +49,8 @@ void Configer::m_fInit()
 }
 
 bool Configer::m_fParseLine(std::string &s,
-                            std::string &key, std::string &value)
+                            std::string &key,
+                            std::string &value)
 {
     eraseAllSpace(s);
     if (s[s.size() - 1] == '\n')
@@ -54,10 +58,12 @@ bool Configer::m_fParseLine(std::string &s,
 
     if (s.empty())
     {
+        //It is a empty line.
         return true;
     }
     else if (s[0] == '#')
     {
+        //It is a comment line.
         return true;
     }
 
@@ -81,7 +87,7 @@ bool Configer::m_fParseLine(std::string &s,
 
 Configer::Configer()
 {
-    m_fInit();
+    m_fInitDefaultKeyValue();
     // LOG(Debug) << "class Configer constructor\n";
 }
 
@@ -102,6 +108,11 @@ bool Configer::loadConfig()
 
         if (m_fParseLine(s, key, value))
         {
+            auto p = m_nValue.find(key);
+            if (p == m_nValue.end())
+            {
+                return false;
+            }
             if (key != "" && m_nValue.find(key) != m_nValue.end())
             {
                 value_tmp[key] = value;

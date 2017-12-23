@@ -6,15 +6,19 @@
 */
 
 /*---Reader Class---
-*Reader is a class which is used to read configure file.
+*Reader is a class which is used to read file.
 *This class doesn't use IO(buffer)-class.
 *We need to upgrade this class.
 *Before we use readLine(),make sure invoke resetToHead()
 ****************************************
-*readLine():return current line content
-*getCurrLineNu():return current line number
-*haveMore():if file have more content to be readed,return true
-*resetToHead():reread begin the file head.
+*readLine():
+*   return current line content
+*getCurrLineNu():
+*   return current line number
+*haveMore():
+*   if file have more content to be readed,return true
+*resetToHead():
+*   reread begin the file head.
 */
 
 #ifndef READER_H

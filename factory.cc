@@ -15,6 +15,7 @@
 #include "buffer.h"
 #include "eventloop.h"
 #include "protocol.h"
+#include "timerid.h"
 #include "log.h"
 
 //---------Factory api--------------//

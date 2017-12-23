@@ -32,7 +32,7 @@ class Configer
     static Reader m_nFileReader;
     std::map<std::string, std::string> m_nValue;
 
-    void m_fInit();
+    void m_fInitDefaultKeyValue();
     bool m_fParseLine(std::string &, std::string &, std::string &);
     Configer();
     Configer(const Configer &c) //disable
