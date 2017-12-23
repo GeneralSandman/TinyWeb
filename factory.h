@@ -25,6 +25,8 @@
 
 class EventLoop;
 
+/*--------Factory-----------------------*/
+
 class Factory
 {
 private:
@@ -74,13 +76,25 @@ public:
   ~Factory();
 };
 
-// class ServerFactory : public Factory
-// {
-// private:
-// public:
-//   ServerFactory(Protocol *);
-//   ~ServerFactory();
-// };
+/*--------ServerFactory-----------------------*/
+
+class ServerFactory : public Factory
+{
+private:
+public:
+  ServerFactory(Protocol *);
+  ~ServerFactory();
+};
+
+/*--------ClientFactory-----------------------*/
+
+class ClientFactory : public Factory
+{
+private:
+public:
+  ClientFactory(Protocol *);
+  ~ClientFactory();
+};
 
 // class EchoServerFactory : public ServerFactory
 // {

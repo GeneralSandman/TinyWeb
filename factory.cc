@@ -111,16 +111,27 @@ Factory::~Factory()
 //--------end-Factory api--------------//
 
 //---ServerFactory api--------------//
-// ServerFactory::ServerFactory()
-// {
-//     LOG(Debug) << "class ServerFactory constructor\n";
-// }
+ServerFactory::ServerFactory()
+{
+    LOG(Debug) << "class ServerFactory constructor\n";
+}
 
-// ServerFactory::~ServerFactory()
-// {
-//     LOG(Debug) << "class ServerFactory destructor\n";
-// }
+ServerFactory::~ServerFactory()
+{
+    LOG(Debug) << "class ServerFactory destructor\n";
+}
 
+
+//---ClientFactory api--------------//
+ClientFactory::ClientFactory()
+{
+    LOG(Debug) << "class ClientFactory constructor\n";
+}
+
+ClientFactory::~ClientFactory()
+{
+    LOG(Debug) << "class ClientFactory destructor\n";
+}
 //---EchoServerFactory api--------------//
 // EchoServerFactory::EchoServerFactory()
 // {

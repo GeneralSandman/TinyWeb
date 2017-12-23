@@ -19,12 +19,26 @@
 #ifndef CONNECTOR_T
 #define CONNECTOR_T
 
+#include "netaddress.h"
+#include "socket.h"
+#include "channel.h"
+
+class EventLoop;
+
 class Connector
 {
-  private:
-  public:
-    Connector();
-    ~Connector();
+private:
+  EventLoop *m_pEventLoop;
+  NetAddress m_nServerAddress;
+  bool  m_nRetry;
+  Socket m_nConnectSocket;
+  Channel m_nConnectChannel;
+
+public:
+  Connector(EventLoop *, const NetAddress &,bool ,int hostport=0);
+  void connect();
+  void retry();
+  ~Connector();
 };
 
 #endif // !CONNECTOR_T

@@ -103,6 +103,9 @@ public:
 std::string getName(Protocol *p);
 Protocol *getInstanceByPointer(const Protocol *p);
 
+
+/*-------Protocol------------*/
+
 class Protocol
 {
 public:
@@ -128,7 +131,9 @@ public:
   friend class Factory;
 };
 
+
 /*-------DiscardProtocol------------*/
+
 class DiscardProtocol : public Protocol
 {
 private:
@@ -140,7 +145,9 @@ public:
   virtual ~DiscardProtocol();
 };
 
+
 /*-------EchoProtocol------------*/
+
 class EchoProtocol : public Protocol
 {
 public:
@@ -150,6 +157,7 @@ public:
   virtual void connectionLost();
   virtual ~EchoProtocol();
 };
+
 
 /*--------WebProtocol-----------*/
 
@@ -168,6 +176,34 @@ public:
   virtual ~WebProtocol();
 
   friend class HttpResponser;
+};
+
+
+/*-------TestServerProtocol------------*/
+
+class TestServerProtocol : public Protocol
+{
+private:
+public:
+  TestServerProtocol();
+  virtual void connectionMade();
+  virtual void dataReceived(const std::string &);
+  virtual void connectionLost();
+  virtual ~TestServerProtocol();
+};
+
+
+/*-------TestClientProtocol------------*/
+
+class TestClientProtocol : public Protocol
+{
+private:
+public:
+  TestClientProtocol();
+  virtual void connectionMade();
+  virtual void dataReceived(const std::string &);
+  virtual void connectionLost();
+  virtual ~TestClientProtocol();
 };
 
 #endif // !PROTOCOL_H

@@ -14,12 +14,48 @@
 #ifndef CLIENT_T
 #define CLIENT_T
 
+#include "netaddress.h"
+#include "callback.h"
+
+#include <set>
+
+class EventLoop;
+class Connector;
+class Connection;
+class Factory;
+
 class Client
 {
-  private:
-  public:
-    Client();
-    ~Client();
+private:
+  bool m_nStarted;
+  unsigned long long m_nConNum;
+  EventLoop *m_pEventLoop;
+  // Connector m_nConnector;
+  std::set<Connector *> m_nConnectors;
+  std::set<Connection *> m_nConnections;
+  // std::set<std::pair<Connector *, Connection *>> m_nConnections_;
+  ConnectionCallback m_nConnectCallback;
+  MessageCallback m_nMessageCallback;
+  CloseCallback m_nCloseCallback;
+  Factory *m_pFactory;
+
+public:
+  Client(EventLoop *, Factory *);
+  void setConenctCallback(ConnectionCallback c)
+  {
+    m_nConnectCallback = c;
+  }
+  void setMessageCallback(MessageCallback c)
+  {
+    m_nMessageCallback = c;
+  }
+  void setCloseCallback(CloseCallback c)
+  {
+    m_nCloseCallback = c;
+  }
+  void start();
+  void connect(const NetAddress &peeraddress, bool retry,int hostport=0);
+  ~Client();
 };
 
 #endif // !CLIENT_T
