@@ -11,6 +11,11 @@
 *to find timers which are expires.
 *Timers we have added to TimerQueue multiplex
 *one timer file description.
+*addTimer()
+*   add a timer to queue,used by eventLoop
+*cancelTimer()
+*   cancel a timer by a TimerId,
+*   TimerId can getted by addTimer.
 ****************************************
 *
 */

@@ -26,7 +26,10 @@ void Server::m_fHandleRead(int connectfd, const NetAddress &address)
 {
     // NetAddress local(getLocalAddr());
     Connection *newCon =
-        new Connection(m_pEventLoop, connectfd, m_nListenAddress, address);
+        new Connection(m_pEventLoop,
+                       connectfd,
+                       m_nListenAddress,
+                       address);
     m_nConNum++;
     // std::cout << m_nConNum << std::endl;
     newCon->setConenctCallback(m_nConnectCallback);
