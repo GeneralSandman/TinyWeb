@@ -5,7 +5,7 @@
 *Web:www.generalsandman.cn
 */
 
-/*---XXX---
+/*---class Connection---
 *
 ****************************************
 *
@@ -24,6 +24,7 @@
 
 class Connection;
 class Socket;
+class EventLoop;
 
 enum Connection_State
 {
@@ -32,8 +33,6 @@ enum Connection_State
   DisConnecting,
   DisConnected
 };
-
-class EventLoop;
 
 class Connection
 {

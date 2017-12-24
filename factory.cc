@@ -18,7 +18,8 @@
 #include "timerid.h"
 #include "log.h"
 
-//---------Factory api--------------//
+/*------------Factory-------------*/
+
 Factory::Factory(EventLoop *loop, Protocol *prot)
     : m_pLoop(loop),
       m_nNumProts(0),
@@ -108,13 +109,19 @@ Factory::~Factory()
     LOG(Debug) << "class Factory destructor\n";
 }
 
-//--------end-Factory api--------------//
+/*------------Factory-------------*/
 
-//---ServerFactory api--------------//
+/*------------ServerFactory-------------*/
+
 ServerFactory::ServerFactory(EventLoop *loop, Protocol *protocol)
     : Factory(loop, protocol)
 {
     LOG(Debug) << "class ServerFactory constructor\n";
+}
+
+void ServerFactory::buildProtocol(Protocol *newProt)
+{
+    //set member of Protocol.
 }
 
 ServerFactory::~ServerFactory()
@@ -122,35 +129,64 @@ ServerFactory::~ServerFactory()
     LOG(Debug) << "class ServerFactory destructor\n";
 }
 
-//---ClientFactory api--------------//
+/*------------ServerFactory-------------*/
+
+/*------------ClientFactory-------------*/
+
 ClientFactory::ClientFactory(EventLoop *loop, Protocol *protocol)
     : Factory(loop, protocol)
 {
     LOG(Debug) << "class ClientFactory constructor\n";
 }
 
+void ClientFactory::buildProtocol(Protocol *newProt)
+{
+    //set member of Protocol.
+}
+
 ClientFactory::~ClientFactory()
 {
     LOG(Debug) << "class ClientFactory destructor\n";
 }
-//---EchoServerFactory api--------------//
-// EchoServerFactory::EchoServerFactory()
-// {
-//     LOG(Debug) << "class EchoServerFactory constructor\n";
-// }
 
-// EchoServerFactory::~EchoServerFactory()
-// {
-//     LOG(Debug) << "class EchoServerFactory destructor\n";
-// }
+/*-----------ClientFactory--------------*/
 
-//---WebServerFactory api--------------//
-// WebServerFactory::WebServerFactory()
-// {
-//     LOG(Debug) << "class WebServerFactory constructor\n";
-// }
+/*-----------ServerPoemFactory--------------*/
 
-// WebServerFactory::~WebServerFactory()
-// {
-//     LOG(Debug) << "class WebServerFactory destructor\n";
-// }
+ServerPoemFactory::ServerPoemFactory(EventLoop *loop, Protocol *protocol)
+    : ServerFactory(loop, protocol)
+{
+    LOG(Debug) << "class ServerPoemFactory constructor\n";
+}
+
+void ServerPoemFactory::buildProtocol(Protocol *newProt)
+{
+    //set member of Protocol.
+}
+
+ServerPoemFactory::~ServerPoemFactory()
+{
+    LOG(Debug) << "class ServerPoemFactory destructor\n";
+}
+
+/*------------ServerPoemFactory-------------*/
+
+/*------------ClientPoemFactory-------------*/
+
+ClientPoemFactory::ClientPoemFactory(EventLoop *loop, Protocol *protocol)
+    : ClientFactory(loop, protocol)
+{
+    LOG(Debug) << "class ClientPoemFactory constructor\n";
+}
+
+void ClientPoemFactory::buildProtocol(Protocol *newProt)
+{
+    //set member of Protocol.
+}
+
+ClientPoemFactory::~ClientPoemFactory()
+{
+    LOG(Debug) << "class ClientPoemFactory destructor\n";
+}
+
+/*-------------ClientPoemFactory------------*/

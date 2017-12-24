@@ -6,7 +6,7 @@
 */
 
 /*---class Factory---
-*
+*This class is a factory which produces protocols.
 ****************************************
 *
 */
@@ -20,18 +20,19 @@
 
 #include <map>
 #include <set>
+#include <string>
 #include <iostream>
 #include <boost/bind.hpp>
 
 class EventLoop;
 
-/*--------Factory-----------------------*/
-
+/*-------------Factory------------*/
 class Factory
 {
 private:
   EventLoop *m_pLoop;
   int m_nNumProts;
+  //int m_nActiveProts;
   const Protocol *m_pProtocol;
   const std::string m_nProtocolName;
   std::map<Connection *, Protocol *> m_nProtocols;
@@ -76,45 +77,54 @@ public:
   ~Factory();
 };
 
-/*--------ServerFactory-----------------------*/
+/*-------------ServerFactory------------*/
 
 class ServerFactory : public Factory
 {
 private:
 public:
-  ServerFactory(EventLoop*,Protocol *);
+  ServerFactory(EventLoop *, Protocol *);
+  virtual void buildProtocol(Protocol *newProt);
   ~ServerFactory();
 };
 
-/*--------ClientFactory-----------------------*/
+/*-------------ClientFactory------------*/
 
 class ClientFactory : public Factory
 {
 private:
 public:
-  ClientFactory(EventLoop*,Protocol *);
+  ClientFactory(EventLoop *, Protocol *);
+  virtual void buildProtocol(Protocol *newProt);
   ~ClientFactory();
 };
 
-// class EchoServerFactory : public ServerFactory
-// {
-// private:
-// public:
-//   EchoServerFactory(Protocol *);
-//   ~EchoServerFactory();
-// };
+/*-----------ServerPoemFactory--------------*/
 
-// class WebServerFactory : public ServerFactory
-// {
-// private:
-// public:
-//   WebServerFactory(Protocol *);
-//   ~WebServerFactory();
-// };
+class ServerPoemFactory : public ServerFactory
+{
+private:
+  std::string m_nName;
+  std::vector<std::string> m_nPoems;
 
-//buildProtocol---return a Protocol
-//statredConnecting
-//clientConnectionLost
-//clientConnectionFailed
+public:
+  ServerPoemFactory(EventLoop *, Protocol *);
+  virtual void buildProtocol(Protocol *newProt);
+  ~ServerPoemFactory();
+};
+
+/*-------------ClientPoemFactory------------*/
+
+class ClientPoemFactory : public ClientFactory
+{
+private:
+  std::string m_nName;
+  std::vector<std::string> m_nPoems;
+
+public:
+  ClientPoemFactory(EventLoop *, Protocol *);
+  virtual void buildProtocol(Protocol *newProt);
+  ~ClientPoemFactory();
+};
 
 #endif // FACTORY_H

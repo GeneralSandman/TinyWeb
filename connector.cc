@@ -26,7 +26,7 @@ Connector::Connector(EventLoop *loop,
       m_nServerAddress(server),
       m_nRetry(retry),
       m_nConnectSocket(createNoBlockSocket()),
-      m_nConnectChannel(loop,m_nConnectSocket.getFd())
+      m_nConnectChannel(loop, m_nConnectSocket.getFd())
 {
     if (hostport != 0)
     {
@@ -34,6 +34,14 @@ Connector::Connector(EventLoop *loop,
     }
     //we have to close this socket fd.
     LOG(Debug) << "class Connector constructor\n";
+}
+
+void Connector::connect()
+{
+}
+
+void Connector::retry()
+{
 }
 
 Connector::~Connector()
