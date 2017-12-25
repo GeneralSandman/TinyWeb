@@ -10,7 +10,7 @@
 ****************************************
 *
 */
- 
+
 #include "socket.h"
 #include "netaddress.h"
 #include "log.h"
@@ -22,7 +22,7 @@
 Socket::Socket(int fd)
 {
     m_nFd = fd;
-    setSocketReuseAddress(fd);//SO_REUSEADDR
+    setSocketReuseAddress(fd); //SO_REUSEADDR
     LOG(Debug) << "class Socket constructor\n";
 }
 
@@ -46,8 +46,34 @@ int Socket::accept(NetAddress &per)
     return connectfd;
 }
 
-void Socket::shutdownWrite(){
+void Socket::shutdownWrite()
+{
     ShutdownWrite(m_nFd);
+}
+
+void Socket::setNoDelay()
+{
+    //disable tcp Nagle algorithm.
+    disableTcpDelay(m_nFd);
+}
+
+void Socket::setDelay()
+{
+    //I think this function has bug,
+    //FIXME:
+    enableTcpDelay(m_nFd);
+}
+
+void Socket::setKeepAlive()
+{
+    enableTcpKeepAlive(m_nFd);
+}
+
+void Socket::setNoKeepAlive()
+{
+    //I think this function has bug,
+    //FIXME:
+    disableTcpKeepAlive(m_nFd);
 }
 
 Socket::~Socket()

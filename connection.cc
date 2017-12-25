@@ -58,6 +58,8 @@ void Connection::m_fHandleWrite()
                 m_pChannel->disableWrite(); //it's very important,you can try to delete the if
                 if (m_nState == DisConnecting)
                     m_fShutdownWrite();
+                if(m_nWriteCompleteCallback)
+                    m_nWriteCompleteCallback(this);
             }
             else
             {
@@ -67,9 +69,7 @@ void Connection::m_fHandleWrite()
 
         else
         {
-            //error
-            // std::cout << "write error\n";
-            LOG(Warn) << "write error\n";
+            //FIXME:we need handle error.
         }
     }
     else
@@ -128,11 +128,21 @@ void Connection::send(const std::string &message)
         nwrote = ::write(m_pChannel->getFd(), message.data(), message.size());
         if (nwrote >= 0)
         {
+            if (nwrote == message.size())
+            {
+                //write complete
+                if (m_nWriteCompleteCallback)
+                    m_nWriteCompleteCallback(this);
+            }
+            else{
+                //have more data to write,
+                //output buffer will write rest data.
+            }
         }
         else
         {
             nwrote = 0;
-            //error
+            //FIXME:handle error.
         }
     }
 

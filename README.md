@@ -154,6 +154,7 @@ python client.py 9090 139.199.13.50 80
 来实现重启服务、平滑升级、更换日志文件、配置文件实时生效等功能。
 - 计划完成Client，Connector，Proxy,memorypool类。
 - 重读代码，配置各个模块的日志结构。
+- 为Factory添加writeCompleteCallback
 
 ### 按什么原则划分请求的阶段
 1. 将阻塞进程的方法按照相关的触发事件分解为两个阶段

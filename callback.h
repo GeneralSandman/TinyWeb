@@ -28,6 +28,7 @@ typedef boost::function<void(Connection *,
                              Buffer *buf,
                              Time)>
     MessageCallback;
+typedef boost::function<void(Connection *)> WriteCompleteCallback;
 typedef boost::function<void(Connection *)> CloseCallback;
 
 #endif // !CALL_BACK_H

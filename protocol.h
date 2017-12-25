@@ -117,6 +117,7 @@ public:
   Protocol();
   void makeConnection();
   void getMessage(const std::string &);
+  void writeComplete();
   void loseConnection();
 
   void sendMessage(const std::string &);
@@ -125,6 +126,7 @@ public:
 
   virtual void connectionMade();
   virtual void dataReceived(const std::string &);
+  virtual void writeCompletely();
   virtual void connectionLost();
   virtual ~Protocol();
 

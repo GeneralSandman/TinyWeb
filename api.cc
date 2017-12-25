@@ -26,7 +26,7 @@
 #include <sys/mman.h>
 #include <sys/epoll.h>
 #include <signal.h>
-
+#include <netinet/tcp.h>
 #include <sys/syscall.h>
 #include <sys/types.h>
 
@@ -34,6 +34,7 @@ pid_t gettid()
 {
     return (pid_t)(syscall(SYS_gettid));
 }
+
 void handle_error(const char *msg)
 {
     fprintf(stderr, "%s: %s\n", msg, strerror(errno));
@@ -64,9 +65,8 @@ void setnonblocking(int sock)
     }
 }
 
-void getLines(const std::string &s,std::vector<std::string> &res, std::string &resOpenLine)
+void getLines(const std::string &s, std::vector<std::string> &res, std::string &resOpenLine)
 {
-
 }
 
 std::string cstr2string(const char *str)
@@ -409,6 +409,52 @@ int setSocketReuseAddress(int sockfd_)
     int optval = 1;
     setsockopt(sockfd_, SOL_SOCKET, SO_REUSEADDR,
                &optval, sizeof optval);
+}
+
+void setTcpDelay(int fd, bool on)
+{
+    //if on == false:
+    //      tcp no delay.
+    //else:
+    //      tcp delay:enable Nagle algorithm.
+    int optval = on ? 0 : 1;
+    int res = setsockopt(fd, IPPROTO_TCP, TCP_NODELAY,
+                         &optval, sizeof(optval));
+    if (res != 0)
+        handle_error_s("setsockopt error\n");
+}
+
+void enableTcpDelay(int fd)
+{
+    setTcpDelay(fd, true);
+}
+
+void disableTcpDelay(int fd)
+{
+    setTcpDelay(fd, false);
+}
+
+void setTcpKeepAlive(int fd, bool on)
+{
+    //if on == false:
+    //      tcp no keep alive.
+    //else:
+    //      enable tcp keep alive.
+    int optval = on ? 1 : 0;
+    int res = setsockopt(fd, IPPROTO_TCP, SO_KEEPALIVE,
+                         &optval, sizeof(optval));
+    if (res != 0)
+        handle_error_s("setsockopt error\n");
+}
+
+void enableTcpKeepAlive(int fd)
+{
+    setTcpKeepAlive(fd, true);
+}
+
+void disableTcpKeepAlive(int fd)
+{
+    setTcpKeepAlive(fd, false);
 }
 
 struct sockaddr_in getLocalAddr(int sockfd)

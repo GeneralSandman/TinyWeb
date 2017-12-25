@@ -54,6 +54,12 @@ public:
                                        this, _1, _2, _3));
   }
 
+  WriteCompleteCallback writeCompleteCallback()
+  {
+    //It is used by Server to set event callback;
+    return WriteCompleteCallback(boost::bind(&Factory::writeComplete, this));
+  }
+
   CloseCallback closeConnectionCallback()
   {
     //It is used by Server to set event callback;
@@ -65,15 +71,13 @@ public:
   void getMessage(Connection *con,
                   Buffer *buf,
                   Time time);
+  void writeComplete(Connection *con);
   void lostConnection(Connection *con);
 
   void closeProtocol(Protocol *);                   //used by protocol
   void closeProtocolAfter(Protocol *, int seconds); //used by protocol
 
   virtual void buildProtocol(Protocol *newProt);
-  // {
-  //can be override
-  // }
   ~Factory();
 };
 

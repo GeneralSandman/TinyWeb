@@ -39,6 +39,7 @@ private:
   std::set<Connection *> m_nConnections;
   ConnectionCallback m_nConnectCallback;
   MessageCallback m_nMessageCallback;
+  WriteCompleteCallback m_nWriteCompleteCallback;
   CloseCallback m_nCloseCallback;
   Factory *m_pFactory;
 
@@ -54,6 +55,10 @@ public:
   void setMessageCallback(MessageCallback c)
   {
     m_nMessageCallback = c;
+  }
+  void setWriteCompleteCallback(WriteCompleteCallback c)
+  {
+    m_nWriteCompleteCallback=c;
   }
   void setCloseCallback(CloseCallback c)
   {

@@ -28,6 +28,10 @@ public:
   void listen();
   int accept(NetAddress &res);
   void shutdownWrite();
+  void setNoDelay();
+  void setDelay();
+  void setKeepAlive();
+  void setNoKeepAlive();
   ~Socket();
 };
 

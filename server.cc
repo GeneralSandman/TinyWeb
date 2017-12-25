@@ -34,6 +34,7 @@ void Server::m_fHandleRead(int connectfd, const NetAddress &address)
     // std::cout << m_nConNum << std::endl;
     newCon->setConenctCallback(m_nConnectCallback);
     newCon->setMessageCallback(m_nMessageCallback);
+    newCon->setWriteCompleteCallback(m_nWriteCompleteCallback);
     newCon->setCloseCallback(boost::bind(&Server::m_fHandleClose, this, _1));
     m_nConnections.insert(newCon);
     newCon->establishConnection();
@@ -64,6 +65,7 @@ Server::Server(EventLoop *loop, const NetAddress &address, Factory *prot)
     {
         setConenctCallback(m_pFactory->connectCallback());
         setMessageCallback(m_pFactory->getMessageCallback());
+        setWriteCompleteCallback(m_pFactory->writeCompleteCallback());
         setCloseCallback(m_pFactory->closeConnectionCallback());
     }
     LOG(Debug) << "class Server constructor\n";

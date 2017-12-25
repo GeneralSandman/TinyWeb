@@ -56,6 +56,17 @@ void Factory::getMessage(Connection *con,
     }
 }
 
+void Factory::writeComplete(Connection *con)
+{
+    //It's used by Server
+    //can't be override
+    auto p = m_nProtocols.find(con);
+    if (p != m_nProtocols.end())
+    {
+        p->second->writeComplete();
+    }
+}
+
 void Factory::lostConnection(Connection *con)
 {
     //It's used by Server

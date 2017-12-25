@@ -71,6 +71,14 @@ int setNoBlock(int fd);
 int setCLOEXEC(int fd);
 int setSocketReuseAddress(int fd);
 
+inline void setTcpDelay(int fd,bool on);
+void enableTcpDelay(int fd);
+void disableTcpDelay(int fd);
+
+inline void setTcpKeepAlive(int fd,bool on);
+void enableTcpKeepAlive(int fd);
+void disableTcpKeepAlive(int fd);
+
 struct sockaddr_in getLocalAddr(int sockfd);
 
 void epoll_addfd(int epfd, int fd, int events);

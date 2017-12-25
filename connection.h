@@ -43,6 +43,7 @@ private:
   Channel *m_pChannel;      //connect fd
   ConnectionCallback m_nConnectCallback;
   MessageCallback m_nMessageCallback;
+  WriteCompleteCallback m_nWriteCompleteCallback;
   CloseCallback m_nCloseCallback;
 
   Buffer m_nInputBuffer;
@@ -68,6 +69,10 @@ public:
   void setMessageCallback(MessageCallback c)
   {
     m_nMessageCallback = c;
+  }
+  void setWriteCompleteCallback(WriteCompleteCallback c)
+  {
+    m_nWriteCompleteCallback = c;
   }
   void setCloseCallback(CloseCallback c)
   {

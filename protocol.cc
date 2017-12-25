@@ -50,18 +50,28 @@ Protocol::Protocol()
 void Protocol::makeConnection()
 {
     //It is used by Factory
+    //user can't change this function.
     connectionMade();
 }
 
 void Protocol::getMessage(const std::string &data)
 {
     //It is used by Factory
+    //user can't change this function.
     dataReceived(data);
+}
+
+void Protocol::writeComplete()
+{
+    //It is used by Factory
+    //user can't change this function.
+    writeCompletely();
 }
 
 void Protocol::loseConnection()
 {
     //It is used by Factory
+    //user can't change this function.
     connectionLost();
 }
 
@@ -82,17 +92,22 @@ void Protocol::closeProtocolAfter(int seconds)
 
 void Protocol::connectionMade()
 {
-    //It can be override
+    //It can be override user.
 }
 
 void Protocol::dataReceived(const std::string &data)
 {
-    //It can be override
+    //It can be override by user.
+}
+
+void Protocol::writeCompletely()
+{
+    //It can be override by user.
 }
 
 void Protocol::connectionLost()
 {
-    //It can be override
+    //It can be override by user.
 }
 
 Protocol::~Protocol()
