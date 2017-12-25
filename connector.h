@@ -5,7 +5,7 @@
 *Web:www.generalsandman.cn
 */
 
-/*---Connector class---
+/*---class Connector---
 *This class has same function like Accepter.
 *It is used by client to connect server.
 *It will handler more errors.
@@ -25,17 +25,23 @@
 
 class EventLoop;
 
+typedef boost::function<void(int, const NetAddress &)> newConnectionCallback;
+
 class Connector
 {
 private:
   EventLoop *m_pEventLoop;
-  NetAddress m_nServerAddress;
-  bool  m_nRetry;
   Socket m_nConnectSocket;
   Channel m_nConnectChannel;
+  newConnectionCallback m_nCallback;
+  bool m_nRetry;
+  int m_nRetryTime;
+  bool m_nConnected;
+  void m_fHandleRead();
 
 public:
-  Connector(EventLoop *, const NetAddress &,bool ,int hostport=0);
+  Connector(EventLoop *, const NetAddress &, bool, int hostport = 0);
+  void setConnectionCallback(newConnectionCallback c) { m_nCallback = c; }
   void connect();
   void retry();
   ~Connector();
