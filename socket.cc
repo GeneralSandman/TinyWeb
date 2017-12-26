@@ -46,6 +46,14 @@ int Socket::accept(NetAddress &per)
     return connectfd;
 }
 
+int Socket::connect(const NetAddress &per)
+{
+    struct sockaddr_in addr;
+    bzero(&addr, sizeof(addr));
+    addr = per.getAddr();
+    return Connect(m_nFd, &addr);
+}
+
 void Socket::shutdownWrite()
 {
     ShutdownWrite(m_nFd);

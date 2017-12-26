@@ -45,7 +45,8 @@ void Close(int fd);
 
 int Bind(int sockfd, const struct sockaddr_in *addr, socklen_t addrlen = sizeof(struct sockaddr_in));
 int Listen(int sockfd, int backlog);
-int Accept(int, struct sockaddr_in *peraddr);
+int Accept(int sockfd, struct sockaddr_in *peraddr);
+int Connect(int sockfd, struct sockaddr_in *peraddr);
 
 void ShutdownWrite(int sockfd);
 
@@ -71,11 +72,11 @@ int setNoBlock(int fd);
 int setCLOEXEC(int fd);
 int setSocketReuseAddress(int fd);
 
-inline void setTcpDelay(int fd,bool on);
+inline void setTcpDelay(int fd, bool on);
 void enableTcpDelay(int fd);
 void disableTcpDelay(int fd);
 
-inline void setTcpKeepAlive(int fd,bool on);
+inline void setTcpKeepAlive(int fd, bool on);
 void enableTcpKeepAlive(int fd);
 void disableTcpKeepAlive(int fd);
 

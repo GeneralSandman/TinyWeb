@@ -10,7 +10,7 @@
 ****************************************
 *
 */
- 
+
 #ifndef SOCKET_H
 #define SOCKET_H
 
@@ -26,7 +26,8 @@ public:
   int getFd() { return m_nFd; }
   void bindAddress(const NetAddress &);
   void listen();
-  int accept(NetAddress &res);
+  int accept(NetAddress &per);
+  int connect(const NetAddress &per);
   void shutdownWrite();
   void setNoDelay();
   void setDelay();

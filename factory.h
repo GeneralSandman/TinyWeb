@@ -131,4 +131,16 @@ public:
   ~ClientPoemFactory();
 };
 
+/*-------------ProxyFactory------------*/
+
+class ProxyFactory : public Factory
+{
+private:
+
+public:
+  ProxyFactory(EventLoop *, Protocol *);
+  virtual void buildProtocol(Protocol *newProt);
+  ~ProxyFactory();
+};
+
 #endif // FACTORY_H

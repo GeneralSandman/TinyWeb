@@ -201,3 +201,23 @@ ClientPoemFactory::~ClientPoemFactory()
 }
 
 /*-------------ClientPoemFactory------------*/
+
+/*------------ProxyFactory-------------*/
+
+ProxyFactory::ProxyFactory(EventLoop *loop, Protocol *protocol)
+    : Factory(loop, protocol)
+{
+    LOG(Debug) << "class ProxyFactory constructor\n";
+}
+
+void ProxyFactory::buildProtocol(Protocol *newProt)
+{
+    //set member of Protocol.
+}
+
+ProxyFactory::~ProxyFactory()
+{
+    LOG(Debug) << "class ProxyFactory destructor\n";
+}
+
+/*-------------ClientPoemFactory------------*/

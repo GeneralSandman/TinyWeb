@@ -196,8 +196,15 @@ int Accept(int sockfd, struct sockaddr_in *peraddr)
 {
     socklen_t len = sizeof(struct sockaddr_in);
     int res = accept(sockfd, (struct sockaddr *)peraddr, &len);
-    if (res <= 0)
+    if (res < 0)
         handle_error("accept error");
+    return res;
+}
+
+int Connect(int sockfd, struct sockaddr_in *peraddr)
+{
+    socklen_t len = sizeof(struct sockaddr_in);
+    int res = connect(sockfd, (struct sockaddr *)peraddr, len);
     return res;
 }
 

@@ -155,6 +155,11 @@ python client.py 9090 139.199.13.50 80
 - 计划完成Client，Connector，Proxy,memorypool类。
 - 重读代码，配置各个模块的日志结构。
 - 为Factory添加writeCompleteCallback
+- Accepter 只有一个，负责所有到来的连接
+- Connector 与Accepter不同，只负责一个Connection，
+- 因为listen-Socket是可以复用的，而已经创建起连接的Socket是不可复用的，下一个新连接必定要使用新的connect-Socket,他们决定了Accepter和Connector在细节上略有不同。
+- 三种工作状态：Server和Proxy
+- 为Protocol添加makeConnection()功能，作为客户端使用
 
 ### 按什么原则划分请求的阶段
 1. 将阻塞进程的方法按照相关的触发事件分解为两个阶段

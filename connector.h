@@ -37,7 +37,10 @@ private:
   bool m_nRetry;
   int m_nRetryTime;
   bool m_nConnected;
+
   void m_fHandleRead();
+
+  void m_fEstablishConnection
 
 public:
   Connector(EventLoop *, const NetAddress &, bool, int hostport = 0);
