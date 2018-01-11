@@ -22,14 +22,16 @@ int main()
 {
 
     EventLoop *loop = new EventLoop();
-    Client *tcpClient = new Client(loop, factory);
+    Protocol *clientProtocol = new Protocol();
+    Factory *clientFactory = new ClientFactory(loop, clientProtocol);
+    Client *tcpClient = new Client(loop, clientFactory);
     tcpClient->start();
 
     string serverip = "192.168.1.1:80";
     NetAddress serveraddress(serverip);
 
     bool retry = false;
-    
+
     for (int i = 0; i < 10; i++)
     {
         tcpClient->connect(serveraddress, retry, 9898 + i);

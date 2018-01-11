@@ -153,6 +153,23 @@ int createSocket()
     return res;
 }
 
+int getSocketError(int sockfd)
+{
+    int opt;
+    socklen_t len = sizeof(opt);
+    int return_val = getsockopt(sockfd,
+                                SOL_SOCKET, SO_ERROR,
+                                &opt, &len);
+    if (return_val == 0)
+    {
+        return opt;
+    }
+    else
+    {
+        return errno;
+    }
+}
+
 int createNoBlockSocket(int domain, int type, int protocol)
 {
     int res = createSocket(domain, type, protocol);

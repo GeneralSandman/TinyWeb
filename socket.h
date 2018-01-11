@@ -29,6 +29,7 @@ public:
   int accept(NetAddress &per);
   int connect(const NetAddress &per);
   void shutdownWrite();
+  void close();
   void setNoDelay();
   void setDelay();
   void setKeepAlive();

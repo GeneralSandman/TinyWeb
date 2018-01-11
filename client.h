@@ -18,6 +18,7 @@
 #include "callback.h"
 
 #include <set>
+#include <map>
 
 class EventLoop;
 class Connector;
@@ -29,16 +30,22 @@ class Client
 private:
   bool m_nStarted;
   unsigned long long m_nConNum;
-  //host address.
   EventLoop *m_pEventLoop;
-  std::set<Connector *> m_nConnectors;
-  std::set<Connection *> m_nConnections;
-  // std::set<std::pair<Connector *, Connection *>> m_nConnections_;
+  Factory *m_pFactory;
+  //pair <hostAddress,peerAddress>
+  typedef std::pair<NetAddress, NetAddress> AddressCouple;
+  typedef std::pair<Connector *, Connection *> ConnectorCouple;
+  std::map<AddressCouple, ConnectorCouple> m_nConnections;
+
   ConnectionCallback m_nConnectCallback;
   MessageCallback m_nMessageCallback;
   WriteCompleteCallback m_nWriteCompleteCallback;
   CloseCallback m_nCloseCallback;
-  Factory *m_pFactory;
+
+  void m_fNewConnectionCallback(int, const NetAddress &,
+                                const NetAddress &);
+
+  void m_fHandleClose(Connection *);
 
 public:
   Client(EventLoop *, Factory *);
@@ -59,7 +66,14 @@ public:
     m_nCloseCallback = c;
   }
   void start();
-  void connect(const NetAddress &peeraddress, bool retry, int hostport = 0);
+  void connect(const NetAddress &hostAddress,
+               const NetAddress &peeraddress,
+               bool retry,
+               bool keepconnect);
+  void disconnect(const NetAddress &hostaddress,
+                  const NetAddress &peeraddress);
+  void disconnectAll();
+  void stop();
   ~Client();
 };
 

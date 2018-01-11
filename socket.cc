@@ -59,6 +59,11 @@ void Socket::shutdownWrite()
     ShutdownWrite(m_nFd);
 }
 
+void Socket::close()
+{
+    Close(m_nFd);
+}
+
 void Socket::setNoDelay()
 {
     //disable tcp Nagle algorithm.

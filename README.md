@@ -160,6 +160,10 @@ python client.py 9090 139.199.13.50 80
 - 因为listen-Socket是可以复用的，而已经创建起连接的Socket是不可复用的，下一个新连接必定要使用新的connect-Socket,他们决定了Accepter和Connector在细节上略有不同。
 - 三种工作状态：Server和Proxy
 - 为Protocol添加makeConnection()功能，作为客户端使用
+- Connector只监听读事件，错误事件
+- Connection监听读、写、写完、错误、关闭事件
+
+- Connection和Connector的Channel不同，也就决定了监听对象的不同，Connector监听的是连接建立的时候的事件，而Connection要对连接成功之后的事件进行负责。注意事件范围。
 
 ### 按什么原则划分请求的阶段
 1. 将阻塞进程的方法按照相关的触发事件分解为两个阶段

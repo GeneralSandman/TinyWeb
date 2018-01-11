@@ -81,6 +81,10 @@ public:
   void shutdownWrite() { m_fShutdownWrite(); }
   void establishConnection();
   void destoryConnection();
+
+  NetAddress getLocalAddress();
+  NetAddress getPeerAddress();
+
   ~Connection();
 };
 

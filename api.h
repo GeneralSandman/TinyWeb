@@ -39,6 +39,8 @@ std::map<char, std::string> getOption(int argc, char *argv[]);
 int createSocket(int domain, int type, int protocol);
 int createSocket();
 
+int getSocketError(int sockfd);
+
 int createNoBlockSocket(int, int, int);
 int createNoBlockSocket();
 void Close(int fd);

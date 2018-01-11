@@ -51,13 +51,13 @@ void Server::m_fHandleClose(Connection *con)
     m_nConnections.erase(p);
 }
 
-Server::Server(EventLoop *loop, const NetAddress &address, Factory *prot)
+Server::Server(EventLoop *loop, const NetAddress &address, Factory *fact)
     : m_nStarted(false),
       m_nConNum(0),
       m_nListenAddress(address),
       m_pEventLoop(loop),
       m_nAccepter(loop, address),
-      m_pFactory(prot)
+      m_pFactory(fact)
 {
     m_nAccepter.setConnectionCallback(
         boost::bind(&Server::m_fHandleRead, this, _1, _2));
