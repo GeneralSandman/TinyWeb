@@ -51,7 +51,7 @@ private:
   bool m_nKeepConnect;
   int m_nRetryTime;
   bool m_nConnect; //stop will disable that
-  TimerId *m_pRetryTimer;
+  TimerId m_nRetryTimer;
 
   void m_fConnect();
   void m_fRetry();
@@ -60,6 +60,7 @@ private:
   void m_fHandleError();
 
   void m_fRemoveInvaildConnectChannel();
+  void m_fRemoveInvaildConnectSocket();
 
   void m_fEstablishConnection();
   void m_fRetryConnect();

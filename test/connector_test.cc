@@ -15,23 +15,128 @@
 #include "../netaddress.h"
 #include "../eventloop.h"
 
+#include <boost/bind.hpp>
+
 using namespace std;
+
+void connectionCallback(int sockfd, const NetAddress &localaddress,
+                        const NetAddress &serveraddress)
+{
+    std::cout << "establish connection[" << localaddress.getIpPort()
+              << "---" << serveraddress.getIpPort() << "]\n";
+}
+
+void test1()
+{
+    EventLoop *loop = new EventLoop();
+    NetAddress serveraddress("127.0.0.1:9999");
+    NetAddress localaddress("127.0.0.1:9555");
+    bool retry = false;
+    bool keepconnect = false;
+
+    Connector *connector = new Connector(loop, localaddress, serveraddress,
+                                         retry, keepconnect);
+    connector->setConnectionCallback(boost::bind(connectionCallback, _1, _2, _3));
+    connector->start();
+
+    loop->runAfter(5, boost::bind(&Connector::stop, connector));
+    loop->runAfter(10, boost::bind(&EventLoop::quit, loop));
+
+    loop->loop();
+    delete loop;
+    delete connector;
+}
+
+void test2()
+{
+    EventLoop *loop = new EventLoop();
+    NetAddress serveraddress("127.0.0.1:9999");
+    NetAddress localaddress("127.0.0.1:9555");
+    bool retry = true;
+    bool keepconnect = false;
+
+    Connector *connector = new Connector(loop, localaddress, serveraddress,
+                                         retry, keepconnect);
+    connector->setConnectionCallback(boost::bind(connectionCallback, _1, _2, _3));
+    connector->start();
+
+    loop->runAfter(5, boost::bind(&Connector::stop, connector));
+    loop->runAfter(10, boost::bind(&EventLoop::quit, loop));
+
+    loop->loop();
+    delete loop;
+    delete connector;
+}
+
+void test3()
+{
+    EventLoop *loop = new EventLoop();
+    NetAddress serveraddress("127.0.0.1:9999");
+    NetAddress localaddress("127.0.0.1:9555");
+    bool retry = false;
+    bool keepconnect = false;
+
+    Connector *connector = new Connector(loop, localaddress, serveraddress,
+                                         retry, keepconnect);
+    connector->setConnectionCallback(boost::bind(connectionCallback, _1, _2, _3));
+    connector->start();
+
+    loop->runAfter(5, boost::bind(&Connector::stop, connector));
+    loop->runAfter(10, boost::bind(&EventLoop::quit, loop));
+
+    loop->loop();
+    delete loop;
+    delete connector;
+}
+
+void test4()
+{
+    EventLoop *loop = new EventLoop();
+    NetAddress serveraddress("127.0.0.1:9999");
+    NetAddress localaddress("127.0.0.1:9555");
+    bool retry = false;
+    bool keepconnect = false;
+
+    Connector *connector = new Connector(loop, localaddress, serveraddress,
+                                         retry, keepconnect);
+    connector->setConnectionCallback(boost::bind(connectionCallback, _1, _2, _3));
+    connector->start();
+
+    loop->runAfter(5, boost::bind(&Connector::stop, connector));
+    loop->runAfter(10, boost::bind(&EventLoop::quit, loop));
+
+    loop->loop();
+    delete loop;
+    delete connector;
+}
+
+void test5()
+{
+    EventLoop *loop = new EventLoop();
+    NetAddress serveraddress("127.0.0.1:9999");
+    NetAddress localaddress("127.0.0.1:9555");
+    bool retry = false;
+    bool keepconnect = false;
+
+    Connector *connector = new Connector(loop, localaddress, serveraddress,
+                                         retry, keepconnect);
+    connector->setConnectionCallback(boost::bind(connectionCallback, _1, _2, _3));
+    connector->start();
+
+    loop->runAfter(5, boost::bind(&Connector::stop, connector));
+    loop->runAfter(10, boost::bind(&EventLoop::quit, loop));
+
+    loop->loop();
+    delete loop;
+    delete connector;
+}
 
 int main()
 {
-
-    EventLoop *loop = new EventLoop();
-    string serverip = "192.168.1.1:80";
-    NetAddress serveraddress(serverip);
-
-    bool retry = false;
-
-    Connector *connector = new Connector(loop, serveraddress, retry, 9899);
-
-    loop->loop();
-
-    delete loop;
-    delete connector;
-
+    test1();
+    test2();
+    test3();
+    test4();
+    test5();
     return 0;
 }

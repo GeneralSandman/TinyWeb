@@ -57,7 +57,7 @@ public:
   WriteCompleteCallback writeCompleteCallback()
   {
     //It is used by Server to set event callback;
-    return WriteCompleteCallback(boost::bind(&Factory::writeComplete, this));
+    return WriteCompleteCallback(boost::bind(&Factory::writeComplete, this,_1));
   }
 
   CloseCallback closeConnectionCallback()

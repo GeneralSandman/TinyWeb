@@ -61,6 +61,7 @@ void Socket::shutdownWrite()
 
 void Socket::close()
 {
+    LOG(Debug) << "invoke Socket::close\n";
     Close(m_nFd);
 }
 
@@ -91,6 +92,6 @@ void Socket::setNoKeepAlive()
 
 Socket::~Socket()
 {
-    close(m_nFd);
+    Close(m_nFd);
     LOG(Debug) << "class Socket destructor\n";
 }

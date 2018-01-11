@@ -3,7 +3,7 @@ gcc11 = g++ -std=c++11 -c
 gcc11o = $(gcc11) -o
 
 lib = api channel condition currentthread epoller eventloop exception \
-	log time timer timerqueue socket netaddress connection server accepter \
+	log time timer timerqueue socket netaddress connection server accepter connector\
 	process processpool reader configer buffer protocol factory parser responser http \
 	sharedmemory semaphore master worker defer memorypool
 lib.o = $(foreach file,$(lib),$(file).o)
@@ -33,6 +33,8 @@ socket_test:socket_test.o $(lib.o)
 	$(link) socket_test socket_test.o $(lib.o)
 accepter_test:accepter_test.o $(lib.o)
 	$(link) accepter_test accepter_test.o $(lib.o)
+connector_test:connector_test.o $(lib.o)
+	$(link) connector_test connector_test.o $(lib.o) -lpthread
 server_test:server_test.o $(lib.o)
 	$(link) server_test server_test.o $(lib.o) -lpthread
 master_test:master_test.o $(lib.o)
@@ -84,6 +86,8 @@ socket_test.o:socket_test.cc
 	$(gcc11) socket_test.cc
 accepter_test.o:accepter_test.cc
 	$(gcc11) accepter_test.cc
+connector_test.o:connector_test.cc
+	$(gcc11) connector_test.cc
 server_test.o:server_test.cc
 	$(gcc11) server_test.cc
 master_test.o:master_test.cc

@@ -28,9 +28,17 @@ public:
       : m_pTimer(timer),
         m_nIdNum(idnum)
   {
-
-    LOG(Debug) << "class TimerId construct\n";
+    // LOG(Debug) << "class TimerId construct\n";
   }
+
+  TimerId(const TimerId &timerid)
+  {
+    m_pTimer = timerid.m_pTimer;
+    m_nIdNum = timerid.m_nIdNum;
+    // LOG(Debug) << "class TimerId construct\n";
+  }
+
+  bool isVaild() { return m_pTimer != nullptr; }
 
   friend class Timer;
   friend class TimerQueue;

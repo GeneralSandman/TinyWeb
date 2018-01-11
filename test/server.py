@@ -11,9 +11,8 @@ def server(ip, port):
     s.listen(8)
 
     conn,addr=s.accept()
-    print addr
-    data=conn.recv(4096)
-    print data
+    print "get a connection:",addr
+    sleepSecond(10)
 
     conn.close()    
     s.close()
@@ -41,4 +40,4 @@ def webServer(ip,port):
 
 
 if __name__ == "__main__":
-    webServer(sys.argv[1], sys.argv[2])
+    server(sys.argv[1], sys.argv[2])
