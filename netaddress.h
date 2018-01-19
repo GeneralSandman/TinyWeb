@@ -16,6 +16,7 @@
 
 #include <netinet/in.h>
 #include <string>
+#include <cstring>
 
 class NetAddress
 {
@@ -38,6 +39,14 @@ public:
   const struct sockaddr_in getAddr() const { return m_nAddress; }
   void setAddr(struct sockaddr_in a) { m_nAddress = a; }
 
+  friend bool operator==(const NetAddress &a, const NetAddress &b)
+  {
+    return memcmp(&a.m_nAddress, &b.m_nAddress, sizeof(struct sockaddr_in));
+  }
+  friend bool operator<(const NetAddress &a, const NetAddress &b)
+  {
+    return memcmp(&a.m_nAddress, &b.m_nAddress, sizeof(struct sockaddr_in));
+  }
   ~NetAddress();
 };
 

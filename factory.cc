@@ -37,6 +37,7 @@ void Factory::createConnection(Connection *newCon)
     newProt->m_nNumber = (++m_nNumProts);
     newProt->m_pConnection = newCon;
     m_nProtocols[newCon] = newProt;
+    //invoke the member function of Protocol
     newProt->makeConnection();
     buildProtocol(newProt);
 }
@@ -52,6 +53,7 @@ void Factory::getMessage(Connection *con,
     {
         std::string all = input->getAll();
         Protocol *prot = p->second;
+        //invoke the member function of Protocol
         prot->getMessage(all);
     }
 }
@@ -63,6 +65,7 @@ void Factory::writeComplete(Connection *con)
     auto p = m_nProtocols.find(con);
     if (p != m_nProtocols.end())
     {
+        //invoke the member function of Protocol
         p->second->writeComplete();
     }
 }
@@ -75,6 +78,7 @@ void Factory::lostConnection(Connection *con)
     if (p != m_nProtocols.end())
     {
         Protocol *prot = p->second;
+        //invoke the member function of Protocol
         prot->loseConnection();
 
         delete prot;
@@ -91,6 +95,7 @@ void Factory::closeProtocol(Protocol *protocol)
         Protocol *prot = p->second;
 
         con->shutdownWrite();
+        //invoke the member function of Protocol
         prot->loseConnection();
 
         delete prot;

@@ -82,8 +82,14 @@ public:
   void establishConnection();
   void destoryConnection();
 
-  NetAddress getLocalAddress();
-  NetAddress getPeerAddress();
+  NetAddress getLocalAddress()
+  {
+    return m_nLocalAddress;
+  }
+  NetAddress getPeerAddress()
+  {
+    return m_nPeerAddress;
+  }
 
   ~Connection();
 };

@@ -30,6 +30,7 @@ class Client
 private:
   bool m_nStarted;
   unsigned long long m_nConNum;
+  
   EventLoop *m_pEventLoop;
   Factory *m_pFactory;
   //pair <hostAddress,peerAddress>

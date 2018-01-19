@@ -37,17 +37,18 @@ void Client::m_fNewConnectionCallback(int sockfd,
     newCon->setCloseCallback(boost::bind(&Client::m_fHandleClose, this, _1));
 
     AddressCouple add(hostaddress, peeraddress);
+    assert(m_nConnections.find(add) != m_nConnections.end());
     m_nConnections[add].second = newCon;
     newCon->establishConnection();
 }
 
 void Client::m_fHandleClose(Connection *con)
 {
-    AddressCouple add(con->getLocalAddress(), con->getPeerAddress());
 
     if (m_nCloseCallback)
         m_nCloseCallback(con);
 
+    AddressCouple add(con->getLocalAddress(), con->getPeerAddress());
     auto p = m_nConnections.find(add);
     assert(p != m_nConnections.end());
 
@@ -57,15 +58,18 @@ void Client::m_fHandleClose(Connection *con)
     conr->stop();
     conn->destoryConnection();
 
-    //this Connector* can't be reused.
     delete conn;
     if (!conr->isKeepConnect())
-    {
+    { //can't be reused.
         delete conr;
         m_nConnections.erase(p);
     }
+    else
+    { //This pair may be reused next time.
+        conn = nullptr;
+    }
 
-    if (m_nStarted && conr->isKeepConnect() && conr->isRetry())
+    if (m_nStarted && conr->isKeepConnect())
         conr->restart();
 }
 
@@ -83,6 +87,7 @@ Client::Client(EventLoop *loop,
         setWriteCompleteCallback(m_pFactory->writeCompleteCallback());
         setCloseCallback(m_pFactory->closeConnectionCallback());
     }
+
     LOG(Debug) << "class Client constructor\n";
 }
 
@@ -124,6 +129,10 @@ void Client::disconnect(const NetAddress &peeraddress,
         conr->stop();
         conn->shutdownWrite();
         //stop this connection by connector.
+        //FIXME:
+        delete conr;
+        delete conn;
+        m_nConnections.erase(p);
     }
     else
     {
@@ -143,7 +152,7 @@ void Client::disconnectAll()
         conn->shutdownWrite();
         //close this connection
         //stop this connection by connector.
-
+        //FIXME:
         delete conr;
         delete conn;
     }

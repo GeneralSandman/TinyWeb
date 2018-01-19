@@ -35,13 +35,14 @@ private:
   unsigned long long m_nConNum;
   NetAddress m_nListenAddress;
   EventLoop *m_pEventLoop;
+  Factory *m_pFactory;
   Accepter m_nAccepter;
   std::set<Connection *> m_nConnections;
+  
   ConnectionCallback m_nConnectCallback;
   MessageCallback m_nMessageCallback;
   WriteCompleteCallback m_nWriteCompleteCallback;
   CloseCallback m_nCloseCallback;
-  Factory *m_pFactory;
 
   void m_fHandleRead(int, const NetAddress &);
   void m_fHandleClose(Connection *);

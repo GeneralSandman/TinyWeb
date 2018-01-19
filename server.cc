@@ -56,8 +56,8 @@ Server::Server(EventLoop *loop, const NetAddress &address, Factory *fact)
       m_nConNum(0),
       m_nListenAddress(address),
       m_pEventLoop(loop),
-      m_nAccepter(loop, address),
-      m_pFactory(fact)
+      m_pFactory(fact),
+      m_nAccepter(loop, address)
 {
     m_nAccepter.setConnectionCallback(
         boost::bind(&Server::m_fHandleRead, this, _1, _2));
@@ -68,6 +68,7 @@ Server::Server(EventLoop *loop, const NetAddress &address, Factory *fact)
         setWriteCompleteCallback(m_pFactory->writeCompleteCallback());
         setCloseCallback(m_pFactory->closeConnectionCallback());
     }
+
     LOG(Debug) << "class Server constructor\n";
 }
 
@@ -87,9 +88,10 @@ Server::~Server()
     //have connection not done
     for (auto t : m_nConnections)
     {
-        // t->destoryConnection();
+        t->shutdownWrite();
+        t->destoryConnection();
         delete t;
-        //bug
+        //Think carefully.
     }
     LOG(Debug) << "class Server destructor\n";
 }

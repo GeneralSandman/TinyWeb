@@ -20,27 +20,23 @@ using namespace std;
 
 int main()
 {
-
     EventLoop *loop = new EventLoop();
-    Protocol *clientProtocol = new Protocol();
+    Protocol *clientProtocol = new TestClientProtocol();
     Factory *clientFactory = new ClientFactory(loop, clientProtocol);
     Client *tcpClient = new Client(loop, clientFactory);
-    tcpClient->start();
 
-    string serverip = "192.168.1.1:80";
-    NetAddress serveraddress(serverip);
-
+    NetAddress serveraddress("127.0.0.1:9999");
+    NetAddress clientaddress("127.0.0.1:9595");
     bool retry = false;
-
-    for (int i = 0; i < 10; i++)
-    {
-        tcpClient->connect(serveraddress, retry, 9898 + i);
-    }
+    bool keepconnect = false;
+    tcpClient->start();
+    tcpClient->connect(clientaddress, serveraddress, retry, keepconnect);
 
     loop->loop();
 
     delete loop;
+    delete clientProtocol;
+    delete clientFactory;
     delete tcpClient;
-
     return 0;
 }

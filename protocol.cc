@@ -232,3 +232,58 @@ WebProtocol::~WebProtocol()
 RegistProtocol(WebProtocol);
 
 //--------end-WebProtocol api-------------//
+
+//--------TestServerProtocol api-------------//
+
+TestServerProtocol::TestServerProtocol()
+{
+}
+
+void TestServerProtocol::connectionMade()
+{
+}
+
+void TestServerProtocol::dataReceived(const std::string &)
+{
+}
+
+void TestServerProtocol::connectionLost()
+{
+}
+
+TestServerProtocol::~TestServerProtocol()
+{
+}
+
+RegistProtocol(TestServerProtocol);
+//--------end-TestServerProtocol api-------------//
+
+//--------TestClientProtocol api-------------//
+
+TestClientProtocol::TestClientProtocol()
+{
+    LOG(Debug) << "class TestClientProtocol constructor\n";
+}
+
+void TestClientProtocol::connectionMade()
+{
+    std::cout << "made a connection\n";
+}
+
+void TestClientProtocol::dataReceived(const std::string &data)
+{
+    std::cout << "receive data:" << data << std::endl;
+}
+
+void TestClientProtocol::connectionLost()
+{
+    std::cout << "lose a connection\n";
+}
+
+TestClientProtocol::~TestClientProtocol()
+{
+    LOG(Debug) << "class TestClientProtocol destructor\n";
+}
+
+RegistProtocol(TestClientProtocol);
+//--------end-TestClientProtocol api-------------//
