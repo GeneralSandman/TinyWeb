@@ -195,6 +195,7 @@ void TimerQueue::cancelTimer(TimerId &timerid)
         m_nCancelingTimers.insert(cancelTimer_);
         //defer the delect action to
         //m_fResetHappened().
+        timerid.m_pTimer = nullptr;
     }
     else
     {

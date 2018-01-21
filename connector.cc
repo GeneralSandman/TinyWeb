@@ -84,14 +84,18 @@ void Connector::m_fConnect()
 
 void Connector::m_fHandleWrite()
 {
+    //Handle write event after invoking connect() return zero.
     if (m_nState == Connecting)
     {
         //removeInvaildChannel
         int sockfd = m_pConnectChannel->getFd();
         int error = getSocketError(sockfd);
+        //FIXME:why??????????????
+        //If no error:we will not use connect-channel,because
+        //      the connection have established.We don't those
+        //      event.
+        //Else with error:the connect-channel is invaild.
         m_fRemoveInvaildConnectChannel();
-        //this channel will not be reused,delete it.
-        //check this sockfd if has error
         if (error)
         {
             if (m_nRetry)
@@ -115,7 +119,9 @@ void Connector::m_fHandleWrite()
 
 void Connector::m_fHandleError()
 {
+    //Handle error event after invoking connect() return zero.
     assert(m_nState == Connecting);
+
     int last_sockfd = m_pConnectChannel->getFd();
     m_fRemoveInvaildConnectChannel();
     m_fRemoveInvaildConnectSocket();
@@ -129,7 +135,7 @@ void Connector::m_fHandleError()
 
 void Connector::m_fRemoveInvaildConnectChannel()
 {
-    //this scoket is Invail,
+    //m_pConnectChannel is Invail,
     //so we can't use this connect channel  again
     //remove and reset it.
     m_pConnectChannel->disableAll();
@@ -147,12 +153,16 @@ void Connector::m_fRemoveInvaildConnectSocket()
 }
 
 void Connector::m_fEstablishConnection()
-{
+{ 
+    //this function will finish some tasks after
+    //invoking connect() return 0.
     //set callback of Channel
     m_nState = Connecting;
     assert(m_pConnectChannel == nullptr);
     m_pConnectChannel = new Channel(m_pEventLoop,
                                     m_pConnectSocket->getFd());
+    //m_pConnectChannel is different from channel of Connection.
+    //The events they inspect are different.
     m_pConnectChannel->setWriteCallback(
         boost::bind(&Connector::m_fHandleWrite, this));
     m_pConnectChannel->setErrorCallback(
@@ -194,6 +204,8 @@ Connector::Connector(EventLoop *loop,
       m_nRetryTime(InitRetryDelayMs),
       m_nConnect(false)
 {
+    //It only init some information ,but not connect
+    //peer.
     LOG(Debug) << "class Connector constructor\n";
 }
 

@@ -26,6 +26,7 @@
 
 class EventLoop;
 
+//different from the connectionCallback in file callback.h
 typedef boost::function<void(int, const NetAddress &, const NetAddress &)> newConnectionCallback;
 const int MaxRetryDelayMs = 30 * 1000;
 const int InitRetryDelayMs = 500;

@@ -9,9 +9,10 @@ def server(ip, port):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((ip, int(port)))
     s.listen(8)
-
     conn,addr=s.accept()
+
     print "get a connection:",addr
+    print "close this connection after 10 seconds\n "
     sleepSecond(10)
 
     conn.close()    
