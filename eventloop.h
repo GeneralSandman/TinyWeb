@@ -41,7 +41,7 @@ public:
   TimerId runAt(Time, timerReadCallback);
   TimerId runAfter(double, timerReadCallback);
   TimerId runEvery(double, timerReadCallback);
-  void cancelTimerId(const TimerId &);
+  void cancelTimerId(TimerId &);
 
   ~EventLoop();
 };

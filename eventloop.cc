@@ -65,7 +65,7 @@ TimerId EventLoop::runEvery(double interval, timerReadCallback c)
     return m_pTimerQueue->addTimer(time, c, true, interval);
 }
 
-void EventLoop::cancelTimerId(const TimerId &timerid)
+void EventLoop::cancelTimerId(TimerId &timerid)
 {
     m_pTimerQueue->cancelTimer(timerid);
 }

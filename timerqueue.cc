@@ -164,14 +164,14 @@ TimerId TimerQueue::addTimer(Time &time, timerReadCallback c, bool repet, double
     return TimerId(timer, timer->getIdNum());
 }
 
-void TimerQueue::cancelTimer(const TimerId &timerid)
+void TimerQueue::cancelTimer(TimerId &timerid)
 {
     assert(m_nTimers.size() == m_nActiveTimers.size());
 
     Time time = timerid.m_pTimer->getTime();
     Timer *timer = timerid.m_pTimer;
     unsigned long long idnum = timerid.m_nIdNum;
-    
+
     std::pair<Time, Timer *>
         cancelTimer = std::make_pair(time, timer);
     std::pair<Timer *, unsigned long long>
@@ -187,6 +187,8 @@ void TimerQueue::cancelTimer(const TimerId &timerid)
         m_nTimers.erase(cancelTimer);
         m_nActiveTimers.erase(cancelTimer_);
         delete timerid.m_pTimer;
+        timerid.m_pTimer = nullptr;
+        //make sure this TimerId is invaild.
     }
     else if (m_nIsCallingExpiredTimers)
     {

@@ -58,7 +58,7 @@ public:
   //getNextTimerId() only can be used by Timer.
   static unsigned long long getNextTimerId() { return m_nCreatedTimers++; }       //++
   TimerId addTimer(Time &time, timerReadCallback c, bool repet, double interval); //create Timer
-  void cancelTimer(const TimerId &timerid);
+  void cancelTimer(TimerId &timerid);
   ~TimerQueue();
 };
 
