@@ -26,13 +26,13 @@ void Connector::m_fConnect()
 {
     assert(m_nState == Disconnected);
 
-    if (m_pConnectSocket != nullptr)
-    {
-        delete m_pConnectSocket;
-        m_pConnectSocket = nullptr;
-        //This function is not the first time invoked.
-        //we have to delete invail connect socket.
-    }
+    // if (m_pConnectSocket != nullptr)
+    // {
+    // delete m_pConnectSocket;
+    // m_pConnectSocket = nullptr;
+    //This function is not the first time invoked.
+    //we have to delete invail connect socket.
+    // }
 
     if (m_pConnectChannel != nullptr)
     {
@@ -42,9 +42,17 @@ void Connector::m_fConnect()
         //we have to delete invail connect socket.
     }
 
-    m_pConnectSocket = new Socket(createNoBlockSocket());
-    m_pConnectSocket->bindAddress(m_nHostAddress);
-    int res = m_pConnectSocket->connect(m_nServerAddress);
+    // m_pConnectSocket = new Socket(createNoBlockSocket());
+    // m_pConnectSocket->bindAddress(m_nHostAddress);
+    // int res = m_pConnectSocket->connect(m_nServerAddress);
+
+    m_nSockfd = createNoBlockSocket();
+    setSocketReuseAddress(m_nSockfd);//TIME_WAIT
+    struct sockaddr_in host = m_nHostAddress.getAddr();
+    struct sockaddr_in peer = m_nServerAddress.getAddr();
+
+    Bind(m_nSockfd, &host);
+    int res = Connect(m_nSockfd, &peer);
     int savedErrno = (res == 0) ? 0 : errno;
 
     switch (savedErrno)
@@ -63,7 +71,10 @@ void Connector::m_fConnect()
     case ECONNREFUSED:
     case ENETUNREACH:
         if (m_nRetry)
+        {
+            m_fRemoveInvaildConnectSocket();
             m_fRetryConnect();
+        }
         break;
 
     case EACCES:
@@ -146,10 +157,14 @@ void Connector::m_fRemoveInvaildConnectChannel()
 
 void Connector::m_fRemoveInvaildConnectSocket()
 {
-    assert(m_pConnectSocket != nullptr);
-    m_pConnectSocket->close();
-    delete m_pConnectSocket;
-    m_pConnectSocket = nullptr;
+    // assert(m_pConnectSocket != nullptr);
+    // m_pConnectSocket->close();
+    // delete m_pConnectSocket;
+    // m_pConnectSocket = nullptr;
+
+    Close(m_nSockfd);
+    std::cout << "failed sockfd\n";
+    m_nSockfd = -1;
 }
 
 void Connector::m_fEstablishConnection()
@@ -160,7 +175,7 @@ void Connector::m_fEstablishConnection()
     m_nState = Connecting;
     assert(m_pConnectChannel == nullptr);
     m_pConnectChannel = new Channel(m_pEventLoop,
-                                    m_pConnectSocket->getFd());
+                                    m_nSockfd);
     //m_pConnectChannel is different from channel of Connection.
     //The events they inspect are different.
     m_pConnectChannel->setWriteCallback(
@@ -194,7 +209,8 @@ Connector::Connector(EventLoop *loop,
                      bool retry,
                      bool keepconnect)
     : m_pEventLoop(loop),
-      m_pConnectSocket(nullptr),
+      //   m_pConnectSocket(nullptr),
+      m_nSockfd(-1),
       m_pConnectChannel(nullptr),
       m_nHostAddress(hostaddress),
       m_nServerAddress(peeraddress),
@@ -233,11 +249,13 @@ void Connector::stop()
 Connector::~Connector()
 {
 
-    if (m_pConnectSocket != nullptr)
-    {
-        delete m_pConnectSocket;
-        m_pConnectSocket = nullptr;
-    }
+    // if (m_pConnectSocket != nullptr)
+    // {
+    // delete m_pConnectSocket;
+    // m_pConnectSocket = nullptr;
+    // }
+    // if (-1 != m_nSockfd)
+    // Close(m_nSockfd);
     if (m_pConnectChannel != nullptr)
     {
         delete m_pConnectChannel;
@@ -245,6 +263,6 @@ Connector::~Connector()
     }
     if (m_nRetryTimer.isVaild())
         m_pEventLoop->cancelTimerId(m_nRetryTimer);
-        
+
     LOG(Debug) << "class Connector destructor\n";
 }

@@ -42,7 +42,11 @@ private:
   };
 
   EventLoop *m_pEventLoop;
-  Socket *m_pConnectSocket;
+  // Socket *m_pConnectSocket;
+  int m_nSockfd;//fd inside of Socket obj
+  //Because this Socket obj have same fd with
+  //Socket in Connection,they will close same fd tigger
+  //close error.
   Channel *m_pConnectChannel;
   newConnectionCallback m_nNewConnectionCallback;
   NetAddress m_nHostAddress;

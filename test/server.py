@@ -32,8 +32,8 @@ def server2(ip,port):
         data=conn.recv(4096)
         print data
 
-        print "close this connection after 5 seconds "
-        sleepSecond(5)
+        print "close this connection after 3 seconds "
+        sleepSecond(3)
         conn.close()
         print "we have close this connection:",addr
         print "\n"

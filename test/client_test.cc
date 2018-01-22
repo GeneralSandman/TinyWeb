@@ -17,7 +17,7 @@
 #include "../eventloop.h"
 #include "../factory.h"
 #include "../buffer.h"
-#include "../time.h"
+#include "../timerid.h"
 
 using namespace std;
 
@@ -54,7 +54,7 @@ void closeCallback(Connection *con)
               << "--" << con->getPeerAddress().getIpPort() << "]" << std::endl;
 }
 
-void basic_test()
+void test1()
 {
     EventLoop *loop = new EventLoop();
     //Don't use factory and protocol,
@@ -65,9 +65,41 @@ void basic_test()
     tcpClient->setWriteCompleteCallback(boost::bind(&writeCompleteCallback, _1));
     tcpClient->setCloseCallback(boost::bind(&closeCallback, _1));
 
+    loop->runAfter(10, std::bind(&EventLoop::quit, loop));
+
+
     NetAddress serveraddress("127.0.0.1:9999");
     NetAddress clientaddress("127.0.0.1:9595");
-    bool retry = false;
+    bool retry = true;
+    bool keepconnect = true;
+    tcpClient->start();
+    tcpClient->connect(clientaddress, serveraddress, retry, keepconnect);
+
+    loop->loop();
+
+    //delete obj in right order.
+    delete tcpClient;
+    delete loop;
+    //basic test successfully.
+}
+
+void test2()
+{
+    EventLoop *loop = new EventLoop();
+    //Don't use factory and protocol,
+    //we set callback.
+    Client *tcpClient = new Client(loop, nullptr);
+    tcpClient->setConenctCallback(boost::bind(&connectCallback, _1));
+    tcpClient->setMessageCallback(boost::bind(&getDataCallback, _1, _2, _3));
+    tcpClient->setWriteCompleteCallback(boost::bind(&writeCompleteCallback, _1));
+    tcpClient->setCloseCallback(boost::bind(&closeCallback, _1));
+
+    loop->runAfter(10, std::bind(&EventLoop::quit, loop));
+
+
+    NetAddress serveraddress("127.0.0.1:9999");
+    NetAddress clientaddress("127.0.0.1:9595");
+    bool retry = true;
     bool keepconnect = false;
     tcpClient->start();
     tcpClient->connect(clientaddress, serveraddress, retry, keepconnect);
@@ -80,7 +112,7 @@ void basic_test()
     //basic test successfully.
 }
 
-void test1()
+void test3()
 {
     //no retry , no keepconnect
     EventLoop *loop = new EventLoop();
@@ -106,6 +138,6 @@ void test1()
 
 int main()
 {
-    basic_test();
+    test1();
     // test1();
 }

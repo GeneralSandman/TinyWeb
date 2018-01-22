@@ -29,7 +29,6 @@ Socket::Socket(int fd)
 
 void Socket::bindAddress(const NetAddress &address)
 {
-    int len;
     struct sockaddr_in s = address.getAddr();
     Bind(m_nFd, &s);
 }
