@@ -79,7 +79,7 @@ public:
   void closeProtocolAfter(Protocol *, int seconds); //used by protocol
 
   virtual void buildProtocol(Protocol *newProt);
-  ~Factory();
+  virtual ~Factory();
 };
 
 /*-------------ServerFactory------------*/
@@ -90,7 +90,7 @@ private:
 public:
   ServerFactory(EventLoop *, Protocol *);
   virtual void buildProtocol(Protocol *newProt);
-  ~ServerFactory();
+  virtual ~ServerFactory();
 };
 
 /*-------------ClientFactory------------*/
@@ -101,8 +101,8 @@ private:
 public:
   ClientFactory(EventLoop *, Protocol *);
   virtual void buildProtocol(Protocol *newProt);
-  ~ClientFactory();
-};
+  virtual ~ClientFactory();
+};;
 
 /*-----------ServerPoemFactory--------------*/
 
@@ -115,7 +115,7 @@ private:
 public:
   ServerPoemFactory(EventLoop *, Protocol *);
   virtual void buildProtocol(Protocol *newProt);
-  ~ServerPoemFactory();
+  virtual ~ServerPoemFactory();
 };
 
 /*-------------ClientPoemFactory------------*/
@@ -129,7 +129,7 @@ private:
 public:
   ClientPoemFactory(EventLoop *, Protocol *);
   virtual void buildProtocol(Protocol *newProt);
-  ~ClientPoemFactory();
+  virtual ~ClientPoemFactory();
 };
 
 /*-------------ProxyFactory------------*/
@@ -141,7 +141,7 @@ private:
 public:
   ProxyFactory(EventLoop *, Protocol *);
   virtual void buildProtocol(Protocol *newProt);
-  ~ProxyFactory();
+  virtual ~ProxyFactory();
 };
 
 #endif // FACTORY_H
