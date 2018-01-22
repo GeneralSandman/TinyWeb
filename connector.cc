@@ -153,7 +153,7 @@ void Connector::m_fRemoveInvaildConnectSocket()
 }
 
 void Connector::m_fEstablishConnection()
-{ 
+{
     //this function will finish some tasks after
     //invoking connect() return 0.
     //set callback of Channel
@@ -226,7 +226,7 @@ void Connector::restart()
 void Connector::stop()
 {
     m_nConnect = false;
-    if (m_nRetryTimer.isVaild())//timer has been set correctly.
+    if (m_nRetryTimer.isVaild()) //timer has been set correctly.
         m_pEventLoop->cancelTimerId(m_nRetryTimer);
 }
 
@@ -243,9 +243,8 @@ Connector::~Connector()
         delete m_pConnectChannel;
         m_pConnectChannel = nullptr;
     }
-
     if (m_nRetryTimer.isVaild())
         m_pEventLoop->cancelTimerId(m_nRetryTimer);
-
+        
     LOG(Debug) << "class Connector destructor\n";
 }

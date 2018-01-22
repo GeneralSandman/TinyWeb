@@ -61,6 +61,31 @@ int main()
     g_loop = new EventLoop();
     timerid1 = g_loop->runEvery(1, boost::bind(fun1));
     timerid2 = g_loop->runEvery(2, boost::bind(fun2));
+
+    if (timerid1.isVaild())
+        std::cout << "timerid1 vaild\n";
+    else
+        std::cout << "timerid1 invaild\n";
+
+    if (timerid2.isVaild())
+        std::cout << "timerid2 vaild\n";
+    else
+        std::cout << "timerid2 invaild\n";
+
+    std::cout << "after cancel timerid1 and timerid2\n";
+    g_loop->cancelTimerId(timerid1);
+    g_loop->cancelTimerId(timerid2);
+    
+    if (timerid1.isVaild())
+        std::cout << "timerid1 vaild\n";
+    else
+        std::cout << "timerid1 invaild\n";
+
+    if (timerid2.isVaild())
+        std::cout << "timerid2 vaild\n";
+    else
+        std::cout << "timerid2 invaild\n";
+
     g_loop->runAfter(13, boost::bind(timeout));
 
     g_loop->loop();

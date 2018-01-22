@@ -45,8 +45,10 @@ void test1()
     connector->start();
     loop->loop();
 
-    delete loop;
+    //we must delete the obj in right order.
+    //can't delete loop firstly.
     delete connector;
+    delete loop;
 }
 
 void test2()
@@ -64,8 +66,8 @@ void test2()
     connector->start();
     loop->loop();
 
-    delete loop;
     delete connector;
+    delete loop;
 }
 
 void test3()

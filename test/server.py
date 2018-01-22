@@ -12,8 +12,8 @@ def server(ip, port):
     conn,addr=s.accept()
 
     print "get a connection:",addr
-    print "close this connection after 10 seconds\n "
-    sleepSecond(10)
+    print "close this connection after 15 seconds\n "
+    sleepSecond(15)
 
     conn.close()    
     s.close()

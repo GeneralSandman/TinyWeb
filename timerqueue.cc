@@ -171,7 +171,6 @@ void TimerQueue::cancelTimer(TimerId &timerid)
     Time time = timerid.m_pTimer->getTime();
     Timer *timer = timerid.m_pTimer;
     unsigned long long idnum = timerid.m_nIdNum;
-
     std::pair<Time, Timer *>
         cancelTimer = std::make_pair(time, timer);
     std::pair<Timer *, unsigned long long>
@@ -196,13 +195,13 @@ void TimerQueue::cancelTimer(TimerId &timerid)
         //defer the delect action to
         //m_fResetHappened().
         timerid.m_pTimer = nullptr;
+        //make sure this TimerId is invaild.
     }
     else
     {
         //this timerid is expired.
         //ignorce.
     }
-
     assert(m_nTimers.size() == m_nActiveTimers.size());
 }
 
