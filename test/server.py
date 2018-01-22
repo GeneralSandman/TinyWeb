@@ -29,8 +29,8 @@ def server2(ip,port):
         print "send message to client"
         conn.send("I get you");
 
-        data=conn.recv(4096)
-        print data
+        # data=conn.recv(4096)
+        # print data
 
         print "close this connection after 3 seconds "
         sleepSecond(3)

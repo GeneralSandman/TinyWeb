@@ -120,6 +120,34 @@ void test3()
     Factory *clientFactory = new ClientFactory(loop, clientProtocol);
     Client *tcpClient = new Client(loop, clientFactory);
 
+    loop->runAfter(10, std::bind(&EventLoop::quit, loop));
+
+    NetAddress serveraddress("127.0.0.1:9999");
+    NetAddress clientaddress("127.0.0.1:9595");
+    bool retry = false;
+    bool keepconnect = false;
+    tcpClient->start();
+    tcpClient->connect(clientaddress, serveraddress, retry, keepconnect);
+
+    loop->loop();
+
+    //delete obj in right order.
+    delete tcpClient;
+    delete clientFactory;
+    delete clientProtocol;
+    delete loop;
+}
+
+void test4()
+{
+    //no retry , no keepconnect
+    EventLoop *loop = new EventLoop();
+    Protocol *clientProtocol = new TestClientProtocol();
+    Factory *clientFactory = new ClientFactory(loop, clientProtocol);
+    Client *tcpClient = new Client(loop, clientFactory);
+
+    loop->runAfter(10, std::bind(&EventLoop::quit, loop));
+    
     NetAddress serveraddress("127.0.0.1:9999");
     NetAddress clientaddress("127.0.0.1:9595");
     bool retry = false;
@@ -138,6 +166,7 @@ void test3()
 
 int main()
 {
-    test1();
     // test1();
+    // test2();
+    test3();
 }
