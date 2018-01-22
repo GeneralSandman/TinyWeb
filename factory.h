@@ -6,7 +6,8 @@
 */
 
 /*---class Factory---
-*This class is a factory which produces protocols.
+*Main function is produces protocols by connection.
+*The lifetime of Connection is not control by it.
 ****************************************
 *
 */

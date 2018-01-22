@@ -18,6 +18,27 @@ def server(ip, port):
     conn.close()    
     s.close()
 
+def server2(ip,port):
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind((ip, int(port)))
+    s.listen(8)
+    while(1):
+        conn,addr=s.accept()
+        print "get a connection:",addr
+
+        print "send message to client"
+        conn.send("I get you");
+
+        data=conn.recv(4096)
+        print data
+
+        print "close this connection after 5 seconds "
+        sleepSecond(5)
+        conn.close()
+        print "we have close this connection:",addr
+        print "\n"
+    s.close()
+
 def webServer(ip,port):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((ip, int(port)))
@@ -41,4 +62,4 @@ def webServer(ip,port):
 
 
 if __name__ == "__main__":
-    server(sys.argv[1], sys.argv[2])
+    server2(sys.argv[1], sys.argv[2])

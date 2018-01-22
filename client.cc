@@ -66,7 +66,6 @@ void Client::m_fHandleClose(Connection *con)
     }
     else
     { //This pair may be reused next time.
-        conn = nullptr;
     }
 
     if (m_nStarted && conr->isKeepConnect())

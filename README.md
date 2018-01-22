@@ -164,6 +164,8 @@ python client.py 9090 139.199.13.50 80
 - Connection监听读、写、写完、错误、关闭事件
 
 - Connection和Connector的Channel不同，也就决定了监听对象的不同，Connector监听的是连接建立的时候的事件，而Connection要对连接成功之后的事件进行负责。注意事件范围。
+- ConnectSocket 和已经建立连接后的Connection中的socket是相同的
+如何处理两者都关闭file descriptor 出错的问题。
 
 ### 按什么原则划分请求的阶段
 1. 将阻塞进程的方法按照相关的触发事件分解为两个阶段

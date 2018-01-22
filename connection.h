@@ -39,8 +39,9 @@ class Connection
 private:
   EventLoop *m_pEventLoop;
   Connection_State m_nState;
-  Socket *m_pConnectSocket; //have difference between ListenSocket
-  Channel *m_pChannel;      //connect fd
+  Socket *m_pConnectSocket; //have difference between ListenSocket and connectSocket
+  Channel *m_pChannel;      //handle connect fd
+  
   ConnectionCallback m_nConnectCallback;
   MessageCallback m_nMessageCallback;
   WriteCompleteCallback m_nWriteCompleteCallback;

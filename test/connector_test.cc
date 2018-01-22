@@ -30,6 +30,10 @@ void connectionCallback(int sockfd, const NetAddress &localaddress,
     loop->runAfter(10, std::bind(&EventLoop::quit, loop));
 }
 
+//in this file,we can't test keepconnect priority,
+//because close callback must handle connection.
+//client_test.cc test the arg keepconnect.
+
 void test1()
 {
     //no retry ,no keepconnect
@@ -108,8 +112,8 @@ void test4()
     loop->runAfter(10, boost::bind(&EventLoop::quit, loop));
 
     loop->loop();
-    delete loop;
     delete connector;
+    delete loop;
 }
 
 void test5()
@@ -129,16 +133,16 @@ void test5()
     loop->runAfter(10, boost::bind(&EventLoop::quit, loop));
 
     loop->loop();
-    delete loop;
     delete connector;
+    delete loop;
 }
 
 int main()
 {
     // test1();
     test2();
-    // test3();
-    // test4();
-    // test5();
+    // test3();//can't use
+    // test4();//can't use
+    // test5();//can't use
     return 0;
 }

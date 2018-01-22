@@ -20,6 +20,7 @@ class Socket
 {
 private:
   int m_nFd;
+  bool m_nClosed;
 
 public:
   Socket(int);

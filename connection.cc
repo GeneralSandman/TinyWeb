@@ -163,7 +163,9 @@ void Connection::establishConnection()
 
 void Connection::destoryConnection()
 {
-    LOG(Info) << "lose connection" << m_nPeerAddress.getIpPort() << std::endl;
+    //this function always be used after shutdown or lost connection
+    //to destory some data of connection
+    //after invoking this function, we delete this connection.
 
     m_nState = DisConnected;
     m_pChannel->disableAll();

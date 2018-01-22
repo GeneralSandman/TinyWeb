@@ -22,6 +22,7 @@
 Socket::Socket(int fd)
 {
     m_nFd = fd;
+    m_nClosed = false;
     setSocketReuseAddress(fd); //SO_REUSEADDR
     LOG(Debug) << "class Socket constructor\n";
 }
@@ -61,8 +62,11 @@ void Socket::shutdownWrite()
 
 void Socket::close()
 {
-    LOG(Debug) << "invoke Socket::close\n";
-    Close(m_nFd);
+    if (m_nClosed == false)
+    {
+        Close(m_nFd);
+        m_nClosed = true;
+    }
 }
 
 void Socket::setNoDelay()
@@ -92,6 +96,10 @@ void Socket::setNoKeepAlive()
 
 Socket::~Socket()
 {
-    Close(m_nFd);
+    if (m_nClosed == false)
+    {
+        Close(m_nFd);
+        m_nClosed = true;
+    }
     LOG(Debug) << "class Socket destructor\n";
 }
