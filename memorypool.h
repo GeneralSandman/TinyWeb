@@ -15,6 +15,107 @@
 #define MEMORY_POOL_H
 
 #include <stddef.h>
+#include <boost/function.hpp>
+#include "log.h"
+
+//Information of BasicAllocator
+
+#if 0
+#include <new>
+#elif !defined(__BASICALLOCATOR_THROW_BAD_ALLOC)
+#include <iostream>
+#define __BASICALLOCATOR_THROW_BAD_ALLOC     \
+  std::cerr << "out of memory" << std::endl; \
+  exit(1)
+#endif
+
+//out of memory handler
+typedef boost::function<void()> OomHandler;
+
+class BasicAllocator
+{
+private:
+  static void *m_fOomMalloc(size_t size)
+  {
+    LOG(Debug) << std::endl;
+    void *result = nullptr;
+    OomHandler myHandler;
+
+    while (1)
+    {
+      myHandler = m_nHandler;
+      if (myHandler)
+      {
+        myHandler();
+        result = malloc(size);
+        if (nullptr != result)
+          return result;
+      }
+      else
+      {
+        __BASICALLOCATOR_THROW_BAD_ALLOC;
+      }
+    }
+  }
+  static void *m_fOomRealloc(void *p, size_t size)
+  {
+
+    LOG(Debug) << std::endl;
+    void *result = nullptr;
+    OomHandler myHandler;
+
+    while (1)
+    {
+      myHandler = m_nHandler;
+      if (myHandler)
+      {
+        myHandler();
+        result = realloc(p, size);
+        if (nullptr != result)
+          return result;
+      }
+      else
+      {
+        __BASICALLOCATOR_THROW_BAD_ALLOC;
+      }
+    }
+  }
+  static OomHandler m_nHandler;
+
+public:
+  static void *allocate(size_t size)
+  {
+    void *result = malloc(size);
+    LOG(Debug) << "BasicAllocator malloc " << size << std::endl;
+    if (nullptr == result)
+      result = m_fOomMalloc(size);
+    return result;
+  }
+
+  static void *reallocate(void *p, size_t size)
+  {
+    void *result = realloc(p, size);
+    LOG(Debug) << "BasicAllocator realloc " << size << std::endl;
+    if (nullptr == result)
+      result = m_fOomRealloc(p, size);
+    return result;
+  }
+
+  static void deallocate(void *p, size_t size)
+  {
+    free(p);
+    LOG(Debug) << "BasicAllocator free " << size << std::endl;
+  }
+
+  static OomHandler setHandler(OomHandler h)
+  {
+    OomHandler tmp = m_nHandler;
+    m_nHandler = h;
+    return tmp;
+  }
+};
+
+//Information of memorypool
 
 #define ALIGN 8
 #define MAXSPACE 128
@@ -47,8 +148,7 @@ private:
   char *m_pHeapEnd;
 
   void *m_fFillFreeList(size_t);
-  char *m_fAllocChunk(size_t, int&);
-  void m_fAddMoreHeap(size_t);
+  char *m_fAllocChunk(size_t, int &);
 
 public:
   MemoryPool();

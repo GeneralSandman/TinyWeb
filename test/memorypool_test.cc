@@ -19,9 +19,13 @@ using namespace std;
 
 int main()
 {
-    MemoryPool pool;
-    int *p = (int *)pool.allocate(4);
-    cout << pool.allocatedSpace() << endl;
+    {
+
+        MemoryPool pool;
+        int *p = (int *)pool.allocate(4);
+        cout << pool.allocatedSpace() << endl;
+        pool.deallocate(p, 4);
+    }
 
     return 0;
 }
