@@ -1,6 +1,6 @@
 /*
 *Author:GeneralSandman
-*Code:https://github.com/GeneralSandman/sigil
+*Code:https://github.com/GeneralSandman/TinyWeb
 *E-mail:generalsandman@163.com
 *Web:www.generalsandman.cn
 */
@@ -131,18 +131,19 @@ void RbTree::m_fDeleteNode(RbTreeNode *node)
     {
         RbTreeNode *replace = node;
         replace = replace->m_pRight;
+        //find min node
         while (replace->m_pLeft != nullptr)
             replace = replace->m_pLeft;
 
         if (node->m_pParent != nullptr)
-        { //要删除的节点不是根节点
+        {
             if (node == node->m_pParent->m_pLeft)
                 node->m_pParent->m_pLeft = replace;
             else
                 node->m_pParent->m_pRight = replace;
         }
         else
-        { //否则
+        {
             m_pRoot = replace;
         }
 
@@ -154,7 +155,7 @@ void RbTree::m_fDeleteNode(RbTreeNode *node)
             parent = replace;
         }
         else
-        { //否则
+        {
             if (child != nullptr)
                 child->m_pParent = parent;
             parent->m_pLeft = child;
@@ -375,6 +376,7 @@ void RbTree::insert(const int &value)
 void RbTree::m_fLeftRotate(RbTreeNode *node)
 {
     LOG(Debug) << "leftRotate:" << node->m_nValue << std::endl;
+
     /* 
 		 * left rotate function
 		 *     p                       p 
@@ -432,7 +434,7 @@ void RbTree::m_fRightRotate(RbTreeNode *node)
 
 		 */
 
-    RbTreeNode *y = node;         //must
+    RbTreeNode *y = node;         //must isn't nullptr
     RbTreeNode *p = y->m_pParent; //may be
     RbTreeNode *x = y->m_pLeft;   //must
     RbTreeNode *lx = x->m_pLeft;  //may be

@@ -1,6 +1,6 @@
 /*
 *Author:GeneralSandman
-*Code:https://github.com/GeneralSandman/sigil
+*Code:https://github.com/GeneralSandman/TinyWeb
 *E-mail:generalsandman@163.com
 *Web:www.generalsandman.cn
 */
@@ -18,11 +18,12 @@
 
 #include <iostream>
 #include <vector>
-using namespace std;
 
 typedef enum { red,
                black } color;
+
 class RbTree;
+
 class RbTreeNode
 {
 private:
@@ -77,12 +78,12 @@ public:
 
   typedef std::pair<int, color> entry;
 
-  void m_fLevel(vector<vector<entry>> &result, RbTreeNode *node, int level)
+  void m_fLevel(std::vector<std::vector<entry>> &result, RbTreeNode *node, int level)
   {
     if (node == nullptr)
       return;
     if (level == result.size())
-      result.push_back(vector<entry>());
+      result.push_back(std::vector<entry>());
     result[level].push_back(entry(node->m_nValue, node->m_nColor));
     m_fLevel(result, node->m_pLeft, level + 1);
     m_fLevel(result, node->m_pRight, level + 1);
