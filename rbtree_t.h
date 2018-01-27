@@ -11,8 +11,8 @@
 *
 */
 
-#ifndef Rb_TREE
-#define Rb_TREE
+#ifndef Rb_TREE_
+#define Rb_TREE_T
 
 #include "log.h"
 
@@ -90,13 +90,13 @@ public:
   }
   void PrintTreeLevel()
   {
-    vector<vector<entry>> result;
+    std::vector<std::vector<entry>> result;
     m_fLevel(result, m_pRoot, 0);
     if (result.empty())
-      cout << "empty\n";
+      std::cout << "empty\n";
     for (int i = 0; i < result.size(); i++)
     {
-      cout << "level " << i + 1 << ":";
+      std::cout << "level " << i + 1 << ":";
       for (auto t : result[i])
       {
         char c;
@@ -105,11 +105,11 @@ public:
         if (t.second == black)
           c = 'B';
 
-        cout << t.first << c << " ";
+        std::cout << t.first << c << " ";
       }
-      cout << endl;
+      std::cout << std::endl;
     }
   }
 };
 
-#endif
+#endif //!RBTREE_T_H

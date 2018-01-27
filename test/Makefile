@@ -2,10 +2,12 @@ link = g++ -o
 gcc11 = g++ -std=c++11 -c
 gcc11o = $(gcc11) -o
 
+struct = rbtree_t list_t string_t 
+
 lib = api channel condition currentthread epoller eventloop exception \
 	log time timer timerqueue socket netaddress connection server accepter connector\
 	client process processpool reader configer buffer protocol factory parser responser http \
-	sharedmemory semaphore master worker defer memorypool rbtree
+	sharedmemory semaphore master worker defer memorypool rbtree_t
 lib.o = $(foreach file,$(lib),$(file).o)
 lib.cc = $(foreach file,$(lib),../$(file).cc)
 
@@ -61,8 +63,8 @@ protocol_test:protocol_test.o
 	$(link) protocol_test protocol_test.o $(lib.o) -lpthread
 defer_test:defer_test.o
 	$(link) defer_test defer_test.o $(lib.o) -lpthread
-rbtree_test:rbtree_test.o rbtree.o
-	$(link) rbtree_test rbtree_test.o rbtree.o log.o
+rbtree_test:rbtree_test.o rbtree_t.o
+	$(link) rbtree_test rbtree_test.o rbtree_t.o log.o
 test:test.o $(lib.o)
 	$(link) test test.o $(lib.o) -lpthread
 
