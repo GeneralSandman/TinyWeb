@@ -6,7 +6,7 @@
 */
 
 /*---String class---
-*
+*String don't manage memory.
 ****************************************
 *
 */
@@ -16,32 +16,78 @@
 
 #include "log.h"
 
+#include <cstring>
+
 class String
 {
-  public:
-    char *data;
-    int len;
+public:
+  char *data;
+  int len;
 
-    String()
-    {
-        LOG(Debug) << "class String constructor\n";
-    }
+  String()
+  {
+    data = nullptr;
+    len = 0;
+  }
 
-    ~String()
-    {
-        LOG(Debug) << "class String destructor\n";
-    }
+  String(const String &s)
+  {
+    data = s.data;
+    len = s.len;
+  }
+
+  String(char *str)
+  {
+    data = str;
+    len = strlen(str);
+  }
+
+  String(char *str, int l)
+  {
+    data = str;
+    len = l;
+  }
+
+  void setNull()
+  {
+    data = nullptr;
+    len = 0;
+  }
+
+  void swap(String str)
+  {
+    std::swap(data, str.data);
+    std::swap(len, str.len);
+  }
+
+  String &operator=(const String &s)
+  {
+    data = s.data;
+    len = s.len;
+
+    return *this;
+  }
+
+  friend bool operator>(const String &a, const String &b)
+  {
+    return a.len > b.len;
+  }
+
+  ~String()
+  {
+    LOG(Debug) << "class String destructor\n";
+  }
 };
 
 class KeyValue
 {
-  private:
-    String m_nKey;
-    String m_nValue;
+private:
+  String m_nKey;
+  String m_nValue;
 
-  public:
-    KeyValue();
-    ~KeyValue();
+public:
+  KeyValue();
+  ~KeyValue();
 };
 
 #endif // !STRING_H
