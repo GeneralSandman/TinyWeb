@@ -5,8 +5,8 @@
 *Web:www.generalsandman.cn
 */
 
-/*---XXX---
-*
+/*---class MemoryPool---
+*MemoryPool is to used to manage memory.
 ****************************************
 *
 */
@@ -14,9 +14,10 @@
 #ifndef MEMORY_POOL_H
 #define MEMORY_POOL_H
 
+#include "log.h"
+
 #include <stddef.h>
 #include <boost/function.hpp>
-#include "log.h"
 
 //Information of BasicAllocator
 
@@ -57,6 +58,7 @@ private:
       }
     }
   }
+
   static void *m_fOomRealloc(void *p, size_t size)
   {
 
@@ -80,6 +82,7 @@ private:
       }
     }
   }
+
   static OomHandler m_nHandler;
 
 public:
@@ -113,15 +116,16 @@ public:
     m_nHandler = h;
     return tmp;
   }
+
 };
 
-//Information of memorypool
+//Information of MemoryPool
 
 #define ALIGN 8
 #define MAXSPACE 128
 #define LIST_SIZE MAXSPACE / ALIGN
 
-//Using union can reduce the expense of managing memory.
+//Using union can reduce the cost of managing memory.
 union obj {
   union obj *p_next;
   char data[1];
@@ -143,7 +147,7 @@ private:
   size_t m_nAllocatedSpace; //Debug
   obj *m_nFreeList[LIST_SIZE];
 
-  //mark the boundary of heap
+  //Tag the boundary of heap which is the backup memory of free list.
   char *m_pHeapBegin;
   char *m_pHeapEnd;
 

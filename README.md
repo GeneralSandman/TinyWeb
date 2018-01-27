@@ -255,6 +255,10 @@ Linux上Nginx的事件模块在没打开异步I/O时就不支持这种方法,像
     - socketpair
 - 对进程池进行重新设计，利用IPC基本类进行通信，控制
 
+> # 更新进度
+- 参考nginx内存池，list,rbtree,string,
+- 思考mime.type的设计，如何配置 include /home/li/TinyWeb/mime.type
+
 > # 模块的开发文档
 
 

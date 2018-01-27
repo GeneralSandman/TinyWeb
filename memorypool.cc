@@ -36,7 +36,9 @@ void *MemoryPool::m_fFillFreeList(size_t s)
 {
     obj *result = nullptr;
     int chunk_num = 15;
-    //chunk_num is a value-result argument
+    //chunk_num is a value-result argument,
+    //set the chunk_num you want,
+    //return the actual chunk_num add to this list.
     char *p_chunk = m_fAllocChunk(s, chunk_num);
 
     if (1 == chunk_num)
@@ -44,10 +46,10 @@ void *MemoryPool::m_fFillFreeList(size_t s)
         LOG(Debug) << "alloc chunk number is 1\n";
         result = (obj *)p_chunk;
     }
-    else
+    else//chunk_num >= 2
     {
         LOG(Debug) << "alloc chunk number is " << chunk_num << " size:" << s << "\n";
-        //add reset chunk_num to free list.
+        //add chunk_num-1 chunk to free list.
         obj **list = m_nFreeList + FREELIST_INDEX(s);
 
         obj *current_chunk = nullptr,
@@ -80,14 +82,14 @@ char *MemoryPool::m_fAllocChunk(size_t s, int &chunk_num)
     if (left_size >= request_size)
     {
         LOG(Debug) << "get " << chunk_num << " space from heap:" << request_size << "\n";
-        //Heap can provied chunk_num chunks to invoker.
+        //Heap can provie chunk_num chunks to free list.
         result = m_pHeapBegin;
         m_pHeapBegin += request_size;
         return result;
     }
     else if (left_size >= s)
     {
-        //The number of heap provied is between 1 and chunk_num.
+        //The number of heap provie is between 1 and chunk_num.
         chunk_num = left_size / s;
         LOG(Debug) << "get " << chunk_num << " space from heap:" << request_size << "\n";
         request_size = s * chunk_num;
@@ -98,7 +100,7 @@ char *MemoryPool::m_fAllocChunk(size_t s, int &chunk_num)
     else
     {
         //Heap even can't provied one chunk.
-        //Add more Heap space.
+        //Add more heap space.
 
         //reuse the last heap space
         //add it to free list
@@ -128,7 +130,7 @@ char *MemoryPool::m_fAllocChunk(size_t s, int &chunk_num)
                     *list_ = (*list_)->p_next;
                     m_pHeapBegin = (char *)(*list_);
                     m_pHeapEnd = m_pHeapBegin + i;
-
+                    //????????????
                     return (m_fAllocChunk(s, chunk_num));
                     //
                 }
@@ -200,7 +202,7 @@ void *MemoryPool::reallocate(void *p, size_t oldsize, size_t newsize)
 
 MemoryPool::~MemoryPool()
 {
-    //delete all list and heap
+    //delete all free list and heap
     for (int i = 0; i < LIST_SIZE; i++)
     {
         obj *curr_obj = m_nFreeList[i];
