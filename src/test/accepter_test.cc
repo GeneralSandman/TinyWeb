@@ -11,10 +11,10 @@
 *
 */
 
-#include "../accepter.h"
-#include "../eventloop.h"
-#include "../netaddress.h"
-#include "../api.h"
+#include <core/accepter.h>
+#include <core/eventloop.h>
+#include <core/netaddress.h>
+#include <base/api.h>
 
 #include <iostream>
 #include <unistd.h>
