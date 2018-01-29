@@ -11,10 +11,10 @@
 *
 */
 
-#include "timerqueue.h"
-#include "timer.h"
-#include "channel.h"
-#include "log.h"
+#include <tiny_core/timerqueue.h>
+#include <tiny_core/timer.h>
+#include <tiny_core/channel.h>
+#include <tiny_base/log.h>
 
 #include <sys/timerfd.h>
 #include <boost/bind.hpp>

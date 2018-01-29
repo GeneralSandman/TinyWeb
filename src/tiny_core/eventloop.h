@@ -14,8 +14,8 @@
 #ifndef EVENT_LOOP_H
 #define EVENT_LOOP_H
 
-#include "time.h"
-#include "timer.h"
+#include <tiny_core/time.h>
+#include <tiny_core/timer.h>
 
 #include <vector>
 

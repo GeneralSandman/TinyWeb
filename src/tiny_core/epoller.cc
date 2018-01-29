@@ -11,11 +11,11 @@
 *
 */
 
-#include "epoller.h"
-#include "channel.h"
-#include "time.h"
-#include "log.h"
-#include "api.h"
+#include <tiny_core/epoller.h>
+#include <tiny_core/channel.h>
+#include <tiny_core/time.h>
+#include <tiny_base/log.h>
+#include <tiny_base/api.h>
 
 #include <sys/epoll.h>
 #include <unistd.h>

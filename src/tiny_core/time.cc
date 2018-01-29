@@ -10,8 +10,8 @@
 ****************************************
 *
 */
- 
-#include "time.h"
+
+#include <tiny_core/time.h>
 
 #include <iostream>
 #include <sys/time.h>
@@ -67,4 +67,3 @@ Time Time::invalid()
 {
   return Time();
 }
-

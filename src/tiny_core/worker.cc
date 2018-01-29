@@ -11,8 +11,8 @@
 *
 */
 
-#include "worker.h"
-#include "log.h"
+#include <tiny_core/worker.h>
+#include <tiny_base/log.h>
 
 #include <unistd.h>
 

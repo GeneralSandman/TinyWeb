@@ -11,9 +11,8 @@
 *
 */
 
-#include "netaddress.h"
-#include "api.h"
-#include "log.h"
+#include <tiny_core/netaddress.h>
+#include <tiny_base/api.h>
 
 #include <string>
 #include <strings.h>

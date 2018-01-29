@@ -14,8 +14,8 @@
 #ifndef TIMER_ID_H
 #define TIMER_ID_H
 
-#include "timer.h"
-#include "log.h"
+#include <tiny_core/timer.h>
+#include <tiny_base/log.h>
 
 class TimerId
 {

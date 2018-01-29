@@ -14,11 +14,11 @@
 #ifndef CONNECTION_H
 #define CONNECTION_H
 
-#include "channel.h"
-#include "buffer.h"
-#include "callback.h"
-#include "time.h"
-#include "netaddress.h"
+#include <tiny_core/channel.h>
+#include <tiny_base/buffer.h>
+#include <tiny_core/callback.h>
+#include <tiny_core/time.h>
+#include <tiny_core/netaddress.h>
 
 #include <boost/function.hpp>
 
@@ -41,7 +41,7 @@ private:
   Connection_State m_nState;
   Socket *m_pConnectSocket; //have difference between ListenSocket and connectSocket
   Channel *m_pChannel;      //handle connect fd
-  
+
   ConnectionCallback m_nConnectCallback;
   MessageCallback m_nMessageCallback;
   WriteCompleteCallback m_nWriteCompleteCallback;

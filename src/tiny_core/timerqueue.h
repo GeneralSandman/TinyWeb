@@ -23,8 +23,8 @@
 #ifndef TIMER_QUEUE_H
 #define TIMER_QUEUE_H
 
-#include "timer.h"
-#include "timerid.h"
+#include <tiny_core/timer.h>
+#include <tiny_core/timerid.h>
 
 #include <vector>
 #include <set>
@@ -42,7 +42,7 @@ private:
   std::set<std::pair<Timer *, unsigned long long>> m_nActiveTimers; //++
   //must m_nTimers.size()==m_nActiveTimers.size()
   bool m_nIsCallingExpiredTimers;
-  std::set<std::pair<Timer *, unsigned long long>> m_nCancelingTimers; //++  
+  std::set<std::pair<Timer *, unsigned long long>> m_nCancelingTimers; //++
 
   EventLoop *m_pEventLoop;
   int m_nFd;

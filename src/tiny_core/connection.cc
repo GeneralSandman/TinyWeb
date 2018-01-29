@@ -11,14 +11,14 @@
 *
 */
 
-#include "connection.h"
-#include "netaddress.h"
-#include "eventloop.h"
-#include "socket.h"
-#include "channel.h"
-#include "time.h"
-#include "api.h"
-#include "log.h"
+#include <tiny_core/connection.h>
+#include <tiny_core/netaddress.h>
+#include <tiny_core/eventloop.h>
+#include <tiny_core/socket.h>
+#include <tiny_core/channel.h>
+#include <tiny_core/time.h>
+#include <tiny_base/api.h>
+#include <tiny_base/log.h>
 
 #include <boost/bind.hpp>
 #include <iostream>
@@ -58,7 +58,7 @@ void Connection::m_fHandleWrite()
                 m_pChannel->disableWrite(); //it's very important,you can try to delete the if
                 if (m_nState == DisConnecting)
                     m_fShutdownWrite();
-                if(m_nWriteCompleteCallback)
+                if (m_nWriteCompleteCallback)
                     m_nWriteCompleteCallback(this);
             }
             else
@@ -134,7 +134,8 @@ void Connection::send(const std::string &message)
                 if (m_nWriteCompleteCallback)
                     m_nWriteCompleteCallback(this);
             }
-            else{
+            else
+            {
                 //have more data to write,
                 //output buffer will write rest data.
             }
