@@ -11,11 +11,11 @@
 *
 */
 
-#include "server.h"
-#include "connection.h"
-#include "factory.h"
-#include "log.h"
-#include "api.h"
+#include <tiny_core/server.h>
+#include <tiny_core/connection.h>
+#include <tiny_core/factory.h>
+#include <tiny_base/log.h>
+#include <tiny_base/api.h>
 
 #include <boost/ptr_container/ptr_set.hpp>
 #include <boost/bind.hpp>

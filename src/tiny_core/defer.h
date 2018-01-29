@@ -14,8 +14,8 @@
 #ifndef DEFER_H
 #define DEFER_H
 
-#include "log.h"
-#include "exception.h"
+#include <tiny_base/exception.h>
+#include <tiny_base/log.h>
 
 #include <deque>
 #include <string>

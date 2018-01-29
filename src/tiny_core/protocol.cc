@@ -11,10 +11,10 @@
 *
 */
 
-#include "protocol.h"
-#include "factory.h"
-#include "connection.h"
-#include "log.h"
+#include <tiny_core/protocol.h>
+#include <tiny_core/factory.h>
+#include <tiny_core/connection.h>
+#include <tiny_base/log.h>
 
 #include <vector>
 

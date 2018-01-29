@@ -11,11 +11,11 @@
 *
 */
 
-#include "client.h"
-#include "connector.h"
-#include "connection.h"
-#include "factory.h"
-#include "log.h"
+#include <tiny_core/client.h>
+#include <tiny_core/connector.h>
+#include <tiny_core/connection.h>
+#include <tiny_core/factory.h>
+#include <tiny_base/log.h>
 
 #include <boost/bind.hpp>
 

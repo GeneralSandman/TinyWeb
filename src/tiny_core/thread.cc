@@ -10,11 +10,11 @@
 ****************************************
 *
 */
- 
-#include "thread.h"
-#include "currentthread.h"
-#include "atomic.h"
-#include "api.h"
+
+#include <tiny_core/thread.h>
+#include <tiny_core/currentthread.h>
+#include <tiny_core/atomic.h>
+#include <tiny_base/api.h>
 
 AtomicInt32 Thread::m_nThreadsNum;
 

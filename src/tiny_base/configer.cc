@@ -40,7 +40,7 @@ void Configer::m_fInitDefaultKeyValue()
     m_nValue["docs"] = "";
     m_nValue["hostname"] = "";
     m_nValue["loglevel"] = "Info";
-    m_nValue["logpa>] = "";
+    m_nValue["logpath"] = "";
     m_nValue["debugfile"] = "";
     m_nValue["infofile"] = "";
     m_nValue["warnfile"] = "";

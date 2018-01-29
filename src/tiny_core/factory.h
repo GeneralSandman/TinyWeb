@@ -15,9 +15,9 @@
 #ifndef FACTORY_H
 #define FACTORY_H
 
-#include "protocol.h"
-#include "connection.h"
-#include "callback.h"
+#include <tiny_core/protocol.h>
+#include <tiny_core/connection.h>
+#include <tiny_core/callback.h>
 
 #include <map>
 #include <set>

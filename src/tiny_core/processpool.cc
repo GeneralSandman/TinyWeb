@@ -11,10 +11,10 @@
 *
 */
 
-#include "processpool.h"
-#include "process.h"
-#include "worker.h"
-#include "log.h"
+#include <tiny_core/processpoll.h>
+#include <tiny_core/process.h>
+#include <tiny_core/worker.h>
+#include <tiny_base/log.h>
 
 #include <unistd.h>
 #include <sys/types.h>

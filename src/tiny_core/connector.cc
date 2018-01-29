@@ -11,13 +11,13 @@
 *
 */
 
-#include "eventloop.h"
-#include "netaddress.h"
-#include "connector.h"
-#include "socket.h"
-#include "timerid.h"
-#include "api.h"
-#include "log.h"
+#include <tiny_core/eventloop.h>
+#include <tiny_core/netaddress.h>
+#include <tiny_core/connector.h>
+#include <tiny_core/socket.h>
+#include <tiny_core/timerid.h>
+#include <tiny_base/api.h>
+#include <tiny_base/log.h>
 
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
@@ -47,7 +47,7 @@ void Connector::m_fConnect()
     // int res = m_pConnectSocket->connect(m_nServerAddress);
 
     m_nSockfd = createNoBlockSocket();
-    setSocketReuseAddress(m_nSockfd);//TIME_WAIT
+    setSocketReuseAddress(m_nSockfd); //TIME_WAIT
     struct sockaddr_in host = m_nHostAddress.getAddr();
     struct sockaddr_in peer = m_nServerAddress.getAddr();
 

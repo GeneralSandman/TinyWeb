@@ -11,8 +11,8 @@
 *
 */
 
-#include "defer.h"
-#include "exception.h"
+#include <tiny_core/defer.h>
+#include <tiny_base/exception.h>
 
 void defaultFun()
 {

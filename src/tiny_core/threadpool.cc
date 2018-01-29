@@ -10,12 +10,13 @@
 ****************************************
 *
 */
- 
-#include "thread.h"
-#include "threadpool.h"
-#include "currentthread.h"
-#include "mutex.h"
-#include "condition.h"
+
+
+#include <tiny_core/thread.h>
+#include <tiny_core/threadpool.h>
+#include <tiny_core/currentthread.h>
+#include <tiny_base/mutex.h>
+#include <tiny_base/condition.h>
 
 #include <boost/bind.hpp>
 

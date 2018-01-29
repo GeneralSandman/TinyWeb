@@ -14,16 +14,16 @@
 #ifndef THREAD_POOL_H
 #define THREAD_POOL_H
 
+
+#include <tiny_base/mutex.h>
+#include <tiny_base/condition.h>
+#include <tiny_core/thread.h>
+
 #include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
-
 #include <string>
 #include <deque>
-#include "mutex.h"
-#include "condition.h"
-
-#include "thread.h"
 
 typedef boost::function<void()> Task;
 

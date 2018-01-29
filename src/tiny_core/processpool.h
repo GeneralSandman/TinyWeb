@@ -14,8 +14,8 @@
 #ifndef PROCESS_POOL_H
 #define PROCESS_POOL_H
 
-#include "process.h"
-#include "api.h"
+#include <tiny_core/process.h>
+#include <tiny_base/api.h>
 
 #include <vector>
 #include <map>

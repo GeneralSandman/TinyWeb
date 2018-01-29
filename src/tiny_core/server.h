@@ -14,10 +14,10 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include "channel.h"
-#include "accepter.h"
-#include "callback.h"
-#include "netaddress.h"
+#include <tiny_core/channel.h>
+#include <tiny_core/accepter.h>
+#include <tiny_core/callback.h>
+#include <tiny_core/netaddress.h>
 
 #include <boost/function.hpp>
 #include <vector>

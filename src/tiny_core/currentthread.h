@@ -14,7 +14,7 @@
 #ifndef CURRENT_THREAD_H
 #define CURRENT_THREAD_H
 
-#include "unistd.h"
+#include <unistd.h>
 
 namespace CurrentThread
 {
@@ -42,7 +42,7 @@ inline const char *name()
 }
 inline bool isMainThread()
 {
-    return tid()==getpid();
+    return tid() == getpid();
 }
 }
 

@@ -14,8 +14,8 @@
 #ifndef CHANNEL_H
 #define CHANNEL_H
 
-#include "callback.h"
-#include "time.h"
+#include <tiny_core/callback.h>
+#include <tiny_core/time.h>
 
 #include <sys/epoll.h>
 #include <boost/function.hpp>

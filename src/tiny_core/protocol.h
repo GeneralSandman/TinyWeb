@@ -29,14 +29,14 @@
 #ifndef PROTOCOL_H
 #define PROTOCOL_H
 
-#include "callback.h"
-#include "connection.h"
-#include "parser.h"
-#include "responser.h"
-#include "buffer.h"
-#include "time.h"
-#include "api.h"
-#include "log.h"
+#include <tiny_core/callback.h>
+#include <tiny_core/connection.h>
+#include <tiny_core/parser.h>
+#include <tiny_core/responser.h>
+#include <tiny_base/buffer.h>
+#include <tiny_core/time.h>
+#include <tiny_base/api.h>
+#include <tiny_base/log.h>
 
 #include <iostream>
 #include <sstream>

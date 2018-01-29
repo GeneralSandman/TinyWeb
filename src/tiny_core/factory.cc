@@ -11,12 +11,12 @@
 *
 */
 
-#include "factory.h"
-#include "buffer.h"
-#include "eventloop.h"
-#include "protocol.h"
-#include "timerid.h"
-#include "log.h"
+#include <tiny_core/factory.h>
+#include <tiny_core/eventloop.h>
+#include <tiny_core/protocol.h>
+#include <tiny_core/timerid.h>
+#include <tiny_base/buffer.h>
+#include <tiny_base/log.h>
 
 /*------------Factory-------------*/
 

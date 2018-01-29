@@ -20,7 +20,7 @@
 #ifndef MASTER_H
 #define MASTER_H
 
-#include "netaddress.h"
+#include <tiny_core/netaddress.h>
 
 #include <string>
 

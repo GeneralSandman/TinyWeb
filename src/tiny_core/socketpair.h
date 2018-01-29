@@ -71,16 +71,6 @@ class SocketPair
     {
         m_nConnection->setReadCallback(c);
     }
-    void readFromChild()
-    {
-        assert(m_nIsFork);
-        assert(m_nIsParent);
-    }
-    void readFromParent()
-    {
-        assert(m_nIsFork);
-        assert(!m_nIsParent);
-    }
     ~SocketPair();
 };
 

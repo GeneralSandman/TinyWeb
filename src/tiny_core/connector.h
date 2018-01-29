@@ -19,10 +19,10 @@
 #ifndef CONNECTOR_T
 #define CONNECTOR_T
 
-#include "netaddress.h"
-#include "socket.h"
-#include "channel.h"
-#include "timerid.h"
+#include <tiny_core/netaddress.h>
+#include <tiny_core/socket.h>
+#include <tiny_core/channel.h>
+#include <tiny_core/timerid.h>
 
 class EventLoop;
 
@@ -43,7 +43,7 @@ private:
 
   EventLoop *m_pEventLoop;
   // Socket *m_pConnectSocket;
-  int m_nSockfd;//fd inside of Socket obj
+  int m_nSockfd; //fd inside of Socket obj
   //Because this Socket obj have same fd with
   //Socket in Connection,they will close same fd tigger
   //close error.

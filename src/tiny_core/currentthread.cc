@@ -11,8 +11,8 @@
 *
 */
 
-#include "currentthread.h"
-#include "api.h"
+#include <tiny_core/currentthread.h>
+#include <tiny_core/api.h>
 
 namespace CurrentThread
 {

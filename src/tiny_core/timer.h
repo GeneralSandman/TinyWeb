@@ -14,7 +14,7 @@
 #ifndef TIMER_H
 #define TIMER_H
 
-#include "time.h"
+#include <tiny_core/time.h>
 
 #include <boost/function.hpp>
 

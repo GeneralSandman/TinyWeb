@@ -11,11 +11,11 @@
 *
 */
 
-#include "process.h"
-#include "processpool.h"
-#include "worker.h"
-#include "api.h"
-#include "log.h"
+#include <tiny_core/process.h>
+#include <tiny_core/processpool.h>
+#include <tiny_core/worker.h>
+#include <tiny_base/api.h>
+#include <tiny_base/log.h>
 
 #include <iostream>
 #include <string>

@@ -5,14 +5,14 @@
 *Web:www.generalsandman.cn
 */
 
-#include "master.h"
-#include "eventloop.h"
-#include "server.h"
-#include "protocol.h"
-#include "configer.h"
-#include "factory.h"
-#include "log.h"
-#include "api.h"
+#include <tiny_core/master.h>
+#include <tiny_core/eventloop.h>
+#include <tiny_core/server.h>
+#include <tiny_core/protocol.h>
+#include <tiny_core/configer.h>
+#include <tiny_core/factory.h>
+#include <tiny_base/log.h>
+#include <tiny_base/api.h>
 
 #include <unistd.h>
 #include <signal.h>

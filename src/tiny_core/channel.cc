@@ -12,9 +12,9 @@
 *
 */
 
-#include "channel.h"
-#include "eventloop.h"
-#include "log.h"
+#include <tiny_core/channel.h>
+#include <tiny_core/eventloop.h>
+#include <tiny_base/log.h>
 
 void Channel::m_fUpdate()
 {

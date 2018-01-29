@@ -14,8 +14,8 @@
 #ifndef CLIENT_T
 #define CLIENT_T
 
-#include "netaddress.h"
-#include "callback.h"
+#include <tiny_core/netaddress.h>
+#include <tiny_core/callback.h>
 
 #include <set>
 #include <map>
@@ -30,7 +30,7 @@ class Client
 private:
   bool m_nStarted;
   unsigned long long m_nConNum;
-  
+
   EventLoop *m_pEventLoop;
   Factory *m_pFactory;
   //pair <hostAddress,peerAddress>

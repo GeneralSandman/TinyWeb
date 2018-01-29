@@ -14,11 +14,12 @@
 #ifndef THREAD_T
 #define THREAD_T
 
+#include <tiny_base/atomic.h>
+
 #include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
 #include <string>
 #include <pthread.h>
-#include "atomic.h"
 
 typedef boost::function<void()> threadFun;
 class Thread : boost::noncopyable
