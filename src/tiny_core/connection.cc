@@ -33,6 +33,7 @@ void Connection::m_fHandleRead(Time arrive)
             m_nMessageCallback(this,
                                &m_nInputBuffer,
                                arrive);
+        LOG(Debug) << arrive.toString() << std::endl;
     }
     else if (n == 0)
     {
@@ -159,7 +160,8 @@ void Connection::establishConnection()
 {
     m_nState = Connected;
     m_pChannel->enableRead();
-    m_nConnectCallback(this);
+    if (m_nConnectCallback)
+        m_nConnectCallback(this);
 }
 
 void Connection::destoryConnection()
