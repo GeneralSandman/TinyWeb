@@ -11,7 +11,7 @@
 *
 */
 
-#include <tiny_base/socketpair.h>
+#include <tiny_core/socketpair.h>
 #include <tiny_base/log.h>
 #include <tiny_base/api.h>
 

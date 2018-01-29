@@ -5,10 +5,10 @@ gcc11o = $(gcc11) -o
 base = api buffer condition configer exception log memorypool \
 	messagequeue reader semaphore sharedmemory signalmanager
 core = accepter channel client connection connector currentthread \
-	defer epoller eventloop factory master netaddress \
-	process server socket socketpair  \
+	defer epoller eventloop factory netaddress \
+	process protocol server socket socketpair  \
 	 time timer timerqueue worker
-http = cache http_factory http_protocol http parser proxyer responser
+http = cache http_factory http_protocol http parser responser
 struct = dict_t list_t rbtree_t string_t
 
 base.o = $(foreach file,$(base),$(file).o)
@@ -20,8 +20,8 @@ http.cc = $(foreach file,$(http),../tiny_http/$(file).cc)
 struct.o = $(foreach file,$(struct),$(file).o)
 struct.cc = $(foreach file,$(struct),../tiny_struct/$(file).cc)
 
-all.cc = $(base.cc) $(core.cc)
-all.o = $(base.o) $(core.o)
+all.cc = $(base.cc) $(core.cc) $(http.cc)
+all.o = $(base.o) $(core.o) $(http.o)
 
 lib = api channel condition currentthread epoller eventloop exception \
 	log time timer timerqueue socket netaddress connection server accepter connector\

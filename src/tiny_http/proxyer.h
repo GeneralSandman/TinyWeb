@@ -14,10 +14,10 @@
 #ifndef PROXYER_H
 #define PROXYER_H
 
-#include "netaddress.h"
-#include "connection.h"
-#include "server.h"
-#include "client.h"
+#include <tiny_core/netaddress.h>
+#include <tiny_core/connection.h>
+#include <tiny_core/server.h>
+#include <tiny_core/client.h>
 
 #include <map>
 

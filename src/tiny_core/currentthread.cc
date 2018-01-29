@@ -12,7 +12,7 @@
 */
 
 #include <tiny_core/currentthread.h>
-#include <tiny_core/api.h>
+#include <tiny_base/api.h>
 
 namespace CurrentThread
 {

@@ -7,26 +7,16 @@ using namespace std;
 // #include <functional>
 #include <boost/bind.hpp>
 
-typedef function<void(int)> handler;
-
-typedef void (*s_handler)(int);
-void set(handler h)
-{
-    s_handler res;
-    // res = h;
-    // (*res)(1);
+void print(int i){
+    cout<<i<<endl;
 }
 
-void test(int i)
-{
-    std::cout << i << endl;
-}
+typedef boost::function <void()> hand;
 
 int main()
 {
-    set(boost::bind(&test, _1));
+    hand h=boost::bind(&print,1);
+    h();
 
-    s_handler res = test;
-    res(1);
     return 0;
 }

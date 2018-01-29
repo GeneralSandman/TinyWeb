@@ -11,10 +11,10 @@
 *
 */
 
-#include "parser.h"
-#include "api.h"
-#include "log.h"
-#include "http.h"
+#include <tiny_http/http.h>
+#include <tiny_http/parser.h>
+#include <tiny_base/api.h>
+#include <tiny_base/log.h>
 
 #include <sys/socket.h>
 #include <string.h>

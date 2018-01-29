@@ -12,8 +12,8 @@
 */
 
 
-#include "proxyer.h"
-#include "log.h"
+#include <tiny_http/proxyer.h>
+#include <tiny_base/log.h>
 
 Proxyer::Proxyer()
 {

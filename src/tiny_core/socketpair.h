@@ -27,7 +27,7 @@ class SocketPair
     int m_nFds[2];
     //parent using 0,child using 1
     EventLoop *m_pEventLoop;
-    Connection *m_nConnection;
+    Connection *m_pConnection;
 
     bool m_nIsFork;
     bool m_nIsParent;
@@ -42,8 +42,9 @@ class SocketPair
         m_nIsFork = true;
         m_nIsParent = true;
         std::cout << "switch parent:" << getpid() << std::endl;
-        m_nConnection = new Connection(m_nFds[0], m_pEventLoop,
-                                       NetAddress tmp, NetAddress tmp);
+        NetAddress tmp;
+        m_pConnection = new Connection(m_pEventLoop,m_nFds[0],
+                                       tmp,tmp);
     }
     void setChildSocket(EventLoop *loop)
     {
@@ -52,24 +53,25 @@ class SocketPair
         m_nIsFork = true;
         m_nIsParent = false;
         std::cout << "switch child:" << getpid() << std::endl;
-        m_nConnection = new Connection(m_nFds[1], m_pEventLoop,
-                                       NetAddress tmp, NetAddress tmp);
+        NetAddress tmp;
+        m_pConnection = new Connection(m_pEventLoop,m_nFds[1],
+                                       tmp,tmp);
     }
     void writeToChild(const std::string &data)
     {
         assert(m_nIsFork);
         assert(m_nIsParent);
-        m_nconnection->send(data);
+        m_pConnection->send(data);
     }
-    void writeToParent()
+    void writeToParent(const std::string &data)
     {
         assert(m_nIsFork);
         assert(!m_nIsParent);
-        m_nconnection->send(data);
+        m_pConnection->send(data);
     }
     void setReadCallback(const MessageCallback &c)
     {
-        m_nConnection->setReadCallback(c);
+        m_pConnection->setMessageCallback(c);
     }
     ~SocketPair();
 };

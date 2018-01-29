@@ -11,8 +11,8 @@
 *
 */
 
-#include "cache.h"
-#include "log.h"
+#include <tiny_http/cache.h>
+#include <tiny_base/log.h>
 
 Cache::Cache()
 {

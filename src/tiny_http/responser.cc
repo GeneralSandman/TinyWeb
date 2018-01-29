@@ -11,13 +11,13 @@
 *
 */
 
-#include "responser.h"
-#include "protocol.h"
-#include "configer.h"
-#include "http.h"
-#include "api.h"
-#include "log.h"
-#include "reader.h"
+#include <tiny_http/responser.h>
+#include <tiny_core/protocol.h>
+#include <tiny_base/configer.h>
+#include <tiny_http/http.h>
+#include <tiny_base/api.h>
+#include <tiny_base/log.h>
+#include <tiny_base/reader.h>
 
 #include <fcntl.h>
 #include <sys/stat.h>
