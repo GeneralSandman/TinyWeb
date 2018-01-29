@@ -58,12 +58,15 @@ int main()
         EventLoop *loop = new EventLoop();
         pipe.setChildSocket(loop);
         pipe.setReadCallback(boost::bind(&getMessage, _1, _2, _3));
+        
 
         TimerId id1=loop->runEvery(1,boost::bind(print));
-        TimerId id=loop->runAfter(5, boost::bind(&EventLoop::quit, loop));
+        TimerId id=loop->runAfter(10, boost::bind(&EventLoop::quit, loop));
         loop->loop();
 
+        pipe.clearSocket();
         delete loop;
+
     }
     else
     {
@@ -71,11 +74,12 @@ int main()
         pipe.setParentSocket(loop);
         // pipe.writeToChild("aa");
 
-        // TimerId id1=loop->runEvery(1,boost::bind(&SocketPair::writeToChild,&pipe,"aa"));
+        TimerId id1=loop->runEvery(1,boost::bind(&SocketPair::writeToChild,&pipe,"aa"));
         TimerId id2=loop->runEvery(1,boost::bind(print));
         TimerId id=loop->runAfter(10, boost::bind(&EventLoop::quit, loop));
         loop->loop();
 
+        pipe.clearSocket();
         delete loop;
     }
 

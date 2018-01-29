@@ -33,7 +33,7 @@ void Connection::m_fHandleRead(Time arrive)
             m_nMessageCallback(this,
                                &m_nInputBuffer,
                                arrive);
-        LOG(Debug) << arrive.toString() << std::endl;
+        // LOG(Debug) << arrive.toString() << std::endl;
     }
     else if (n == 0)
     {
