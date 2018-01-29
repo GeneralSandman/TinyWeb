@@ -3,26 +3,30 @@
 #include <cstring>
 
 using namespace std;
+#include <boost/function.hpp>
+// #include <functional>
+#include <boost/bind.hpp>
 
-#define f(s) sizeof(s)
+typedef function<void(int)> handler;
+
+typedef void (*s_handler)(int);
+void set(handler h)
+{
+    s_handler res;
+    // res = h;
+    // (*res)(1);
+}
+
+void test(int i)
+{
+    std::cout << i << endl;
+}
 
 int main()
 {
-    int *a;
-    std::cout << sizeof(a) << std::endl;
+    set(boost::bind(&test, _1));
 
-    char *str = "11";
-    std::cout << sizeof(str) << std::endl
-              << strlen(str) << std::endl
-              << f(str) << std::endl;
-
-    char s[] = "11";
-    std::cout << sizeof(s) << std::endl
-              << strlen(s) << std::endl
-              << f(s) << std::endl;
-
-    str = "111";
-    s = "22";
-
+    s_handler res = test;
+    res(1);
     return 0;
 }

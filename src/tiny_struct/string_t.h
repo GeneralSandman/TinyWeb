@@ -14,9 +14,19 @@
 #ifndef STRING_H
 #define STRING_H
 
-#include "log.h"
+#include <tiny_base/log.h>
 
 #include <cstring>
+
+inline char toLower(char c)
+{
+  return (c >= 'A' && c <= 'Z') ? (c | 0x20) : c;
+}
+
+inline char toUpper(char c)
+{
+  return (c >= 'a' && c <= 'z') ? (c | ~0x20) : c;
+}
 
 class String
 {

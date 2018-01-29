@@ -2,7 +2,12 @@ link = g++ -o
 gcc11 = g++ -std=c++11 -c
 gcc11o = $(gcc11) -o
 
+base = time
+core = serv
+http = server_tests
 struct = rbtree_t list_t string_t 
+
+all = $(struct) $(base) $(core) $(http)
 
 lib = api channel condition currentthread epoller eventloop exception \
 	log time timer timerqueue socket netaddress connection server accepter connector\
@@ -10,6 +15,12 @@ lib = api channel condition currentthread epoller eventloop exception \
 	sharedmemory semaphore master worker defer memorypool rbtree_t
 lib.o = $(foreach file,$(lib),$(file).o)
 lib.cc = $(foreach file,$(lib),../$(file).cc)
+
+obj = ../tiny_struct/list_t.o ../tiny_struct/rbtree_t.o
+all:$(obj)
+
+$(obj):%.o:%.cc
+	$(gcc11o) $@ $<
 
 lib:$(lib.cc)
 	$(gcc11) $(lib.cc)
@@ -67,11 +78,12 @@ rbtree_test:rbtree_test.o rbtree_t.o
 	$(link) rbtree_test rbtree_test.o rbtree_t.o log.o
 test:test.o $(lib.o)
 	$(link) test test.o $(lib.o) -lpthread
+signalmanager_test:signalmanager_test.o
+	$(link) signalmanager_test.o signalmanager.o
 
 
 
 base_test.o:base_test.cc
-	$(gcc11) base_test.cc
 api_test.o:api_test.cc
 	$(gcc11) api_test.cc
 thread_test.o:thread_test.cc
@@ -124,13 +136,13 @@ rbtree_test.o:rbtree_test.cc
 	$(gcc11) rbtree_test.cc
 test.o:test.cc
 	$(gcc11) test.cc
-
+signalmanager_test.o:signalmanager_test.cc
+	$(gcc11) signalmanager_test.cc
 
 
 
 clean:
-	rm *.o
+	- rm *.o
 
 cleanall:
-	rm *_test
-	rm *.o
+	- rm *_test *.o

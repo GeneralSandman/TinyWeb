@@ -14,33 +14,36 @@
 #ifndef SIGNAL_MANAGER_H
 #define SIGNAL_MANAGER_H
 
-#include <string>
-#include <functional>
+#include <tiny_struct/string_t.h>
 
-typedef std::function<void()> SignalCallback;
+// typedef std::function<void(int)> SignalCallback;
+typedef void (*SignalCallback)(int);
 
 class Signal
 {
-  private:
-    int m_nSignalNumber;
-    std::string m_nName;
-    std::string m_nMeaning;
-    SignalCallback m_nSignalCallback;
+private:
+  int m_nNumber;
+  String m_nName;
+  String m_nMeaning;
+  SignalCallback m_nCallback;
 
-  public:
-    Signal(int, const std::string &, const std::string&, SignalCallback);
-    ~Signal();
+public:
+  Signal(int, const String &, const String &, SignalCallback);
+  ~Signal();
+  friend class SignalManager;
 };
 
 class SignalManager
 {
-  private:
-  public:
-    SignalManager();
-    void addSignal();
-    void updateSignal();
-    void deleteSignal();
-    ~SignalManager();
+private:
+  unsigned char m_nNum;
+
+public:
+  SignalManager();
+  void addSignal(const Signal &);
+  void updateSignal(const Signal &);
+  void deleteSignal(const Signal &);
+  ~SignalManager();
 };
 
 #endif // !SIGNAL_MANAGER_H
