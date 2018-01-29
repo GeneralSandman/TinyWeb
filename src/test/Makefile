@@ -30,7 +30,8 @@ lib = api channel condition currentthread epoller eventloop exception \
 lib.o = $(foreach file,$(lib),$(file).o)
 lib.cc = $(foreach file,$(lib),../$(file).cc)
 
-all:$(all.o)
+all:$(http.cc)
+	$(gccll) $(http.cc)
 
 $(all.o):%.o:%.cc
 	$(gcc11o) $@ $<
@@ -92,7 +93,9 @@ rbtree_test:rbtree_test.o rbtree_t.o
 test:test.o $(lib.o)
 	$(link) test test.o $(lib.o) -lpthread
 signalmanager_test:signalmanager_test.o
-	$(link) signalmanager_test.o signalmanager.o
+	$(link) signalmanager_test signalmanager.o
+socketpair_test:socketpair_test.o $(all.o)
+	$(link)	socketpair_test socketpair_test.o $(all.o) -lpthread 
 
 
 
@@ -151,7 +154,8 @@ test.o:test.cc
 	$(gcc11) test.cc
 signalmanager_test.o:signalmanager_test.cc
 	$(gcc11) signalmanager_test.cc
-
+socketpair_test.o:socketpair_test.cc
+	$(gcc11) socketpair_test.cc
 
 
 clean:
