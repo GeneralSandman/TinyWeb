@@ -18,7 +18,7 @@
 #include <string>
 #include <algorithm>
 
-#include "log.h"
+#include <tiny_base/log.h>
 
 log_level convertStringToLoglevel(const std::string &s)
 {

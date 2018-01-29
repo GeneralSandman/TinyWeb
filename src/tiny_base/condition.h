@@ -15,8 +15,8 @@
 #ifndef CONDITION_H
 #define CONDITION_H
 
-#include "api.h"
-#include "mutex.h"
+#include <tiny_base/api.h>
+#include <tiny_base/mutex.h>
 
 #include <boost/noncopyable.hpp>
 #include <pthread.h>

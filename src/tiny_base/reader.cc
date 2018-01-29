@@ -5,9 +5,9 @@
 *Web:www.generalsandman.cn
 */
 
-#include "reader.h"
-#include "api.h"
-#include "log.h"
+#include <tiny_base/reader.h>
+#include <tiny_base/api.h>
+#include <tiny_base/log.h>
 
 #include <iostream>
 #include <fstream>

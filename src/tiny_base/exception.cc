@@ -7,7 +7,7 @@
 
 #include <execinfo.h>
 
-#include "exception.h"
+#include <tiny_base/exception.h>
 
 Exception::Exception(const char *msg)
     : m_nName(msg)

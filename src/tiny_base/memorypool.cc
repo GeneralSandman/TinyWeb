@@ -18,8 +18,8 @@
 *
 */
 
-#include "memorypool.h"
-#include "log.h"
+#include <tiny_base/memorypool.h>
+#include <tiny_base/log.h>
 
 OomHandler BasicAllocator::m_nHandler;
 
@@ -46,7 +46,7 @@ void *MemoryPool::m_fFillFreeList(size_t s)
         LOG(Debug) << "alloc chunk number is 1\n";
         result = (obj *)p_chunk;
     }
-    else//chunk_num >= 2
+    else //chunk_num >= 2
     {
         LOG(Debug) << "alloc chunk number is " << chunk_num << " size:" << s << "\n";
         //add chunk_num-1 chunk to free list.

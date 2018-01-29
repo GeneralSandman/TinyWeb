@@ -14,7 +14,7 @@
 #ifndef MEMORY_POOL_H
 #define MEMORY_POOL_H
 
-#include "log.h"
+#include <tiny_base/log.h>
 
 #include <stddef.h>
 #include <boost/function.hpp>

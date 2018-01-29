@@ -15,7 +15,7 @@
 #ifndef CONFIGER_H
 #define CONFIGER_H
 
-#include "reader.h"
+#include <tiny_base/reader.h>
 
 #include <map>
 #include <string>

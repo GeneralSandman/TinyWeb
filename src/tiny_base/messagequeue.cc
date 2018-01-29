@@ -11,7 +11,7 @@
 *
 */
  
-#include "messagequeue.h"
+#include <tiny_base/messagequeue.h>
 
 MessageQueue::MessageQueue(){}
 void MessageQueue::notify(){}

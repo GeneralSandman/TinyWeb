@@ -5,10 +5,10 @@
 *Web:www.generalsandman.cn
 */
 
-#include "configer.h"
-#include "reader.h"
-#include "api.h"
-#include "log.h"
+#include <tiny_base/configer.h>
+#include <tiny_base/reader.h>
+#include <tiny_base/api.h>
+#include <tiny_base/log.h>
 
 #include <algorithm>
 #include <string>
@@ -40,7 +40,7 @@ void Configer::m_fInitDefaultKeyValue()
     m_nValue["docs"] = "";
     m_nValue["hostname"] = "";
     m_nValue["loglevel"] = "Info";
-    m_nValue["logpath"] = "";
+    m_nValue["logpa>] = "";
     m_nValue["debugfile"] = "";
     m_nValue["infofile"] = "";
     m_nValue["warnfile"] = "";

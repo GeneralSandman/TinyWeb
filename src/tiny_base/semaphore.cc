@@ -11,8 +11,8 @@
 *
 */
 
-#include "semaphore.h"
-#include "log.h"
+#include <tiny_base/semaphore.h>
+#include <tiny_base/log.h>
 
 #include <semaphore.h>
 

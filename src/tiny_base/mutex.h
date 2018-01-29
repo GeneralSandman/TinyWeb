@@ -17,7 +17,7 @@
 #include <boost/noncopyable.hpp>
 #include <pthread.h>
 
-#include "api.h"
+#include <tiny_base/api.h>
 
 class MutexLock : boost::noncopyable
 {

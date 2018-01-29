@@ -2,12 +2,26 @@ link = g++ -o
 gcc11 = g++ -std=c++11 -c
 gcc11o = $(gcc11) -o
 
-base = time
-core = serv
-http = server_tests
-struct = rbtree_t list_t string_t 
+base = api buffer condition configer exception log memorypool \
+	messagequeue reader semaphore sharedmemory signalmanager
+core = accepter channel client connection connector currentthread \
+	defer epoller eventloop factory main master netaddress newmaster \
+	process processpool protocol server socket socketpair thread \
+	threadpool time timer timerqueue worker
+http = cache http_factory http_protocol http parser proxyer responser
+struct = dict_t list_t rbtree_t string_t
 
-all = $(struct) $(base) $(core) $(http)
+base.o = $(foreach file,$(base),$(file).o)
+base.cc = $(foreach file,$(base),../tiny_base/$(file).cc)
+core.o = $(foreach file,$(core),$(file).o)
+core.cc = $(foreach file,$(core),../tiny_core/$(file).cc)
+http.o = $(foreach file,$(http),$(file).o)
+http.cc = $(foreach file,$(http),../tiny_http/$(file).cc)
+struct.o = $(foreach file,$(struct),$(file).o)
+struct.cc = $(foreach file,$(struct),../tiny_struct/$(file).cc)
+
+all.cc = $(struct.cc) $(base.cc) $(core.cc) $(http.cc)
+all.o = $(struct.o) $(base.o) $(core.o) $(http.o)
 
 lib = api channel condition currentthread epoller eventloop exception \
 	log time timer timerqueue socket netaddress connection server accepter connector\
@@ -16,10 +30,9 @@ lib = api channel condition currentthread epoller eventloop exception \
 lib.o = $(foreach file,$(lib),$(file).o)
 lib.cc = $(foreach file,$(lib),../$(file).cc)
 
-obj = ../tiny_struct/list_t.o ../tiny_struct/rbtree_t.o
-all:$(obj)
+all:$(all.o)
 
-$(obj):%.o:%.cc
+$(all.o):%.o:%.cc
 	$(gcc11o) $@ $<
 
 lib:$(lib.cc)

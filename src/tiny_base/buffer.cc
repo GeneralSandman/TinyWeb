@@ -11,8 +11,8 @@
 *
 */
 
-#include "buffer.h"
-#include "log.h"
+#include <tiny_base/buffer.h>
+#include <tiny_base/log.h>
 
 #include <sys/uio.h>
 #include <algorithm>
