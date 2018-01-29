@@ -11,10 +11,10 @@
 *
 */
 
-#ifndef Rb_TREE_
+#ifndef Rb_TREE_T
 #define Rb_TREE_T
 
-#include "log.h"
+#include <tiny_base/log.h>
 
 #include <iostream>
 #include <vector>

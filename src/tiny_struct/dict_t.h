@@ -1,10 +1,25 @@
+/*
+*Author:GeneralSandman
+*Code:https://github.com/GeneralSandman/TinyWeb
+*E-mail:generalsandman@163.com
+*Web:www.generalsandman.cn
+*/
+
+/*---XXX---
+*
+****************************************
+*
+*/
+
 #ifndef DICT_H
 #define DICT_H
+
+#include <tiny_base/log.h>
+
 #include <string>
 #include <cstring>
+#include <deque>
 #include <iostream>
-#include "sigil.h"
-#include "log.h"
 
 template <typename K>
 unsigned int hashFunction(const K &key)
