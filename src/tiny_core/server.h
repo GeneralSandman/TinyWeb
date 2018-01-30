@@ -49,7 +49,7 @@ private:
 
 public:
   Server(EventLoop *, const NetAddress &, Factory *);
-  void setConenctCallback(ConnectionCallback c)
+  void setConnectCallback(ConnectionCallback c)
   {
     m_nConnectCallback = c;
   }

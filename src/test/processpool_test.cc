@@ -11,8 +11,7 @@
 *
 */
 
-#include "../processpool.h"
-
+#include <tiny_core/processpool.h>
 #include <iostream>
 
 using namespace std;
@@ -20,14 +19,8 @@ using namespace std;
 int main()
 {
     {
-
         ProcessPool pool;
-        pool.start(1);
-        // sleep(5);
-        // pool.killAll();
-        // sleep(5);
-
-        pause();
+        pool.createProcess(3);
     }
 
     return 0;

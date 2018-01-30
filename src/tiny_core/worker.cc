@@ -16,27 +16,11 @@
 
 #include <unistd.h>
 
-Worker::Worker(int num, std::string name)
+Worker::Worker(int num, const std::string &name)
     : m_nNumber(num),
       m_nName(name)
 {
     LOG(Debug) << "class Worker constructor\n";
-}
-
-Worker::Worker(const Worker &worker)
-{
-    m_nNumber = worker.m_nNumber;
-    m_nName = worker.m_nName;
-    LOG(Debug) << "class Worker constructor\n";
-}
-
-Worker &Worker::operator=(const Worker &worker)
-{
-    if (this != &worker)
-    {
-        m_nNumber = worker.m_nNumber;
-        m_nName = worker.m_nName;
-    }
 }
 
 void Worker::work()
@@ -52,6 +36,37 @@ Worker::~Worker()
     LOG(Debug) << "class Worker destructor\n";
 }
 
+Master::Master(int num, const std::string &name)
+    : Worker(num, name)
+{
+    LOG(Debug) << "class Master constuctor\n";
+}
+
+void Master::work()
+{
+}
+
+Master::~Master()
+{
+    LOG(Debug) << "class Master destuctor\n";
+}
+
+Slave::Slave(int num, const std::string &name)
+    : Worker(num, name)
+{
+    LOG(Debug) << "class Slave constuctor\n";
+}
+
+void Slave::work()
+{
+}
+
+Slave::~Slave()
+{
+    LOG(Debug) << "class Slave destructor\n";
+}
+
+/////////////
 HttpListenWorker::HttpListenWorker(int num, std::string name)
     : Worker(num, name)
 {

@@ -53,7 +53,7 @@ public:
   //setXXXCallback():is a public function
   //but it always used by itself to set callback functions
   //which is provied by factory.
-  void setConenctCallback(ConnectionCallback c)
+  void setConnectCallback(ConnectionCallback c)
   {
     m_nConnectCallback = c;
   }

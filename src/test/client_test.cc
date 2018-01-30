@@ -60,7 +60,7 @@ void test1()
     //Don't use factory and protocol,
     //we set callback.
     Client *tcpClient = new Client(loop, nullptr);
-    tcpClient->setConenctCallback(boost::bind(&connectCallback, _1));
+    tcpClient->setConnectCallback(boost::bind(&connectCallback, _1));
     tcpClient->setMessageCallback(boost::bind(&getDataCallback, _1, _2, _3));
     tcpClient->setWriteCompleteCallback(boost::bind(&writeCompleteCallback, _1));
     tcpClient->setCloseCallback(boost::bind(&closeCallback, _1));
@@ -89,7 +89,7 @@ void test2()
     //Don't use factory and protocol,
     //we set callback.
     Client *tcpClient = new Client(loop, nullptr);
-    tcpClient->setConenctCallback(boost::bind(&connectCallback, _1));
+    tcpClient->setConnectCallback(boost::bind(&connectCallback, _1));
     tcpClient->setMessageCallback(boost::bind(&getDataCallback, _1, _2, _3));
     tcpClient->setWriteCompleteCallback(boost::bind(&writeCompleteCallback, _1));
     tcpClient->setCloseCallback(boost::bind(&closeCallback, _1));

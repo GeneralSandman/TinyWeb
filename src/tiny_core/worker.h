@@ -18,24 +18,39 @@
 
 class Worker
 {
-  protected:
-    int m_nNumber;
-    std::string m_nName;
+protected:
+  int m_nNumber;
+  std::string m_nName;
 
-  public:
-    Worker(int, std::string);
-    Worker(const Worker &);
-    Worker &operator=(const Worker &);
-    virtual void work();
-    virtual ~Worker();
+public:
+  Worker(int, const std::string&);
+  virtual void work();
+  virtual ~Worker();
 };
 
+class Master : public Worker
+{
+public:
+  Master(int, const std::string &);
+  virtual void work();
+  virtual ~Master();
+};
+
+class Slave : public Worker
+{
+public:
+  Slave(int, const std::string &);
+  virtual void work();
+  virtual ~Slave();
+};
+
+/////////
 class HttpListenWorker : public Worker
 {
-  public:
-    HttpListenWorker(int, std::string);
-    virtual void work();
-    ~HttpListenWorker();
+public:
+  HttpListenWorker(int, std::string);
+  virtual void work();
+  ~HttpListenWorker();
 };
 
 #endif // !WORKER_H

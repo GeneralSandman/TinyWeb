@@ -6,7 +6,7 @@ base = api buffer condition configer exception log memorypool \
 	messagequeue reader semaphore sharedmemory signalmanager
 core = accepter channel client connection connector currentthread \
 	defer epoller eventloop factory netaddress \
-	process protocol server socket socketpair  \
+	protocol server socket socketpair  \
 	 time timer timerqueue worker
 http = cache http_factory http_protocol http parser responser
 struct = dict_t list_t rbtree_t string_t

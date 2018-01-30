@@ -32,7 +32,7 @@ void Server::m_fHandleRead(int connectfd, const NetAddress &address)
                        address);
     m_nConNum++;
     // std::cout << m_nConNum << std::endl;
-    newCon->setConenctCallback(m_nConnectCallback);
+    newCon->setConnectCallback(m_nConnectCallback);
     newCon->setMessageCallback(m_nMessageCallback);
     newCon->setWriteCompleteCallback(m_nWriteCompleteCallback);
     newCon->setCloseCallback(boost::bind(&Server::m_fHandleClose, this, _1));
@@ -63,7 +63,7 @@ Server::Server(EventLoop *loop, const NetAddress &address, Factory *fact)
         boost::bind(&Server::m_fHandleRead, this, _1, _2));
     if (m_pFactory != nullptr)
     {
-        setConenctCallback(m_pFactory->connectCallback());
+        setConnectCallback(m_pFactory->connectCallback());
         setMessageCallback(m_pFactory->getMessageCallback());
         setWriteCompleteCallback(m_pFactory->writeCompleteCallback());
         setCloseCallback(m_pFactory->closeConnectionCallback());

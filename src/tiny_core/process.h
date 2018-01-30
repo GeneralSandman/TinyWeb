@@ -34,14 +34,17 @@ enum ProcStatus
 
 class ProcessPool;
 class Worker;
+class EventLoop;
 
 class Process : boost::noncopyable
 {
 private:
-  // Worker *m_pWorker;
-  std::string m_nName; //parent process is "main"
+  Worker* m_pWorker;
+  EventLoop *m_pEventLoop;
+  std::string m_nName;
   int m_nNumber;
   pid_t m_nPid;
+  SocketPair m_nPipe;
   bool m_nStarted;
   bool m_nExited;
 
@@ -49,16 +52,34 @@ private:
   void m_fProcessStart();
 
 public:
-  explicit Process(const std::string &name, int number);
-  void start(); //invoke by processpool
-  pid_t getPid()
+  Process(const std::string &name,
+          int number,
+          int sockfd[2])
+      : m_pEventLoop(new EventLoop),
+        m_nName(name),
+        m_nNumber(number),
+        m_nPid(getpid()),
+        m_nPipe(m_pEventLoop, sockfd),
+        m_nStarted(false),
+        m_nExited(false)
   {
-    return m_nPid;
+    LOG(Debug) << "class Process constructor\n";
   }
-  int join();
+  void setAsChild()
+  {
+    m_nPipe.setChildSocket();
+    m_nPipe.setMessageCallback();
+  }
+  void start() { m_nWorker.work(); }
+  pid_t getPid() { return m_nPid; }
   bool started() { return true == m_nStarted; }
-  ~Process();
-
+  int join() {}
+  ~Process()
+  {
+    m_nPipe.clearSocket();
+    delete m_pEventLoop;
+    LOG(Debug) << "class Process destructor\n";
+  }
   friend class ProcessPool;
 };
 
