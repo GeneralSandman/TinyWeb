@@ -13,10 +13,11 @@
 
 #include <tiny_base/signalmanager.h>
 #include <tiny_base/log.h>
-#include <tiny_struct/string_t.h>
+// #include <tiny_struct/string_t.h>
+#include <string>
 #include <tiny_base/api.h>
 
-Signal::Signal(int num, const String &name, const String &meaning, SignalCallback callback)
+Signal::Signal(int num, const std::string &name, const std::string &meaning, SignalCallback callback)
     : m_nNumber(num),
       m_nName(name),
       m_nMeaning(meaning),

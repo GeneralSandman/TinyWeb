@@ -14,7 +14,8 @@
 #ifndef SIGNAL_MANAGER_H
 #define SIGNAL_MANAGER_H
 
-#include <tiny_struct/string_t.h>
+// #include <tiny_struct/string_t.h>
+#include <string>
 
 // typedef std::function<void(int)> SignalCallback;
 typedef void (*SignalCallback)(int);
@@ -23,12 +24,12 @@ class Signal
 {
 private:
   int m_nNumber;
-  String m_nName;
-  String m_nMeaning;
+  std::string m_nName;
+  std::string m_nMeaning;
   SignalCallback m_nCallback;
 
 public:
-  Signal(int, const String &, const String &, SignalCallback);
+  Signal(int, const std::string &, const std::string &, SignalCallback);
   ~Signal();
   friend class SignalManager;
 };
