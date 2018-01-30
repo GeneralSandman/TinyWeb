@@ -45,11 +45,12 @@ void child()
 
 int main()
 {
-    SocketPair pipe;
-    pipe.createSocket();
+    int sockpairFds[2];
+    int res = socketpair(AF_UNIX, SOCK_STREAM, 0, sockpairFds);
+    if (res == -1)
+        handle_error("socketpair error:");
 
     pid_t pid = fork();
-
     if (pid < 0)
     {
         cout << "error\n";
@@ -57,7 +58,8 @@ int main()
     else if (pid == 0)
     {
         EventLoop *loop = new EventLoop();
-        pipe.setChildSocket(loop);
+        SocketPair pipe(loop, sockpairFds);
+        pipe.setChildSocket();
         pipe.setMessageCallback(boost::bind(&getMessage, _1, _2, _3));
 
         TimerId id1 = loop->runEvery(1, boost::bind(&SocketPair::writeToParent, &pipe, "bb"));
@@ -70,7 +72,8 @@ int main()
     else
     {
         EventLoop *loop = new EventLoop();
-        pipe.setParentSocket(loop);
+        SocketPair pipe(loop, sockpairFds);
+        pipe.setParentSocket();
         pipe.setMessageCallback(boost::bind(&getMessage, _1, _2, _3));
 
         TimerId id1 = loop->runEvery(1, boost::bind(&SocketPair::writeToChild, &pipe, "aa"));

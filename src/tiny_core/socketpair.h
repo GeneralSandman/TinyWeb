@@ -21,32 +21,32 @@
 #include <assert.h>
 #include <cstring>
 
+class EventLoop;
+
 class SocketPair
 {
-  private:
-    int m_nFds[2];
-    //parent using 0,child using 1
-    EventLoop *m_pEventLoop;
-    Connection *m_pConnection;
+private:
+  //parent using 0,child using 1
+  EventLoop *m_pEventLoop;
+  int m_nFds[2];
+  Connection *m_pConnection;
 
-    bool m_nIsFork;
-    bool m_nIsParent;
+  bool m_nIsParent;
 
-  public:
-    SocketPair();
-    void createSocket();
-    void setParentSocket(EventLoop *loop);
-    void setChildSocket(EventLoop *loop);
-    void writeToChild(const std::string &data);
-    void writeToParent(const std::string &data);
+public:
+  SocketPair(EventLoop *loop, int fds[2]);
+  void setParentSocket();
+  void setChildSocket();
+  void writeToChild(const std::string &data);
+  void writeToParent(const std::string &data);
 
-    void setConnectCallback(const ConnectionCallback &c);
-    void setMessageCallback(const MessageCallback &c);
-    void setWriteCompleteCallback(const WriteCompleteCallback &c);
-    void setCloseCallback(const CloseCallback &c);
+  void setConnectCallback(const ConnectionCallback &c);
+  void setMessageCallback(const MessageCallback &c);
+  void setWriteCompleteCallback(const WriteCompleteCallback &c);
+  void setCloseCallback(const CloseCallback &c);
 
-    void clearSocket();
-    ~SocketPair();
+  void clearSocket();
+  ~SocketPair();
 };
 
 #endif //!SOCKET_PAIR_H

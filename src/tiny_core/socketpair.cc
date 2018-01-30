@@ -18,25 +18,20 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
-SocketPair::SocketPair()
-    : m_nIsFork(false),
+class EventLoop;
+
+SocketPair::SocketPair(EventLoop *loop, int fds[2])
+    : m_pEventLoop(loop),
       m_nIsParent(true)
 {
+    m_nFds[0]=fds[0];
+    m_nFds[1]=fds[1];
     LOG(Debug) << "class SocketPair constructor\n";
 }
 
-void SocketPair::createSocket()
+void SocketPair::setParentSocket()
 {
-    int res = socketpair(AF_UNIX, SOCK_STREAM, 0, m_nFds);
-    if (res == -1)
-        handle_error("socketpair error:");
-}
-
-void SocketPair::setParentSocket(EventLoop *loop)
-{
-    m_pEventLoop = loop;
     Close(m_nFds[1]);
-    m_nIsFork = true;
     m_nIsParent = true;
     std::cout << "switch parent:" << getpid() << std::endl;
     NetAddress tmp;
@@ -45,11 +40,9 @@ void SocketPair::setParentSocket(EventLoop *loop)
     m_pConnection->establishConnection();
 }
 
-void SocketPair::setChildSocket(EventLoop *loop)
+void SocketPair::setChildSocket()
 {
-    m_pEventLoop = loop;
     Close(m_nFds[0]);
-    m_nIsFork = true;
     m_nIsParent = false;
     std::cout << "switch child:" << getpid() << std::endl;
     NetAddress tmp;
@@ -60,7 +53,6 @@ void SocketPair::setChildSocket(EventLoop *loop)
 
 void SocketPair::writeToChild(const std::string &data)
 {
-    assert(m_nIsFork);
     assert(m_nIsParent);
     std::cout << "[parent] send data:" << data << std::endl;
     m_pConnection->send(data);
@@ -68,7 +60,6 @@ void SocketPair::writeToChild(const std::string &data)
 
 void SocketPair::writeToParent(const std::string &data)
 {
-    assert(m_nIsFork);
     assert(!m_nIsParent);
     std::cout << "[child] send data:" << data << std::endl;
     m_pConnection->send(data);
