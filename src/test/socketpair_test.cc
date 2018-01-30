@@ -27,11 +27,12 @@ using namespace std;
 
 void getMessage(Connection *con, Buffer *buf, Time time)
 {
-    std::cout << "read form\n";
+    std::cout << "receve data:" << buf->getAll() << std::endl;
 }
 
-void print(){
-    std::cout<<getpid()<<"--\n";
+void print()
+{
+    // std::cout << getpid() << "--\n";
 }
 
 void parent()
@@ -57,26 +58,23 @@ int main()
     {
         EventLoop *loop = new EventLoop();
         pipe.setChildSocket(loop);
-        pipe.setReadCallback(boost::bind(&getMessage, _1, _2, _3));
-        
+        pipe.setMessageCallback(boost::bind(&getMessage, _1, _2, _3));
 
-        TimerId id1=loop->runEvery(1,boost::bind(print));
-        TimerId id=loop->runAfter(10, boost::bind(&EventLoop::quit, loop));
+        TimerId id1 = loop->runEvery(1, boost::bind(&SocketPair::writeToParent, &pipe, "bb"));
+        TimerId id2 = loop->runAfter(10, boost::bind(&EventLoop::quit, loop));
         loop->loop();
 
         pipe.clearSocket();
         delete loop;
-
     }
     else
     {
         EventLoop *loop = new EventLoop();
         pipe.setParentSocket(loop);
-        // pipe.writeToChild("aa");
+        pipe.setMessageCallback(boost::bind(&getMessage, _1, _2, _3));
 
-        TimerId id1=loop->runEvery(1,boost::bind(&SocketPair::writeToChild,&pipe,"aa"));
-        TimerId id2=loop->runEvery(1,boost::bind(print));
-        TimerId id=loop->runAfter(10, boost::bind(&EventLoop::quit, loop));
+        TimerId id1 = loop->runEvery(1, boost::bind(&SocketPair::writeToChild, &pipe, "aa"));
+        TimerId id2 = loop->runAfter(10, boost::bind(&EventLoop::quit, loop));
         loop->loop();
 
         pipe.clearSocket();

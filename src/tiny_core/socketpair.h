@@ -35,54 +35,17 @@ class SocketPair
   public:
     SocketPair();
     void createSocket();
-    void clearSocket()
-    {
-        //must be invoked before delete eventloop.
-        m_pConnection->shutdownWrite();
-        m_pConnection->destoryConnection();
-        delete m_pConnection;
-    }
-    void setParentSocket(EventLoop *loop)
-    {
-        m_pEventLoop = loop;
-        Close(m_nFds[1]);
-        m_nIsFork = true;
-        m_nIsParent = true;
-        std::cout << "switch parent:" << getpid() << std::endl;
-        NetAddress tmp;
-        m_pConnection = new Connection(m_pEventLoop, m_nFds[0],
-                                       tmp, tmp);
-        m_pConnection->establishConnection();
-    }
-    void setChildSocket(EventLoop *loop)
-    {
-        m_pEventLoop = loop;
-        Close(m_nFds[0]);
-        m_nIsFork = true;
-        m_nIsParent = false;
-        std::cout << "switch child:" << getpid() << std::endl;
-        NetAddress tmp;
-        m_pConnection = new Connection(m_pEventLoop, m_nFds[1],
-                                       tmp, tmp);
-        m_pConnection->establishConnection();
-    }
-    void writeToChild(const std::string &data)
-    {
-        assert(m_nIsFork);
-        assert(m_nIsParent);
-        std::cout << "send\n";
-        m_pConnection->send(data);
-    }
-    void writeToParent(const std::string &data)
-    {
-        assert(m_nIsFork);
-        assert(!m_nIsParent);
-        m_pConnection->send(data);
-    }
-    void setReadCallback(const MessageCallback &c)
-    {
-        m_pConnection->setMessageCallback(c);
-    }
+    void setParentSocket(EventLoop *loop);
+    void setChildSocket(EventLoop *loop);
+    void writeToChild(const std::string &data);
+    void writeToParent(const std::string &data);
+
+    void setConnectCallback(const ConnectionCallback &c);
+    void setMessageCallback(const MessageCallback &c);
+    void setWriteCompleteCallback(const WriteCompleteCallback &c);
+    void setCloseCallback(const CloseCallback &c);
+
+    void clearSocket();
     ~SocketPair();
 };
 
