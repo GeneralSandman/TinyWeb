@@ -16,14 +16,17 @@
 
 #include <string>
 
+class EventLoop;
+
 class Worker
 {
 protected:
+  EventLoop *m_pEventLoop;
   int m_nNumber;
   std::string m_nName;
 
 public:
-  Worker(int, const std::string&);
+  Worker(EventLoop *, int, const std::string &);
   virtual void work();
   virtual ~Worker();
 };
@@ -31,7 +34,7 @@ public:
 class Master : public Worker
 {
 public:
-  Master(int, const std::string &);
+  Master(EventLoop *, int, const std::string &);
   virtual void work();
   virtual ~Master();
 };
@@ -39,7 +42,7 @@ public:
 class Slave : public Worker
 {
 public:
-  Slave(int, const std::string &);
+  Slave(EventLoop *, int, const std::string &);
   virtual void work();
   virtual ~Slave();
 };
@@ -48,7 +51,7 @@ public:
 class HttpListenWorker : public Worker
 {
 public:
-  HttpListenWorker(int, std::string);
+  HttpListenWorker(EventLoop*,int, std::string);
   virtual void work();
   ~HttpListenWorker();
 };
