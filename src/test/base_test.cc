@@ -11,8 +11,8 @@
 *
 */
 
-#include "../eventloop.h"
-#include "../channel.h"
+#include <tiny_core/eventloop.h>
+#include <tiny_core/channel.h>
 
 #include <iostream>
 #include <sys/timerfd.h>

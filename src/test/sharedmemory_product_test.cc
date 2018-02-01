@@ -11,8 +11,8 @@
 *
 */
 
-#include "../sharedmemory.h"
-#include "../time.h"
+#include <tiny_base/sharedmemory.h>
+#include <tiny_core/time.h>
 
 #include <iostream>
 #include <deque>

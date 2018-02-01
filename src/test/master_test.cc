@@ -11,7 +11,7 @@
 *
 */
 
-#include "../master.h"
+#include <tiny_core/master.h>
 
 #include <iostream>
 #include <getopt.h>

@@ -11,8 +11,8 @@
 *
 */
 
-#include "../api.h"
-#include "../currentthread.h"
+#include <tiny_base/api.h>
+#include <tiny_core/currentthread.h>
 
 #include <iostream>
 #include <string>

@@ -11,8 +11,8 @@
 *
 */
 
-#include "../worker.h"
-#include "../process.h"
+#include <tiny_core/worker.h>
+#include <tiny_core/process.h>
 
 #include <iostream>
 #include <unistd.h>

@@ -11,9 +11,9 @@
 *
 */
 
-#include "../timerqueue.h"
-#include "../timerid.h"
-#include "../eventloop.h"
+#include <tiny_core/timerqueue.h>
+#include <tiny_core/timerid.h>
+#include <tiny_core/eventloop.h>
 
 #include <iostream>
 #include <boost/bind.hpp>

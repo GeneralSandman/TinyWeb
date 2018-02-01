@@ -11,17 +11,17 @@
 *
 */
 
-#include "../server.h"
-#include "../eventloop.h"
-#include "../netaddress.h"
-#include "../connection.h"
-#include "../protocol.h"
-#include "../factory.h"
-#include "../configer.h"
-#include "../buffer.h"
-#include "../time.h"
-#include "../api.h"
-#include "../log.h"
+#include <tiny_core/server.h>
+#include <tiny_core/eventloop.h>
+#include <tiny_core/netaddress.h>
+#include <tiny_core/connection.h>
+#include <tiny_core/protocol.h>
+#include <tiny_core/factory.h>
+#include <tiny_base/configer.h>
+#include <tiny_base/buffer.h>
+#include <tiny_core/time.h>
+#include <tiny_base/api.h>
+#include <tiny_base/log.h>
 
 #include <iostream>
 #include <unistd.h>

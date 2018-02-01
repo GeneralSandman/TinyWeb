@@ -11,9 +11,9 @@
 *
 */
 
-#include "../connector.h"
-#include "../netaddress.h"
-#include "../eventloop.h"
+#include <tiny_core/connector.h>
+#include <tiny_core/netaddress.h>
+#include <tiny_core/eventloop.h>
 
 #include <boost/bind.hpp>
 

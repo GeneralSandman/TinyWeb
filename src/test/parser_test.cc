@@ -11,8 +11,8 @@
 *
 */
 
-#include "../parser.h"
-#include "../api.h"
+#include <tiny_core/parser.h>
+#include <tiny_base/api.h>
 
 #include <iostream>
 #include <unistd.h>

@@ -11,7 +11,7 @@
 *
 */
 
-#include "../buffer.h"
+#include <tiny_base/buffer.h>
 
 #include <iostream>
 

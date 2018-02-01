@@ -11,8 +11,8 @@
 *
 */
 
-#include "../api.h"
-#include "../protocol.h"
+#include <tiny_core/protocol.h>
+#include <tiny_base/api.h>
 
 #include <iostream>
 #include <fstream>

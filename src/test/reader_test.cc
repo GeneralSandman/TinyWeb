@@ -11,7 +11,7 @@
 *
 */
 
-#include "../reader.h"
+#include <tiny_base/reader.h>
 
 #include <iostream>
 #include <string>

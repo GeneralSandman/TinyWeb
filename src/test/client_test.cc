@@ -11,13 +11,13 @@
 *
 */
 
-#include "../client.h"
-#include "../netaddress.h"
-#include "../connection.h"
-#include "../eventloop.h"
-#include "../factory.h"
-#include "../buffer.h"
-#include "../timerid.h"
+#include <tiny_core/client.h>
+#include <tiny_core/netaddress.h>
+#include <tiny_core/connection.h>
+#include <tiny_core/eventloop.h>
+#include <tiny_core/factory.h>
+#include <tiny_core/timerid.h>
+#include <tiny_base/buffer.h>
 
 using namespace std;
 
@@ -67,7 +67,6 @@ void test1()
 
     loop->runAfter(10, std::bind(&EventLoop::quit, loop));
 
-
     NetAddress serveraddress("127.0.0.1:9999");
     NetAddress clientaddress("127.0.0.1:9595");
     bool retry = true;
@@ -95,7 +94,6 @@ void test2()
     tcpClient->setCloseCallback(boost::bind(&closeCallback, _1));
 
     loop->runAfter(10, std::bind(&EventLoop::quit, loop));
-
 
     NetAddress serveraddress("127.0.0.1:9999");
     NetAddress clientaddress("127.0.0.1:9595");
@@ -147,7 +145,7 @@ void test4()
     Client *tcpClient = new Client(loop, clientFactory);
 
     loop->runAfter(10, std::bind(&EventLoop::quit, loop));
-    
+
     NetAddress serveraddress("127.0.0.1:9999");
     NetAddress clientaddress("127.0.0.1:9595");
     bool retry = false;

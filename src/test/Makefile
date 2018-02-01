@@ -2,6 +2,8 @@ link = g++ -o
 gcc11 = g++ -std=c++11 -c
 gcc11o = $(gcc11) -o
 
+VPATH = ../tiny_base:../tiny_core:../tiny_http:../tiny_struct
+
 base = api buffer condition configer exception log memorypool \
 	messagequeue reader semaphore sharedmemory signalmanager
 core = accepter channel client connection connector currentthread \
@@ -35,6 +37,10 @@ all:$(all.cc)
 
 $(all.o):%.o:%.cc
 	$(gcc11o) $@ $<
+
+vpath %.c ../tiny_base:../tiny_struct:../tiny_core:../tiny_http
+
+
 
 lib:$(lib.cc)
 	$(gcc11) $(lib.cc)
@@ -101,65 +107,38 @@ socketpair_test:socketpair_test.o $(all.o)
 
 base_test.o:base_test.cc
 api_test.o:api_test.cc
-	$(gcc11) api_test.cc
 thread_test.o:thread_test.cc
-	$(gcc11) thread_test.cc
 threadpool_test.o:threadpool_test.cc
-	$(gcc11) threadpool_test.cc
 process_test.o:process_test.cc
-	$(gcc11) process_test.cc
 processpool_test.o:processpool_test.cc
-	$(gcc11) processpool_test.cc
 memorypool_test.o:memorypool_test.cc
-	$(gcc11) memorypool_test.cc
 time_test.o:time_test.cc
-	$(gcc11) time_test.cc
 timerqueue_test.o:timerqueue_test.cc
-	$(gcc11) timerqueue_test.cc
 socket_test.o:socket_test.cc
-	$(gcc11) socket_test.cc
 accepter_test.o:accepter_test.cc
-	$(gcc11) accepter_test.cc
 connector_test.o:connector_test.cc
-	$(gcc11) connector_test.cc
 server_test.o:server_test.cc
-	$(gcc11) server_test.cc
 client_test.o:client_test.cc
-	$(gcc11) client_test.cc
 master_test.o:master_test.cc
-	$(gcc11) master_test.cc	
 configer_test.o:configer_test.cc
-	$(gcc11) configer_test.cc
 daemon_test.o:daemon_test.cc
-	$(gcc11) daemon_test.cc
 reader_test.o:reader_test.cc
-	$(gcc11) reader_test.cc
 sharedmemory_consume_test.o:sharedmemory_consume_test.cc
-	$(gcc11) sharedmemory_consume_test.cc
 sharedmemory_product_test.o:sharedmemory_product_test.cc
-	$(gcc11) sharedmemory_product_test.cc
 buffer_test.o:buffer_test.cc
-	$(gcc11) buffer_test.cc
 parser_test.o:parser_test.cc
-	$(gcc11) parser_test.cc
 log_test.o:log_test.cc
-	$(gcc11) log_test.cc
 protocol_test.o:protocol_test.cc
-	$(gcc11) protocol_test.cc
 defer_test.o:defer_test.cc
-	$(gcc11) defer_test.cc
 rbtree_test.o:rbtree_test.cc
-	$(gcc11) rbtree_test.cc
 test.o:test.cc
-	$(gcc11) test.cc
 signalmanager_test.o:signalmanager_test.cc
-	$(gcc11) signalmanager_test.cc
 socketpair_test.o:socketpair_test.cc
-	$(gcc11) socketpair_test.cc
 
-
+.PHONY:clean
 clean:
 	- rm *.o
 
+.PHONY:clean
 cleanall:
 	- rm *_test *.o

@@ -11,9 +11,9 @@
 *
 */
 
-#include "../log.h"
-#include "../exception.h"
-#include "../defer.h"
+#include <tiny_base/log.h>
+#include <tiny_base/exception.h>
+#include <tiny_core/defer.h>
 
 #include <iostream>
 #include <deque>

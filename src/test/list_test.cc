@@ -11,7 +11,7 @@
 *
 */
 
-#include "../list.h"
+#include <tiny_struct/list_t.h>
 
 #include <iostream>
 #include <string>

@@ -11,7 +11,7 @@
 *
 */
 
-#include "../log.h"
+#include <tiny_base/log.h>
 
 #include <ctime>
 #include <iostream>

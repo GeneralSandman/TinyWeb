@@ -11,8 +11,8 @@
 *
 */
 
-#include "../currentthread.h"
-#include "../threadpool.h"
+#include <tiny_core/currentthread.h>
+#include <tiny_core/threadpool.h>
 
 #include <stdio.h>
 #include <string>

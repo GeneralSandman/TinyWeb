@@ -11,7 +11,7 @@
 *
 */
 
-#include "../api.h"
+#include <tiny_base/api.h>
 
 #include <mqueue.h>
 #include <stdio.h>

@@ -11,8 +11,8 @@
 *
 */
 
-#include "../dict.h"
-#include "../log.h"
+#include <tiny_struct/dict_t.h>
+#include <tiny_base/log.h>
 
 #include <iostream>
 #include <string>

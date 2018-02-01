@@ -11,9 +11,9 @@
 *
 */
 
-#include "../socket.h"
-#include "../netaddress.h"
-#include "../api.h"
+#include <tiny_core/socket.h>
+#include <tiny_core/netaddress.h>
+#include <tiny_base/api.h>
 
 #include <iostream>
 #include <vector>
