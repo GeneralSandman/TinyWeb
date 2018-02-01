@@ -20,11 +20,21 @@ using namespace std;
 int main()
 {
     {
+        MemoryPool pool;
+        for (int i = 8; i <= 128; i += 8)
+            pool.allocate(i);
+        cout << pool.allocatedSpace() << endl;
+    }
+    cout << "-------------------" << endl;
+    {
 
         MemoryPool pool;
-        int *p = (int *)pool.allocate(4);
+        for (int i = 8; i <= 128; i += 8)
+            pool.allocate(i);
+
+        for (int i = 8; i <= 128; i += 8)
+            pool.allocate(i);
         cout << pool.allocatedSpace() << endl;
-        pool.deallocate(p, 4);
     }
 
     return 0;

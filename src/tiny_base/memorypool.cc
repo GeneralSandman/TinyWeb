@@ -24,18 +24,24 @@
 OomHandler BasicAllocator::m_nHandler;
 
 MemoryPool::MemoryPool()
+    : m_nAllocatedSpace(0),
+      m_nAllSpace(0),
+      m_pHeapBegin(nullptr),
+      m_pHeapEnd(nullptr),
+      m_pCleanHandlers(nullptr)
 {
     for (int i = 0; i < LIST_SIZE; i++)
         m_nFreeList[i] = nullptr;
-    m_nAllocatedSpace = 0;
 
     LOG(Debug) << "class MemoryPool constructor\n";
 }
 
 void *MemoryPool::m_fFillFreeList(size_t s)
 {
+    LOG(Debug) << "fill list\n";
     obj *result = nullptr;
-    int chunk_num = 15;
+    int chunk_num = 6;
+    //We need to test the most effictive chunk_num.
     //chunk_num is a value-result argument,
     //set the chunk_num you want,
     //return the actual chunk_num add to this list.
@@ -59,7 +65,7 @@ void *MemoryPool::m_fFillFreeList(size_t s)
 
         *list = next_chunk = (obj *)(p_chunk + s);
 
-        for (int i = 1; i < chunk_num - 1; i++)
+        for (int i = 1; i < chunk_num; i++)
         {
             //FIXME:FIXME:
             current_chunk = next_chunk;
@@ -67,6 +73,7 @@ void *MemoryPool::m_fFillFreeList(size_t s)
             current_chunk->p_next = next_chunk;
         }
         current_chunk->p_next = nullptr;
+        LOG(Debug) << "add " << chunk_num - 1 << " chunks to free list\n";
     }
 
     return (void *)result;
@@ -81,7 +88,7 @@ char *MemoryPool::m_fAllocChunk(size_t s, int &chunk_num)
 
     if (left_size >= request_size)
     {
-        LOG(Debug) << "get " << chunk_num << " space from heap:" << request_size << "\n";
+        LOG(Debug) << "get " << chunk_num << " space from heap:" << request_size << std::endl;
         //Heap can provie chunk_num chunks to free list.
         result = m_pHeapBegin;
         m_pHeapBegin += request_size;
@@ -91,7 +98,7 @@ char *MemoryPool::m_fAllocChunk(size_t s, int &chunk_num)
     {
         //The number of heap provie is between 1 and chunk_num.
         chunk_num = left_size / s;
-        LOG(Debug) << "get " << chunk_num << " space from heap:" << request_size << "\n";
+        LOG(Debug) << "get " << chunk_num << " space from heap,chunk size:" << s << "\n";
         request_size = s * chunk_num;
         result = m_pHeapBegin;
         m_pHeapBegin += request_size;
@@ -114,6 +121,16 @@ char *MemoryPool::m_fAllocChunk(size_t s, int &chunk_num)
         //we have to set malloc_size carefully.
         size_t malloc_size = 2 * request_size; //malloc_size%8==0
         m_pHeapBegin = (char *)malloc(malloc_size);
+        m_nAllSpace += malloc_size;
+        // LOG(Debug) << "All Space is:" << m_nAllSpace << std::endl;
+
+        //update cleanHandlers
+        struct cleanup *newCleanHandler =
+            (struct cleanup *)malloc(sizeof(struct cleanup));
+        newCleanHandler->data = (void *)m_pHeapBegin;
+        newCleanHandler->next = m_pCleanHandlers;
+        m_pCleanHandlers = newCleanHandler;
+
         LOG(Debug) << "malloc memory directly by system call\n";
         if (nullptr == m_pHeapBegin)
         {
@@ -149,6 +166,7 @@ char *MemoryPool::m_fAllocChunk(size_t s, int &chunk_num)
 
 void *MemoryPool::allocate(size_t s)
 {
+    m_nAllocatedSpace += ROUND_UP(s);
     //if size > MAXSPACE : invoke BasicAllocator::allocate,
     //else :find a free block in free list.
     obj *result = nullptr;
@@ -169,7 +187,6 @@ void *MemoryPool::allocate(size_t s)
         }
         *list = result->p_next;
     }
-    m_nAllocatedSpace += s;
     return result;
 }
 
@@ -190,7 +207,7 @@ void MemoryPool::deallocate(void *p, size_t s)
         newlist->p_next = *list;
         *list = newlist;
     }
-    m_nAllocatedSpace -= s;
+    m_nAllocatedSpace -= ROUND_UP(s);
 }
 
 void *MemoryPool::reallocate(void *p, size_t oldsize, size_t newsize)
@@ -202,28 +219,35 @@ void *MemoryPool::reallocate(void *p, size_t oldsize, size_t newsize)
 
 MemoryPool::~MemoryPool()
 {
-    //delete all free list and heap
+    size_t all = 0;
     for (int i = 0; i < LIST_SIZE; i++)
     {
-        obj *curr_obj = m_nFreeList[i];
-        obj *next_obj = curr_obj;
-
-        int debug_size = (i + 1) * 8;
-        int debug_chunknum = 0;
-
-        while (nullptr != curr_obj)
+        obj *tmp = m_nFreeList[i];
+        int size = (i + 1) * 8;
+        int num = 0;
+        while (tmp != nullptr)
         {
-            next_obj = curr_obj->p_next;
-            free(curr_obj);
-            debug_chunknum++;
-            curr_obj = next_obj;
+            num++;
+            tmp = tmp->p_next;
         }
-        LOG(Debug) << "delete free list:"
-                   << "size:" << debug_size
-                   << "num:" << debug_chunknum << std::endl;
+        all += num * size;
+        LOG(Debug) << "size=" << size
+                   << ",nums=" << num << std::endl;
     }
 
-    LOG(Debug) << "delete heep size:" << m_pHeapEnd - m_pHeapBegin << std::endl;
-    free(m_pHeapBegin);
+    LOG(Debug) << "all space size:" << m_nAllSpace
+               << ",heap size:" << m_pHeapEnd - m_pHeapBegin
+               << ",free list size:" << all
+               << ",allocate to user size:" << m_nAllocatedSpace
+               << std::endl;
+    while (m_pCleanHandlers != nullptr)
+    {
+        struct cleanup *cur = m_pCleanHandlers;
+        m_pCleanHandlers = cur->next;
+        free(cur->data);
+        free(cur);
+        LOG(Debug) << "free\n";
+    }
+
     LOG(Debug) << "class MemoryPool destructor\n";
 }

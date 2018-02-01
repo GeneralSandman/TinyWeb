@@ -116,7 +116,6 @@ public:
     m_nHandler = h;
     return tmp;
   }
-
 };
 
 //Information of MemoryPool
@@ -131,7 +130,14 @@ union obj {
   char data[1];
 };
 
-inline size_t ROUND_UP(size_t n)
+struct cleanup
+{
+  void *data;
+  struct cleanup *next;
+};
+
+inline size_t
+ROUND_UP(size_t n)
 {
   return (((n) + ALIGN - 1) & ~(ALIGN - 1));
 }
@@ -145,7 +151,9 @@ class MemoryPool
 {
 private:
   size_t m_nAllocatedSpace; //Debug
+  size_t m_nAllSpace;       //Debug
   obj *m_nFreeList[LIST_SIZE];
+  struct cleanup *m_pCleanHandlers;
 
   //Tag the boundary of heap which is the backup memory of free list.
   char *m_pHeapBegin;
