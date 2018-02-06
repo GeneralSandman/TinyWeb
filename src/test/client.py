@@ -5,6 +5,17 @@ def sleepSecond(s):
     print "sleep ",s,"second(s)"
     time.sleep(s)
 
+def client1(localport,ip, port):
+    lport=int(localport)
+    while(1):
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
+        s.bind(("127.0.0.1", lport))
+        lport+=1
+        s.connect((ip, int(port)))
+        sleepSecond(1)
+        s.close()
+
 def client(localport,ip, port):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind(("127.0.0.1", int(localport)))
@@ -46,4 +57,5 @@ def webClient(localport,ip,port=80):
 
 
 if __name__ == "__main__":
-    webClient(sys.argv[3], sys.argv[1], sys.argv[2])
+    
+    client1(sys.argv[3], sys.argv[1], sys.argv[2])

@@ -38,9 +38,9 @@ void Accepter::m_fHandleRead()
     }
 }
 
-Accepter::Accepter(EventLoop *loop, const NetAddress &server)
+Accepter::Accepter(EventLoop *loop, const NetAddress &server,int listenSocket)
     : m_pEventLoop(loop),
-      m_nListenSocket(createNoBlockSocket()),
+      m_nListenSocket(listenSocket),
       m_nListenChannel(loop, m_nListenSocket.getFd()),
       m_nListening(false)
 {

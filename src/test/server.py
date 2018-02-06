@@ -1,4 +1,4 @@
-import socket, sys,time
+import socket, sys,time,os
 
 
 def sleepSecond(s):
@@ -17,6 +17,68 @@ def server(ip, port):
 
     conn.close()    
     s.close()
+
+def forkServer(ip,port):
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
+    s.bind((ip, int(port)))
+
+    pid=os.fork()
+    if 0==pid:
+        print "child pid:",os.getpid()
+        s.listen(8)
+        while(1):
+            conn,addr=s.accept()
+            print "child1 get a connection:",addr
+            conn.close()
+        s.close()
+
+    else:
+        pid=os.fork()
+        if 0==pid:
+            print "child2 pid:",os.getpid()
+            s.listen(8)
+            while(1):
+                conn,addr=s.accept()
+                print "child2 get a connection:",addr
+                conn.close()
+            s.close()
+            
+        else:
+            print "parent pid:",os.getpid()
+            s.listen(8)
+            while(1):
+                conn,addr=s.accept()
+                print "parent get a connection:",addr
+                conn.close()
+            s.close()
+
+def forkServer2(ip,port):
+    pid=os.fork()
+    if 0==pid:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
+        s.bind((ip, int(port)))
+        s.listen(8)
+        print "child pid:",os.getpid()
+        while(1):
+            conn,addr=s.accept()
+            print "child1 get a connection:",addr
+            conn.close()
+        s.close()
+    else:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
+        s.bind((ip, int(port)))
+        s.listen(8)
+        print "child pid:",os.getpid()
+        while(1):
+            conn,addr=s.accept()
+            print "child1 get a connection:",addr
+            conn.close()
+        s.close()
+
+
 
 def server2(ip,port):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -62,4 +124,4 @@ def webServer(ip,port):
 
 
 if __name__ == "__main__":
-    server2(sys.argv[1], sys.argv[2])
+    forkServer(sys.argv[1], sys.argv[2])

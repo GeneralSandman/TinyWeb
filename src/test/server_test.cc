@@ -92,7 +92,7 @@ int main()
 
     Protocol *prot = new WebProtocol();
     Factory *factory = new Factory(g_loop, prot);
-    Server server(g_loop, address, factory);
+    Server server(g_loop, address,createNoBlockSocket(), factory);
 
     server.start();
 

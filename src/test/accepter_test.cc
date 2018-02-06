@@ -53,7 +53,7 @@ int main()
     g_loop->runAfter(200, boost::bind(timeout));
 
     NetAddress server("127.0.0.1:9898");
-    Accepter accept(g_loop, server);
+    Accepter accept(g_loop, server,createNoBlockSocket());
     accept.setConnectionCallback(ConnectionCallback);
     accept.listen();
 

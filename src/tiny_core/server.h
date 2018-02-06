@@ -38,7 +38,7 @@ private:
   Factory *m_pFactory;
   Accepter m_nAccepter;
   std::set<Connection *> m_nConnections;
-  
+
   ConnectionCallback m_nConnectCallback;
   MessageCallback m_nMessageCallback;
   WriteCompleteCallback m_nWriteCompleteCallback;
@@ -48,7 +48,7 @@ private:
   void m_fHandleClose(Connection *);
 
 public:
-  Server(EventLoop *, const NetAddress &, Factory *);
+  Server(EventLoop *, const NetAddress &, int listenSocket, Factory *);
   void setConnectCallback(ConnectionCallback c)
   {
     m_nConnectCallback = c;
@@ -59,7 +59,7 @@ public:
   }
   void setWriteCompleteCallback(WriteCompleteCallback c)
   {
-    m_nWriteCompleteCallback=c;
+    m_nWriteCompleteCallback = c;
   }
   void setCloseCallback(CloseCallback c)
   {

@@ -35,7 +35,7 @@ private:
   void m_fHandleRead();
 
 public:
-  Accepter(EventLoop *, const NetAddress &);
+  Accepter(EventLoop *, const NetAddress &,int listenSocket);
   void setConnectionCallback(newConnectionCallback c) { m_nCallback = c; }
   void listen();
   ~Accepter();
