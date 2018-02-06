@@ -5,50 +5,41 @@
 *Web:www.generalsandman.cn
 */
 
-/*---class Master---
+/*---XXX---
 *
-* this class will do those things:
-* switch to daemon process
-* new Protocol,new Server;
-* server->start() and eventloop->loop();
 ****************************************
-*Server():initalize the Server and Protocol
-*start():invoke Server::start(),EventLoop::loop()
-*~Server():delete the resource;
+*
 */
 
 #ifndef MASTER_H
 #define MASTER_H
 
-#include <tiny_core/netaddress.h>
-
 #include <string>
 
 class EventLoop;
-class Server;
-class Protocol;
-class Factory;
-
-void logSecond();
 
 class Master
 {
-private:
-  static EventLoop *m_pEventLoop;
-  std::string m_nConfigFile;
-  NetAddress m_nAddress;
-  Protocol *m_pProtocol;
-  Factory *m_pFactory;
-  Server *m_pServer;
+protected:
+  EventLoop *m_pEventLoop;
+  int m_nNumber;
+  std::string m_nName;
 
-  void m_fSwitchtoDaemon();
-  void m_fSetSignalsHandler();
-  static void m_fSignalHandler(int);
+  int m_nListenSocket;
 
 public:
-  Master(const std::string &configfile, bool Debug = false);
-  void start();
+  Master(EventLoop *, int, const std::string &);
+  void init()
+  {
+    m_nListenSocket = createNoBlockSocket();
+  }
+  void getListenSocket()
+  {
+    return m_nListenSocket;
+  }
+  void work();
   ~Master();
 };
+
 
 #endif // !MASTER_H
