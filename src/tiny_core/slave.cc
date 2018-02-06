@@ -30,6 +30,7 @@ Slave::Slave(EventLoop *loop, int num, const std::string &name)
 void Slave::work()
 {
     m_pServer.start();
+    m_pEventLoop->loop();
 }
 
 Slave::~Slave()

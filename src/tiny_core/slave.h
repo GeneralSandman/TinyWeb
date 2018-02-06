@@ -32,13 +32,14 @@ protected:
   Factory *m_pFactory;
 
   NetAddress m_nListenAddress;
-  int m_nListenSocket;
+  int m_nListenSocketFd;
   Server *m_pServer;
 
 public:
   Slave(EventLoop *, int, const std::string &);
   void createListenServer(int listenSocket)
   {
+    m_nListenSocketFd=listenSocket;
     m_pServer = new Server(m_pEventLoop,
                            m_nListenAddress, listenSocket, m_pFactory);
   }

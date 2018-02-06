@@ -39,8 +39,8 @@ class EventLoop;
 class Process : boost::noncopyable
 {
 private:
-  Worker* m_pWorker;
   EventLoop *m_pEventLoop;
+  Slave *m_pSlave;
   std::string m_nName;
   int m_nNumber;
   pid_t m_nPid;
@@ -56,6 +56,7 @@ public:
           int number,
           int sockfd[2])
       : m_pEventLoop(new EventLoop),
+        m_pSlave(m_pEventLoop, number, name),
         m_nName(name),
         m_nNumber(number),
         m_nPid(getpid()),
@@ -70,7 +71,12 @@ public:
     m_nPipe.setChildSocket();
     m_nPipe.setMessageCallback();
   }
-  void start() { m_nWorker.work(); }
+  void createListenServer(int listen)
+  {
+    m_pSlave->createListenServer(listen);
+  }
+
+  void start() { m_nSlave.work(); }
   pid_t getPid() { return m_nPid; }
   bool started() { return true == m_nStarted; }
   int join() {}

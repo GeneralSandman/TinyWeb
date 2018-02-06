@@ -30,6 +30,7 @@ Master::Master(EventLoop *loop, int num, const std::string &name)
 
 void Master::work()
 {
+    m_pEventLoop->loop();
 }
 
 Master::~Master()

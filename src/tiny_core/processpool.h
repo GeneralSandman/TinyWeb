@@ -37,10 +37,13 @@ class ProcessPool
 {
 
 private:
-  Master *m_pMaster;
+  
   EventLoop *m_pEventLoop;
+  Master *m_pMaster;
   Process *m_pProcess;
   std::vector<SocketPair *> m_nPipes;
+
+  int m_nListenSocketFd;
 
 public:
   ProcessPool();

@@ -11,7 +11,7 @@
 *
 */
 
-#include <tiny_core/processpoll.h>
+#include <tiny_core/processpool.h>
 #include <tiny_core/process.h>
 #include <tiny_core/worker.h>
 #include <tiny_base/log.h>
@@ -26,8 +26,14 @@ void ProcessPool::m_fInitSignal()
 }
 
 ProcessPool::ProcessPool()
+    :m_pEventLoop(new EventLoop()),
+    m_pMaster(m_pEventLoop,0,"master"),
+    m_pProcess(nullptr),
+    m_nListenSocketFd(-1)
 {
     m_fInitSignal();
+    m_pMaster->init();
+    m_nListenSocketFd=m_pMaster->getListendSocket();
     LOG(Debug) << "class ProcessPoll constructor\n";
 }
 
@@ -52,6 +58,7 @@ void ProcessPool::createProcess(int nums)
             //child
             m_pProcess = new Process(to_string(i), i, socketpairFds);
             m_pProcess->setAsChild();
+            m_pProcess->createListenServer(m_nListenSocketFd);
             goto WAIT;
         }
         else
