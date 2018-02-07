@@ -10,6 +10,7 @@ TinyWeb is a high-performance web server which is based on C++11.
 and low resource consumption.
 - Module design is a efficient approach to design this system.
 
+---------------------
 
 ## Quick Start
 
@@ -76,16 +77,14 @@ sudo ./TinyWeb -d -c /home/li/TinyWeb.conf
 
 ## Reference：
 
-1.APUE
+1.[Advanced Programming in the Unix Environment](https://en.wikipedia.org/wiki/Advanced_Programming_in_the_Unix_Environment)
 
-2.UNP卷1
+2.[UNIX Network Programming](https://en.wikipedia.org/wiki/UNIX_Network_Programming)
 
-3.UNP卷2
-
-4.C++ Primer
+3.C++ Primer
 
 5.[Linux 多线程服务端编程：使用 muduo C++ 网络库](https://github.com/chenshuo/documents)
 
-6.[C++ 官方参考手册](http://en.cppreference.com/w/cpp)
+6.[C++ Reference](http://en.cppreference.com/w/cpp)
 
 7.[高性能服务器编程](http://blog.csdn.net/column/details/high-perf-network.html)
