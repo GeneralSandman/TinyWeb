@@ -15,6 +15,7 @@
 #define PROCESS_POOL_H
 
 #include <tiny_core/process.h>
+#include <tiny_base/signalmanager.h>
 #include <tiny_base/api.h>
 
 #include <vector>
@@ -37,13 +38,26 @@ class ProcessPool
 {
 
 private:
-  
   EventLoop *m_pEventLoop;
   Master *m_pMaster;
   Process *m_pProcess;
   std::vector<SocketPair *> m_nPipes;
-
   int m_nListenSocketFd;
+  SignalManager m_nSignalManager;
+
+  void m_fSetSignalHandlers()
+  {
+    std::vector<Signal> signals = {
+        Signal(, , , ),
+        Signal(, , , ),
+        Signal(, , , ),
+        Signal(, , , ),
+        Signal(, , , ),
+        Signal(, , , ),
+    };
+    for (auto t : signals)
+      m_nSignalManager.addSignal(t);
+  }
 
 public:
   ProcessPool();
@@ -56,6 +70,8 @@ public:
       m_pProcess->start();
   }
   void killAll();
+  void killSoftly();
+  // void killI
   ~ProcessPool();
   friend class Process;
 };

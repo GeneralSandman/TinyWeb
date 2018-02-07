@@ -30,6 +30,10 @@ private:
 
 public:
   Signal(int, const std::string &, const std::string &, SignalCallback);
+  bool isSame(int signal) const
+  {
+    return m_nNumber == signal;
+  }
   ~Signal();
   friend class SignalManager;
 };

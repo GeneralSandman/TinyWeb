@@ -23,12 +23,12 @@ Signal::Signal(int num, const std::string &name, const std::string &meaning, Sig
       m_nMeaning(meaning),
       m_nCallback(callback)
 {
-    LOG(Debug) << "class Signal constructor\n";
+    // LOG(Debug) << "class Signal constructor\n";
 }
 
 Signal::~Signal()
 {
-    LOG(Debug) << "class Signal destructor\n";
+    // LOG(Debug) << "class Signal destructor\n";
 }
 
 SignalManager::SignalManager()

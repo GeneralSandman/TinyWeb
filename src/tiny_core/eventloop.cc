@@ -45,6 +45,9 @@ void EventLoop::loop()
         Time arriveTime = m_pPoller->poll(m_nActiveChannels);
         for (auto t : m_nActiveChannels)
             t->handleEvent(arriveTime);
+        //signal handler 
+        //see signalmanager.cc
+        //
     }
 }
 

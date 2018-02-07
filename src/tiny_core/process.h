@@ -14,6 +14,7 @@
 #ifndef PROCESS_H
 #define PROCESS_H
 
+#include <tiny_base/signalmanager.h>
 #include <tiny_base/api.h>
 
 #include <iostream>
@@ -48,7 +49,21 @@ private:
   bool m_nStarted;
   bool m_nExited;
 
-  void m_fInitSignal();
+  SignalManager m_nSignalManager;
+
+  void m_fSetSignalHandlers()
+  {
+    std::vector<Signal> signals = {
+        Signal(, , , ),
+        Signal(, , , ),
+        Signal(, , , ),
+        Signal(, , , ),
+        Signal(, , , ),
+        Signal(, , , ),
+    };
+    for (auto t : signals)
+      m_nSignalManager.addSignal(t);
+  }
   void m_fProcessStart();
 
 public:
@@ -74,6 +89,10 @@ public:
   void createListenServer(int listen)
   {
     m_pSlave->createListenServer(listen);
+  }
+
+  void setSignalHandlers()
+  {
   }
 
   void start() { m_nSlave.work(); }
