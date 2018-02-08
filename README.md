@@ -1,6 +1,5 @@
 ![](TinyWeb_logo.png)
 
-# <a href='https://www.dissigil.cn'><img src='https://github.com/GeneralSandman/TinyWeb/blob/master/TinyWeb_logo.png' height='60' alt='TinyWeb'></a>
 
 ----------------
 
