@@ -14,6 +14,14 @@
 #include <tiny_base/signalmanager.h>
 // #include <tiny_struct/string_t.h>
 
+
+int status_quit_softly;//QUIT
+int status_terminate;//TERM,INT
+int status_exiting;
+int status_reconfigure;//HUP,reboot 
+int status_child_quit;//CHLD
+
+
 #include <signal.h>
 #include <iostream>
 #include <vector>
@@ -67,19 +75,13 @@ static void parentSignalHandler(int sign)
     switch (sign)
     {
     case SIGINT:
-        interrupt = 1;
+        status_quit = 1;
         break;
     case SIGTERM:
-        term = 1;
-        break;
-    case SIGHUP:
-        hup = 1;
+        status_terminate = 1;
         break;
     case SIGCHLD:
-        child = 1;
-        break;
-    case SIGPIPE:
-        pipe = 1;
+        status_child_quit = 1;
         break;
     }
 }
@@ -99,19 +101,13 @@ static void childSignalHandler(int sign)
     switch (sign)
     {
     case SIGINT:
-        interrupt = 1;
+        status_quit = 1;
         break;
     case SIGTERM:
-        term = 1;
-        break;
-    case SIGHUP:
-        hup = 1;
+        status_terminate = 1;
         break;
     case SIGCHLD:
-        child = 1;
-        break;
-    case SIGPIPE:
-        pipe = 1;
+        status_child_quit = 1;
         break;
     }
 }

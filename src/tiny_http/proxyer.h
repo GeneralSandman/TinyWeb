@@ -40,15 +40,15 @@ private:
   // std::map<NetAddress, Connection *> m_nServers;
   // std::map<NetAddress, Connection *> m_nClients;
 
-  Server m_nServer;
-  Client m_nClient;
-  EventLoop *m_pEventLoop;
-  bool m_nStarted;
+  // Server m_nServer;
+  // Client m_nClient;
+  // EventLoop *m_pEventLoop;
+  // bool m_nStarted;
   ConnectionCallback m_nConnectCallback;
   MessageCallback m_nMessageCallback;
   WriteCompleteCallback m_nWriteCompleteCallback;
   CloseCallback m_nCloseCallback;
-  Factory *m_pFactory;
+  // Factory *m_pFactory;
 
 public:
   Proxyer();

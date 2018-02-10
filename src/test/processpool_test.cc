@@ -20,6 +20,7 @@ int main()
 {
     {
         ProcessPool pool;
+        pool.init();
         pool.createProcess(3);
     }
 

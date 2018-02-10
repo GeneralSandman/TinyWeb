@@ -24,19 +24,12 @@ protected:
   EventLoop *m_pEventLoop;
   int m_nNumber;
   std::string m_nName;
-
   int m_nListenSocket;
 
 public:
   Master(EventLoop *, int, const std::string &);
-  void init()
-  {
-    m_nListenSocket = createNoBlockSocket();
-  }
-  void getListenSocket()
-  {
-    return m_nListenSocket;
-  }
+  void init();
+  int getListenSocket();
   void work();
   ~Master();
 };

@@ -14,6 +14,8 @@
 #ifndef SLAVE_H
 #define SLAVE_H
 
+#include <tiny_core/netaddress.h>
+
 #include <string>
 
 class EventLoop;
@@ -37,12 +39,7 @@ protected:
 
 public:
   Slave(EventLoop *, int, const std::string &);
-  void createListenServer(int listenSocket)
-  {
-    m_nListenSocketFd=listenSocket;
-    m_pServer = new Server(m_pEventLoop,
-                           m_nListenAddress, listenSocket, m_pFactory);
-  }
+  void createListenServer(int listenSocket);
   void work();
   ~Slave();
 };

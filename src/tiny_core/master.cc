@@ -28,6 +28,16 @@ Master::Master(EventLoop *loop, int num, const std::string &name)
     LOG(Debug) << "class Master constuctor\n";
 }
 
+void Master::init()
+{
+    m_nListenSocket = createNoBlockSocket();
+}
+
+int Master::getListenSocket()
+{
+    return m_nListenSocket;
+}
+
 void Master::work()
 {
     m_pEventLoop->loop();
@@ -37,4 +47,3 @@ Master::~Master()
 {
     LOG(Debug) << "class Master destuctor\n";
 }
-

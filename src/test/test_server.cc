@@ -10,7 +10,7 @@
 ****************************************
 *
 */
- 
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -24,32 +24,42 @@
 #include <vector>
 #include <map>
 #include <sys/epoll.h>
-#include "./api/api.h"
+#include <signal.h>
 
-int main__(int argc, char **argv)
+#include <tiny_base/api.h>
+#include <tiny_core/time.h>
+
+// int main__(int argc, char **argv)
+// {
+//     std::map<char, std::string> opt;
+//     opt = getOption(argc, argv);
+//     if (opt.size() == 0)
+//     {
+//         std::cout << "argv error\n";
+//         exit(-1);
+//     }
+
+//     std::string host = "127.0.0.1";
+//     int port;
+//     port = stoi(opt['p']);
+//     server::Server s = server::Server(host, port);
+//     std::string html = "home.html";
+//     while (1)
+//     {
+//         server::Protocal port = s.getClient();
+//         port.responseHtml(html);
+//     }
+// }
+
+static void signal_handler(int sig)
 {
-    std::map<char, std::string> opt;
-    opt = getOption(argc, argv);
-    if (opt.size() == 0)
-    {
-        std::cout << "argv error\n";
-        exit(-1);
-    }
-
-    std::string host = "127.0.0.1";
-    int port;
-    port = stoi(opt['p']);
-    server::Server s = server::Server(host, port);
-    std::string html = "home.html";
-    while (1)
-    {
-        server::Protocal port = s.getClient();
-        port.responseHtml(html);
-    }
+    std::cout << "receive signal:" << sig << std::endl;
 }
 
 int main(int argc, char **argv)
 {
+    add_signal(SIGUSR1, signal_handler);
+    std::cout << getpid() << std::endl;
     std::map<char, std::string> opt;
     opt = getOption(argc, argv);
     if (opt.size() == 0)
@@ -76,12 +86,14 @@ int main(int argc, char **argv)
     char *local_addr = "127.0.0.1";
     inet_aton(local_addr, &(serveraddr.sin_addr));
     serveraddr.sin_port = htons(port); //或者htons(SERV_PORT);
-    Bind(listenfd, (sockaddr *)&serveraddr, sizeof(serveraddr));
+    Bind(listenfd, (const struct sockaddr_in *)&serveraddr, sizeof(serveraddr));
     Listen(listenfd, 8);
     for (;;)
     {
-        int nfds = epoll_wait(epfd, events, 20, 500); //等待epoll事件的发生
-        for (int i = 0; i < nfds; ++i)                //处理所发生的所有事件
+        int nfds = epoll_wait(epfd, events, 20, 5000); //等待epoll事件的发生
+        Time tmp = Time::now();
+        std::cout << tmp.toString() << "return from epoll_wait" << std::endl;
+        for (int i = 0; i < nfds; ++i) //处理所发生的所有事件
         {
             if (events[i].data.fd == listenfd) //监听事件
             {

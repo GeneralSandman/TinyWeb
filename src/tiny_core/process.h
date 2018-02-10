@@ -17,6 +17,8 @@
 #include <tiny_base/signalmanager.h>
 #include <tiny_base/api.h>
 
+#include <tiny_core/socketpair.h>
+
 #include <iostream>
 #include <string>
 #include <signal.h>
@@ -24,6 +26,12 @@
 #include <sys/wait.h>
 #include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
+
+int status_quit_softly; //QUIT
+int status_terminate;   //TERM,INT
+int status_exiting;
+int status_reconfigure; //HUP,reboot
+int status_child_quit;  //CHLD
 
 typedef boost::function<void()> Fun;
 
@@ -33,9 +41,9 @@ enum ProcStatus
   Status_Exited
 };
 
-class ProcessPool;
-class Worker;
 class EventLoop;
+class Slave;
+
 
 class Process : boost::noncopyable
 {
@@ -51,60 +59,33 @@ private:
 
   SignalManager m_nSignalManager;
 
-  void m_fSetSignalHandlers()
+  static void childSignalHandler(int sign)
   {
-    std::vector<Signal> signals = {
-        Signal(, , , ),
-        Signal(, , , ),
-        Signal(, , , ),
-        Signal(, , , ),
-        Signal(, , , ),
-        Signal(, , , ),
-    };
-    for (auto t : signals)
-      m_nSignalManager.addSignal(t);
+    std::cout << "child[" << getpid() << "]signal manager get signal:" << sign << std::endl;
+
+    switch (sign)
+    {
+    case SIGINT:
+      status_terminate = 1;
+      break;
+    case SIGTERM:
+      status_terminate = 1;
+      break;
+    }
   }
-  void m_fProcessStart();
 
 public:
   Process(const std::string &name,
           int number,
-          int sockfd[2])
-      : m_pEventLoop(new EventLoop),
-        m_pSlave(m_pEventLoop, number, name),
-        m_nName(name),
-        m_nNumber(number),
-        m_nPid(getpid()),
-        m_nPipe(m_pEventLoop, sockfd),
-        m_nStarted(false),
-        m_nExited(false)
-  {
-    LOG(Debug) << "class Process constructor\n";
-  }
-  void setAsChild()
-  {
-    m_nPipe.setChildSocket();
-    m_nPipe.setMessageCallback();
-  }
-  void createListenServer(int listen)
-  {
-    m_pSlave->createListenServer(listen);
-  }
-
-  void setSignalHandlers()
-  {
-  }
-
-  void start() { m_nSlave.work(); }
-  pid_t getPid() { return m_nPid; }
-  bool started() { return true == m_nStarted; }
-  int join() {}
-  ~Process()
-  {
-    m_nPipe.clearSocket();
-    delete m_pEventLoop;
-    LOG(Debug) << "class Process destructor\n";
-  }
+          int sockfd[2]);
+  void setAsChild();
+  void createListenServer(int listen);
+  void setSignalHandlers();
+  void start();
+  pid_t getPid();
+  bool started();
+  int join();
+  ~Process();
   friend class ProcessPool;
 };
 

@@ -13,28 +13,34 @@
 
 #include <tiny_core/processpool.h>
 #include <tiny_core/process.h>
-#include <tiny_core/worker.h>
+#include <tiny_core/eventloop.h>
+#include <tiny_core/master.h>
 #include <tiny_base/log.h>
 
 #include <unistd.h>
 #include <sys/types.h>
 #include <signal.h>
 #include <map>
+#include <string>
+#include <boost/bind.hpp>
 
-void ProcessPool::m_fInitSignal()
-{
-}
+
+
 
 ProcessPool::ProcessPool()
-    :m_pEventLoop(new EventLoop()),
-    m_pMaster(m_pEventLoop,0,"master"),
-    m_pProcess(nullptr),
-    m_nListenSocketFd(-1)
+    : m_pEventLoop(new EventLoop()),
+      m_pMaster(new Master(m_pEventLoop, 0, "master")),
+      m_pProcess(nullptr),
+      m_nListenSocketFd(-1)
 {
-    m_fInitSignal();
-    m_pMaster->init();
-    m_nListenSocketFd=m_pMaster->getListendSocket();
+
     LOG(Debug) << "class ProcessPoll constructor\n";
+}
+
+void ProcessPool::init()
+{
+    m_pMaster->init();
+    m_nListenSocketFd = m_pMaster->getListenSocket();
 }
 
 void ProcessPool::createProcess(int nums)
@@ -43,29 +49,30 @@ void ProcessPool::createProcess(int nums)
     //first-step:create nums process
     for (int i = 0; i < nums; i++)
     {
-        int sockpairFds[2];
-        int res = socketpair(AF_UNIX, SOCK_STREAM, 0, sockpairFds);
+        int socketpairFds[2];
+        int res = socketpair(AF_UNIX, SOCK_STREAM, 0, socketpairFds);
         if (res == -1)
             handle_error("socketpair error:");
 
-        int res = fork();
-        if (res < 0)
+        pid_t pid = fork();
+        if (pid < 0)
         {
             std::cout << "fork error\n";
         }
-        else if (res == 0)
+        else if (pid == 0)
         {
             //child
-            m_pProcess = new Process(to_string(i), i, socketpairFds);
+            m_pProcess = new Process(std::to_string(i), i, socketpairFds);
             m_pProcess->setAsChild();
+            m_pProcess->setSignalHandlers();
             m_pProcess->createListenServer(m_nListenSocketFd);
             goto WAIT;
         }
         else
         {
             //parent continue
-            tmp.push_back({sockpairFds[0],
-                           sockpairFds[1]});
+            tmp.push_back({socketpairFds[0],
+                           socketpairFds[1]});
         }
     }
 
@@ -79,14 +86,40 @@ void ProcessPool::createProcess(int nums)
 
         SocketPair *pipe = new SocketPair(m_pEventLoop, i);
         m_nPipes.push_back(pipe);
+        pipe->setParentSocket();
+        pipe->setMessageCallback(boost::bind(&test__MessageCallback, _1, _2, _3)); //FIXME:
+        setSignalHandlers();
     }
 
 WAIT:
     start();
 }
 
+void ProcessPool::setSignalHandlers()
+{
+    std::vector<Signal> signals = {
+        Signal(SIGINT, "SIGINT", "killAll", parentSignalHandler),
+        Signal(SIGTERM, "SIGTERM", "killSoftly", parentSignalHandler),
+        Signal(SIGCHLD, "SIGCHLD", "childdead", parentSignalHandler)};
+
+    for (auto t : signals)
+        m_nSignalManager.addSignal(t);
+}
+
+void ProcessPool::start()
+{
+    //parent
+    if (!m_pProcess)
+        m_pMaster->work();
+    else
+        m_pProcess->start();
+}
 
 void ProcessPool::killAll()
+{
+}
+
+void ProcessPool::killSoftly()
 {
 }
 

@@ -138,6 +138,7 @@ ngx_shmtx_t锁是可以在共享内存上使用的,它是Nginx中最常见的锁
 - 参考nginx内存池，list,rbtree,string,
 - 思考mime.type的设计，如何配置 include /home/li/TinyWeb/mime.type
 - 重新写Makefile
+- 更新EventLoop
 > # 模块的开发文档
 
 > # 需要处理的信号：
@@ -146,6 +147,14 @@ ngx_shmtx_t锁是可以在共享内存上使用的,它是Nginx中最常见的锁
 - SIGINT Ctrl-c
 - SIGTERM　
 - SIGHUP 终端退出信号
+
+
+> # 如何方便的控制TinyWeb：
+- kill -QUIT PID :softly close
+- kill -TERM PID :close quickly
+- kill -INT PID :同上
+- -c <configfile>:
+- -d :
 
 各种类模块的说明：
 - distingush Protocol & Connection
@@ -156,7 +165,7 @@ ngx_shmtx_t锁是可以在共享内存上使用的,它是Nginx中最常见的锁
         维护者数据缓冲，监听着各种连接事件
     - 简单来说：Connection负责数据传输，不处理用户逻辑；Protocol不处理数据传输，
      负责处理逻辑
-
+- EventLoop 管理SignalManager，在loop()中根据信号处理函数设置的全局变量去进行状态控制。
 
 
 > # test目录下相关测试的说明
