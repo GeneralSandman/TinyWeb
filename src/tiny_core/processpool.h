@@ -24,13 +24,12 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-
-
-int status_quit_softly; //QUIT
-int status_terminate;   //TERM,INT
-int status_exiting;
-int status_reconfigure; //HUP,reboot
-int status_child_quit;  //CHLD
+#include <tiny_core/status.h>
+extern int status_quit_softly; //QUIT
+extern int status_terminate;   //TERM,INT
+extern int status_exiting;
+extern int status_reconfigure; //HUP,reboot
+extern int status_child_quit;  //CHLD
 
 class Master;
 class SocketPair;
@@ -43,10 +42,7 @@ struct pair
 };
 
 #include <tiny_base/buffer.h>
-void test__MessageCallback(Connection *con, Buffer *buf, Time time)
-{
-  std::cout << buf->getAll() << std::endl;
-}
+void test_parent_MessageCallback(Connection *con, Buffer *buf, Time time);
 
 class ProcessPool
 {
@@ -73,6 +69,7 @@ private:
     case SIGCHLD:
       status_child_quit = 1;
       break;
+      //invoke waitpid() to collect the resource of child
     }
   }
 

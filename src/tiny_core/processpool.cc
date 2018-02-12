@@ -24,8 +24,11 @@
 #include <string>
 #include <boost/bind.hpp>
 
-
-
+#include <tiny_base/buffer.h>
+void test_parent_MessageCallback(Connection *con, Buffer *buf, Time time)
+{
+    std::cout << buf->getAll() << std::endl;
+}
 
 ProcessPool::ProcessPool()
     : m_pEventLoop(new EventLoop()),
@@ -71,6 +74,7 @@ void ProcessPool::createProcess(int nums)
         else
         {
             //parent continue
+            std::cout << "create process:[" << pid << "]\n";
             tmp.push_back({socketpairFds[0],
                            socketpairFds[1]});
         }
@@ -83,11 +87,11 @@ void ProcessPool::createProcess(int nums)
         int i[2];
         i[0] = t.d1;
         i[1] = t.d2;
-
+        std::cout << "parent establish connection with child\n";
         SocketPair *pipe = new SocketPair(m_pEventLoop, i);
         m_nPipes.push_back(pipe);
         pipe->setParentSocket();
-        pipe->setMessageCallback(boost::bind(&test__MessageCallback, _1, _2, _3)); //FIXME:
+        pipe->setMessageCallback(boost::bind(&test_parent_MessageCallback, _1, _2, _3)); //FIXME:
         setSignalHandlers();
     }
 
@@ -109,6 +113,7 @@ void ProcessPool::setSignalHandlers()
 void ProcessPool::start()
 {
     //parent
+    std::cout << "start work\n";
     if (!m_pProcess)
         m_pMaster->work();
     else

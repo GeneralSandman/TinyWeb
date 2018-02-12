@@ -16,7 +16,6 @@
 
 #include <tiny_base/signalmanager.h>
 #include <tiny_base/api.h>
-
 #include <tiny_core/socketpair.h>
 
 #include <iostream>
@@ -27,13 +26,18 @@
 #include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
 
-int status_quit_softly; //QUIT
-int status_terminate;   //TERM,INT
-int status_exiting;
-int status_reconfigure; //HUP,reboot
-int status_child_quit;  //CHLD
+#include<tiny_core/status.h>
+extern int status_quit_softly; //QUIT
+extern int status_terminate;   //TERM,INT
+extern int status_exiting;
+extern int status_reconfigure; //HUP,reboot
+extern int status_child_quit;  //CHLD
 
 typedef boost::function<void()> Fun;
+
+#include <tiny_base/buffer.h>
+void test_child_MessageCallback(Connection *con, Buffer *buf, Time time);
+
 
 enum ProcStatus
 {

@@ -25,7 +25,11 @@
 #include <boost/bind.hpp>
 
 // void Process::childSignalHandler(int);
-
+#include <tiny_base/buffer.h>
+void test_child_MessageCallback(Connection *con, Buffer *buf, Time time)
+{
+  std::cout << buf->getAll() << std::endl;
+}
 
 Process::Process(const std::string &name,
                  int number,
@@ -45,7 +49,7 @@ Process::Process(const std::string &name,
 void Process::setAsChild()
 {
   m_nPipe.setChildSocket();
-  m_nPipe.setMessageCallback(boost::bind(&test__MessageCallback, _1, _2, _3));
+  m_nPipe.setMessageCallback(boost::bind(&test_child_MessageCallback, _1, _2, _3));
 }
 
 void Process::createListenServer(int listen)

@@ -31,6 +31,7 @@ void Socket::bindAddress(const NetAddress &address)
 {
     struct sockaddr_in s = address.getAddr();
     Bind(m_nFd, &s);
+    setSocketReuseAddress(fd);
 }
 void Socket::listen()
 {

@@ -21,7 +21,7 @@ int main()
     {
         ProcessPool pool;
         pool.init();
-        pool.createProcess(3);
+        pool.createProcess(1);
     }
 
     return 0;
