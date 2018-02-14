@@ -46,6 +46,7 @@ int Master::getListenSocket()
 
 void Master::work()
 {
+    std::cout << "[master]:start working\n";
     m_pEventLoop->loop();
     if (status_terminate || status_quit_softly)
     {

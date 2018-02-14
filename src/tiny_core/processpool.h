@@ -44,6 +44,8 @@ struct pair
 #include <tiny_base/buffer.h>
 void test_parent_MessageCallback(Connection *con, Buffer *buf, Time time);
 
+void period_print_test(void);
+
 class ProcessPool
 {
 

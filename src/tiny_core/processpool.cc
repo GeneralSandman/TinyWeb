@@ -33,6 +33,11 @@ void test_parent_MessageCallback(Connection *con, Buffer *buf, Time time)
               << buf->getAll() << std::endl;
 }
 
+void period_print_test(void)
+{
+  std::cout << "print every second\n";
+}
+
 ProcessPool::ProcessPool()
     : m_pEventLoop(new EventLoop()),
       m_pMaster(new Master(this, m_pEventLoop, 0, "master")),
@@ -92,7 +97,6 @@ void ProcessPool::createProcess(int nums)
     }
 
     //second-step:build pipe with every child process
-    m_pEventLoop = new EventLoop();
     for (auto t : pair_tmp)
     {
         int i[2];
@@ -140,8 +144,10 @@ void ProcessPool::start()
             std::cout << "[parent]:I will send to child[" << m_nPids[index]
                       << "] message every one seconds\n";
 
-            m_pEventLoop->runEvery(1, boost::bind(&SocketPair::writeToChild,
-                                                  m_nPipes[index], "parent send message to child"));
+            TimerId id1 = m_pEventLoop->runEvery(1, boost::bind(&SocketPair::writeToChild,
+                                                                m_nPipes[index],
+                                                                "parent send message to child"));
+            TimerId id2 = m_pEventLoop->runEvery(1, boost::bind(&period_print_test));
         }
         m_pMaster->work();
     }
