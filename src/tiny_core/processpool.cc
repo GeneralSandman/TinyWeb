@@ -15,6 +15,7 @@
 #include <tiny_core/process.h>
 #include <tiny_core/eventloop.h>
 #include <tiny_core/master.h>
+#include <tiny_core/timerid.h>
 #include <tiny_base/log.h>
 
 #include <unistd.h>
@@ -27,7 +28,9 @@
 #include <tiny_base/buffer.h>
 void test_parent_MessageCallback(Connection *con, Buffer *buf, Time time)
 {
-    std::cout << buf->getAll() << std::endl;
+
+    std::cout << "[parent]:get message:"
+              << buf->getAll() << std::endl;
 }
 
 ProcessPool::ProcessPool()
@@ -65,7 +68,10 @@ void ProcessPool::createProcess(int nums)
         }
         else if (pid == 0)
         {
-            //child
+            //Child process:
+            //1.establish channel with Parent;
+            //2.set signal handlers
+            //3.create listen server
             m_pProcess = new Process(std::to_string(i), i, socketpairFds);
             m_pProcess->setAsChild();
             m_pProcess->setSignalHandlers();
@@ -74,10 +80,14 @@ void ProcessPool::createProcess(int nums)
         }
         else
         {
-            //parent continue
+            //Parent process:
+            //1.push socketpair
+            //2.push pid
+            //setting information after forking.
             std::cout << "create process:[" << pid << "]\n";
-            tmp.push_back({socketpairFds[0],
-                           socketpairFds[1]});
+            pair_tmp.push_back({socketpairFds[0],
+                                socketpairFds[1]});
+            pids_tmp.push_back(pid);
         }
     }
 
@@ -99,6 +109,7 @@ void ProcessPool::createProcess(int nums)
     {
         m_nPids.push_back(t);
     }
+    assert(m_nPids.size() == m_nPipes.size());
 
 WAIT:
     start();
@@ -120,13 +131,30 @@ void ProcessPool::start()
     //parent
     std::cout << "start work\n";
     if (!m_pProcess)
+    {
+        //Parent process
+        assert(m_nPipes.size() == m_nPids.size());
+
+        for (int index = 0; index < m_nPipes.size(); index++)
+        {
+            std::cout << "[parent]:I will send to child[" << m_nPids[index]
+                      << "] message every one seconds\n";
+
+            m_pEventLoop->runEvery(1, boost::bind(&SocketPair::writeToChild,
+                                                  m_nPipes[index], "parent send message to child"));
+        }
         m_pMaster->work();
+    }
     else
+    {
+        //Child process
         m_pProcess->start();
+    }
 }
 
 void ProcessPool::killAll()
 {
+    //This function will be invoked by master.
     std::cout << "[parent]:kill all chilern\n";
     for (auto t : m_nPids)
     {
@@ -142,6 +170,8 @@ void ProcessPool::killAll()
 
 void ProcessPool::killSoftly()
 {
+    std::cout << "[parent]:kill chilern softly\n";
+    //the difference with killAll
 }
 
 ProcessPool::~ProcessPool()
@@ -151,7 +181,7 @@ ProcessPool::~ProcessPool()
 
     for (auto t : m_nPipes)
     {
-        t.clearSocket();
+        t->clearSocket();
         delete t;
     }
 

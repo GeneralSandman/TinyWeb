@@ -28,7 +28,8 @@
 #include <tiny_base/buffer.h>
 void test_child_MessageCallback(Connection *con, Buffer *buf, Time time)
 {
-  std::cout << buf->getAll() << std::endl;
+  std::cout << "[child]:get message:"
+            << buf->getAll() << std::endl;
 }
 
 Process::Process(const std::string &name,

@@ -55,7 +55,7 @@ private:
   std::vector<SocketPair *> m_nPipes;
   std::vector<pid_t> m_nPids;
   int m_nProcessNum;
-  
+
   int m_nListenSocketFd;
   SignalManager m_nSignalManager;
 
@@ -79,23 +79,28 @@ private:
       std::cout << "[parent]:collect information from child[" << pid << "]\n";
       break;
       //invoke waitpid() to collect the resource of child
-    case SIGHUP:
-      status_reconfigure = 1;
-      std::cout << "[parent]:reconfigure\n";
-      //kill childern softly and create new process
-      break;
+      // case SIGHUP:
+      //   status_reconfigure = 1;
+      //   std::cout << "[parent]:reconfigure\n";
+      //   //kill childern softly and create new process
+      //   break;
     }
   }
 
   void m_fDestoryProcess(pid_t pid)
   {
-    auto p = m_nPids.find(pid);
+    auto p = m_nPids.begin();
+    for (; p != m_nPids.end(); p++)
+    {
+      if (*p == pid)
+        break;
+    }
     assert(p != m_nPids.end());
     int index = p - m_nPids.begin();
 
-    m_nPipes[index].clearSocket();
+    m_nPipes[index]->clearSocket();
     delete m_nPipes[index];
-    m_nPipes.erase(m_nPiped.begin() + index);
+    m_nPipes.erase(m_nPipes.begin() + index);
 
     m_nPids.erase(m_nPids.begin() + index);
 

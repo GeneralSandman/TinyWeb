@@ -22,7 +22,7 @@
 #include <unistd.h>
 
 extern int status_terminate;
-extern int status_quit_softlt;
+extern int status_quit_softly;
 extern int status_reconfigure;
 
 Master::Master(ProcessPool *pool, EventLoop *loop, int num, const std::string &name)
@@ -47,7 +47,7 @@ int Master::getListenSocket()
 void Master::work()
 {
     m_pEventLoop->loop();
-    if (status_terminate || status_quit_softlt)
+    if (status_terminate || status_quit_softly)
     {
         std::cout << "[master]:I will kill all chilern\n";
         m_pProcessPool->killAll();
@@ -56,7 +56,7 @@ void Master::work()
     {
         std::cout << "[master]:reconfigure ,recreate new process\n";
         m_pProcessPool->killAll();
-        m_pProcessPool->create(m_pProcessPool->processNum());
+        m_pProcessPool->createProcess(m_pProcessPool->processNum());
     }
 }
 
