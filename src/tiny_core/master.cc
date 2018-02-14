@@ -11,6 +11,7 @@
 *
 */
 
+#include <tiny_core/processpool.h>
 #include <tiny_core/eventloop.h>
 #include <tiny_core/master.h>
 #include <tiny_core/netaddress.h>
@@ -20,8 +21,13 @@
 
 #include <unistd.h>
 
-Master::Master(EventLoop *loop, int num, const std::string &name)
-    : m_pEventLoop(loop),
+extern int status_terminate;
+extern int status_quit_softlt;
+extern int status_reconfigure;
+
+Master::Master(ProcessPool *pool, EventLoop *loop, int num, const std::string &name)
+    : m_pProcessPool(pool),
+      m_pEventLoop(loop),
       m_nNumber(num),
       m_nName(name)
 {
@@ -41,6 +47,17 @@ int Master::getListenSocket()
 void Master::work()
 {
     m_pEventLoop->loop();
+    if (status_terminate || status_quit_softlt)
+    {
+        std::cout << "[master]:I will kill all chilern\n";
+        m_pProcessPool->killAll();
+    }
+    if (status_reconfigure)
+    {
+        std::cout << "[master]:reconfigure ,recreate new process\n";
+        m_pProcessPool->killAll();
+        m_pProcessPool->create(m_pProcessPool->processNum());
+    }
 }
 
 Master::~Master()

@@ -89,6 +89,7 @@ int Process::join()
 Process::~Process()
 {
   m_nPipe.clearSocket();
+  delete m_pSlave;
   delete m_pEventLoop;
   LOG(Debug) << "class Process destructor\n";
 }

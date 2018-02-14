@@ -19,6 +19,9 @@
 #include <tiny_core/time.h>
 #include <tiny_base/log.h>
 
+extern int status_quit_softly;
+extern int status_terminate;
+
 EventLoop::EventLoop()
 {
     m_nRunning = true;
@@ -45,9 +48,13 @@ void EventLoop::loop()
         Time arriveTime = m_pPoller->poll(m_nActiveChannels);
         for (auto t : m_nActiveChannels)
             t->handleEvent(arriveTime);
-        //signal handler 
-        //see signalmanager.cc
-        //
+
+        //stop this loop if get signal SIGINT SIGTERM SIGKILL SIGQUIT
+        if (status_quit_softly == 1 || status_terminate == 1)
+        {
+            std::cout << "quit this eventloop\n";
+            m_nRunning = false;
+        }
     }
 }
 

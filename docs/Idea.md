@@ -145,7 +145,8 @@ ngx_shmtx_t锁是可以在共享内存上使用的,它是Nginx中最常见的锁
 - SIGCHLD 子进程终止通知父进程
 - SIGPIPE 管道异常
 - SIGINT Ctrl-c
-- SIGTERM　
+- SIGTERM 强制关闭
+- SIGQUIT 软关闭　
 - SIGHUP 终端退出信号
 
 

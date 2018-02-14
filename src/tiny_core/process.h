@@ -26,7 +26,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
 
-#include<tiny_core/status.h>
+#include <tiny_core/status.h>
 extern int status_quit_softly; //QUIT
 extern int status_terminate;   //TERM,INT
 extern int status_exiting;
@@ -38,7 +38,6 @@ typedef boost::function<void()> Fun;
 #include <tiny_base/buffer.h>
 void test_child_MessageCallback(Connection *con, Buffer *buf, Time time);
 
-
 enum ProcStatus
 {
   Status_Started,
@@ -47,7 +46,6 @@ enum ProcStatus
 
 class EventLoop;
 class Slave;
-
 
 class Process : boost::noncopyable
 {
@@ -70,10 +68,13 @@ private:
     switch (sign)
     {
     case SIGINT:
-      status_terminate = 1;
-      break;
     case SIGTERM:
       status_terminate = 1;
+      std::cout << "[child]:terminate\n";
+      break;
+    case SIGQUIT:
+      status_quit_softly = 1;
+      std::cout << "[child]:quit softly\n";
       break;
     }
   }

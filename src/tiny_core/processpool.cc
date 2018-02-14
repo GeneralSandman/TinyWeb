@@ -32,7 +32,7 @@ void test_parent_MessageCallback(Connection *con, Buffer *buf, Time time)
 
 ProcessPool::ProcessPool()
     : m_pEventLoop(new EventLoop()),
-      m_pMaster(new Master(m_pEventLoop, 0, "master")),
+      m_pMaster(new Master(this, m_pEventLoop, 0, "master")),
       m_pProcess(nullptr),
       m_nListenSocketFd(-1)
 {
@@ -48,7 +48,8 @@ void ProcessPool::init()
 
 void ProcessPool::createProcess(int nums)
 {
-    std::vector<pair> tmp;
+    std::vector<pair> pair_tmp;
+    std::vector<pid_t> pids_tmp;
     //first-step:create nums process
     for (int i = 0; i < nums; i++)
     {
@@ -82,7 +83,7 @@ void ProcessPool::createProcess(int nums)
 
     //second-step:build pipe with every child process
     m_pEventLoop = new EventLoop();
-    for (auto t : tmp)
+    for (auto t : pair_tmp)
     {
         int i[2];
         i[0] = t.d1;
@@ -93,6 +94,10 @@ void ProcessPool::createProcess(int nums)
         pipe->setParentSocket();
         pipe->setMessageCallback(boost::bind(&test_parent_MessageCallback, _1, _2, _3)); //FIXME:
         setSignalHandlers();
+    }
+    for (auto t : pids_tmp)
+    {
+        m_nPids.push_back(t);
     }
 
 WAIT:
@@ -122,6 +127,17 @@ void ProcessPool::start()
 
 void ProcessPool::killAll()
 {
+    std::cout << "[parent]:kill all chilern\n";
+    for (auto t : m_nPids)
+    {
+        std::cout << "[parent]:kill child[" << t << "]\n";
+        int res = kill(t, SIGTERM);
+        if (res == 0)
+        {
+            std::cout << "[parent]:kill child[" << t << "] successfully\n";
+            m_fDestoryProcess(t);
+        }
+    }
 }
 
 void ProcessPool::killSoftly()
@@ -130,5 +146,14 @@ void ProcessPool::killSoftly()
 
 ProcessPool::~ProcessPool()
 {
+    delete m_pMaster;
+    delete m_pEventLoop;
+
+    for (auto t : m_nPipes)
+    {
+        t.clearSocket();
+        delete t;
+    }
+
     LOG(Debug) << "class ProcessPoll destructor\n";
 }

@@ -51,7 +51,11 @@ private:
   EventLoop *m_pEventLoop;
   Master *m_pMaster;
   Process *m_pProcess;
+
   std::vector<SocketPair *> m_nPipes;
+  std::vector<pid_t> m_nPids;
+  int m_nProcessNum;
+  
   int m_nListenSocketFd;
   SignalManager m_nSignalManager;
 
@@ -61,22 +65,48 @@ private:
     switch (sign)
     {
     case SIGINT:
-      status_terminate = 1;
-      break;
     case SIGTERM:
       status_terminate = 1;
+      std::cout << "[parent]:parent will terminate all slave process\n";
       break;
+    case SIGQUIT:
+      status_quit_softly = 1;
+      std::cout << "[parent]:quit softly\n";
     case SIGCHLD:
       status_child_quit = 1;
+      int status;
+      pid_t pid = waitpid(-1, &status, WNOHANG);
+      std::cout << "[parent]:collect information from child[" << pid << "]\n";
       break;
       //invoke waitpid() to collect the resource of child
+    case SIGHUP:
+      status_reconfigure = 1;
+      std::cout << "[parent]:reconfigure\n";
+      //kill childern softly and create new process
+      break;
     }
+  }
+
+  void m_fDestoryProcess(pid_t pid)
+  {
+    auto p = m_nPids.find(pid);
+    assert(p != m_nPids.end());
+    int index = p - m_nPids.begin();
+
+    m_nPipes[index].clearSocket();
+    delete m_nPipes[index];
+    m_nPipes.erase(m_nPiped.begin() + index);
+
+    m_nPids.erase(m_nPids.begin() + index);
+
+    m_nProcessNum--;
   }
 
 public:
   ProcessPool();
   void init();
   void createProcess(int nums);
+  inline int processNum() { return m_nProcessNum; }
   void setSignalHandlers();
   void start();
   void killAll();

@@ -16,23 +16,24 @@
 
 #include <string>
 
+class ProcessPool;
 class EventLoop;
 
 class Master
 {
 protected:
+  ProcessPool *m_pProcessPool;
   EventLoop *m_pEventLoop;
   int m_nNumber;
   std::string m_nName;
   int m_nListenSocket;
 
 public:
-  Master(EventLoop *, int, const std::string &);
+  Master(ProcessPool *, EventLoop *, int, const std::string &);
   void init();
   int getListenSocket();
   void work();
   ~Master();
 };
-
 
 #endif // !MASTER_H
