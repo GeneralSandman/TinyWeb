@@ -1,14 +1,4 @@
 
-> # 设计难点及解决之道
-|难点|解决办法|
-|-|-|
-|进程间通信机制||
-|||
-|||
-|||
-
-
-
 > # 各种成熟与不成熟想法
 - 实现一个高效的内存池，为每个TCP连接维持内存池。参考STL实现。
     - 通过成员函数allocate和deallocate分配释放内存。
@@ -147,8 +137,9 @@ ngx_shmtx_t锁是可以在共享内存上使用的,它是Nginx中最常见的锁
 - SIGINT Ctrl-c
 - SIGTERM 强制关闭
 - SIGQUIT 软关闭　
-- SIGHUP 终端退出信号
+- SIGHUP 终端退出信号，重新加载配置文件。
 
+> # TinyWeb全线改为智能指针
 
 > # 如何方便的控制TinyWeb：
 - kill -QUIT PID :softly close

@@ -23,6 +23,7 @@
 #include <signal.h>
 #include <map>
 #include <string>
+#include <memory>
 #include <boost/bind.hpp>
 
 #include <tiny_base/buffer.h>
@@ -35,12 +36,12 @@ void test_parent_MessageCallback(Connection *con, Buffer *buf, Time time)
 
 void period_print_test(void)
 {
-  std::cout << "print every second\n";
+    std::cout << "[parent]:print every second\n";
 }
 
 ProcessPool::ProcessPool()
     : m_pEventLoop(new EventLoop()),
-      m_pMaster(new Master(this, m_pEventLoop, 0, "master")),
+      m_pMaster(new Master(this, m_pEventLoop.get(), 0, "master")),
       m_pProcess(nullptr),
       m_nListenSocketFd(-1)
 {
@@ -77,7 +78,9 @@ void ProcessPool::createProcess(int nums)
             //1.establish channel with Parent;
             //2.set signal handlers
             //3.create listen server
-            m_pProcess = new Process(std::to_string(i), i, socketpairFds);
+            // m_pProcess = new Process(std::to_string(i), i, socketpairFds);
+            m_pProcess = std::make_shared<Process>(std::to_string(i),
+                                                   i, socketpairFds);
             m_pProcess->setAsChild();
             m_pProcess->setSignalHandlers();
             m_pProcess->createListenServer(m_nListenSocketFd);
@@ -102,8 +105,9 @@ void ProcessPool::createProcess(int nums)
         int i[2];
         i[0] = t.d1;
         i[1] = t.d2;
-        std::cout << "parent establish connection with child\n";
-        SocketPair *pipe = new SocketPair(m_pEventLoop, i);
+        std::cout << "[parent]:establish connection with child\n";
+        // SocketPair *pipe = new SocketPair(m_pEventLoop, i);
+        std::shared_ptr<SocketPair> pipe(new SocketPair(m_pEventLoop.get(), i));
         m_nPipes.push_back(pipe);
         pipe->setParentSocket();
         pipe->setMessageCallback(boost::bind(&test_parent_MessageCallback, _1, _2, _3)); //FIXME:
@@ -124,7 +128,10 @@ void ProcessPool::setSignalHandlers()
     std::vector<Signal> signals = {
         Signal(SIGINT, "SIGINT", "killAll", parentSignalHandler),
         Signal(SIGTERM, "SIGTERM", "killSoftly", parentSignalHandler),
-        Signal(SIGCHLD, "SIGCHLD", "childdead", parentSignalHandler)};
+        Signal(SIGCHLD, "SIGCHLD", "childdead", parentSignalHandler),
+        Signal(SIGQUIT, "QIGQUIT", "quit softly", parentSignalHandler),
+        Signal(SIGPIPE, "SIGPIPE", "socket close", parentSignalHandler),
+        Signal(SIGHUP, "SIGHUP", "reconfigure", parentSignalHandler)};
 
     for (auto t : signals)
         m_nSignalManager.addSignal(t);
@@ -182,14 +189,6 @@ void ProcessPool::killSoftly()
 
 ProcessPool::~ProcessPool()
 {
-    delete m_pMaster;
-    delete m_pEventLoop;
-
-    for (auto t : m_nPipes)
-    {
-        t->clearSocket();
-        delete t;
-    }
 
     LOG(Debug) << "class ProcessPoll destructor\n";
 }

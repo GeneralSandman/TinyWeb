@@ -23,6 +23,7 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <memory>
 
 #include <tiny_core/status.h>
 extern int status_quit_softly; //QUIT
@@ -50,11 +51,16 @@ class ProcessPool
 {
 
 private:
-  EventLoop *m_pEventLoop;
-  Master *m_pMaster;
-  Process *m_pProcess;
+  // EventLoop *m_pEventLoop;
+  // Master *m_pMaster;
+  // Process *m_pProcess;
 
-  std::vector<SocketPair *> m_nPipes;
+  std::shared_ptr<EventLoop> m_pEventLoop;
+  std::shared_ptr<Master> m_pMaster;
+  std::shared_ptr<Process> m_pProcess;
+
+  std::vector<std::shared_ptr<SocketPair>> m_nPipes;
+  // std::vector<SocketPair *> m_nPipes;
   std::vector<pid_t> m_nPids;
   int m_nProcessNum;
 
@@ -63,7 +69,7 @@ private:
 
   static void parentSignalHandler(int sign)
   {
-    std::cout << "parent signal manager get signal:" << sign << std::endl;
+    std::cout << "[parent]:signal manager get signal:" << sign << std::endl;
     switch (sign)
     {
     case SIGINT:
@@ -80,12 +86,14 @@ private:
       pid_t pid = waitpid(-1, &status, WNOHANG);
       std::cout << "[parent]:collect information from child[" << pid << "]\n";
       break;
-      //invoke waitpid() to collect the resource of child
-      // case SIGHUP:
-      //   status_reconfigure = 1;
-      //   std::cout << "[parent]:reconfigure\n";
-      //   //kill childern softly and create new process
-      //   break;
+    //invoke waitpid() to collect the resource of child
+    // case SIGHUP:
+    //   status_reconfigure = 1;
+    //   std::cout << "[parent]:reconfigure\n";
+    //   //kill childern softly and create new process
+    //   break;
+    // case SIGPIPE:; //i
+    //   norncpe break;
     }
   }
 
@@ -101,7 +109,6 @@ private:
     int index = p - m_nPids.begin();
 
     m_nPipes[index]->clearSocket();
-    delete m_nPipes[index];
     m_nPipes.erase(m_nPipes.begin() + index);
 
     m_nPids.erase(m_nPids.begin() + index);

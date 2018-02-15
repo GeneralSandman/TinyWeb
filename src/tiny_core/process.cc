@@ -62,7 +62,10 @@ void Process::setSignalHandlers()
 {
   std::vector<Signal> signals = {
       Signal(SIGINT, "SIGINT", "killAll", childSignalHandler),
-      Signal(SIGTERM, "SIGTERM", "killSoftly", childSignalHandler)};
+      Signal(SIGTERM, "SIGTERM", "killSoftly", childSignalHandler),
+      Signal(SIGQUIT, "QIGQUIT", "quit softly", childSignalHandler),
+      Signal(SIGPIPE, "SIGPIPE", "socket close", childSignalHandler),
+      Signal(SIGHUP, "SIGHUP", "reconfigure", childSignalHandler)};
 
   for (auto t : signals)
     m_nSignalManager.addSignal(t);
