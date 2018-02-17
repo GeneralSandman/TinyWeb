@@ -95,7 +95,7 @@ std::ostream &Logger::getStream(log_level level)
             return std::cout;
         }
     }
-    if (Info == level)
+    else if (Info == level)
     {
         if (m_nInfoLogFile.is_open())
         {
@@ -179,8 +179,8 @@ std::ostream &Logger::log(log_level level,
                             << "[" << level_string << "]"
                             << "--"
                             << "function (" << function << ")"
-                            << "line " << line << ":"
-                            << std::flush;
+                            << "line " << line << ":";
+    // << std::flush;
 }
 
 Logger::~Logger()

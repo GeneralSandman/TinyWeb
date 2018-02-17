@@ -78,7 +78,6 @@ void ProcessPool::createProcess(int nums)
             //1.establish channel with Parent;
             //2.set signal handlers
             //3.create listen server
-            // m_pProcess = new Process(std::to_string(i), i, socketpairFds);
             m_pProcess = std::make_shared<Process>(std::to_string(i),
                                                    i, socketpairFds);
             m_pProcess->setAsChild();
@@ -89,9 +88,9 @@ void ProcessPool::createProcess(int nums)
         else
         {
             //Parent process:
+            //setting information after forking.
             //1.push socketpair
             //2.push pid
-            //setting information after forking.
             std::cout << "create process:[" << pid << "]\n";
             pair_tmp.push_back({socketpairFds[0],
                                 socketpairFds[1]});
@@ -139,8 +138,6 @@ void ProcessPool::setSignalHandlers()
 
 void ProcessPool::start()
 {
-    //parent
-    std::cout << "start work\n";
     if (!m_pProcess)
     {
         //Parent process
@@ -154,7 +151,7 @@ void ProcessPool::start()
             TimerId id1 = m_pEventLoop->runEvery(1, boost::bind(&SocketPair::writeToChild,
                                                                 m_nPipes[index],
                                                                 "parent send message to child"));
-            TimerId id2 = m_pEventLoop->runEvery(1, boost::bind(&period_print_test));
+            // TimerId id2 = m_pEventLoop->runEvery(1, boost::bind(&period_print_test));
         }
         m_pMaster->work();
     }
@@ -175,7 +172,7 @@ void ProcessPool::killAll()
         int res = kill(t, SIGTERM);
         if (res == 0)
         {
-            std::cout << "[parent]:kill child[" << t << "] successfully\n";
+            std::cout << "[parent]:kill child [" << t << "] successfully\n";
             m_fDestoryProcess(t);
         }
     }
@@ -185,6 +182,7 @@ void ProcessPool::killSoftly()
 {
     std::cout << "[parent]:kill chilern softly\n";
     //the difference with killAll
+    //FIXME:
 }
 
 ProcessPool::~ProcessPool()

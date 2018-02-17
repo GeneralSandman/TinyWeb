@@ -86,33 +86,30 @@ private:
       pid_t pid = waitpid(-1, &status, WNOHANG);
       std::cout << "[parent]:collect information from child[" << pid << "]\n";
       break;
-    //invoke waitpid() to collect the resource of child
-    // case SIGHUP:
-    //   status_reconfigure = 1;
-    //   std::cout << "[parent]:reconfigure\n";
-    //   //kill childern softly and create new process
-    //   break;
-    // case SIGPIPE:; //i
-    //   norncpe break;
+      //invoke waitpid() to collect the resource of child
+      // case SIGHUP:
+      //   status_reconfigure = 1;
+      //   std::cout << "[parent]:reconfigure\n";
+      //   //kill childern softly and create new process
+      //   break;
+      // case SIGPIPE:; //i
+      //   norncppe      break;
     }
   }
 
   void m_fDestoryProcess(pid_t pid)
   {
-    auto p = m_nPids.begin();
-    for (; p != m_nPids.end(); p++)
+    int index = 0;
+    for (; index < m_nPids.size(); index++)
     {
-      if (*p == pid)
+      if (m_nPids[index] = pid)
         break;
     }
-    assert(p != m_nPids.end());
-    int index = p - m_nPids.begin();
+    assert(index!=m_nPids.size());
 
     m_nPipes[index]->clearSocket();
     m_nPipes.erase(m_nPipes.begin() + index);
-
     m_nPids.erase(m_nPids.begin() + index);
-
     m_nProcessNum--;
   }
 
