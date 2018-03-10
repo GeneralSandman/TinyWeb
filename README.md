@@ -71,6 +71,10 @@ sudo ./TinyWeb -c /home/li/TinyWeb.conf
 sudo ./TinyWeb -d -c /home/li/TinyWeb.conf
 ```
 
+---------------------
+
+## Guide
+[TinyWeb Guides](http://www.dissigil.cn/TinyWeb-0/)
 
 
 --------------
