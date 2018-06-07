@@ -124,4 +124,4 @@ def webServer(ip,port):
 
 
 if __name__ == "__main__":
-    forkServer(sys.argv[1], sys.argv[2])
+    webServer(sys.argv[1], sys.argv[2])

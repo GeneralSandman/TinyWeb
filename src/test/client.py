@@ -34,7 +34,7 @@ def client(localport,ip, port):
     print "close connection"
     s.close()
 
-def webClient(localport,ip,port=80):
+def webClient(localport,ip,port=9999):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind(("127.0.0.1", int(localport)))
     s.connect((ip, int(port)))
