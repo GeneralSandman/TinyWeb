@@ -77,6 +77,19 @@ int main(void)
     http_parser_init(parser, HTTP_REQUEST);
     parsed = http_parser_execute(parser, &settings, buf, strlen(buf));
     end = (float)clock() / CLOCKS_PER_SEC;
+    printf("Elapsed %f seconds.\n\n", (end - start));
+
+
+    buf = "GET http://admin.omsg.cn/uploadpic/2016121034000012.png?username=li&passwd=li HTTP/1.1\r\n"
+          "Host: admin.omsg.cn\r\n"
+          "Accept: */*\r\n"
+          "Connection: Keep-Alive\r\n\r\n";
+
+    start = (float)clock() / CLOCKS_PER_SEC;
+    http_parser_init(parser, HTTP_REQUEST);
+    parsed = http_parser_execute(parser, &settings, buf, strlen(buf));
+    end = (float)clock() / CLOCKS_PER_SEC;
+    printf("Elapsed %f seconds.\n\n", (end - start));
 
     buf = "HTTP/1.1 200 OK\r\n"
           "Date: Tue, 04 Aug 2009 07:59:32 GMT\r\n"
