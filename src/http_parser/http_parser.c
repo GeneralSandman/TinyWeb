@@ -734,12 +734,12 @@ reexecute:
           parser->type = HTTP_RESPONSE;
           UPDATE_STATE(s_res_HT);
         } else {
-          if (UNLIKELY(ch != 'E')) {
+          if (UNLIKELY(ch != 'E')) {//not method HEAD
             SET_ERRNO(HPE_INVALID_CONSTANT);
             goto error;
           }
 
-          parser->type = HTTP_REQUEST;
+          parser->type = HTTP_REQUEST;//is method HEAD
           parser->method = HTTP_HEAD;
           parser->index = 2;
           UPDATE_STATE(s_req_method);
@@ -856,7 +856,7 @@ reexecute:
             case CR:
             case LF:
               UPDATE_STATE(s_res_status_start);
-              REEXECUTE();
+              REEXECUTE();//why????
               break;
             default:
               SET_ERRNO(HPE_INVALID_STATUS);
@@ -883,7 +883,7 @@ reexecute:
         parser->index = 0;
 
         if (ch == CR || ch == LF)
-          REEXECUTE();
+          REEXECUTE();//why???
 
         break;
       }
@@ -959,7 +959,7 @@ reexecute:
           goto error;
         }
 
-        matcher = method_strings[parser->method];
+        matcher = method_strings[parser->method];//why?? reread
         if (ch == ' ' && matcher[parser->index] == '\0') {
           UPDATE_STATE(s_req_spaces_before_url);
         } else if (ch == matcher[parser->index]) {
@@ -1009,7 +1009,7 @@ reexecute:
         if (ch == ' ') break;
 
         MARK(url);
-        if (parser->method == HTTP_CONNECT) {
+        if (parser->method == HTTP_CONNECT) {//CONNECT方法
           UPDATE_STATE(s_req_server_start);
         }
 
@@ -1056,7 +1056,7 @@ reexecute:
         switch (ch) {
           case ' ':
             UPDATE_STATE(s_req_http_start);
-            CALLBACK_DATA(url);
+            CALLBACK_DATA(url);//get url
             break;
           case CR:
           case LF:
@@ -1065,7 +1065,7 @@ reexecute:
             UPDATE_STATE((ch == CR) ?
               s_req_line_almost_done :
               s_header_field_start);
-            CALLBACK_DATA(url);
+            CALLBACK_DATA(url);//get url
             break;
           default:
             UPDATE_STATE(parse_url_char(CURRENT_STATE(), ch));
@@ -1184,7 +1184,7 @@ reexecute:
           REEXECUTE();
         }
 
-        c = TOKEN(ch);
+        c = TOKEN(ch);//why ???
 
         if (UNLIKELY(!c)) {
           SET_ERRNO(HPE_INVALID_HEADER_TOKEN);
@@ -1223,7 +1223,7 @@ reexecute:
       case s_header_field:
       {
         const char* start = p;
-        for (; p != data + len; p++) {
+        for (; p != data + len; p++) {//!!!!!!!!!
           ch = *p;
           c = TOKEN(ch);
 
@@ -1264,7 +1264,7 @@ reexecute:
             case h_matching_connection:
               parser->index++;
               if (parser->index > sizeof(CONNECTION)-1
-                  || c != CONNECTION[parser->index]) {
+                  || c != CONNECTION[parser->index]) {//why use parser->index
                 parser->header_state = h_general;
               } else if (parser->index == sizeof(CONNECTION)-2) {
                 parser->header_state = h_connection;
@@ -1322,7 +1322,7 @@ reexecute:
             case h_connection:
             case h_content_length:
             case h_transfer_encoding:
-            case h_upgrade:
+            case h_upgrade://ConnectionXXX
               if (ch != ' ') parser->header_state = h_general;
               break;
 
@@ -1340,8 +1340,8 @@ reexecute:
         }
 
         if (ch == ':') {
-          UPDATE_STATE(s_header_value_discard_ws);
-          CALLBACK_DATA(header_field);
+          UPDATE_STATE(s_header_value_discard_ws);//ws????
+          CALLBACK_DATA(header_field);//callback header_field
           break;
         }
 
@@ -1366,17 +1366,17 @@ reexecute:
 
       case s_header_value_start:
       {
-        MARK(header_value);
+        MARK(header_value);//mark the header value
 
         UPDATE_STATE(s_header_value);
-        parser->index = 0;
+        parser->index = 0;//the begin of header value
 
         c = LOWER(ch);
 
         switch (parser->header_state) {
           case h_upgrade:
             parser->flags |= F_UPGRADE;
-            parser->header_state = h_general;
+            parser->header_state = h_general;//why???
             break;
 
           case h_transfer_encoding:
@@ -1394,7 +1394,7 @@ reexecute:
               goto error;
             }
 
-            if (parser->flags & F_CONTENTLENGTH) {
+            if (parser->flags & F_CONTENTLENGTH) {//why???
               SET_ERRNO(HPE_UNEXPECTED_CONTENT_LENGTH);
               goto error;
             }
@@ -1438,7 +1438,7 @@ reexecute:
           if (ch == CR) {
             UPDATE_STATE(s_header_almost_done);
             parser->header_state = h_state;
-            CALLBACK_DATA(header_value);
+            CALLBACK_DATA(header_value);//the difference between 1441 and 1449 line
             break;
           }
 
@@ -1447,10 +1447,10 @@ reexecute:
             COUNT_HEADER_SIZE(p - start);
             parser->header_state = h_state;
             CALLBACK_DATA_NOADVANCE(header_value);
-            REEXECUTE();
+            REEXECUTE();//why???
           }
 
-          if (!lenient && !IS_HEADER_CHAR(ch)) {
+          if (!lenient && !IS_HEADER_CHAR(ch)) {//the meaning of lenient
             SET_ERRNO(HPE_INVALID_HEADER_TOKEN);
             goto error;
           }
@@ -1466,7 +1466,7 @@ reexecute:
 
               limit = MIN(limit, HTTP_MAX_HEADER_SIZE);
 
-              p_cr = (const char*) memchr(p, CR, limit);
+              p_cr = (const char*) memchr(p, CR, limit);//!!!!
               p_lf = (const char*) memchr(p, LF, limit);
               if (p_cr != NULL) {
                 if (p_lf != NULL && p_cr >= p_lf)
@@ -1484,7 +1484,7 @@ reexecute:
             }
 
             case h_connection:
-            case h_transfer_encoding:
+            case h_transfer_encoding://why???
               assert(0 && "Shouldn't get here.");
               break;
 
@@ -1498,7 +1498,7 @@ reexecute:
               uint64_t t;
 
               if (ch == ' ') {
-                h_state = h_content_length_ws;
+                h_state = h_content_length_ws;//ws ???
                 break;
               }
 
@@ -1532,7 +1532,7 @@ reexecute:
             /* Transfer-Encoding: chunked */
             case h_matching_transfer_encoding_chunked:
               parser->index++;
-              if (parser->index > sizeof(CHUNKED)-1
+              if (parser->index > sizeof(CHUNKED)-1//why???
                   || c != CHUNKED[parser->index]) {
                 h_state = h_general;
               } else if (parser->index == sizeof(CHUNKED)-2) {
@@ -1591,7 +1591,7 @@ reexecute:
               break;
 
             case h_matching_connection_token:
-              if (ch == ',') {
+              if (ch == ',') {//why???
                 h_state = h_matching_connection_token_start;
                 parser->index = 0;
               }
@@ -1743,7 +1743,7 @@ reexecute:
           parser->upgrade =
               (parser->type == HTTP_REQUEST || parser->status_code == 101);
         } else {
-          parser->upgrade = (parser->method == HTTP_CONNECT);
+          parser->upgrade = (parser->method == HTTP_CONNECT);//connect method
         }
 
         /* Here we call the headers_complete callback. This is somewhat
@@ -1756,7 +1756,7 @@ reexecute:
          * we have to simulate it by handling a change in errno below.
          */
         if (settings->on_headers_complete) {
-          switch (settings->on_headers_complete(parser)) {
+          switch (settings->on_headers_complete(parser)) {//different !!!
             case 0:
               break;
 
@@ -1791,13 +1791,14 @@ reexecute:
         hasBody = parser->flags & F_CHUNKED ||
           (parser->content_length > 0 && parser->content_length != ULLONG_MAX);
         if (parser->upgrade && (parser->method == HTTP_CONNECT ||
-                                (parser->flags & F_SKIPBODY) || !hasBody)) {
+                                (parser->flags & F_SKIPBODY) || 
+                                !hasBody)) {//!!!!!
           /* Exit, the rest of the message is in a different protocol. */
           UPDATE_STATE(NEW_MESSAGE());
           CALLBACK_NOTIFY(message_complete);
-          RETURN((p - data) + 1);
+          RETURN((p - data) + 1);//why ???
         }
-
+        //no finished!!!!
         if (parser->flags & F_SKIPBODY) {
           UPDATE_STATE(NEW_MESSAGE());
           CALLBACK_NOTIFY(message_complete);
@@ -1880,7 +1881,7 @@ reexecute:
         break;
 
       case s_chunk_size_start:
-      {
+      {//why??? search http chunk 
         assert(parser->nread == 1);
         assert(parser->flags & F_CHUNKED);
 
