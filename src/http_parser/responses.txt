@@ -14,3 +14,22 @@ Connection: close\r\n
     </SOAP-ENV:Fault>\n
   </SOAP-ENV:Body>\n
 </SOAP-ENV:Envelope>
+
+
+HTTP/1.1 304 Not Modified
+Server: Tengine
+Date: Mon, 11 Jun 2018 07:18:14 GMT
+Content-Type: text/html; charset=utf-8
+Connection: keep-alive
+Vary: Ali-Detector-Type
+Cache-Control: max-age=60, s-maxage=300
+X-Snapshot-Age: 1
+Content-MD5: DheThrvjUs/c+FtbVv7Sbw==
+ETag: W/"29d7-163e38938b3"
+Via: cache9.l2cm12-1[0,304-0,H], cache48.l2cm12-1[0,0], cache6.cn295[0,304-0,H], cache6.cn295[1,0]
+Age: 121
+X-Cache: HIT TCP_IMS_HIT dirn:6:453356086 mlen:-1
+Timing-Allow-Origin: *
+EagleId: 7ceee81815287014946507756e
+Strict-Transport-Security: max-age=31536000
+

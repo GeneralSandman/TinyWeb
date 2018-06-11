@@ -87,22 +87,9 @@ enum http_status
 #undef XX
 };
 
-/*Array statusStrings is used by httpStatueStr()*/
-static const char *statusStrings[] =
-    {
-#define XX(num, name, string) #string,
-        HTTP_STATUS_MAP(XX)
-#undef XX
-};
+/* end Http status */
 
-const char *httpStatusStr(enum http_status s)
-{
-    return ELEM_AT(statusStrings, s, "<invalid>");
-}
-
-    /* end Http status */
-
-    /* begin Http Request Methods */
+/* begin Http Request Methods */
 
 #define HTTP_METHOD_MAP(XX)          \
     XX(0, DELETE, DELETE)            \
@@ -155,22 +142,9 @@ enum http_method
 #undef XX
 };
 
-/*Array methodString is used by httpMethodStr()*/
-static const char *methodStrings[] =
-    {
-#define XX(num, name, string) #string,
-        HTTP_METHOD_MAP(XX)
-#undef XX
-};
+/* end Http Request Methods */
 
-const char *httpMethodStr(enum http_method m)
-{
-    return ELEM_AT(methodStrings, m, "<unknown>");
-}
-
-    /* end Http Request Methods */
-
-    /* begin Http Errors */
+/* begin Http Errors */
 
 #define HTTP_ERRNO_MAP(XX)                                              \
     /* No error */                                                      \
@@ -225,19 +199,6 @@ enum http_errno
 };
 #undef HTTP_ERRNO_GEN
 
-/*Array errnoStrings is used by httpErrnoStr()*/
-static const char *errnoStrings[] =
-    {
-#define XX(name, string) #string,
-        HTTP_ERRNO_MAP(XX)
-#undef XX
-};
-
-const char *httpErrnoStr(enum http_errno e)
-{
-    return ELEM_AT(errnoStrings, e, "<invalid>");
-}
-
-    /* end Http Errors */
+/* end Http Errors */
 
 #endif

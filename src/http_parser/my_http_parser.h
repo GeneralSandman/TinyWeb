@@ -22,6 +22,14 @@
 #include <map>
 #include <boost/function.hpp>
 
+#define CR '\r'
+#define LF '\n'
+#define isNum(c) ('0' <= (c) && (c) <= '9')
+#define isAlpha(c) ('a' <= (c) && (c) <= 'z' || 'A' <= (c) && (c) <= 'Z')
+#define isAlphaNum(c) (isNum(c) || isAlpha(c))
+#define toLower(c) (unsigned char)(('A' <= (c) && (c) <= 'Z') ? c | 0x20 : c)
+#define toUpper(c) (unsigned char)(('a' <= (c) && (c) <= 'z') ? c | 0x20 : c)//not finished
+
 //the values set to HttpParser::m_nType
 enum httpParserType
 {

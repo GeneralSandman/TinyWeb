@@ -11,6 +11,7 @@
 *
 */
 
+#include "http.h"
 #include "my_http_parser.h"
 
 enum state
@@ -56,14 +57,18 @@ enum state
     s_requ_version_major,
     s_requ_version_dot,
     s_requ_version_minor,
+    s_resp_line_almost_done,
     s_requ_line_done,
 
-    s_header_start,
+    //heaser statue
+    // s_header_start,
     s_header_key_start,
     s_header_key,
     s_header_value_start,
     s_header_value,
+    s_header_almost_done,
     s_header_done,
+    s_headers_done,
 
     s_body_start,
     s_body,
@@ -85,6 +90,10 @@ enum state
 void HttpParser::setType(enum httpParserType type)
 {
     m_nType = type;
+    m_nState = (type == HTTP_RESPONSE) ? s_resp_start
+                                       : ((type == HTTP_REQUEST
+                                               ? s_resp_start
+                                               : s_start_resp_or_requ));
 }
 
 int HttpParser::execute(const std::string &stream, int &at, int len)
@@ -131,80 +140,182 @@ int HttpParser::execute(const std::string &stream, int &at, int len)
             break;
 
         case s_resp_start: //not finished
-            checkOrGoError(ch == 'H');
+            checkOrGoError((ch == 'H'));
             m_nState = s_resp_H;
             break;
 
         case s_resp_H:
-            checkOrGoError(ch == 'T');
+            checkOrGoError((ch == 'T'));
             m_nState = s_resp_HT;
             break;
 
         case s_resp_HT:
-            checkOrGoError(ch == 'T');
+            checkOrGoError((ch == 'T'));
 
             m_nState = s_resp_HTT;
             break;
         case s_resp_HTT:
-            checkOrGoError(ch == 'P');
+            checkOrGoError((ch == 'P'));
 
             m_nState = s_resp_HTTP;
             break;
 
         case s_resp_HTTP:
-            checkOrGoError(ch == '/');
+            checkOrGoError((ch == '/'));
             m_nState = s_resp_HTTP_slash;
             break;
 
         case s_resp_HTTP_slash:
-            if (!('0' <= ch && ch <= '9'))
-            {
-                goto error;
-            }
+            checkOrGoError(isNum(ch));
             m_nState = s_resp_version_major;
             m_nHttpVersionMajor = ch - '0';
             break;
 
         case s_resp_version_major:
-            checkOrGoError(ch == '.');
+            checkOrGoError((ch == '.'));
             m_nState = s_resp_version_dot;
             break;
 
         case s_resp_version_dot:
-            if (!('0' <= ch && ch <= '9'))
-            {
-                goto error;
-            }
+            checkOrGoError(isNum(ch));
             m_nState = s_resp_version_minor;
             m_nHttpVersionMinor = ch - '0';
             break;
 
         case s_resp_version_minor:
-
+            checkOrGoError((ch == ' '));
+            m_nState = s_resp_status_code_start;
+            std::cout << "get response http version:HTTP/" << m_nHttpVersionMajor << "."
+                      << m_nHttpVersionMinor << std::endl;
             break;
 
         case s_resp_status_code_start:
-
+            m_nStatusCode = 0;
+            checkOrGoError(isNum(ch));
+            // std::cout << *(begin + i) << std::endl;
+            m_nStatusCode *= 10;
+            m_nStatusCode += ch - '0';
+            m_nState = s_resp_status_code;
             break;
 
         case s_resp_status_code:
-
+            if (ch == ' ')
+            {
+                m_nState = s_resp_status_phrase_start;
+                std::cout << "get http status code:" << m_nStatusCode << std::endl;
+            }
+            else
+            {
+                checkOrGoError(isNum(ch));
+                m_nStatusCode *= 10;
+                m_nStatusCode += ch - '0';
+            }
             break;
 
         case s_resp_status_phrase_start:
-
+            checkOrGoError(isAlpha(ch));
+            status_phrase_begin = begin + i;
+            m_nState = s_resp_status_phrase;
             break;
 
         case s_resp_status_phrase:
+            if (ch == '\r')
+            {
+                m_nState = s_resp_line_almost_done;
+            }
+            else if (ch == '\n')
+            {
+                std::string phrase(status_phrase_begin, begin + i);
+                std::cout << "get status phrase:" << phrase << std::endl;
+                m_nState = s_resp_line_done;
+            }
+            else if (isAlpha(ch))
+            {
+                //FIXME:
+            }
+            break;
 
+        case s_resp_line_almost_done:
+            if (ch == '\r')
+            {
+                m_nState = s_resp_line_almost_done;
+            }
+            else if (ch == '\n')
+            {
+                std::string phrase(status_phrase_begin, begin + i);
+                std::cout << "get status phrase:" << phrase << std::endl;
+                std::cout << "request line done:" << std::endl;
+                m_nState = s_resp_line_done;
+            }
             break;
 
         case s_resp_line_done:
+            if (ch == '\n')
+            {
+                m_nState = s_headers_done;
+            }
+            break;
 
+        case s_header_key_start:
+            header_key_begin = begin + i;
+            m_nState = s_header_key;
+            break;
+
+        case s_header_key:
+            if (ch == ':')
+            {
+                std::string key(header_key_begin, begin + i);
+                std::cout << "get a header key:" << key << std::endl;
+                m_nState = s_header_value_start;
+            }
+            break;
+
+        case s_header_value_start:
+            if (ch == ' ')
+            {
+            }
+            else if (isAlpha(ch) || ch == '"')
+            {
+                header_value_begin = begin + i;
+                m_nState = s_header_value;
+            }
+            break;
+
+        case s_header_value:
+            if (ch == '\r')
+            {
+            }
+            if (ch == '\n')
+            {
+                std::string value(header_value_begin, begin + i);
+                std::cout << "get a header value:" << value << std::endl;
+                m_nState = s_header_done;
+            }
+            break;
+
+        case s_header_almost_done:
+            break;
+
+        case s_header_done:
+            if (isAlpha(ch))
+            {
+                m_nState = s_header_key_start;
+            }
+            else if (ch == '\r')
+            {
+            }
+            else if (ch == '\n')
+            {
+                m_nState = s_headers_done;
+            }
+            break;
+
+        case s_headers_done:
             break;
         }
     }
 
 error:
     std::cout << "parser error\n";
+    return -1;
 }
