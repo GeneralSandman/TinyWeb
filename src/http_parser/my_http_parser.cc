@@ -73,7 +73,21 @@ enum state
 
 };
 
-int HttpParser::execute(const std::string &stream, int &at)
+#define checkOrGoError(con) \
+    do                      \
+    {                       \
+        if (!con)           \
+        {                   \
+            goto error;     \
+        }                   \
+    } while (0);
+
+void HttpParser::setType(enum httpParserType type)
+{
+    m_nType = type;
+}
+
+int HttpParser::execute(const std::string &stream, int &at, int len)
 {
     std::cout << "function HttpParser::execute()\n";
 
@@ -83,9 +97,114 @@ int HttpParser::execute(const std::string &stream, int &at)
     const char *header_key_begin = nullptr;
     const char *header_value_begin = nullptr;
     const char *body_begin = nullptr;
-}
 
-void HttpParser::setType(enum httpParserType type)
-{
-    m_nType = type;
+    if (getErrno() != HPE_OK)
+        return 0;
+
+    if (len == 0)
+    {
+    }
+
+    switch (m_nState)
+    {
+        // switch to some init state;
+    }
+
+    for (int i = 0; i < len; i++)
+    {
+        char ch = *(begin + i);
+
+        switch (m_nState)
+        {
+
+        case s_start_resp_or_requ:
+            if (ch == 'H') //response
+            {
+                m_nState = s_resp_H;
+                invokeByName("getMessage", nullptr, 0);
+            }
+            else
+            {
+                m_nState = s_requ_start;
+                invokeByName("getMessage", nullptr, 0);
+            }
+            break;
+
+        case s_resp_start: //not finished
+            checkOrGoError(ch == 'H');
+            m_nState = s_resp_H;
+            break;
+
+        case s_resp_H:
+            checkOrGoError(ch == 'T');
+            m_nState = s_resp_HT;
+            break;
+
+        case s_resp_HT:
+            checkOrGoError(ch == 'T');
+
+            m_nState = s_resp_HTT;
+            break;
+        case s_resp_HTT:
+            checkOrGoError(ch == 'P');
+
+            m_nState = s_resp_HTTP;
+            break;
+
+        case s_resp_HTTP:
+            checkOrGoError(ch == '/');
+            m_nState = s_resp_HTTP_slash;
+            break;
+
+        case s_resp_HTTP_slash:
+            if (!('0' <= ch && ch <= '9'))
+            {
+                goto error;
+            }
+            m_nState = s_resp_version_major;
+            m_nHttpVersionMajor = ch - '0';
+            break;
+
+        case s_resp_version_major:
+            checkOrGoError(ch == '.');
+            m_nState = s_resp_version_dot;
+            break;
+
+        case s_resp_version_dot:
+            if (!('0' <= ch && ch <= '9'))
+            {
+                goto error;
+            }
+            m_nState = s_resp_version_minor;
+            m_nHttpVersionMinor = ch - '0';
+            break;
+
+        case s_resp_version_minor:
+
+            break;
+
+        case s_resp_status_code_start:
+
+            break;
+
+        case s_resp_status_code:
+
+            break;
+
+        case s_resp_status_phrase_start:
+
+            break;
+
+        case s_resp_status_phrase:
+
+            break;
+
+        case s_resp_line_done:
+
+            break;
+        }
+    }
+
+error:
+    std::cout << "parser error\n";
 }

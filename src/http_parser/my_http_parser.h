@@ -16,6 +16,8 @@
 
 // #include <tiny_base/log.h>
 
+#include "http.h"
+
 #include <iostream>
 #include <map>
 #include <boost/function.hpp>
@@ -137,6 +139,11 @@ class HttpParser
 
 	void setType(enum httpParserType type);
 
+	enum http_errno getErrno()
+	{
+		return (enum http_errno)m_nErrno;
+	}
+
 	int invokeByName(const char *funName,
 					 const char *data,
 					 unsigned int len)
@@ -152,7 +159,7 @@ class HttpParser
 		return fun();
 	}
 
-	int execute(const std::string &stream, int &at);
+	int execute(const std::string &stream, int &at, int len);
 
 	~HttpParser()
 	{

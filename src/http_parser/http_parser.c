@@ -703,6 +703,7 @@ reexecute:
         /* this state is used after a 'Connection: close' message
          * the parser will error out if it reads another message
          */
+        //!!!
         if (LIKELY(ch == CR || ch == LF))
           break;
 
@@ -729,7 +730,7 @@ reexecute:
         break;
       }
 
-      case s_res_or_resp_H:
+      case s_res_or_resp_H://!!!
         if (ch == 'T') {
           parser->type = HTTP_RESPONSE;
           UPDATE_STATE(s_res_HT);
