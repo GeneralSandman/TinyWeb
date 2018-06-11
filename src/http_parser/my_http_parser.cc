@@ -16,70 +16,6 @@
 
 #include <string.h>
 
-enum state
-{
-    s_error = 1,
-
-    s_start_resp_or_requ,
-
-    s_resp_start,
-    s_resp_H,
-    s_resp_HT,
-    s_resp_HTT,
-    s_resp_HTTP,
-    s_resp_HTTP_slash,
-    s_resp_version_major,
-    s_resp_version_dot,
-    s_resp_version_minor,
-    s_resp_status_code_start,
-    s_resp_status_code,
-    s_resp_status_phrase_start,
-    s_resp_status_phrase,
-    s_resp_line_done,
-
-    s_requ_start,
-    s_requ_method_start,
-    s_requ_method,
-    s_requ_url_begin,
-    s_requ_schema,
-    s_requ_schema_slash,
-    s_requ_schema_slash_slash,
-    s_requ_server_start,
-    s_requ_server,
-    s_requ_path,
-    s_requ_query_string_start,
-    s_requ_query_string,
-    s_requ_fragment_start,
-    s_requ_HTTP_start,
-    s_requ_H,
-    s_requ_HT,
-    s_requ_HTT,
-    s_requ_HTTP,
-    s_requ_HTTP_slash,
-    s_requ_version_major,
-    s_requ_version_dot,
-    s_requ_version_minor,
-    s_resp_line_almost_done,
-    s_requ_line_done,
-
-    //heaser statue
-    // s_header_start,
-    s_header_key_start,
-    s_header_key,
-    s_header_value_start,
-    s_header_value,
-    s_header_almost_done,
-    s_header_done,
-    s_headers_done,
-
-    s_body_start,
-    s_body,
-    s_body_done,
-
-    s_chunk
-
-};
-
 #define checkOrGoError(con) \
     do                      \
     {                       \
@@ -98,11 +34,87 @@ void HttpParser::setType(enum httpParserType type)
                                                : s_start_resp_or_requ));
 }
 
+enum state HttpParser::parseUrlChar(const char ch, enum state stat)
+{
+    switch (ch)
+    {
+    case '\r':
+    case '\n':
+    case '\t':
+    case '\a':
+    case '\f':
+    case ' ':
+        return s_error;
+        break;
+
+    default:
+        break;
+    }
+
+    switch (stat)
+    {
+    case s_requ_url_begin:
+
+        break;
+
+    case s_requ_schema:
+        if (isAlpha(ch))
+            return stat;
+        if (ch == ':')
+            return s_requ_schema_slash;
+        break;
+
+    case s_requ_schema_slash:
+        if (ch == '/')
+            return s_requ_schema_slash_slash;
+        break;
+
+    case s_requ_schema_slash_slash:
+        if (ch == '/')
+            return s_requ_server_start;
+        break;
+
+    case s_requ_server_start:
+        break;
+
+    case s_requ_server:
+
+        if (ch == '/')
+        {
+            return s_requ_path;
+        }
+        else if (ch == '?')
+        {
+            return s_requ_query_string_start;
+        }
+        else if (ch == '#')
+        {
+            return s_requ_fragment_start;
+        }
+        break;
+
+    case s_requ_path:
+        break;
+
+    case s_requ_query_string_start:
+        break;
+
+    case s_requ_query_string:
+        break;
+
+    case s_requ_fragment_start:
+        break;
+
+    default:
+
+        break;
+    }
+}
+
 int HttpParser::parseUrl(const std::string &stream, int &at, int len, Url *result)
 {
     std::cout << "function parseUrl\n";
     memset(result, sizeof(Url), 0);
-    
 }
 
 int HttpParser::execute(const std::string &stream, int &at, int len)
