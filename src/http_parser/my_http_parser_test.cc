@@ -100,15 +100,15 @@ void testHttpParserResponse()
                       "Content-Type: text/xml; charset=utf-8\r\n"
                       "Connection: close\r\n"
                       "\r\n";
-                    //   "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                    //   "<SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\">\n"
-                    //   "<SOAP-ENV:Body>\n"
-                    //   "<SOAP-ENV:Fault>\n"
-                    //   "<faultcode>SOAP-ENV:Client</faultcode>\n"
-                    //   "<faultstring>Client Error</faultstring>\n"
-                    //   "</SOAP-ENV:Fault>\n"
-                    //   "</SOAP-ENV:Body>\n"
-                    //   "</SOAP-ENV:Envelope>";
+    //   "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+    //   "<SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\">\n"
+    //   "<SOAP-ENV:Body>\n"
+    //   "<SOAP-ENV:Fault>\n"
+    //   "<faultcode>SOAP-ENV:Client</faultcode>\n"
+    //   "<faultstring>Client Error</faultstring>\n"
+    //   "</SOAP-ENV:Fault>\n"
+    //   "</SOAP-ENV:Body>\n"
+    //   "</SOAP-ENV:Envelope>";
 
     string response1 = "HTTP/1.1 304 Not Modified\r\n"
                        "Server: Tengine\r\n"
@@ -128,7 +128,7 @@ void testHttpParserResponse()
                        "Strict-Transport-Security: max-age=31536000\r\n"
                        "\r\n";
 
-        HttpParserSettings settings;
+    HttpParserSettings settings;
     settings.setGetMessageCallback(boost::bind(getMessage));
     settings.setGetRequestLineCallback(boost::bind(getRequestLine));
     settings.setGetHeaderCallback(boost::bind(getHeader));
@@ -144,12 +144,34 @@ void testHttpParserResponse()
 
 void testHttpParserRequest()
 {
+    string request = "GET http://127.0.0.1:9999/index.html HTTP/1.1\r\n"
+                     "Host: 127.0.0.1:9999\r\n"
+                     "Connection: keep-alive\r\n"
+                     "Upgrade-Insecure-Requests: 1\r\n"
+                     "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.162 Safari/537.36\r\n"
+                     "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8\r\n"
+                     "Accept-Encoding: gzip, deflate, br\r\n"
+                     "Accept-Language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7\r\n"
+                     "\r\n";
+
+    HttpParserSettings settings;
+    settings.setGetMessageCallback(boost::bind(getMessage));
+    settings.setGetRequestLineCallback(boost::bind(getRequestLine));
+    settings.setGetHeaderCallback(boost::bind(getHeader));
+    settings.setGetBodyCallback(boost::bind(getBody));
+    settings.setGetEndMessageCallback(boost::bind(endMessage));
+
+    HttpParser parser(&settings);
+    parser.setType(HTTP_REQUEST);
+    int begin = 0;
+    parser.execute(request, begin, request.size());
+    cout << "begin:" << begin << endl;
 }
 
 int main()
 {
     // testHttpParser();
-    testHttpParserResponse();
-    // testHttpParserRequest();
+    // testHttpParserResponse();
+    testHttpParserRequest();
     return 0;
 }

@@ -19,6 +19,7 @@
 #include "http.h"
 
 #include <iostream>
+#include <stdio.h>
 #include <map>
 #include <boost/function.hpp>
 
@@ -28,7 +29,7 @@
 #define isAlpha(c) ('a' <= (c) && (c) <= 'z' || 'A' <= (c) && (c) <= 'Z')
 #define isAlphaNum(c) (isNum(c) || isAlpha(c))
 #define toLower(c) (unsigned char)(('A' <= (c) && (c) <= 'Z') ? c | 0x20 : c)
-#define toUpper(c) (unsigned char)(('a' <= (c) && (c) <= 'z') ? c | 0x20 : c)//not finished
+#define toUpper(c) (unsigned char)(('a' <= (c) && (c) <= 'z') ? c | 0x20 : c) //not finished
 
 //the values set to HttpParser::m_nType
 enum httpParserType
@@ -37,6 +38,71 @@ enum httpParserType
 	HTTP_RESPONSE,
 	HTTP_BOTH
 };
+
+enum httpUrlField
+{
+	HTTP_UF_SCHEMA = 0,
+	HTTP_UF_HOST = 1,
+	HTTP_UF_PORT = 2,
+	HTTP_UF_PATH = 3,
+	HTTP_UF_QUERY = 4,
+	HTTP_UF_FRAGMENT = 5,
+	HTTP_UF_MAX = 6
+};
+
+struct Url
+{
+	unsigned int port : 16;
+	unsigned int field_set : 16;
+	char *data;
+	struct
+	{
+		unsigned int offset : 16;
+		unsigned int len : 16;
+	} fields[HTTP_UF_MAX];
+};
+
+typedef struct Url Url;
+
+void printUrl(const Url *url)
+{
+	if (url->field_set & HTTP_UF_SCHEMA)
+	{
+		int off = url->fields[HTTP_UF_SCHEMA].offset;
+		int len = url->fields[HTTP_UF_SCHEMA].len;
+		printf("schema:%.*s", len, url->data + off);
+	}
+	if (url->field_set & HTTP_UF_HOST)
+	{
+		int off = url->fields[HTTP_UF_HOST].offset;
+		int len = url->fields[HTTP_UF_HOST].len;
+		printf("\thost:%.*s", len, url->data + off);
+	}
+	if (url->field_set & HTTP_UF_PORT)
+	{
+		int off = url->fields[HTTP_UF_PORT].offset;
+		int len = url->fields[HTTP_UF_PORT].len;
+		printf("\tport:%.*s", len, url->data + off);
+	}
+	if (url->field_set & HTTP_UF_PATH)
+	{
+		int off = url->fields[HTTP_UF_PATH].offset;
+		int len = url->fields[HTTP_UF_PATH].len;
+		printf("\tpath:%.*s", len, url->data + off);
+	}
+	if (url->field_set & HTTP_UF_QUERY)
+	{
+		int off = url->fields[HTTP_UF_QUERY].offset;
+		int len = url->fields[HTTP_UF_QUERY].len;
+		printf("\tquery:%.*s", len, url->data + off);
+	}
+	if (url->field_set & HTTP_UF_FRAGMENT)
+	{
+		int off = url->fields[HTTP_UF_FRAGMENT].offset;
+		int len = url->fields[HTTP_UF_FRAGMENT].len;
+		printf("\tfragment:%.*s\n", len, url->data + off);
+	};
+}
 
 typedef boost::function<int()> HttpCallback;
 typedef boost::function<int()> HttpDataCallback;
@@ -167,6 +233,8 @@ class HttpParser
 		return fun();
 	}
 
+	// enum state
+	int parseUrl(const std::string &stream, int &at, int len, Url *result);
 	int execute(const std::string &stream, int &at, int len);
 
 	~HttpParser()
