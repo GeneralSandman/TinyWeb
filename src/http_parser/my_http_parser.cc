@@ -34,7 +34,8 @@ void HttpParser::setType(enum httpParserType type)
                                                : s_start_resp_or_requ));
 }
 
-enum state HttpParser::parseUrlChar(const char ch, enum state stat)
+enum state HttpParser::parseUrlChar(const char ch,
+                                    enum state stat)
 {
     switch (ch)
     {
@@ -54,7 +55,10 @@ enum state HttpParser::parseUrlChar(const char ch, enum state stat)
     switch (stat)
     {
     case s_requ_url_begin:
-
+        if (ch == '/') //or ch=='*' :method CONNECT
+            return s_requ_path;
+        if (isAlpha(ch))
+            return s_requ_schema;
         break;
 
     case s_requ_schema:
@@ -83,6 +87,10 @@ enum state HttpParser::parseUrlChar(const char ch, enum state stat)
         {
             return s_requ_path;
         }
+        else if (ch == '@')
+        {
+            return s_requ_server_at;
+        }
         else if (ch == '?')
         {
             return s_requ_query_string_start;
@@ -94,27 +102,161 @@ enum state HttpParser::parseUrlChar(const char ch, enum state stat)
         break;
 
     case s_requ_path:
+        if (IS_URL_CHAR(ch))
+        {
+            return stat;
+        }
+        else if (ch == '?')
+        {
+            return s_requ_query_string_start;
+        }
+        else if (ch == '#')
+        {
+            return s_requ_fragment_start;
+        }
+        break;
+
+    case s_requ_server_at:
+        if (ch == '@')
+            return s_error;
         break;
 
     case s_requ_query_string_start:
+        if (IS_URL_CHAR(ch))
+        {
+            return s_requ_query_string;
+        }
+        else if (ch == '?')
+        {
+            return s_requ_query_string;
+        }
+        else if (ch == '#')
+        {
+            return s_requ_fragment_start;
+        }
         break;
 
     case s_requ_query_string:
+
         break;
 
     case s_requ_fragment_start:
+        if (IS_URL_CHAR(ch))
+        {
+            return s_requ_fragment;
+        }
+
         break;
+
+    case s_requ_fragment:
+        if (IS_URL_CHAR(ch))
+        {
+            return s_requ_fragment;
+        }
+        else if (ch == '?')
+        {
+            return s_requ_fragment;
+        }
+        else if (ch == '#')
+        {
+            return s_requ_fragment;
+        }
 
     default:
 
         break;
     }
+
+    return s_error;
 }
 
-int HttpParser::parseUrl(const std::string &stream, int &at, int len, Url *result)
+int HttpParser::parserHost(const std::string &stream,
+                         int &at,
+                         int len,
+                         Url *result)
+{
+    if (stream.empty() && result->data == nullptr)
+        return 1;
+    
+}
+
+int HttpParser::parseUrl(const std::string &stream,
+                         int &at,
+                         int len,
+                         Url *result)
 {
     std::cout << "function parseUrl\n";
     memset(result, sizeof(Url), 0);
+
+    result->data = (char *)stream.c_str();
+    enum state stat = s_requ_url_begin;
+    enum httpUrlField oldfield = HTTP_UF_MAX, field;
+    bool found_at = false;
+
+    for (int i = 0; i < len; i++)
+    {
+        stat = parseUrlChar(*(stream.c_str() + at + i), stat);
+        // field = 0;
+
+        switch (stat)
+        {
+        case s_error:
+            return -1;
+            break;
+
+        /* Skip delimeters */
+        case s_requ_schema_slash:
+        case s_requ_schema_slash_slash:
+        case s_requ_server_start:
+        case s_requ_query_string_start:
+        case s_requ_fragment_start:
+            continue;
+
+        case s_requ_server_at:
+            found_at = true;
+            break;
+
+        case s_requ_schema:
+            field = HTTP_UF_SCHEMA;
+
+        case s_requ_server:
+            field = HTTP_UF_HOST;
+            break;
+
+        case s_requ_path:
+            field = HTTP_UF_PATH;
+            break;
+
+        case s_requ_query_string:
+            field = HTTP_UF_QUERY;
+            break;
+
+        case s_requ_fragment:
+            field = HTTP_UF_FRAGMENT;
+            break;
+
+        default:
+            break;
+        }
+
+        if (field == oldfield)
+        {
+            result->fields[field].len++;
+            continue;
+        }
+
+        result->fields[field].offset = i;
+        result->fields[field].len = 1;
+
+        result->field_set |= (1 << field);
+        oldfield = field;
+    }
+
+    if (result->field_set & (1 << HTTP_UF_HOST))
+    {
+        if (parseHost(result))
+            return -1;
+    }
 }
 
 int HttpParser::execute(const std::string &stream, int &at, int len)

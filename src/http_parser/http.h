@@ -201,4 +201,12 @@ enum http_errno
 
 /* end Http Errors */
 
+extern const unsigned char urlChar[32];
+
+#define BIT_AT(a, i)                                \
+    (!!((unsigned int)(a)[(unsigned int)(i) >> 3] & \
+        (1 << ((unsigned int)(i)&7))))
+
+#define IS_URL_CHAR(c) (BIT_AT(urlChar, (unsigned char)c))
+
 #endif

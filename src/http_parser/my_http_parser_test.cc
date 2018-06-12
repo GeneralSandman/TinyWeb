@@ -15,6 +15,7 @@
 #include <boost/bind.hpp>
 #include <iostream>
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -166,6 +167,25 @@ void testHttpParserRequest()
     int begin = 0;
     parser.execute(request, begin, request.size());
     cout << "begin:" << begin << endl;
+}
+
+void testParseUrl()
+{
+    //replace urls with urls.txt
+    vector<string> urls = {
+        "https://blog.csdn.net/foruok/article/details/8954726",
+        "www.baidu.com",
+        "https://www.baidu.com",
+        "http://127.0.0.1:9999/",
+        "http://www.dissigil.cn/resume.pdf",
+        "https::///ksdjf.cn/",
+        "https::/dsjfll.cb.cb//",
+        "https://did.cn/../dsf"};
+
+    for (int i = 0; i < urls.size(); i++)
+    {
+        
+    }
 }
 
 int main()

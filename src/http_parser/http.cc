@@ -58,7 +58,7 @@ const char *httpErrnoStr(enum http_errno e)
 # define T(v) v
 #endif
 
-static const unsigned char urlChar[32] = {
+const unsigned char urlChar[32] = {
 /*   0 nul    1 soh    2 stx    3 etx    4 eot    5 enq    6 ack    7 bel  */
         0    |   0    |   0    |   0    |   0    |   0    |   0    |   0,
 /*   8 bs     9 ht    10 nl    11 vt    12 np    13 cr    14 so    15 si   */
@@ -93,9 +93,5 @@ static const unsigned char urlChar[32] = {
         1    |   2    |   4    |   8    |   16   |   32   |   64   |   0, };
 
 
-# define BIT_AT(a, i)                                                \
-  (!!((unsigned int) (a)[(unsigned int) (i) >> 3] &                  \
-   (1 << ((unsigned int) (i) & 7))))
 
-#define IS_URL_CHAR(c)      (BIT_AT(urlChar, (unsigned char)c))
 
