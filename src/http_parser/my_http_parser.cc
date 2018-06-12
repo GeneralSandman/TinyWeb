@@ -70,6 +70,12 @@ enum http_host_state HttpParser::parseHostChar(const char ch, enum http_host_sta
 
     case s_http_host_v6_start:
         //not finished
+        if (isIpv6Char(ch))
+            return s_http_host_v6;
+        else if (ch == ']')
+            return s_http_host_v6_end;
+        else if (ch == '%')
+            return s_http_host_v6_zone_start;
         break;
 
     case s_http_host:

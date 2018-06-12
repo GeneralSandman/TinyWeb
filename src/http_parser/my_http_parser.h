@@ -42,7 +42,7 @@
 #define isHostChar(c) (isAlphaNum(c) || (c) == '.' || (c) == '-' || (c) == '_')
 
 #define isIpv4Char(c) (isNum(c) || (c) == '.')
-#define isIpv6Char(c) (IS_HEX(c) || (c) == ':' || (c) == '.')
+#define isIpv6Char(c) (isHexChar(c) || (c) == ':' || (c) == '.')
 
 //the values set to HttpParser::m_nType
 enum httpParserType
