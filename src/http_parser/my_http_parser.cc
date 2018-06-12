@@ -34,6 +34,75 @@ void HttpParser::setType(enum httpParserType type)
                                                : s_start_resp_or_requ));
 }
 
+enum http_host_state HttpParser::parseHostChar(const char ch, enum http_host_state stat)
+{
+    switch (ch)
+    {
+    case '\r':
+    case '\n':
+    case '\t':
+    case '\a':
+    case '\f':
+    case ' ':
+        return s_http_host_error;
+        break;
+
+    default:
+        break;
+    }
+
+    switch (stat)
+    {
+    case s_http_userinfo_start:
+    case s_http_userinfo: //http://@hostname/ is vaild
+        if (ch == '@')
+            return s_http_host_start;
+        else if (isUserInfoChar(ch))
+            return s_http_userinfo;
+        break;
+
+    case s_http_host_start:
+        if (ch == '[') //is IPv6
+            return s_http_host_v6_start;
+        if (isHostChar(ch)) //is IPv4
+            return s_http_host;
+        break;
+
+    case s_http_host_v6_start:
+        //not finished
+        break;
+
+    case s_http_host:
+        if (isHostChar(ch))
+            return s_http_host;
+        break;
+
+    case s_http_host_v6:
+        //not finished
+        break;
+
+    case s_http_host_v6_end:
+        //not finished
+        break;
+
+    case s_http_host_v6_zone_start:
+        break;
+    case s_http_host_v6_zone:
+        break;
+
+    case s_http_host_port_start:
+    case s_http_host_port:
+        if (isNum(ch))
+            return s_http_host_port;
+        break;
+
+    default:
+        break;
+    }
+
+    return s_http_host_error;
+}
+
 enum state HttpParser::parseUrlChar(const char ch,
                                     enum state stat)
 {
@@ -171,13 +240,12 @@ enum state HttpParser::parseUrlChar(const char ch,
 }
 
 int HttpParser::parserHost(const std::string &stream,
-                         int &at,
-                         int len,
-                         Url *result)
+                           int &at,
+                           int len,
+                           Url *result)
 {
     if (stream.empty() && result->data == nullptr)
         return 1;
-    
 }
 
 int HttpParser::parseUrl(const std::string &stream,

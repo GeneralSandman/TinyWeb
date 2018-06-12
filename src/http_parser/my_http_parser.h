@@ -28,8 +28,21 @@
 #define isNum(c) ('0' <= (c) && (c) <= '9')
 #define isAlpha(c) ('a' <= (c) && (c) <= 'z' || 'A' <= (c) && (c) <= 'Z')
 #define isAlphaNum(c) (isNum(c) || isAlpha(c))
-#define toLower(c) (unsigned char)(('A' <= (c) && (c) <= 'Z') ? c | 0x20 : c)
-#define toUpper(c) (unsigned char)(('a' <= (c) && (c) <= 'z') ? c | 0x20 : c) //not finished
+#define toLower(c) (unsigned char)(c | 0x20)
+// #define toUpper(c) (unsigned char)(('a' <= (c) && (c) <= 'z') ? c | 0x20 : c) //not finished
+#define isHexChar(c) (isNum(c) || ('a' <= toLower(c) && toLower(c) <= 'f'))
+
+#define isMarkChar(c) ((c) == '-' || (c) == '_' || (c) == '.' ||                              \
+					   (c) == '!' || (c) == '~' || (c) == '*' || (c) == '\'' || (c) == '(' || \
+					   (c) == ')')
+#define isUserInfoChar(c) (isAlphaNum(c) || isMarkChar(c) || (c) == '%' ||                       \
+						   (c) == ';' || (c) == ':' || (c) == '&' || (c) == '=' || (c) == '+' || \
+						   (c) == '$' || (c) == ',')
+
+#define isHostChar(c) (isAlphaNum(c) || (c) == '.' || (c) == '-' || (c) == '_')
+
+#define isIpv4Char(c) (isNum(c) || (c) == '.')
+#define isIpv6Char(c) (IS_HEX(c) || (c) == ':' || (c) == '.')
 
 //the values set to HttpParser::m_nType
 enum httpParserType
@@ -114,6 +127,22 @@ enum state
 
 	s_chunk
 
+};
+
+enum http_host_state
+{
+	s_http_host_error = 1,
+	s_http_userinfo_start,
+	s_http_userinfo,
+	s_http_host_start,
+	s_http_host_v6_start,
+	s_http_host,
+	s_http_host_v6,
+	s_http_host_v6_end,
+	s_http_host_v6_zone_start,
+	s_http_host_v6_zone,
+	s_http_host_port_start,
+	s_http_host_port
 };
 
 struct Url
@@ -300,7 +329,9 @@ class HttpParser
 	}
 
 	// enum state
+	enum http_host_state parseHostChar(const char ch, enum http_host_state s);
 	enum state parseUrlChar(const char ch, enum state s);
+	int parserHost(const std::string &stream, int &at, int len, Url *result);
 	int parseUrl(const std::string &stream, int &at, int len, Url *result);
 	int execute(const std::string &stream, int &at, int len);
 
