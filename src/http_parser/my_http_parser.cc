@@ -34,10 +34,12 @@ void HttpParser::setType(enum httpParserType type)
                                                : s_start_resp_or_requ));
 }
 
-enum http_host_state HttpParser::parseHostChar(const char ch, enum http_host_state stat)
+enum http_host_state HttpParser::parseHostChar(const char ch,
+                                               enum http_host_state stat)
 {
     switch (ch)
     {
+    //invaild char in url
     case '\r':
     case '\n':
     case '\t':
@@ -53,8 +55,8 @@ enum http_host_state HttpParser::parseHostChar(const char ch, enum http_host_sta
 
     switch (stat)
     {
-    case s_http_userinfo_start:
-    case s_http_userinfo: //http://@hostname/ is vaild
+    case s_http_userinfo_start: //http://@hostname/ is vaild
+    case s_http_userinfo:
         if (ch == '@')
             return s_http_host_start;
         else if (isUserInfoChar(ch))
@@ -64,36 +66,59 @@ enum http_host_state HttpParser::parseHostChar(const char ch, enum http_host_sta
     case s_http_host_start:
         if (ch == '[') //is IPv6
             return s_http_host_v6_start;
-        if (isHostChar(ch)) //is IPv4
-            return s_http_host;
+        else if (isHostChar(ch)) //is IPv4
+            return s_http_host_v4;
         break;
 
     case s_http_host_v6_start:
         //not finished
         if (isIpv6Char(ch))
             return s_http_host_v6;
-        else if (ch == ']')
+        else if (ch == ']') //http://[]/ is invaild
+            return s_http_host_error;
+        else if (ch == '%')
+            return s_http_host_error; //http://[%eth]/ is invaild
+        break;
+
+    case s_http_host_v4:
+        if (isHostChar(ch))
+            return s_http_host_v4;
+        else if (ch == ':')
+            return s_http_host_port_start;
+        break;
+
+    case s_http_host_v6:
+        if (ch == ']')
             return s_http_host_v6_end;
+        else if (isIpv6Char(ch))
+            return s_http_host_v6;
         else if (ch == '%')
             return s_http_host_v6_zone_start;
         break;
 
-    case s_http_host:
-        if (isHostChar(ch))
-            return s_http_host;
-        break;
-
-    case s_http_host_v6:
-        //not finished
-        break;
-
     case s_http_host_v6_end:
+        if (ch == ':')
+            return s_http_host_port_start;
         //not finished
         break;
 
     case s_http_host_v6_zone_start:
+        if (isAlphaNum(ch) ||
+            ch == '%' ||
+            ch == '.' ||
+            ch == '-' ||
+            ch == '_' ||
+            ch == '~')
+            return s_http_host_v6_zone;
         break;
+
     case s_http_host_v6_zone:
+        if (ch == ']')
+            return s_http_host_v6_end;
+        //FIXME:RFC 6874
+        // else if (ch ==''||
+        //          ch =='')
+        //     return s_http_host_error;
         break;
 
     case s_http_host_port_start:
@@ -245,13 +270,133 @@ enum state HttpParser::parseUrlChar(const char ch,
     return s_error;
 }
 
-int HttpParser::parserHost(const std::string &stream,
-                           int &at,
-                           int len,
-                           Url *result)
+int HttpParser::parseHost(const std::string &stream,
+                          int &at,
+                          int len,
+                          Url *result,
+                          bool has_at_char)
 {
-    if (stream.empty() && result->data == nullptr)
-        return 1;
+    //The example of data: dissigil.cn.
+    //You MUST guarentee data just a fragment of host in url.
+    //For example : http://dissigil.cn is invalid
+    //              dissigil.cn/index.html is invaild
+
+    assert(stream.c_str() == result->data);
+    assert(result->field_set & (1 << HTTP_UF_HOST));
+    assert(len == result->fields[HTTP_UF_HOST].len);
+    assert(at == result->fields[HTTP_UF_HOST].offset);
+
+    char *begin = (char *)stream.c_str() + at;
+    enum http_host_state prestat = has_at_char
+                                       ? s_http_userinfo_start
+                                       : s_http_host_start;
+    enum http_host_state stat;
+    for (int i = 0; i < len; i++)
+    {
+        stat = parseHostChar(*(begin + i), stat);
+
+        switch (stat)
+        {
+        case s_http_host_error:
+            return -1;
+            break;
+
+        case s_http_userinfo_start:
+            //This value is Impossible!
+            continue;
+            break;
+
+        case s_http_userinfo:
+            if (prestat != stat)
+            {
+                result->fields[HTTP_UF_USERINFO].offset = at + i;
+                result->fields[HTTP_UF_USERINFO].len = 1;
+                result->field_set |= (1 << HTTP_UF_USERINFO);
+            }
+            else
+                result->fields[HTTP_UF_USERINFO].len++;
+            break;
+
+        case s_http_host_start:
+            //nothing
+            break;
+
+        case s_http_host_v6_start:
+            // do nothing
+            break;
+
+        case s_http_host_v4:
+            if (prestat != stat)
+            {
+                result->fields[HTTP_UF_HOST].offset = at + i;
+                result->fields[HTTP_UF_HOST].len = 1;
+            }
+            else
+                result->fields[HTTP_UF_HOST].len++;
+            break;
+
+        case s_http_host_v6:
+            if (prestat != stat)
+            {
+                result->fields[HTTP_UF_HOST].offset = at + i;
+                result->fields[HTTP_UF_HOST].len = 1;
+            }
+            else
+                result->fields[HTTP_UF_HOST].len++;
+            break;
+
+        case s_http_host_v6_end:
+            //do nothing
+            break;
+
+        case s_http_host_v6_zone_start:
+            result->fields[HTTP_UF_HOST].len++;
+            break;
+
+        case s_http_host_v6_zone:
+            result->fields[HTTP_UF_HOST].len++;
+            break;
+
+        case s_http_host_port_start:
+            //do nothing
+            break;
+
+        case s_http_host_port:
+            if (prestat != stat)
+            {
+                result->fields[HTTP_UF_PORT].offset = at + i;
+                result->fields[HTTP_UF_PORT].len = 1;
+                result->field_set |= (1 << HTTP_UF_PORT);
+            }
+            else
+                result->fields[HTTP_UF_PORT].len++;
+            break;
+        }
+
+        prestat = stat;
+    }
+
+    switch (stat)
+    {
+    case s_http_host_error:
+    case s_http_userinfo_start:
+    case s_http_userinfo:
+    case s_http_host_start:
+    case s_http_host_v6_start:
+    case s_http_host_v6:
+    case s_http_host_v6_zone_start:
+    case s_http_host_v6_zone:
+        return -1; //invaild
+
+    case s_http_host_v4:
+    case s_http_host_v6_end:
+    case s_http_host_port_start:
+    case s_http_host_port:
+        return 0; //vaild
+        break;
+    }
+
+    return 0;
 }
 
 int HttpParser::parseUrl(const std::string &stream,

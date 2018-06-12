@@ -3,19 +3,19 @@
 2 no sure,why
 3 if method is CONNECT,vaild
 
-www.dissigil.cn
+www.dissigil.cn/
 0
-http://www.dissigil.cn
-1
 http://www.dissigil.cn/
 1
-http://www.dissigil.cn/index.html
+http://www.dissigil.cn
 1
-http://hostname/
+http://www.dissigil.cn
 1
-http://www.dissigil.cn:80/index.html
+http://hostname
 1
-http://www.dissigil.cn::80/index.html
+http://www.dissigil.cn:80
+1
+http://www.dissigil.cn::80
 0
 http://www.dissigil.cn:999999/index.html
 0
@@ -109,3 +109,6 @@ http://ABC.com/%7Esmith/home.html
 1
 http://ABC.com:/%7esmith/home.html
 1
+http://www.baidu.com/link?url=-xBr1W_69PMdd5rdglCQljN1Rm5jA-7umx885_TZEZS
+1
+

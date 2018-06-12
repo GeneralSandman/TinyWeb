@@ -60,7 +60,8 @@ enum httpUrlField
 	HTTP_UF_PATH = 3,
 	HTTP_UF_QUERY = 4,
 	HTTP_UF_FRAGMENT = 5,
-	HTTP_UF_MAX = 6
+	HTTP_UF_USERINFO = 6,
+	HTTP_UF_MAX = 7
 };
 
 enum state
@@ -136,7 +137,7 @@ enum http_host_state
 	s_http_userinfo,
 	s_http_host_start,
 	s_http_host_v6_start,
-	s_http_host,
+	s_http_host_v4,
 	s_http_host_v6,
 	s_http_host_v6_end,
 	s_http_host_v6_zone_start,
@@ -331,7 +332,7 @@ class HttpParser
 	// enum state
 	enum http_host_state parseHostChar(const char ch, enum http_host_state s);
 	enum state parseUrlChar(const char ch, enum state s);
-	int parserHost(const std::string &stream, int &at, int len, Url *result);
+	int parseHost(const std::string &stream, int &at, int len, Url *result, bool has_at_char);
 	int parseUrl(const std::string &stream, int &at, int len, Url *result);
 	int execute(const std::string &stream, int &at, int len);
 
