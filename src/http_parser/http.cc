@@ -52,11 +52,7 @@ const char *httpErrnoStr(enum http_errno e)
     return ELEM_AT(errnoStrings, e, "<invalid>");
 }
 
-#if HTTP_PARSER_STRICT
-# define T(v) 0
-#else
-# define T(v) v
-#endif
+#define T(v) 0
 
 const unsigned char urlChar[32] = {
 /*   0 nul    1 soh    2 stx    3 etx    4 eot    5 enq    6 ack    7 bel  */
@@ -91,7 +87,6 @@ const unsigned char urlChar[32] = {
         1    |   2    |   4    |   8    |   16   |   32   |   64   |  128,
 /* 120  x   121  y   122  z   123  {   124  |   125  }   126  ~   127 del */
         1    |   2    |   4    |   8    |   16   |   32   |   64   |   0, };
-
 
 
 

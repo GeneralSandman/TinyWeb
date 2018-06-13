@@ -16,6 +16,46 @@
 
 #include <string.h>
 
+void printUrl(const Url *url)
+{
+    if (url->field_set & HTTP_UF_SCHEMA)
+    {
+        int off = url->fields[HTTP_UF_SCHEMA].offset;
+        int len = url->fields[HTTP_UF_SCHEMA].len;
+        printf("schema:%.*s", len, url->data + off);
+    }
+    if (url->field_set & HTTP_UF_HOST)
+    {
+        int off = url->fields[HTTP_UF_HOST].offset;
+        int len = url->fields[HTTP_UF_HOST].len;
+        printf("\thost:%.*s", len, url->data + off);
+    }
+    if (url->field_set & HTTP_UF_PORT)
+    {
+        int off = url->fields[HTTP_UF_PORT].offset;
+        int len = url->fields[HTTP_UF_PORT].len;
+        printf("\tport:%.*s", len, url->data + off);
+    }
+    if (url->field_set & HTTP_UF_PATH)
+    {
+        int off = url->fields[HTTP_UF_PATH].offset;
+        int len = url->fields[HTTP_UF_PATH].len;
+        printf("\tpath:%.*s", len, url->data + off);
+    }
+    if (url->field_set & HTTP_UF_QUERY)
+    {
+        int off = url->fields[HTTP_UF_QUERY].offset;
+        int len = url->fields[HTTP_UF_QUERY].len;
+        printf("\tquery:%.*s", len, url->data + off);
+    }
+    if (url->field_set & HTTP_UF_FRAGMENT)
+    {
+        int off = url->fields[HTTP_UF_FRAGMENT].offset;
+        int len = url->fields[HTTP_UF_FRAGMENT].len;
+        printf("\tfragment:%.*s\n", len, url->data + off);
+    };
+}
+
 #define checkOrGoError(con) \
     do                      \
     {                       \
@@ -32,6 +72,21 @@ void HttpParser::setType(enum httpParserType type)
                                        : ((type == HTTP_REQUEST
                                                ? s_requ_start
                                                : s_start_resp_or_requ));
+}
+
+int HttpParser::invokeByName(const char *funName,
+                             const char *data,
+                             unsigned int len)
+{
+    std::cout << "invoke function by name:" << funName << std::endl;
+    if (m_pSettings == nullptr)
+        return -1;
+    std::string fname(funName);
+    HttpCallback fun = m_pSettings->getMethodByName(fname);
+    if (fun == nullptr)
+        return -1;
+
+    return fun();
 }
 
 enum http_host_state HttpParser::parseHostChar(const char ch,
@@ -132,6 +187,135 @@ enum http_host_state HttpParser::parseHostChar(const char ch,
     }
 
     return s_http_host_error;
+}
+
+int HttpParser::parseHost(const std::string &stream,
+                          int &at,
+                          int len,
+                          Url *result,
+                          bool has_at_char)
+{
+    //The example of data: dissigil.cn.
+    //You MUST guarentee data just a fragment of host in url.
+    //For example : http://dissigil.cn is invalid
+    //              dissigil.cn/index.html is invaild
+
+    assert(stream.c_str() == result->data);
+    assert(result->field_set & (1 << HTTP_UF_HOST));
+    assert(len == result->fields[HTTP_UF_HOST].len);
+    assert(at == result->fields[HTTP_UF_HOST].offset);
+
+    char *begin = (char *)stream.c_str() + at;
+    enum http_host_state prestat = has_at_char
+                                       ? s_http_userinfo_start
+                                       : s_http_host_start;
+    enum http_host_state stat;
+    for (int i = 0; i < len; i++)
+    {
+        stat = parseHostChar(*(begin + i), prestat);
+
+        switch (stat)
+        {
+        case s_http_host_error:
+            return -1;
+            break;
+
+        case s_http_userinfo_start:
+            //This value is Impossible!
+            continue;
+            break;
+
+        case s_http_userinfo:
+            if (prestat != stat)
+            {
+                result->fields[HTTP_UF_USERINFO].offset = at + i;
+                result->fields[HTTP_UF_USERINFO].len = 1;
+                result->field_set |= (1 << HTTP_UF_USERINFO);
+            }
+            else
+                result->fields[HTTP_UF_USERINFO].len++;
+            break;
+
+        case s_http_host_start:
+            //nothing
+            break;
+
+        case s_http_host_v6_start:
+            // do nothing
+            break;
+
+        case s_http_host_v4:
+            if (prestat != stat)
+            {
+                result->fields[HTTP_UF_HOST].offset = at + i;
+                result->fields[HTTP_UF_HOST].len = 1;
+            }
+            else
+                result->fields[HTTP_UF_HOST].len++;
+            break;
+
+        case s_http_host_v6:
+            if (prestat != stat)
+            {
+                result->fields[HTTP_UF_HOST].offset = at + i;
+                result->fields[HTTP_UF_HOST].len = 1;
+            }
+            else
+                result->fields[HTTP_UF_HOST].len++;
+            break;
+
+        case s_http_host_v6_end:
+            //do nothing
+            break;
+
+        case s_http_host_v6_zone_start:
+            result->fields[HTTP_UF_HOST].len++;
+            break;
+
+        case s_http_host_v6_zone:
+            result->fields[HTTP_UF_HOST].len++;
+            break;
+
+        case s_http_host_port_start:
+            //do nothing
+            break;
+
+        case s_http_host_port:
+            if (prestat != stat)
+            {
+                result->fields[HTTP_UF_PORT].offset = at + i;
+                result->fields[HTTP_UF_PORT].len = 1;
+                result->field_set |= (1 << HTTP_UF_PORT);
+            }
+            else
+                result->fields[HTTP_UF_PORT].len++;
+            break;
+        }
+
+        prestat = stat;
+    }
+
+    switch (stat)
+    {
+    case s_http_host_error:
+    case s_http_userinfo_start:
+    case s_http_userinfo:
+    case s_http_host_start:
+    case s_http_host_v6_start:
+    case s_http_host_v6:
+    case s_http_host_v6_zone_start:
+    case s_http_host_v6_zone:
+        return -1; //invaild
+
+    case s_http_host_v4:
+    case s_http_host_v6_end:
+    case s_http_host_port_start:
+    case s_http_host_port:
+        return 0; //vaild
+        break;
+    }
+
+    return 0;
 }
 
 enum state HttpParser::parseUrlChar(const char ch,
@@ -337,135 +521,6 @@ enum state HttpParser::parseUrlChar(const char ch,
     return s_error;
 }
 
-int HttpParser::parseHost(const std::string &stream,
-                          int &at,
-                          int len,
-                          Url *result,
-                          bool has_at_char)
-{
-    //The example of data: dissigil.cn.
-    //You MUST guarentee data just a fragment of host in url.
-    //For example : http://dissigil.cn is invalid
-    //              dissigil.cn/index.html is invaild
-
-    assert(stream.c_str() == result->data);
-    assert(result->field_set & (1 << HTTP_UF_HOST));
-    assert(len == result->fields[HTTP_UF_HOST].len);
-    assert(at == result->fields[HTTP_UF_HOST].offset);
-
-    char *begin = (char *)stream.c_str() + at;
-    enum http_host_state prestat = has_at_char
-                                       ? s_http_userinfo_start
-                                       : s_http_host_start;
-    enum http_host_state stat;
-    for (int i = 0; i < len; i++)
-    {
-        stat = parseHostChar(*(begin + i), prestat);
-
-        switch (stat)
-        {
-        case s_http_host_error:
-            return -1;
-            break;
-
-        case s_http_userinfo_start:
-            //This value is Impossible!
-            continue;
-            break;
-
-        case s_http_userinfo:
-            if (prestat != stat)
-            {
-                result->fields[HTTP_UF_USERINFO].offset = at + i;
-                result->fields[HTTP_UF_USERINFO].len = 1;
-                result->field_set |= (1 << HTTP_UF_USERINFO);
-            }
-            else
-                result->fields[HTTP_UF_USERINFO].len++;
-            break;
-
-        case s_http_host_start:
-            //nothing
-            break;
-
-        case s_http_host_v6_start:
-            // do nothing
-            break;
-
-        case s_http_host_v4:
-            if (prestat != stat)
-            {
-                result->fields[HTTP_UF_HOST].offset = at + i;
-                result->fields[HTTP_UF_HOST].len = 1;
-            }
-            else
-                result->fields[HTTP_UF_HOST].len++;
-            break;
-
-        case s_http_host_v6:
-            if (prestat != stat)
-            {
-                result->fields[HTTP_UF_HOST].offset = at + i;
-                result->fields[HTTP_UF_HOST].len = 1;
-            }
-            else
-                result->fields[HTTP_UF_HOST].len++;
-            break;
-
-        case s_http_host_v6_end:
-            //do nothing
-            break;
-
-        case s_http_host_v6_zone_start:
-            result->fields[HTTP_UF_HOST].len++;
-            break;
-
-        case s_http_host_v6_zone:
-            result->fields[HTTP_UF_HOST].len++;
-            break;
-
-        case s_http_host_port_start:
-            //do nothing
-            break;
-
-        case s_http_host_port:
-            if (prestat != stat)
-            {
-                result->fields[HTTP_UF_PORT].offset = at + i;
-                result->fields[HTTP_UF_PORT].len = 1;
-                result->field_set |= (1 << HTTP_UF_PORT);
-            }
-            else
-                result->fields[HTTP_UF_PORT].len++;
-            break;
-        }
-
-        prestat = stat;
-    }
-
-    switch (stat)
-    {
-    case s_http_host_error:
-    case s_http_userinfo_start:
-    case s_http_userinfo:
-    case s_http_host_start:
-    case s_http_host_v6_start:
-    case s_http_host_v6:
-    case s_http_host_v6_zone_start:
-    case s_http_host_v6_zone:
-        return -1; //invaild
-
-    case s_http_host_v4:
-    case s_http_host_v6_end:
-    case s_http_host_port_start:
-    case s_http_host_port:
-        return 0; //vaild
-        break;
-    }
-
-    return 0;
-}
-
 int HttpParser::parseUrl(const std::string &stream,
                          int &at,
                          int len,
@@ -577,6 +632,7 @@ int HttpParser::execute(const std::string &stream, int &at, int len)
     std::cout << "function HttpParser::execute()\n";
 
     const char *begin = stream.c_str() + at;
+
     const char *url_begin = nullptr;
     const char *status_phrase_begin = nullptr;
     const char *header_key_begin = nullptr;

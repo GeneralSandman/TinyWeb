@@ -160,45 +160,7 @@ struct Url
 
 typedef struct Url Url;
 
-void printUrl(const Url *url)
-{
-	if (url->field_set & HTTP_UF_SCHEMA)
-	{
-		int off = url->fields[HTTP_UF_SCHEMA].offset;
-		int len = url->fields[HTTP_UF_SCHEMA].len;
-		printf("schema:%.*s", len, url->data + off);
-	}
-	if (url->field_set & HTTP_UF_HOST)
-	{
-		int off = url->fields[HTTP_UF_HOST].offset;
-		int len = url->fields[HTTP_UF_HOST].len;
-		printf("\thost:%.*s", len, url->data + off);
-	}
-	if (url->field_set & HTTP_UF_PORT)
-	{
-		int off = url->fields[HTTP_UF_PORT].offset;
-		int len = url->fields[HTTP_UF_PORT].len;
-		printf("\tport:%.*s", len, url->data + off);
-	}
-	if (url->field_set & HTTP_UF_PATH)
-	{
-		int off = url->fields[HTTP_UF_PATH].offset;
-		int len = url->fields[HTTP_UF_PATH].len;
-		printf("\tpath:%.*s", len, url->data + off);
-	}
-	if (url->field_set & HTTP_UF_QUERY)
-	{
-		int off = url->fields[HTTP_UF_QUERY].offset;
-		int len = url->fields[HTTP_UF_QUERY].len;
-		printf("\tquery:%.*s", len, url->data + off);
-	}
-	if (url->field_set & HTTP_UF_FRAGMENT)
-	{
-		int off = url->fields[HTTP_UF_FRAGMENT].offset;
-		int len = url->fields[HTTP_UF_FRAGMENT].len;
-		printf("\tfragment:%.*s\n", len, url->data + off);
-	};
-}
+void printUrl(const Url *url);
 
 typedef boost::function<int()> HttpCallback;
 typedef boost::function<int()> HttpDataCallback;
@@ -316,24 +278,15 @@ class HttpParser
 
 	int invokeByName(const char *funName,
 					 const char *data,
-					 unsigned int len)
-	{
-		std::cout << "invoke function by name:" << funName << std::endl;
-		if (m_pSettings == nullptr)
-			return -1;
-		std::string fname(funName);
-		HttpCallback fun = m_pSettings->getMethodByName(fname);
-		if (fun == nullptr)
-			return -1;
-
-		return fun();
-	}
+					 unsigned int len);
 
 	// enum state
 	enum http_host_state parseHostChar(const char ch, enum http_host_state s);
-	enum state parseUrlChar(const char ch, enum state s);
 	int parseHost(const std::string &stream, int &at, int len, Url *result, bool has_at_char);
+
+	enum state parseUrlChar(const char ch, enum state s);
 	int parseUrl(const std::string &stream, int &at, int len, Url *result);
+
 	int execute(const std::string &stream, int &at, int len);
 
 	~HttpParser()
