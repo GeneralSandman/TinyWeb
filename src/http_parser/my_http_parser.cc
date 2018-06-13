@@ -144,7 +144,7 @@ enum state HttpParser::parseUrlChar(const char ch,
     case '\t':
     case '\a':
     case '\f':
-    case ' ':
+    case ' ': //invaild char in url
         return s_error;
         break;
 
@@ -156,32 +156,73 @@ enum state HttpParser::parseUrlChar(const char ch,
     {
     case s_requ_url_begin:
         if (ch == '/') //or ch=='*' :method CONNECT
+        {
             return s_requ_path;
-        if (isAlpha(ch))
+        }
+        else if (isAlpha(ch))
+        {
             return s_requ_schema;
+        }
         break;
 
-    case s_requ_schema:
+    case s_requ_schema: //finished
         if (isAlpha(ch))
-            return stat;
-        if (ch == ':')
+        {
+            return s_requ_schema;
+        }
+        else if (ch == ':')
+        {
             return s_requ_schema_slash;
+        }
         break;
 
-    case s_requ_schema_slash:
+    case s_requ_schema_slash: //finished
         if (ch == '/')
+        {
             return s_requ_schema_slash_slash;
+        }
         break;
 
-    case s_requ_schema_slash_slash:
+    case s_requ_schema_slash_slash: //finished
         if (ch == '/')
+        {
             return s_requ_server_start;
+        }
         break;
 
     case s_requ_server_start:
+
+        if (ch == '/') //http:///
+        {
+            return s_error;
+        }
+        else if (ch == '@') //http://@hostname/ is vaild
+        {
+            return s_requ_server_at;
+        }
+        else if (ch == '?') //http://?queurystring/ is invaild
+        {
+            return s_error;
+        }
+        else if (ch == '#')
+        {
+            return s_error;
+        }
+        else if (ch == '[') //Ipv6 begin
+        {
+            return s_requ_server;
+        }
+        else if (ch == ']') //http://]:80/
+        {
+            return s_error;
+        }
+        else if (isUserInfoChar(ch)) //FIXME:
+        {
+            return s_requ_server;
+        }
         break;
 
-    case s_requ_server:
+    case s_requ_server: //finished
 
         if (ch == '/')
         {
@@ -199,12 +240,17 @@ enum state HttpParser::parseUrlChar(const char ch,
         {
             return s_requ_fragment_start;
         }
+        else if (isUserInfoChar(ch) ||
+                 ch == '[') //Ipv6 or userInfochar
+        {
+            return s_requ_server;
+        }
         break;
 
-    case s_requ_path:
-        if (IS_URL_CHAR(ch))
+    case s_requ_path: //finished
+        if (isUrlChar(ch))
         {
-            return stat;
+            return s_requ_path;
         }
         else if (ch == '?')
         {
@@ -216,13 +262,13 @@ enum state HttpParser::parseUrlChar(const char ch,
         }
         break;
 
-    case s_requ_server_at:
-        if (ch == '@')
+    case s_requ_server_at: //finished
+        if (ch == '@')     //double '@' in url : invaild
             return s_error;
         break;
 
-    case s_requ_query_string_start:
-        if (IS_URL_CHAR(ch))
+    case s_requ_query_string_start: //finished
+        if (isUrlChar(ch))
         {
             return s_requ_query_string;
         }
@@ -236,20 +282,40 @@ enum state HttpParser::parseUrlChar(const char ch,
         }
         break;
 
-    case s_requ_query_string:
-
-        break;
-
-    case s_requ_fragment_start:
-        if (IS_URL_CHAR(ch))
+    case s_requ_query_string: //finished
+        //FIXME:
+        if (isUrlChar(ch))
         {
             return s_requ_fragment;
+        }
+        else if (ch == '?')
+        {
+            return s_requ_query_string;
+        }
+        else if (ch == '#')
+        {
+            return s_requ_fragment;
+        }
+        break;
+
+    case s_requ_fragment_start: //finished
+        if (isUrlChar(ch))
+        {
+            return s_requ_fragment;
+        }
+        else if (ch == '?')
+        {
+            return s_requ_fragment;
+        }
+        else if (ch == '#')
+        {
+            return s_requ_fragment_start;
         }
 
         break;
 
-    case s_requ_fragment:
-        if (IS_URL_CHAR(ch))
+    case s_requ_fragment: //finished
+        if (isUrlChar(ch))
         {
             return s_requ_fragment;
         }
@@ -261,6 +327,7 @@ enum state HttpParser::parseUrlChar(const char ch,
         {
             return s_requ_fragment;
         }
+        break;
 
     default:
 
@@ -293,7 +360,7 @@ int HttpParser::parseHost(const std::string &stream,
     enum http_host_state stat;
     for (int i = 0; i < len; i++)
     {
-        stat = parseHostChar(*(begin + i), stat);
+        stat = parseHostChar(*(begin + i), prestat);
 
         switch (stat)
         {
@@ -407,50 +474,55 @@ int HttpParser::parseUrl(const std::string &stream,
     std::cout << "function parseUrl\n";
     memset(result, sizeof(Url), 0);
 
+    char *begin = (char *)stream.c_str();
     result->data = (char *)stream.c_str();
-    enum state stat = s_requ_url_begin;
-    enum httpUrlField oldfield = HTTP_UF_MAX, field;
-    bool found_at = false;
+    enum state prestat = s_requ_url_begin;
+    enum state stat;
+    enum httpUrlField prefield = HTTP_UF_MAX;
+    enum httpUrlField field;
+    bool has_at_char = false;
 
     for (int i = 0; i < len; i++)
     {
-        stat = parseUrlChar(*(stream.c_str() + at + i), stat);
+        stat = parseUrlChar(*(begin + at + i), prestat);
         // field = 0;
 
         switch (stat)
         {
-        case s_error:
+        case s_error: //finished
             return -1;
             break;
 
         /* Skip delimeters */
-        case s_requ_schema_slash:
+        case s_requ_schema_slash: //finished
         case s_requ_schema_slash_slash:
         case s_requ_server_start:
         case s_requ_query_string_start:
         case s_requ_fragment_start:
             continue;
-
-        case s_requ_server_at:
-            found_at = true;
             break;
 
-        case s_requ_schema:
-            field = HTTP_UF_SCHEMA;
+        case s_requ_server_at: //finished
+            has_at_char = true;
+            break;
 
-        case s_requ_server:
+        case s_requ_schema: //finished
+            field = HTTP_UF_SCHEMA;
+            break;
+
+        case s_requ_server: //finished
             field = HTTP_UF_HOST;
             break;
 
-        case s_requ_path:
+        case s_requ_path: //finished
             field = HTTP_UF_PATH;
             break;
 
-        case s_requ_query_string:
+        case s_requ_query_string: //finished
             field = HTTP_UF_QUERY;
             break;
 
-        case s_requ_fragment:
+        case s_requ_fragment: //finished
             field = HTTP_UF_FRAGMENT;
             break;
 
@@ -458,24 +530,46 @@ int HttpParser::parseUrl(const std::string &stream,
             break;
         }
 
-        if (field == oldfield)
+        if (field == prefield)
         {
             result->fields[field].len++;
             continue;
         }
 
-        result->fields[field].offset = i;
+        result->fields[field].offset = at + i;
         result->fields[field].len = 1;
 
         result->field_set |= (1 << field);
-        oldfield = field;
+
+        prefield = field;
+        prestat = stat;
     }
 
     if (result->field_set & (1 << HTTP_UF_HOST))
     {
-        if (parseHost(result))
+        int offset = result->fields[HTTP_UF_HOST].offset;
+        int len = result->fields[HTTP_UF_HOST].len;
+        if (-1 == parseHost(stream, offset, len, result, has_at_char))
             return -1;
     }
+    else if (result->field_set & (1 << HTTP_UF_SCHEMA)) // http:///index.html is invaild
+        return -1;
+
+    if (result->field_set & (1 << HTTP_UF_PORT))
+    {
+        unsigned int offset = result->fields[HTTP_UF_PORT].offset;
+        unsigned int len = result->fields[HTTP_UF_PORT].len;
+        unsigned int port = 0;
+        for (int i = 0; i < len; i++)
+        {
+            port *= 10;
+            port += *(begin + offset + i) - '0';
+            if (port > 65535)
+                return -1;
+        }
+    }
+
+    return 0;
 }
 
 int HttpParser::execute(const std::string &stream, int &at, int len)

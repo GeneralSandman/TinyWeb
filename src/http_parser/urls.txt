@@ -111,6 +111,7 @@ http://ABC.com:/%7esmith/home.html
 1
 http://www.baidu.com/link?url=-xBr1W_69PMdd5rdglCQljN1Rm5jA-7umx885_TZEZS
 1
+/index.html
 
 
 
@@ -137,4 +138,12 @@ http://abc.com:80/~smith/home.html
 http://ABC.com/%7Esmith/home.html
 1
 http://ABC.com:/%7esmith/home.html
+1
+http:///
+0
+http://@hostname/
+1
+http://?queurystring/
+0
+http://#fragment/
 1
