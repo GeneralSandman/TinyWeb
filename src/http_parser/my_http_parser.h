@@ -235,7 +235,7 @@ class HttpParserSettings
   public:
 	HttpParserSettings()
 	{
-		std::cout << "class HttpParserSettings constructor\n";
+		// std::cout << "class HttpParserSettings constructor\n";
 	}
 
 	void setGetMessageCallback(const HttpCallback &c)
@@ -280,7 +280,7 @@ class HttpParserSettings
 
 	~HttpParserSettings()
 	{
-		std::cout << "class HttpParserSettings destructor\n";
+		// std::cout << "class HttpParserSettings destructor\n";
 	}
 
 	friend class HttpParser;
@@ -313,7 +313,7 @@ class HttpParser
 		: m_pSettings(set),
 		  m_pData(nullptr)
 	{
-		std::cout << "class HttpParser constructor\n";
+		// std::cout << "class HttpParser constructor\n";
 	}
 
 	void setType(enum httpParserType type);
@@ -341,7 +341,7 @@ class HttpParser
 
 	~HttpParser()
 	{
-		std::cout << "class HttpParser destructor\n";
+		// std::cout << "class HttpParser destructor\n";
 	}
 };
 

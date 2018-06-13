@@ -23,37 +23,37 @@ void printUrl(const Url *url)
     {
         int off = url->fields[HTTP_UF_SCHEMA].offset;
         int len = url->fields[HTTP_UF_SCHEMA].len;
-        printf("schema:%.*s", len, url->data + off);
+        printf("schema:%.*s\n", len, url->data + off);
     }
     if (url->field_set & HTTP_UF_HOST)
     {
         int off = url->fields[HTTP_UF_HOST].offset;
         int len = url->fields[HTTP_UF_HOST].len;
-        printf("\thost:%.*s", len, url->data + off);
+        printf("host:%.*s\n", len, url->data + off);
     }
     if (url->field_set & HTTP_UF_PORT)
     {
         int off = url->fields[HTTP_UF_PORT].offset;
         int len = url->fields[HTTP_UF_PORT].len;
-        printf("\tport:%.*s", len, url->data + off);
+        printf("port:%.*s\n", len, url->data + off);
     }
     if (url->field_set & HTTP_UF_PATH)
     {
         int off = url->fields[HTTP_UF_PATH].offset;
         int len = url->fields[HTTP_UF_PATH].len;
-        printf("\tpath:%.*s", len, url->data + off);
+        printf("path:%.*s\n", len, url->data + off);
     }
     if (url->field_set & HTTP_UF_QUERY)
     {
         int off = url->fields[HTTP_UF_QUERY].offset;
         int len = url->fields[HTTP_UF_QUERY].len;
-        printf("\tquery:%.*s", len, url->data + off);
+        printf("query:%.*s\n", len, url->data + off);
     }
     if (url->field_set & HTTP_UF_FRAGMENT)
     {
         int off = url->fields[HTTP_UF_FRAGMENT].offset;
         int len = url->fields[HTTP_UF_FRAGMENT].len;
-        printf("\tfragment:%.*s\n", len, url->data + off);
+        printf("fragment:%.*s\n", len, url->data + off);
     };
 }
 
@@ -341,110 +341,68 @@ enum state HttpParser::parseUrlChar(const char ch,
     {
     case s_requ_url_begin:
         if (ch == '/') //or ch=='*' :method CONNECT
-        {
-            return s_requ_path;
-        }
+            return s_requ_path; // /index.html
         else if (isAlpha(ch))
-        {
             return s_requ_schema;
-        }
         break;
 
     case s_requ_schema: //finished
         if (isAlpha(ch))
-        {
             return s_requ_schema;
-        }
         else if (ch == ':')
-        {
             return s_requ_schema_slash;
-        }
         break;
 
     case s_requ_schema_slash: //finished
         if (ch == '/')
-        {
             return s_requ_schema_slash_slash;
-        }
         break;
 
     case s_requ_schema_slash_slash: //finished
         if (ch == '/')
-        {
             return s_requ_server_start;
-        }
         break;
 
     case s_requ_server_start:
 
         if (ch == '/') //http:///
-        {
             return s_error;
-        }
         else if (ch == '@') //http://@hostname/ is vaild
-        {
             return s_requ_server_at;
-        }
         else if (ch == '?') //http://?queurystring/ is invaild
-        {
             return s_error;
-        }
         else if (ch == '#')
-        {
             return s_error;
-        }
         else if (ch == '[') //Ipv6 begin
-        {
             return s_requ_server;
-        }
         else if (ch == ']') //http://]:80/
-        {
             return s_error;
-        }
         else if (isUserInfoChar(ch)) //FIXME:
-        {
             return s_requ_server;
-        }
         break;
 
     case s_requ_server: //finished
 
         if (ch == '/')
-        {
             return s_requ_path;
-        }
         else if (ch == '@')
-        {
             return s_requ_server_at;
-        }
         else if (ch == '?')
-        {
             return s_requ_query_string_start;
-        }
         else if (ch == '#')
-        {
             return s_requ_fragment_start;
-        }
         else if (isUserInfoChar(ch) ||
                  ch == '[') //Ipv6 or userInfochar
-        {
             return s_requ_server;
-        }
         break;
 
     case s_requ_path: //finished
         if (isUrlChar(ch))
-        {
             return s_requ_path;
-        }
         else if (ch == '?')
-        {
             return s_requ_query_string_start;
-        }
         else if (ch == '#')
-        {
             return s_requ_fragment_start;
-        }
         break;
 
     case s_requ_server_at: //finished
@@ -527,7 +485,7 @@ int HttpParser::parseUrl(const std::string &stream,
                          int len,
                          Url *result)
 {
-    std::cout << "function parseUrl\n";
+    // std::cout << "function parseUrl\n";
     memset(result, sizeof(Url), 0);
 
     char *begin = (char *)stream.c_str();
@@ -540,7 +498,9 @@ int HttpParser::parseUrl(const std::string &stream,
 
     for (int i = 0; i < len; i++)
     {
-        stat = parseUrlChar(*(begin + at + i), prestat);
+        char ch = *(begin + at + i);
+        // std::cout << ch << (unsigned int)prestat << std::endl;
+        stat = parseUrlChar(ch, prestat);
         // field = 0;
 
         switch (stat)
@@ -555,6 +515,7 @@ int HttpParser::parseUrl(const std::string &stream,
         case s_requ_server_start:
         case s_requ_query_string_start:
         case s_requ_fragment_start:
+            prestat = stat;
             continue;
             break;
 
@@ -605,8 +566,8 @@ int HttpParser::parseUrl(const std::string &stream,
     {
         int offset = result->fields[HTTP_UF_HOST].offset;
         int len = result->fields[HTTP_UF_HOST].len;
-        if (-1 == parseHost(stream, offset, len, result, has_at_char))
-            return -1;
+        // if (-1 == parseHost(stream, offset, len, result, has_at_char))
+        //     return -1;
     }
     else if (result->field_set & (1 << HTTP_UF_SCHEMA)) // http:///index.html is invaild
         return -1;
@@ -623,6 +584,7 @@ int HttpParser::parseUrl(const std::string &stream,
             if (port > 65535)
                 return -1;
         }
+        // std::cout << "port:" << port << std::endl;
     }
 
     return 0;
@@ -791,9 +753,9 @@ int HttpParser::parseHeader(const std::string &stream,
 
         case s_http_header_done:
             // std::cout << "key begin:" << keybegin
-                    //   << " key len:" << keylen
-                    //   << "->value begin:" << valuebegin
-                    //   << " value len:" << valuelen << std::endl;
+            //   << " key len:" << keylen
+            //   << "->value begin:" << valuebegin
+            //   << " value len:" << valuelen << std::endl;
             printf("%.*s->%.*s^\n", keylen, begin + keybegin,
                    valuelen, begin + valuebegin);
             headers++;

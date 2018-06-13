@@ -169,21 +169,94 @@ void testHttpParserRequest()
     cout << "begin:" << begin << endl;
 }
 
+void testParseHost()
+{
+    vector<string> hosts = {
+        "127.0.0.1",
+        "255.0.0.0:80",
+        "www.dissigil.cn:8080",
+        "/www.dissigil.cn:80",
+        "[1:2::3:4]",
+        "[1:2::3:4]:80",
+        "[2001:0000:0000:0000:0000:0000:1.9.1.1]",
+        "a.tbcdn.cn:",
+        "a:b@host.com:8080",
+        "a:b@@hostname:443",
+        "a:b@@hostname",
+        "foo bar",
+        "foo\rbar",
+        "foo\nbar",
+        "foo\tbar",
+        "foo\fbar",
+        "a%20:b@host.com",
+        "@hostname",
+        "http://www.dissigil.cn/"};
+
+    for (int i = 0; i < hosts.size(); i++)
+    {
+    }
+}
+
 void testParseUrl()
 {
+    //have bug, wr need init something
     //replace urls with urls.txt
     vector<string> urls = {
-        "https://blog.csdn.net/foruok/article/details/8954726",
-        "www.baidu.com",
-        "https://www.baidu.com",
+        // "https://blog.csdn.net/foruok/article/details/8954726",
+        // "www.baidu.com",
+        "www.dissigil.cn", //false
+        "www.dissigil.cn/index.html",
+        "www.dissigil.cn:80",
+        "www.dissigil.cn:80/index.html",
+        "www.dissigil.cn/home/artile/li.html",
+
+        "https://www.dissigil.cn", //true
+        "https://www.dissigil.cn/index.html",
+        "https://www.dissigil.cn:80",
+        "https://www.dissigil.cn:80/index.html",
+        "https://www.dissigil.cn/home/artile/li.html",
+
+        "http/www.dissigil.cn", //false
+        "http//www.dissigil.cn",
+        "http:www.dissigil.cn",
+        "http:/www.dissigil.cn",
+        "http:://www.dissigil.cn",
+
+        "/index.html", //true
         "http://127.0.0.1:9999/",
-        "http://www.dissigil.cn/resume.pdf",
-        "https::///ksdjf.cn/",
-        "https::/dsjfll.cb.cb//",
-        "https://did.cn/../dsf"};
+        "http://[::]/index.html",
+        "/asdf/adsd/sdf.html",
+        "http://a:b@host.com:8080/p/a/t/h?query=string#hash",
+
+        "//index.html", //false
+        "http://foo boar/",
+        "http://foo\nboar/",
+        "http://foo\rboar/",
+        "http://foo\tboar/"
+
+    };
+
+    HttpParserSettings settings;
 
     for (int i = 0; i < urls.size(); i++)
     {
+        HttpParser parser(&settings);
+        parser.setType(HTTP_REQUEST);
+        int begin = 0;
+
+        Url result;
+        std::cout << i << "->" << urls[i] << std::endl;
+        if (-1 == parser.parseUrl(urls[i], begin, urls[i].size(), &result))
+        {
+            std::cout << "parse error\n"
+                      << std::endl;
+            continue;
+        }
+        // parser.parseHeader(urls[i], begin, urls[i].size());
+        std::cout << "parse success" << std::endl;
+        printUrl(&result);
+        std::cout << std::endl;
+        // cout << "begin:" << begin << endl;
     }
 }
 
@@ -221,7 +294,7 @@ void testParseHeader()
         "From: user@email.com\r\n"
         "Host: www.zcmhi.com\r\n"
         "\r\n",
-        };
+    };
 
     HttpParserSettings settings;
 
@@ -231,7 +304,7 @@ void testParseHeader()
         parser.setType(HTTP_REQUEST);
         int begin = 0;
         std::cout << "---" << i << "---\n";
-        parser.parseHeader(strs[i], begin, strs[i].size());
+        // parser.parseHost(strs[i], begin, strs[i].size());
         // cout << "begin:" << begin << endl;
     }
 }
@@ -241,6 +314,8 @@ int main()
     // testHttpParser();
     // testHttpParserResponse();
     // testHttpParserRequest();
-    testParseHeader();
+    // testParseHost();
+    testParseUrl();
+    // testParseHeader();
     return 0;
 }
