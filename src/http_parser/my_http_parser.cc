@@ -15,6 +15,7 @@
 #include "my_http_parser.h"
 
 #include <string.h>
+#include <stdio.h>
 
 void printUrl(const Url *url)
 {
@@ -644,7 +645,9 @@ enum http_header_state HttpParser::parseHeaderChar(const char ch,
             return s_http_headers_almost_done;
         else if (ch == '\n')
             return s_http_headers_done;
-        else if (isAlpha(ch) || ch == ':')
+        else if (ch == ':')
+            return s_http_header_start;
+        else if (isAlpha(ch))
             return s_http_header_key_start;
         break;
 
@@ -652,7 +655,7 @@ enum http_header_state HttpParser::parseHeaderChar(const char ch,
         if (isAlpha(ch) || ch == '-')
             return s_http_header_key;
         else if (ch == ':')
-            return s_http_header_value_start;
+            return s_http_header_colon;
         break;
 
     case s_http_header_key:
@@ -671,30 +674,53 @@ enum http_header_state HttpParser::parseHeaderChar(const char ch,
         if (ch == ' ')
             return s_http_header_space;
         else if (ch == '\r')
+            return s_http_header_error;
+        else if (ch == '\n')
+            return s_http_header_error;
+        return s_http_header_value_start;
+        break;
+
+    case s_http_header_value_start:
+        if (ch == '\r')
+            return s_http_header_almost_done;
+        else if (ch == '\n')
+            return s_http_header_done;
+        return s_http_header_value;
+        break;
+
+    case s_http_header_value:
+        if (ch == '\r')
+            return s_http_header_almost_done;
+        else if (ch == '\n')
+            return s_http_header_done;
+        return s_http_header_value;
+        break;
+
+    case s_http_header_almost_done:
+        if (ch == '\r')
             return s_http_header_almost_done;
         else if (ch == '\n')
             return s_http_header_done;
         break;
 
-    case s_http_header_value_start:
-        
-        break;
-
-    case s_http_header_value:
-        break;
-
-    case s_http_header_almost_done:
-        break;
-
     case s_http_header_done:
-
+        if (ch == '\r')
+            return s_http_headers_almost_done;
+        else if (ch == '\n')
+            return s_http_headers_done;
         break;
 
     case s_http_headers_almost_done:
-
+        if (ch == '\r')
+            return s_http_headers_almost_done;
+        else if (ch == '\n')
+            return s_http_headers_done;
+        return s_http_header_error;
         break;
 
     case s_http_headers_done:
+        //impossible ????
+        return s_http_header_start;
         break;
     }
 
@@ -711,8 +737,13 @@ int HttpParser::parseHeader(const std::string &stream,
     enum http_header_state prestat = s_http_header_start;
     enum http_header_state stat;
 
+    unsigned int headers = 0;
+
     unsigned int keybegin = 0;
+    unsigned int keylen = 0;
+
     unsigned int valuebegin = 0;
+    unsigned int valuelen = 0;
 
     for (int i = 0; i < len; i++)
     {
@@ -726,36 +757,56 @@ int HttpParser::parseHeader(const std::string &stream,
             break;
 
         case s_http_header_start:
-            //not finished
+            //do nothing
             break;
 
         case s_http_header_key_start:
-
             keybegin = at + i;
+            keylen = 1;
             break;
 
         case s_http_header_key:
+            keylen++;
+            break;
+
+        case s_http_header_colon:
+            //do nothing
+            break;
+
+        case s_http_header_space:
+            //do nothing
             break;
 
         case s_http_header_value_start:
             valuebegin = at + i;
+            valuelen = 1;
             break;
 
         case s_http_header_value:
+            valuelen++;
             break;
 
         case s_http_header_almost_done:
             break;
 
         case s_http_header_done:
-
+            // std::cout << "key begin:" << keybegin
+                    //   << " key len:" << keylen
+                    //   << "->value begin:" << valuebegin
+                    //   << " value len:" << valuelen << std::endl;
+            printf("%.*s->%.*s^\n", keylen, begin + keybegin,
+                   valuelen, begin + valuebegin);
+            headers++;
+            keybegin = keylen = 0;
+            valuebegin = valuelen = 0;
+            stat = s_http_header_start;
             break;
 
         case s_http_headers_almost_done:
-
             break;
 
         case s_http_headers_done:
+            std::cout << "header number:" << headers << std::endl;
             break;
         }
 

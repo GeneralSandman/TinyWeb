@@ -184,7 +184,55 @@ void testParseUrl()
 
     for (int i = 0; i < urls.size(); i++)
     {
-        
+    }
+}
+
+void testParseHeader()
+{
+    vector<string> strs = {
+        "Connection: close\r\n"
+        "Server: Tengine\r\n"
+        "Connection: keep-alive\r\n"
+        "Vary: Ali-Detector-Type\r\n"
+        "\r\n",
+
+        "sdfasd",
+
+        "Connection: upgrade\r\n"
+        ":authority: pingtas.qq.com\r\n"
+        ":method: GET\r\n"
+        ":path: /webview/pingd?dm=join.qq.com&pvi=3220461568&si=s2709209088&url=/apply.php&arg=&ty=1&rdm=&rurl=&rarg=&adt=&r2=49873873&r3=-1&r4=1&fl=&scr=1366x768&scl=24-bit&lg=zh-cn&jv=&tz=-8&ct=&ext=adid=&pf=&random=1528878932585\r\n"
+        ":scheme: https\r\n"
+        "\r\n",
+
+        "Accept: text/plain, text/html\r\n"
+        "Accept-Charset: iso-8859-5\r\n"
+        "Accept-Encoding: compress, gzip\r\n"
+        "Accept-Language: en,zh\r\n"
+        "Accept-Ranges: bytes\r\n"
+        "Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==\r\n"
+        "Cache-Control: no-cache\r\n"
+        "Connection: close\r\n"
+        "Cookie: $Version=1; Skin=new;\r\n"
+        "Content-Length: 348\r\n"
+        "Content-Type: application/x-www-form-urlencoded\r\n"
+        "Date: Tue, 15 Nov&nbsp;2010 08:12:31 GMT\r\n"
+        "Expect: 100-continue\r\n"
+        "From: user@email.com\r\n"
+        "Host: www.zcmhi.com\r\n"
+        "\r\n",
+        };
+
+    HttpParserSettings settings;
+
+    for (int i = 0; i < strs.size(); i++)
+    {
+        HttpParser parser(&settings);
+        parser.setType(HTTP_REQUEST);
+        int begin = 0;
+        std::cout << "---" << i << "---\n";
+        parser.parseHeader(strs[i], begin, strs[i].size());
+        // cout << "begin:" << begin << endl;
     }
 }
 
@@ -192,6 +240,7 @@ int main()
 {
     // testHttpParser();
     // testHttpParserResponse();
-    testHttpParserRequest();
+    // testHttpParserRequest();
+    testParseHeader();
     return 0;
 }
