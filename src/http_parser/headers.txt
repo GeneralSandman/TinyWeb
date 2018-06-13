@@ -1,0 +1,123 @@
+Date: Tue, 04 Aug 2009 07:59:32 GMT\r\n
+Server: Apache\r\n
+X-Powered-By: Servlet/2.5 JSP/2.1\r\n
+Content-Type: text/xml; charset=utf-8\r\n
+Connection: close\r\n
+Server: Tengine\r\n
+Date: Mon, 11 Jun 2018 07:18:14 GMT\r\n
+Content-Type: text/html; charset=utf-8\r\n
+Connection: keep-alive\r\n
+Vary: Ali-Detector-Type\r\n
+Cache-Control: max-age=60, s-maxage=300\r\n
+X-Snapshot-Age: 1\r\n
+Content-MD5: DheThrvjUs/c+FtbVv7Sbw==\r\n
+ETag: W/"29d7-163e38938b3"\r\n
+Via: cache9.l2cm12-1[0,304-0,H], cache48.l2cm12-1[0,0], cache6.cn295[0,304-0,H], cache6.cn295[1,0]\r\n
+Age: 121\r\n
+X-Cache: HIT TCP_IMS_HIT dirn:6:453356086 mlen:-1\r\n
+Timing-Allow-Origin: *\r\n
+EagleId: 7ceee81815287014946507756e\r\n
+Strict-Transport-Security: max-age=31536000\r\n
+Host: admin.omsg.cn\r\n
+Accept: */*\r\n
+Connection: Keep-Alive\r\n
+Host: 127.0.0.1:9999\r\n
+Connection: keep-alive\r\n
+Upgrade-Insecure-Requests: 1\r\n
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.162 Safari/537.36\r\n
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8\r\n
+Accept-Encoding: gzip, deflate, br\r\n
+Accept-Language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7\r\n
+Connection: keep-alive\r\n
+Connection: close\r\n
+Connection: upgrade\r\n
+:authority: pingtas.qq.com\r\n
+:method: GET\r\n
+:path: /webview/pingd?dm=join.qq.com&pvi=3220461568&si=s2709209088&url=/apply.php&arg=&ty=1&rdm=&rurl=&rarg=&adt=&r2=49873873&r3=-1&r4=1&fl=&scr=1366x768&scl=24-bit&lg=zh-cn&jv=&tz=-8&ct=&ext=adid=&pf=&random=1528878932585\r\n
+:scheme: https\r\n
+accept: image/webp,image/apng,image/*,*/*;q=0.8\r\n
+accept-encoding: gzip, deflate, br\r\n
+accept-language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7\r\n
+cookie: pgv_pvi=3220461568; pt2gguin=o2862161626; RK=Rbj0aNsU0b; ptcz=aaab7e63732cfa999fa38b1969c6111b540a2fb88d790cf692b2fae82bda234c; ptui_loginuin=2862161626; pgv_pvid=9544573568; o_cookie=2862161626; pac_uid=1_2862161626; pgv_si=s2709209088\r\n
+referer: https://join.qq.com/apply.php\r\n
+user-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.162 Safari/537.36\r\n
+access-control-allow-origin: https://xui.ptlogin2.qq.com/cgi-bin/xlogin?appid=1600001285&daid=6&s_url=https%3A%2F%2Fjoin.qq.com\r\n
+cache-control: max-age=2592000\r\n
+content-length: 298\r\n
+content-type: image/webp\r\n
+date: Sat, 02 Jun 2018 08:31:53 GMT\r\n
+expires: Mon, 02 Jul 2018 08:31:52 GMT\r\n
+last-modified: Mon, 19 Mar 2018 10:19:20 GMT\r\n
+server: NWSs\r\n
+server_ip: 58.56.110.149\r\n
+status: 304\r\n
+timing-allow-origin: https://xui.ptlogin2.qq.com/cgi-bin/xlogin?appid=1600001285&daid=6&s_url=https%3A%2F%2Fjoin.qq.com\r\n
+vary: Accept\r\n
+x-cache-lookup: Hit From Disktank\r\n
+x-datasrc: 1\r\n
+x-nws-log-uuid: ce4a14b1-aa97-449a-94ca-b8d9bd887607\r\n
+x-reqgue: 0\r\n
+Accept: text/plain, text/html\r\n
+Accept-Charset: iso-8859-5\r\n
+Accept-Encoding: compress, gzip\r\n
+Accept-Language: en,zh\r\n
+Accept-Ranges: bytes\r\n
+Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==\r\n
+Cache-Control: no-cache\r\n
+Connection: close\r\n
+Cookie: $Version=1; Skin=new;\r\n
+Content-Length: 348\r\n
+Content-Type: application/x-www-form-urlencoded\r\n
+Date: Tue, 15 Nov&nbsp;2010 08:12:31 GMT\r\n
+Expect: 100-continue\r\n
+From: user@email.com\r\n
+Host: www.zcmhi.com\r\n
+If-Match: “737060cd8c284d8af7ad3082f209582d”\r\n
+If-Modified-Since: Sat, 29 Oct 2010 19:43:31 GMT\r\n
+If-None-Match: “737060cd8c284d8af7ad3082f209582d”\r\n
+If-Range: “737060cd8c284d8af7ad3082f209582d”\r\n
+If-Unmodified-Since: Sat, 29 Oct 2010 19:43:31 GMT\r\n
+Max-Forwards: 10\r\n
+Pragma: no-cache\r\n
+Proxy-Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==\r\n
+Range: bytes=500-999\r\n
+Referer: http://www.zcmhi.com/archives/71.html\r\n
+TE: trailers,deflate;q=0.5\r\n
+Upgrade: HTTP/2.0, SHTTP/1.3, IRC/6.9, RTA/x11\r\n
+User-Agent: Mozilla/5.0 (Linux; X11)\r\n
+Via: 1.0 fred, 1.1 nowhere.com (Apache/1.1)\r\n
+Warn: 199 Miscellaneous warning\r\n
+Accept-Ranges: bytes\r\n
+Age: 12\r\n
+Allow: GET, HEAD\r\n
+Cache-Control: no-cache\r\n
+Content-Encoding: gzip\r\n
+Content-Language: en,zh\r\n
+Content-Length: 348\r\n
+Content-Location: /index.htm\r\n
+Content-MD5: Q2hlY2sgSW50ZWdyaXR5IQ==\r\n
+Content-Range: bytes 21010-47021/47022\r\n
+Content-Type: text/html; charset=utf-8\r\n
+Date: Tue, 15 Nov 2010 08:12:31 GMT\r\n
+ETag: “737060cd8c284d8af7ad3082f209582d”\r\n
+Expires: Thu, 01 Dec 2010 16:00:00 GMT\r\n
+Last-Modified: Tue, 15 Nov 2010 12:45:26 GMT\r\n
+Location: http://www.zcmhi.com/archives/94.html\r\n
+Pragma: no-cache\r\n
+Proxy-Authenticate: Basic\r\n
+Retry-After: 120\r\n
+Server: Apache/1.3.27 (Unix) (Red-Hat/Linux)\r\n
+Set-Cookie: UserID=JohnDoe; Max-Age=3600; Version=1\r\n
+Trailer: Max-Forwards\r\n
+Transfer-Encoding:chunked\r\n
+Vary: *\r\n
+Via: 1.0 fred, 1.1 nowhere.com (Apache/1.1)\r\n
+Warning: 199 Miscellaneous warning\r\n
+WWW-Authenticate: Basic\r\n
+Connection: keep-alive\r\n
+Date: Wed, 13 Jun 2018 09:00:07 GMT\r\n
+ETag: "5ad9a108-159c3"\r\n
+Last-Modified: Fri, 20 Apr 2018 08:12:56 GMT\r\n
+Server: nginx/1.4.6 (Ubuntu)\r\n
+\r\n
+

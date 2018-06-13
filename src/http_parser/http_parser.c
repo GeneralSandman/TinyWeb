@@ -1194,7 +1194,7 @@ reexecute:
 
         MARK(header_field);
 
-        parser->index = 0;
+        parser->index = 0;//index=0
         UPDATE_STATE(s_header_field);
 
         switch (c) {
@@ -1646,7 +1646,7 @@ reexecute:
         break;
       }
 
-      case s_header_value_lws:
+      case s_header_value_lws://?????
       {
         if (ch == ' ' || ch == '\t') {
           UPDATE_STATE(s_header_value_start);

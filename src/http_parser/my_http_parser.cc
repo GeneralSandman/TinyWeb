@@ -627,7 +627,145 @@ int HttpParser::parseUrl(const std::string &stream,
     return 0;
 }
 
-int HttpParser::execute(const std::string &stream, int &at, int len)
+enum http_header_state HttpParser::parseHeaderChar(const char ch,
+                                                   enum http_header_state stat)
+{
+    switch (stat)
+    {
+    case s_http_header_error:
+        //impossible
+        return s_http_header_error;
+        break;
+
+    case s_http_header_start:
+        if (ch == ' ')
+            return s_http_header_start;
+        else if (ch == '\r')
+            return s_http_headers_almost_done;
+        else if (ch == '\n')
+            return s_http_headers_done;
+        else if (isAlpha(ch) || ch == ':')
+            return s_http_header_key_start;
+        break;
+
+    case s_http_header_key_start:
+        if (isAlpha(ch) || ch == '-')
+            return s_http_header_key;
+        else if (ch == ':')
+            return s_http_header_value_start;
+        break;
+
+    case s_http_header_key:
+        if (ch == ':')
+            return s_http_header_colon;
+        else if (isAlpha(ch) || ch == '-')
+            return s_http_header_key;
+        break;
+
+    case s_http_header_colon:
+        if (ch == ' ')
+            return s_http_header_space;
+        break;
+
+    case s_http_header_space:
+        if (ch == ' ')
+            return s_http_header_space;
+        else if (ch == '\r')
+            return s_http_header_almost_done;
+        else if (ch == '\n')
+            return s_http_header_done;
+        break;
+
+    case s_http_header_value_start:
+        
+        break;
+
+    case s_http_header_value:
+        break;
+
+    case s_http_header_almost_done:
+        break;
+
+    case s_http_header_done:
+
+        break;
+
+    case s_http_headers_almost_done:
+
+        break;
+
+    case s_http_headers_done:
+        break;
+    }
+
+    return s_http_header_error;
+}
+
+int HttpParser::parseHeader(const std::string &stream,
+                            int &at,
+                            int len)
+{
+
+    char *begin = (char *)stream.c_str();
+
+    enum http_header_state prestat = s_http_header_start;
+    enum http_header_state stat;
+
+    unsigned int keybegin = 0;
+    unsigned int valuebegin = 0;
+
+    for (int i = 0; i < len; i++)
+    {
+        char ch = *(begin + at + i);
+        stat = parseHeaderChar(ch, prestat);
+
+        switch (stat)
+        {
+        case s_http_header_error:
+            return -1;
+            break;
+
+        case s_http_header_start:
+            //not finished
+            break;
+
+        case s_http_header_key_start:
+
+            keybegin = at + i;
+            break;
+
+        case s_http_header_key:
+            break;
+
+        case s_http_header_value_start:
+            valuebegin = at + i;
+            break;
+
+        case s_http_header_value:
+            break;
+
+        case s_http_header_almost_done:
+            break;
+
+        case s_http_header_done:
+
+            break;
+
+        case s_http_headers_almost_done:
+
+            break;
+
+        case s_http_headers_done:
+            break;
+        }
+
+        prestat = stat;
+    }
+}
+
+int HttpParser::execute(const std::string &stream,
+                        int &at,
+                        int len)
 {
     std::cout << "function HttpParser::execute()\n";
 
@@ -649,7 +787,21 @@ int HttpParser::execute(const std::string &stream, int &at, int len)
 
     switch (m_nState)
     {
-        // switch to some init state;
+    // switch to some init state;
+    case s_resp_start:
+
+        break;
+
+    case s_requ_start:
+
+        break;
+
+    case s_start_resp_or_requ:
+
+        break;
+
+    default:
+        break;
     }
 
     for (int i = 0; i < len; i++)

@@ -1,0 +1,2 @@
+GET http://admin.omsg.cn/uploadpic/2016121034000012.png HTTP/1.1\r\n
+GET / HTTP/1.1\r\n

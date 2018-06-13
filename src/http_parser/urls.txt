@@ -112,6 +112,10 @@ http://ABC.com:/%7esmith/home.html
 http://www.baidu.com/link?url=-xBr1W_69PMdd5rdglCQljN1Rm5jA-7umx885_TZEZS
 1
 /index.html
+1
+https://pingtas.qq.com/webview/pingd?dm=join.qq.com&pvi=3220461568&si=s2709209088&url=/apply.php&arg=&ty=1&rdm=&rurl=&rarg=&adt=&r2=49873873&r3=-1&r4=1&fl=&scr=1366x768&scl=24-bit&lg=zh-cn&jv=&tz=-8&ct=&ext=adid=&pf=&random=1528878932585
+1
+
 
 
 

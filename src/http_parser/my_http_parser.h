@@ -21,6 +21,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <map>
+#include <list>
 #include <boost/function.hpp>
 
 #define CR '\r'
@@ -146,7 +147,24 @@ enum http_host_state
 	s_http_host_port
 };
 
-struct Url
+enum http_header_state
+{
+	s_http_header_error = 1,
+
+	s_http_header_start,
+	s_http_header_key_start,
+	s_http_header_key,
+	s_http_header_colon,
+	s_http_header_space,
+	s_http_header_value_start,
+	s_http_header_value,
+	s_http_header_almost_done,
+	s_http_header_done,
+	s_http_headers_almost_done,
+	s_http_headers_done,
+};
+
+typedef struct Url
 {
 	unsigned int port : 16;
 	unsigned int field_set : 16;
@@ -156,9 +174,38 @@ struct Url
 		unsigned int offset : 16;
 		unsigned int len : 16;
 	} fields[HTTP_UF_MAX];
+} Url;
+
+enum httpHeaderField
+{
+	HTTP_HF__SCHEMA = 0,
+	HTTP_HF__HOST = 1,
+	HTTP_HF_KEEP_CONNECTION = 2,
+	HTTP_HF_CONTENT_LENGTH = 3,
+	HTTP_HF_UPGRADE = 4,
+	HTTP_HF_TRANSFER_ENCODING_CHUNKED = 5,
+	HTTP_HF__USERINFO = 6,
+	HTTP_HF__MAX = 7
 };
 
-typedef struct Url Url;
+typedef struct HttpHeader
+{
+	std::string key; //take place with string_t
+	std::string value;
+} HttpHeader;
+
+struct HttpHeaders
+{
+	HttpHeader *host;
+	HttpHeader *connection;
+	HttpHeader *content_lenght;
+	HttpHeader *transfer_encoding;
+	HttpHeader *if_modified_since;
+	HttpHeader *referer;
+	HttpHeader *upgrade;
+
+	std::list<HttpHeader *> generals; //take place in list_t
+};
 
 void printUrl(const Url *url);
 
@@ -286,6 +333,9 @@ class HttpParser
 
 	enum state parseUrlChar(const char ch, enum state s);
 	int parseUrl(const std::string &stream, int &at, int len, Url *result);
+
+	enum http_header_state parseHeaderChar(const char ch, enum http_header_state s);
+	int parseHeader(const std::string &stream, int &at, int len);
 
 	int execute(const std::string &stream, int &at, int len);
 
