@@ -791,6 +791,8 @@ int HttpParser::execute(const std::string &stream,
     const char *body_begin = nullptr;
     const char *method_begin = nullptr;
 
+    unsigned int headers = 0;
+
     if (getErrno() != HPE_OK)
         return 0;
 
@@ -883,7 +885,7 @@ int HttpParser::execute(const std::string &stream,
         case s_resp_version_minor:
             checkOrGoError((ch == ' '));
             m_nState = s_resp_status_code_start;
-            std::cout << "get response http version:HTTP/" << m_nHttpVersionMajor << "."
+            std::cout << "response http version:HTTP/" << m_nHttpVersionMajor << "."
                       << m_nHttpVersionMinor << std::endl;
             break;
 
@@ -900,7 +902,7 @@ int HttpParser::execute(const std::string &stream,
             if (ch == ' ')
             {
                 m_nState = s_resp_status_phrase_start;
-                std::cout << "get http status code:" << m_nStatusCode << std::endl;
+                std::cout << "http status code:" << m_nStatusCode << std::endl;
             }
             else
             {
@@ -924,7 +926,7 @@ int HttpParser::execute(const std::string &stream,
             else if (ch == '\n')
             {
                 std::string phrase(status_phrase_begin, begin + at + i);
-                std::cout << "get status phrase:" << phrase << std::endl;
+                std::cout << "status phrase:" << phrase << std::endl;
                 m_nState = s_resp_line_done;
             }
             else if (isAlpha(ch))
@@ -941,7 +943,7 @@ int HttpParser::execute(const std::string &stream,
             else if (ch == '\n')
             {
                 std::string phrase(status_phrase_begin, begin + at + i);
-                std::cout << "get status phrase:" << phrase << std::endl;
+                std::cout << "status phrase:" << phrase << std::endl;
                 std::cout << "request line done:" << std::endl;
                 m_nState = s_resp_line_done;
             }
@@ -1132,6 +1134,7 @@ int HttpParser::execute(const std::string &stream,
             {
                 std::string value(header_value_begin, begin + at + i);
                 std::cout << "value:" << value << std::endl;
+                headers++;
                 m_nState = s_header_almost_done;
             }
             if (ch == '\n')
@@ -1153,6 +1156,7 @@ int HttpParser::execute(const std::string &stream,
             }
             else if (ch == '\r')
             {
+                m_nState = s_headers_almost_done;
             }
             else if (ch == '\n')
             {
@@ -1162,7 +1166,8 @@ int HttpParser::execute(const std::string &stream,
 
         case s_headers_almost_done:
             checkOrGoError((ch == '\n'));
-            m_nState = s_header_done;
+            std::cout << "headers Number:" << headers << std::endl;
+            m_nState = s_headers_done;
             break;
 
         case s_headers_done:
