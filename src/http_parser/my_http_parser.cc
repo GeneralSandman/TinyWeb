@@ -340,7 +340,7 @@ enum state HttpParser::parseUrlChar(const char ch,
     switch (stat)
     {
     case s_requ_url_begin:
-        if (ch == '/') //or ch=='*' :method CONNECT
+        if (ch == '/')          //or ch=='*' :method CONNECT
             return s_requ_path; // /index.html
         else if (isAlpha(ch))
             return s_requ_schema;
@@ -782,7 +782,7 @@ int HttpParser::execute(const std::string &stream,
 {
     std::cout << "function HttpParser::execute()\n";
 
-    const char *begin = stream.c_str() + at;
+    const char *begin = stream.c_str();
 
     const char *url_begin = nullptr;
     const char *status_phrase_begin = nullptr;
@@ -819,7 +819,7 @@ int HttpParser::execute(const std::string &stream,
 
     for (int i = 0; i < len; i++)
     {
-        char ch = *(begin + i);
+        char ch = *(begin + at + i);
 
         switch (m_nState)
         {
@@ -912,7 +912,7 @@ int HttpParser::execute(const std::string &stream,
 
         case s_resp_status_phrase_start:
             checkOrGoError(isAlpha(ch));
-            status_phrase_begin = begin + i;
+            status_phrase_begin = begin + at + i;
             m_nState = s_resp_status_phrase;
             break;
 
@@ -923,7 +923,7 @@ int HttpParser::execute(const std::string &stream,
             }
             else if (ch == '\n')
             {
-                std::string phrase(status_phrase_begin, begin + i);
+                std::string phrase(status_phrase_begin, begin + at + i);
                 std::cout << "get status phrase:" << phrase << std::endl;
                 m_nState = s_resp_line_done;
             }
@@ -940,7 +940,7 @@ int HttpParser::execute(const std::string &stream,
             }
             else if (ch == '\n')
             {
-                std::string phrase(status_phrase_begin, begin + i);
+                std::string phrase(status_phrase_begin, begin + at + i);
                 std::cout << "get status phrase:" << phrase << std::endl;
                 std::cout << "request line done:" << std::endl;
                 m_nState = s_resp_line_done;
@@ -960,17 +960,17 @@ int HttpParser::execute(const std::string &stream,
             }
 
             checkOrGoError(isAlpha(ch));
-            header_key_begin = begin + i;
+            header_key_begin = begin + at + i;
             m_nState = s_header_key_start;
             break;
 
         case s_requ_start:
             m_nState = s_requ_method; //FIXME:
-            method_begin = begin + i;
+            method_begin = begin + at + i;
             break;
 
         case s_requ_method_start:
-            // method_begin = begin + i;
+            // method_begin = begin + at + i;
             if (ch == ' ')
             {
             }
@@ -981,58 +981,54 @@ int HttpParser::execute(const std::string &stream,
         case s_requ_method:
             if (ch == ' ')
             {
-                std::string method(method_begin, begin + i);
+                std::string method(method_begin, begin + at + i);
                 std::cout << "method:" << method << std::endl;
                 m_nState = s_requ_url_begin;
             }
-            checkOrGoError(isAlpha(ch));
             break;
 
         case s_requ_url_begin:
-            // checkOrGoError(isUrlChar(ch));
-            url_begin = begin + i;
-            // m_nState=s_r
-            break;
-
-        case s_requ_schema:
-            break;
-
-        case s_requ_schema_slash:
-            checkOrGoError((ch == '/'));
-            m_nState = s_requ_schema_slash_slash;
-            break;
-
-        case s_requ_schema_slash_slash:
-            checkOrGoError((ch == '/'));
-            m_nState = s_requ_server_start;
-            break;
-
-        case s_requ_server_start:
-            break;
-
-        case s_requ_server:
-            break;
-
-        case s_requ_path:
-            checkOrGoError(isAlphaNum(ch)); //FIXME:
-
-            if (ch == '?')
+            if (isUrlChar(ch))
             {
-                m_nState = s_requ_query_string_start;
+                url_begin = begin + at + i;
+                m_nState = s_requ_url;
+            }
+            else if (ch == ' ')
+            {
+                m_nState = s_requ_url_begin;
             }
             break;
 
+        case s_requ_url:
+            if (isUrlChar(ch))
+            {
+                m_nState = s_requ_url;
+            }
+            else if (ch == ' ')
+            {
+                //FIXME:
+                std::string url(url_begin, begin + at + i);
+                std::cout << "url:" << url << std::endl;
+                m_nState = s_requ_HTTP_start;
+            }
+
+            break;
+
+        case s_requ_schema:
+        case s_requ_schema_slash:
+        case s_requ_schema_slash_slash:
+        case s_requ_server_start:
+        case s_requ_server:
+        case s_requ_path:
         case s_requ_query_string_start:
-
-            break;
-
         case s_requ_query_string:
-            break;
-
         case s_requ_fragment_start:
+            //do nothing
             break;
 
         case s_requ_HTTP_start:
+            checkOrGoError((ch == 'H'));
+            m_nState = s_requ_H;
             break;
 
         case s_requ_H:
@@ -1073,20 +1069,17 @@ int HttpParser::execute(const std::string &stream,
             break;
 
         case s_requ_version_minor:
-            // checkOrGoError((ch == ' '));
-            if (ch == '\r')
-            {
-            }
-            else if (ch == '\n')
-            {
-                m_nState = s_requ_line_done;
-            }
-            std::cout << "get response http version:HTTP/" << m_nHttpVersionMajor << "."
+            checkOrGoError((ch == '\r'));
+            m_nState = s_requ_line_almost_done;
+            std::cout << "http version:HTTP/" << m_nHttpVersionMajor << "."
                       << m_nHttpVersionMinor << std::endl;
             break;
 
-        // case s_resp_line_almost_done:
-        //     break;
+        case s_requ_line_almost_done:
+            checkOrGoError('\n');
+            m_nState = s_requ_line_done;
+            break;
+
         case s_requ_line_done:
             if (ch == '\r')
             {
@@ -1100,7 +1093,7 @@ int HttpParser::execute(const std::string &stream,
             }
 
             checkOrGoError(isAlpha(ch));
-            header_key_begin = begin + i;
+            header_key_begin = begin + at + i;
             m_nState = s_header_key_start;
             break;
 
@@ -1111,8 +1104,8 @@ int HttpParser::execute(const std::string &stream,
         case s_header_key:
             if (ch == ':')
             {
-                std::string key(header_key_begin, begin + i);
-                std::cout << "get a header key:" << key << std::endl;
+                std::string key(header_key_begin, begin + at + i);
+                std::cout << "key:" << key << std::endl;
                 m_nState = s_header_value_start;
             }
             break;
@@ -1120,10 +1113,16 @@ int HttpParser::execute(const std::string &stream,
         case s_header_value_start:
             if (ch == ' ')
             {
+                // m_nState = s_header_value_start;
             }
-            else if (isAlpha(ch) || ch == '"')
+            else if (ch == '\r' || ch == '\n')
             {
-                header_value_begin = begin + i;
+                m_nState = s_error;
+            }
+            else
+            {
+                // std::cout
+                header_value_begin = begin + at + i;
                 m_nState = s_header_value;
             }
             break;
@@ -1131,22 +1130,25 @@ int HttpParser::execute(const std::string &stream,
         case s_header_value:
             if (ch == '\r')
             {
+                std::string value(header_value_begin, begin + at + i);
+                std::cout << "value:" << value << std::endl;
+                m_nState = s_header_almost_done;
             }
             if (ch == '\n')
             {
-                std::string value(header_value_begin, begin + i);
-                std::cout << "get a header value:" << value << std::endl;
-                m_nState = s_header_done;
+                m_nState = s_error;
             }
             break;
 
         case s_header_almost_done:
+            checkOrGoError((ch == '\n'));
+            m_nState = s_header_done;
             break;
 
         case s_header_done:
             if (isAlpha(ch))
             {
-                header_key_begin = begin + i;
+                header_key_begin = begin + at + i;
                 m_nState = s_header_key_start;
             }
             else if (ch == '\r')
@@ -1156,6 +1158,11 @@ int HttpParser::execute(const std::string &stream,
             {
                 m_nState = s_headers_done;
             }
+            break;
+
+        case s_headers_almost_done:
+            checkOrGoError((ch == '\n'));
+            m_nState = s_header_done;
             break;
 
         case s_headers_done:

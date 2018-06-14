@@ -145,28 +145,50 @@ void testHttpParserResponse()
 
 void testHttpParserRequest()
 {
-    string request = "GET http://127.0.0.1:9999/index.html HTTP/1.1\r\n"
-                     "Host: 127.0.0.1:9999\r\n"
-                     "Connection: keep-alive\r\n"
-                     "Upgrade-Insecure-Requests: 1\r\n"
-                     "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.162 Safari/537.36\r\n"
-                     "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8\r\n"
-                     "Accept-Encoding: gzip, deflate, br\r\n"
-                     "Accept-Language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7\r\n"
-                     "\r\n";
+
+    vector<string> requests = {
+        "GET http://127.0.0.1:9999/index.html HTTP/1.1\r\n"
+        "Host: 127.0.0.1:9999\r\n"
+        "Connection: keep-alive\r\n"
+        "\r\n",
+
+        "GET http://127.0.0.1:9999/index.html HTTP/1.1\r\n"
+        "Host: www.baidu.com\r\n"
+        "Connection: keep-alive\r\n"
+        "Upgrade-Insecure-Requests: 1\r\n"
+        "Accept: text/html\r\n"
+        "Accept-Encoding: gzip, deflate, br\r\n"
+        "Accept-Language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7\r\n"
+        "\r\n",
+
+        "GET http://127.0.0.1:9999/index.html HTTP/1.1\r\n"
+        "Host: www.dissigil.cn\r\n"
+        "Connection: keep-alive\r\n"
+        "Pragma: no-cache\r\n"
+        "Cache-Control: no-cache\r\n"
+        "Upgrade-Insecure-Requests: 1\r\n"
+        "Accept-Encoding: gzip, deflate\r\n"
+        "Accept-Language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7\r\n"
+        "Cookie: _ga=GA1.2.2068106829.1526513886; _gid=GA1.2.1899421896.1528880409\r\n"
+        "\r\n",
+
+    };
 
     HttpParserSettings settings;
-    settings.setGetMessageCallback(boost::bind(getMessage));
-    settings.setGetRequestLineCallback(boost::bind(getRequestLine));
-    settings.setGetHeaderCallback(boost::bind(getHeader));
-    settings.setGetBodyCallback(boost::bind(getBody));
-    settings.setGetEndMessageCallback(boost::bind(endMessage));
+    // settings.setGetMessageCallback(boost::bind(getMessage));
+    // settings.setGetRequestLineCallback(boost::bind(getRequestLine));
+    // settings.setGetHeaderCallback(boost::bind(getHeader));
+    // settings.setGetBodyCallback(boost::bind(getBody));
+    // settings.setGetEndMessageCallback(boost::bind(endMessage));
 
-    HttpParser parser(&settings);
-    parser.setType(HTTP_REQUEST);
-    int begin = 0;
-    parser.execute(request, begin, request.size());
-    cout << "begin:" << begin << endl;
+    for (int i = 0; i < requests.size(); i++)
+    {
+        std::cout << "---" << i << std::endl;
+        HttpParser parser(&settings);
+        parser.setType(HTTP_REQUEST);
+        int begin = 0;
+        parser.execute(requests[i], begin, requests[i].size());
+    }
 }
 
 void testParseHost()
@@ -263,10 +285,13 @@ void testParseUrl()
 void testParseHeader()
 {
     vector<string> strs = {
-        "Connection: close\r\n"
-        "Server: Tengine\r\n"
+        "Host: 127.0.0.1:9999\r\n"
         "Connection: keep-alive\r\n"
-        "Vary: Ali-Detector-Type\r\n"
+        "Upgrade-Insecure-Requests: 1\r\n"
+        "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.162 Safari/537.36\r\n"
+        "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8\r\n"
+        "Accept-Encoding: gzip, deflate, br\r\n"
+        "Accept-Language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7\r\n"
         "\r\n",
 
         "sdfasd",
@@ -313,9 +338,9 @@ int main()
 {
     // testHttpParser();
     // testHttpParserResponse();
-    // testHttpParserRequest();
+    testHttpParserRequest();
     // testParseHost();
-    testParseUrl();
+    // testParseUrl();
     // testParseHeader();
     return 0;
 }

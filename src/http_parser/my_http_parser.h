@@ -84,12 +84,14 @@ enum state
 	s_resp_status_code,
 	s_resp_status_phrase_start,
 	s_resp_status_phrase,
+	s_resp_line_almost_done,
 	s_resp_line_done,
 
 	s_requ_start,
 	s_requ_method_start,
 	s_requ_method,
 	s_requ_url_begin,
+	s_requ_url, //add
 	s_requ_schema,
 	s_requ_schema_slash,
 	s_requ_schema_slash_slash,
@@ -110,7 +112,7 @@ enum state
 	s_requ_version_major,
 	s_requ_version_dot,
 	s_requ_version_minor,
-	s_resp_line_almost_done,
+	s_requ_line_almost_done,
 	s_requ_line_done,
 
 	//heaser statue
@@ -121,6 +123,7 @@ enum state
 	s_header_value,
 	s_header_almost_done,
 	s_header_done,
+	s_headers_almost_done,
 	s_headers_done,
 
 	s_body_start,
