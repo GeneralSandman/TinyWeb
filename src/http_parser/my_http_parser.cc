@@ -190,7 +190,7 @@ enum http_host_state HttpParser::parseHostChar(const char ch,
     return s_http_host_error;
 }
 
-int HttpParser::parseHost(const std::string &stream,
+int HttpParser::parseHost(const char *stream,
                           int &at,
                           int len,
                           Url *&result,
@@ -198,15 +198,14 @@ int HttpParser::parseHost(const std::string &stream,
 {
     //The example of data: dissigil.cn.
     //You MUST guarentee data just a fragment of host in url.
-    //For example : http://dissigil.cn is invalid
-    //              dissigil.cn/index.html is invaild
+    //TODO: todo comments
 
-    assert(stream.c_str() == result->data);
+    assert(stream == result->data);
     assert(result->field_set & (1 << HTTP_UF_HOST));
     assert(len == result->fields[HTTP_UF_HOST].len);
     assert(at == result->fields[HTTP_UF_HOST].offset);
 
-    char *begin = (char *)stream.c_str() + at;
+    char *begin = (char *)stream + at;
     enum http_host_state prestat = has_at_char
                                        ? s_http_userinfo_start
                                        : s_http_host_start;
@@ -699,12 +698,12 @@ enum http_header_state HttpParser::parseHeaderChar(const char ch,
     return s_http_header_error;
 }
 
-int HttpParser::parseHeader(const std::string &stream,
+int HttpParser::parseHeader(const char *stream,
                             int &at,
                             int len)
 {
 
-    char *begin = (char *)stream.c_str();
+    char *begin = (char *)stream;
 
     enum http_header_state prestat = s_http_header_start;
     enum http_header_state stat;
@@ -786,13 +785,13 @@ int HttpParser::parseHeader(const std::string &stream,
     }
 }
 
-int HttpParser::execute(const std::string &stream,
+int HttpParser::execute(const char *stream,
                         int &at,
                         int len)
 {
     std::cout << "function HttpParser::execute()\n";
 
-    const char *begin = stream.c_str();
+    const char *begin = stream;
 
     const char *url_begin = nullptr;
     const char *status_phrase_begin = nullptr;

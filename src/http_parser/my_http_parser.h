@@ -332,15 +332,15 @@ class HttpParser
 
 	// enum state
 	enum http_host_state parseHostChar(const char ch, enum http_host_state s);
-	int parseHost(const std::string &stream, int &at, int len, Url *&result, bool has_at_char);
+	int parseHost(const char *stream, int &at, int len, Url *&result, bool has_at_char);
 
 	enum state parseUrlChar(const char ch, enum state s);
 	int parseUrl(const char *stream, int &at, int len, Url *&result);
 
 	enum http_header_state parseHeaderChar(const char ch, enum http_header_state s);
-	int parseHeader(const std::string &stream, int &at, int len);
+	int parseHeader(const char *stream, int &at, int len);
 
-	int execute(const std::string &stream, int &at, int len);
+	int execute(const char *stream, int &at, int len);
 
 	~HttpParser()
 	{

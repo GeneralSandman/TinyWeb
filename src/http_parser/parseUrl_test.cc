@@ -22,7 +22,7 @@ using namespace std;
 typedef struct testUrl
 {
     const char *url;
-    bool vaild;
+    bool valid;
     const char *host;
     const char *path;
 } testUrl;
@@ -30,131 +30,337 @@ typedef struct testUrl
 testUrl urls[] = {
 
     {.url = "https://www.dissigil.cn",
-     .vaild = true,
+     .valid = true,
      .host = "www.dissigil.cn",
      .path = ""},
 
     {.url = "https://www.dissigil.cn/index.html",
-     .vaild = true,
+     .valid = true,
      .host = "www.dissigil.cn",
      .path = "/index.html"},
 
     {.url = "http://dissigil.cn/",
-     .vaild = true,
+     .valid = true,
      .host = "dissigil.cn",
      .path = "/"},
 
     {.url = "http://www.dissigil.cn:80",
-     .vaild = true,
+     .valid = true,
      .host = "www.dissigil.cn:80",
      .path = ""},
 
     {.url = "http://www.dissigil.cn:8080/",
-     .vaild = true,
+     .valid = true,
      .host = "www.dissigil.cn:8080",
      .path = "/"},
 
     {.url = "http://www.dissigil.cn:8080/index/index.html",
-     .vaild = true,
+     .valid = true,
      .host = "www.dissigil.cn:8080",
      .path = "/index/index.html"},
 
     {.url = "www.dissigil.cn",
-     .vaild = false,
+     .valid = false,
      .host = nullptr,
      .path = nullptr},
 
     {.url = "www.dissigil.cn/index.html",
-     .vaild = false,
+     .valid = false,
      .host = nullptr,
      .path = nullptr},
 
     {.url = "www.dissigil.cn:80",
-     .vaild = false,
+     .valid = false,
      .host = nullptr,
      .path = nullptr},
 
     {.url = "www.dissigil.cn:80/index.html",
-     .vaild = false,
+     .valid = false,
      .host = nullptr,
      .path = nullptr},
 
     {.url = "www.dissigil.cn/home/index.html",
-     .vaild = false,
+     .valid = false,
      .host = nullptr,
      .path = nullptr},
 
     {.url = "http/www.dissigil.cn",
-     .vaild = false,
+     .valid = false,
      .host = nullptr,
      .path = nullptr},
 
     {.url = "http//www.dissigil.cn",
-     .vaild = false,
+     .valid = false,
      .host = nullptr,
      .path = nullptr},
 
     {.url = "http:www.dissigil.cn",
-     .vaild = false,
+     .valid = false,
      .host = nullptr,
      .path = nullptr},
 
     {.url = "http:/www.dissigil.cn",
-     .vaild = false,
+     .valid = false,
      .host = nullptr,
      .path = nullptr},
 
     {.url = "http:://www.dissigil.cn",
-     .vaild = false,
+     .valid = false,
      .host = nullptr,
      .path = nullptr},
 
     {.url = "/index.html",
-     .vaild = true,
+     .valid = true,
      .host = nullptr,
      .path = "/index.html"},
 
     {.url = "http://127.0.0.1:9999/",
-     .vaild = true,
+     .valid = true,
      .host = "127.0.0.1:9999",
      .path = "/"},
 
     {.url = "http://127.0.0.1/",
-     .vaild = true,
+     .valid = true,
      .host = "127.0.0.1",
      .path = "/"},
 
     {.url = "/asdf/adsd/sdf.html",
-     .vaild = true,
+     .valid = true,
      .host = "",
      .path = "/asdf/adsd/sdf.html"},
 
     {.url = "http://a:b@host.com:8080/p/a/t/h?query=string#hash",
-     .vaild = true,
+     .valid = true,
      .host = "a:b@host.com:8080",
      .path = "/p/a/t/h?query=string#hash"},
 
     {.url = "/home/index.html", //false
-     .vaild = true,
+     .valid = true,
      .host = nullptr,
      .path = nullptr},
 
     {.url = "http://foo boar/",
-     .vaild = false,
+     .valid = false,
      .host = nullptr,
      .path = nullptr},
 
-    {.url =
-         "http://foo\nboar/",
-     .vaild = false,
+    {.url = "http://foo\nboar/",
+     .valid = false,
      .host = nullptr,
      .path = nullptr},
 
-    {.url =
-         "http://foo\rboar/",
-     .vaild = false,
+    {.url = "http://foo\rboar/",
+     .valid = false,
      .host = nullptr,
      .path = nullptr},
+
+    {.url = "http://hostname/",
+     .valid = true,
+     .host = "hostname",
+     .path = "/"},
+
+    {.url = "http://hostname:444/",
+     .valid = true,
+     .host = "hostname:444",
+     .path = "/"},
+
+    {.url = "hostname:443",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "http://[1:2::3:4]/",
+     .valid = true,
+     .host = "1:2::3:4",
+     .path = "/"},
+
+    {.url = "http://[1:2::3:4]:67/",
+     .valid = true,
+     .host = "[1:2::3:4]:67", //FIXME:
+     .path = "/"},
+
+    {.url = "http://[2001:0000:0000:0000:0000:0000:1.9.1.1]/",
+     .valid = true,
+     .host = "[2001:0000:0000:0000:0000:0000:1.9.1.1]", //FIXME:
+     .path = "/"},
+
+    {.url = "http://a.tbcdn.cn/p/fp/2010c/??fp-header-min.css,fp-base-min.css,"
+            "fp-channel-min.css,fp-product-min.css,fp-mall-min.css,fp-category-min.css,"
+            "fp-sub-min.css,fp-gdp4p-min.css,fp-css3-min.css,fp-misc-min.css?t=20101022.css",
+     .valid = true,
+     .host = "a.tbcdn.cn",
+     .path = "/p/fp/2010c/"},
+
+    {.url = "/toto.html?toto=a%20b",
+     .valid = true,
+     .host = "",
+     .path = "/toto.html"},
+
+    {.url = "/toto.html#titi",
+     .valid = true,
+     .host = "",
+     .path = "/toto.html"},
+
+    {.url = "http://www.webmasterworld.com/r.cgi?f=21&d=8405&url=",
+     .valid = true,
+     .host = "www.webmasterworld.com",
+     .path = "/r.cgi"},
+
+    {.url = "http://host.com:8080/p/a/t/h?query=string#hash",
+     .valid = true,
+     .host = "host.com:8080",
+     .path = "/p/a/t/h"},
+
+    {.url = "http://a:b@host.com:8080/p/a/t/h?query=string#hash",
+
+     .valid = true,
+     .host = "a:b@host.com:8080",
+     .path = "/p/a/t/h"},
+
+    {.url = "http://a:b@@hostname:443/",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "http://:443/",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "http://hostname:/",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "a:b@hostname:443",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = ":443",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "hostname:",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "hostname:443/",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "/foo bar/",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "http://a%20:b@host.com/",
+     .valid = true,
+     .host = "a%20:b@host.com",
+     .path = "/"},
+
+    {.url = "/foo\rbar/",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "http://hostname::443/",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "http://a::b@host.com/",
+     .valid = true,
+     .host = "a::b@host.com",
+     .path = "/"},
+
+    {.url = "/foo\nbar/",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "http://@hostname/fo",
+     .valid = true,
+     .host = "hostname", //FIXME:
+     .path = "/fo"},
+
+    {.url = "http://host\name/fo",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "http://host%name/fo",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "http://host;ame/fo",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "http://a!;-_!=+$@host.com/",
+     .valid = true,
+     .host = "host.com",
+     .path = "/"},
+
+    {.url = "http://@/fo",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "http://toto@/fo",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "http:///fo",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "http://host=ame/fo",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "http://[fe80::a%25eth0]/",
+     .valid = true,
+     .host = "fe80::a%25eth0",
+     .path = "/"},
+
+    {.url = "http://[fe80::a%eth0]/",
+     .valid = true,
+     .host = "fe80::a%eth0",
+     .path = "/"},
+
+    {.url = "http://[fe80::a%]/",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "http://[fe80::a%$HOME]/",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "http://[%eth0]/",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "/foo\tbar/",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "/foo\fbar/",
+     .valid = false,
+     .host = "",
+     .path = ""},
 
 };
 
@@ -225,13 +431,14 @@ void testParseUrl_()
 void testParseUrl()
 {
 
+    vector<string> notPass;
+
     HttpParserSettings settings;
 
     int all = sizeof(urls) / sizeof(urls[0]);
     int pass_test = 0;
 
-    int len = sizeof(urls) / sizeof(urls[0]);
-    for (int i = 0; i < len; i++)
+    for (int i = 0; i < all; i++)
     {
         HttpParser parser(&settings);
         parser.setType(HTTP_REQUEST);
@@ -245,23 +452,27 @@ void testParseUrl()
                                   result);
 
         bool res = (tmp == -1) ? false : true;
-        if (res == urls[i].vaild)
+        if (res == urls[i].valid)
         {
             std::cout << "pass test\n";
             pass_test++;
         }
         else
+        {
             std::cout << "not pass test\n";
+            string tmp(urls[i].url);
+            notPass.push_back(tmp);
+        }
 
         if (res)
         {
-            std::cout << "url vaild\n";
+            std::cout << "url valid\n";
             printUrl(result);
             std::cout << std::endl;
         }
         else
         {
-            std::cout << "url invaild\n";
+            std::cout << "url invalid\n";
         }
 
         std::cout << std::endl;
@@ -270,6 +481,13 @@ void testParseUrl()
     }
 
     std::cout << pass_test << "/" << all << std::endl;
+
+    if (!notPass.empty())
+    {
+        cout << "not pass test urls:\n";
+        for (auto t : notPass)
+            std::cout << t << std::endl;
+    }
 }
 
 int main()

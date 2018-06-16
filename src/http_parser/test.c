@@ -2818,7 +2818,7 @@ const struct url_test url_tests[] =
   ,.rv=0
   }
 
-, {.name="CONNECT request"
+, {.name="CONNECT request"//not finished
   ,.url="hostname:443"
   ,.is_connect=1
   ,.u=
