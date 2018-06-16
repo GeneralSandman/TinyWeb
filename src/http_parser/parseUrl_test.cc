@@ -402,6 +402,127 @@ testUrl urls[] = {
      .host = "www.dissigil.cn",
      .path = "/home"},
 
+    {
+        .url = "http://#fragment/",
+        .valid = false,
+        .host = "",
+        .path = "",
+    },
+
+    {.url = "http://?queurystring/",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "http://@hostname/",
+     .valid = true,
+     .host = "@hostname",
+     .path = "/"},
+
+    {.url = "http:///",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "http://ABC.com/%7esmith/home.html",
+     .valid = true,
+     .host = "ABC.com",
+     .path = "/%7esmith/home.html"},
+
+    {.url = "http://ABC.com/%7Esmith/home.html",
+     .valid = true,
+     .host = "ABC.com",
+     .path = "/%7esmith/home.html"},
+
+    {.url = "http://abc.com:80/~smith/home.html",
+     .valid = true,
+     .host = "abc.com:80",
+     .path = "/~smith/home.html"},
+
+    {.url = "https://did.cn/../dsf",
+     .valid = true, //FIXME: not sure valid or invalid
+     .host = "did.cn",
+     .path = "/../dsf"},
+
+    {.url = "https://dsjfll.cb.cb//",
+     .valid = true, //FIXME: not sure valid or invalid
+     .host = "dsjfll.cb.cb",
+     .path = "//"},
+
+    {.url = "https:///ksdjf.cn/",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "https://did.cn/../dsf",
+     .valid = true, //FIXME: not sure valid or invalid
+     .host = "did.cn",
+     .path = "/../dsf"},
+
+    {.url = "https://pingtas.qq.com/webview/pingd?"
+            "dm=join.qq.com&pvi=3220461568&si=s2709209088&"
+            "url=/apply.php&arg=&ty=1&rdm=&rurl=&rarg=&adt="
+            "&r2=49873873&r3=-1&r4=1&fl=&scr=1366x768&scl=24-"
+            "bit&lg=zh-cn&jv=&tz=-8&ct=&ext=adid=&pf=&random=1528878932585",
+     .valid = true,
+     .host = "pingtas.qq.com",
+     .path = "/webview/pingd"},
+
+    {.url = "http://www.baidu.com/link?url=-xBr1W_69PMdd5rdglCQljN1Rm5jA-7umx885_TZEZS",
+     .valid = true,
+     .host = "www.baidu.com",
+     .path = "/link"},
+
+    {.url = "http://host%name/fo",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "http://host;ame/fo",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "http://hos'name/fo",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "http://host\"ame/fo",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "http://host=ame/fo",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "http://host>ame/fo",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "http://host<ame/fo",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "http://host,ame/fo",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "http://host%name/fo",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "http://host/toto.html?toto=a%20b",
+     .valid = true,
+     .host = "host",
+     .path = "/toto.html"},
+
 };
 
 void testParseUrl()
