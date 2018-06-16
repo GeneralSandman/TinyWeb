@@ -61,57 +61,57 @@ testUrl urls[] = {
 
     {.url = "www.dissigil.cn",
      .valid = false,
-     .host = nullptr,
-     .path = nullptr},
+     .host = "",
+     .path = ""},
 
     {.url = "www.dissigil.cn/index.html",
      .valid = false,
-     .host = nullptr,
-     .path = nullptr},
+     .host = "",
+     .path = ""},
 
     {.url = "www.dissigil.cn:80",
      .valid = false,
-     .host = nullptr,
-     .path = nullptr},
+     .host = "",
+     .path = ""},
 
     {.url = "www.dissigil.cn:80/index.html",
      .valid = false,
-     .host = nullptr,
-     .path = nullptr},
+     .host = "",
+     .path = ""},
 
     {.url = "www.dissigil.cn/home/index.html",
      .valid = false,
-     .host = nullptr,
-     .path = nullptr},
+     .host = "",
+     .path = ""},
 
     {.url = "http/www.dissigil.cn",
      .valid = false,
-     .host = nullptr,
-     .path = nullptr},
+     .host = "",
+     .path = ""},
 
     {.url = "http//www.dissigil.cn",
      .valid = false,
-     .host = nullptr,
-     .path = nullptr},
+     .host = "",
+     .path = ""},
 
     {.url = "http:www.dissigil.cn",
      .valid = false,
-     .host = nullptr,
-     .path = nullptr},
+     .host = "",
+     .path = ""},
 
     {.url = "http:/www.dissigil.cn",
      .valid = false,
-     .host = nullptr,
-     .path = nullptr},
+     .host = "",
+     .path = ""},
 
     {.url = "http:://www.dissigil.cn",
      .valid = false,
-     .host = nullptr,
-     .path = nullptr},
+     .host = "",
+     .path = ""},
 
     {.url = "/index.html",
      .valid = true,
-     .host = nullptr,
+     .host = "",
      .path = "/index.html"},
 
     {.url = "http://127.0.0.1:9999/",
@@ -132,27 +132,52 @@ testUrl urls[] = {
     {.url = "http://a:b@host.com:8080/p/a/t/h?query=string#hash",
      .valid = true,
      .host = "a:b@host.com:8080",
-     .path = "/p/a/t/h?query=string#hash"},
+     .path = "/p/a/t/h"},
+
+    {.url = "http://hostname:80/home?query=li#head",
+     .valid = true,
+     .host = "hostname:80",
+     .path = "/home"},
+
+    {.url = "http://hostname:80/home#?query=li#head",
+     .valid = true,
+     .host = "hostname:80",
+     .path = "/home"},
+
+    {.url = "http://hostname:80/home??query=li##head",
+     .valid = true,
+     .host = "hostname:80",
+     .path = "/home"},
+
+    {.url = "http://hostname:80/home?abcd=abcd?query=li##head",
+     .valid = true,
+     .host = "hostname:80",
+     .path = "/home"},
+
+    {.url = "http://hostname:80/hom#e?query=li#head",
+     .valid = true,
+     .host = "hostname:80",
+     .path = "/hom"},
 
     {.url = "/home/index.html", //false
      .valid = true,
-     .host = nullptr,
-     .path = nullptr},
+     .host = "",
+     .path = ""},
 
     {.url = "http://foo boar/",
      .valid = false,
-     .host = nullptr,
-     .path = nullptr},
+     .host = "",
+     .path = ""},
 
     {.url = "http://foo\nboar/",
      .valid = false,
-     .host = nullptr,
-     .path = nullptr},
+     .host = "",
+     .path = ""},
 
     {.url = "http://foo\rboar/",
      .valid = false,
-     .host = nullptr,
-     .path = nullptr},
+     .host = "",
+     .path = ""},
 
     {.url = "http://hostname/",
      .valid = true,
@@ -176,12 +201,17 @@ testUrl urls[] = {
 
     {.url = "http://[1:2::3:4]:67/",
      .valid = true,
-     .host = "[1:2::3:4]:67", //FIXME:
+     .host = "[1:2::3:4]:67",
      .path = "/"},
+
+    {.url = "http://[1:2::3:4]:67/index/hom#e?query=li#head",
+     .valid = true,
+     .host = "[1:2::3:4]:67",
+     .path = "/index/hom"},
 
     {.url = "http://[2001:0000:0000:0000:0000:0000:1.9.1.1]/",
      .valid = true,
-     .host = "[2001:0000:0000:0000:0000:0000:1.9.1.1]", //FIXME:
+     .host = "[2001:0000:0000:0000:0000:0000:1.9.1.1]",
      .path = "/"},
 
     {.url = "http://a.tbcdn.cn/p/fp/2010c/??fp-header-min.css,fp-base-min.css,"
@@ -284,7 +314,7 @@ testUrl urls[] = {
 
     {.url = "http://@hostname/fo",
      .valid = true,
-     .host = "hostname", //FIXME:
+     .host = "hostname",
      .path = "/fo"},
 
     {.url = "http://host\name/fo",
@@ -308,6 +338,11 @@ testUrl urls[] = {
      .path = "/"},
 
     {.url = "http://@/fo",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+    {.url = "http://@jljljl/fo",
      .valid = false,
      .host = "",
      .path = ""},
@@ -362,71 +397,12 @@ testUrl urls[] = {
      .host = "",
      .path = ""},
 
+    {.url = "https://www.dissigil.cn/home#sd#qu?query=li",
+     .valid = true,
+     .host = "www.dissigil.cn",
+     .path = "/home"},
+
 };
-
-void testParseUrl_()
-{
-    //TODO:
-    //replace urls with urls.txt
-    vector<string> urls = {
-        // "https://blog.csdn.net/foruok/article/details/8954726",
-        // "www.baidu.com",
-        "www.dissigil.cn", //false
-        "www.dissigil.cn/index.html",
-        "www.dissigil.cn:80",
-        "www.dissigil.cn:80/index.html",
-        "www.dissigil.cn/home/artile/li.html",
-
-        "https://www.dissigil.cn", //true
-        "https://www.dissigil.cn/index.html",
-        "https://www.dissigil.cn:80",
-        "https://www.dissigil.cn:80/index.html",
-        "https://www.dissigil.cn/home/artile/li.html",
-
-        "http/www.dissigil.cn", //false
-        "http//www.dissigil.cn",
-        "http:www.dissigil.cn",
-        "http:/www.dissigil.cn",
-        "http:://www.dissigil.cn",
-
-        "/index.html", //true
-        "http://127.0.0.1:9999/",
-        "http://[::]/index.html",
-        "/asdf/adsd/sdf.html",
-        "http://a:b@host.com:8080/p/a/t/h?query=string#hash",
-
-        "//index.html", //false
-        "http://foo boar/",
-        "http://foo\nboar/",
-        "http://foo\rboar/",
-        "http://foo\tboar/"
-
-    };
-
-    HttpParserSettings settings;
-
-    for (int i = 0; i < urls.size(); i++)
-    {
-        HttpParser parser(&settings);
-        parser.setType(HTTP_REQUEST);
-        int begin = 0;
-
-        Url *result = new Url;
-        std::cout << i << "->" << urls[i] << std::endl;
-        // if (-1 == parser.parseUrl(urls[i], begin, urls[i].size(), result))
-        {
-            std::cout << "parse error\n"
-                      << std::endl;
-            continue;
-        }
-        // parser.parseHeader(urls[i], begin, urls[i].size());
-        std::cout << "parse success" << std::endl;
-        printUrl(result);
-        std::cout << std::endl;
-        delete result;
-        // cout << "begin:" << begin << endl;
-    }
-}
 
 void testParseUrl()
 {
@@ -435,11 +411,15 @@ void testParseUrl()
 
     HttpParserSettings settings;
 
-    int all = sizeof(urls) / sizeof(urls[0]);
-    int pass_test = 0;
+    int alltest = 0;
+    int passtest = 0;
 
-    for (int i = 0; i < all; i++)
+    int len = sizeof(urls) / sizeof(urls[0]);
+
+    for (int i = 0; i < len; i++)
     {
+        alltest++;
+
         HttpParser parser(&settings);
         parser.setType(HTTP_REQUEST);
 
@@ -455,11 +435,11 @@ void testParseUrl()
         if (res == urls[i].valid)
         {
             std::cout << "pass test\n";
-            pass_test++;
+            passtest++;
         }
         else
         {
-            std::cout << "not pass test\n";
+            std::cout << "not pass test!!!\n";
             string tmp(urls[i].url);
             notPass.push_back(tmp);
         }
@@ -480,7 +460,7 @@ void testParseUrl()
         delete result;
     }
 
-    std::cout << pass_test << "/" << all << std::endl;
+    std::cout << passtest << "/" << alltest << std::endl;
 
     if (!notPass.empty())
     {
@@ -488,6 +468,14 @@ void testParseUrl()
         for (auto t : notPass)
             std::cout << t << std::endl;
     }
+    //We can't judge this urls is valid or invalid,
+    //because '@' , IPv6 , UserInfo , port make judgement
+    //become complicate.
+    //So, we need to using api HttpParser::parseHost()
+    //to solve this problem.
+    //If you want get more information about host,
+    //place view parseHost_test.cc file.
+    //Good Luck, ^_^_^_^_^_^
 }
 
 int main()

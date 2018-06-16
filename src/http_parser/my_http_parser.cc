@@ -376,6 +376,8 @@ enum state HttpParser::parseUrlChar(const char ch,
             return s_requ_server;
         else if (ch == ']') //http://]:80/
             return s_error;
+        else if (ch == ':') //http://:443
+            return s_error;
         else if (isUserInfoChar(ch)) //FIXME:
             return s_requ_server;
         break;
@@ -391,7 +393,8 @@ enum state HttpParser::parseUrlChar(const char ch,
         else if (ch == '#')
             return s_requ_fragment_start;
         else if (isUserInfoChar(ch) ||
-                 ch == '[') //Ipv6 or userInfochar
+                 ch == '[' ||
+                 ch == ']') //Ipv6 or userInfochar
             return s_requ_server;
         break;
 
@@ -407,6 +410,12 @@ enum state HttpParser::parseUrlChar(const char ch,
     case s_requ_server_at: //finished
         if (ch == '@')     //double '@' in url : invaild
             return s_error;
+        else if(ch=='/')// host://a@/abc
+            return s_error;
+        // checkOrGoError(isUrlChar(ch));
+        if (!isUrlChar(ch))
+            return s_error;
+        return s_requ_server;
         break;
 
     case s_requ_query_string_start: //finished
@@ -428,7 +437,7 @@ enum state HttpParser::parseUrlChar(const char ch,
         //FIXME:
         if (isUrlChar(ch))
         {
-            return s_requ_fragment;
+            return s_requ_query_string;
         }
         else if (ch == '?')
         {
@@ -436,23 +445,14 @@ enum state HttpParser::parseUrlChar(const char ch,
         }
         else if (ch == '#')
         {
-            return s_requ_fragment;
+            return s_requ_fragment_start;
         }
         break;
 
     case s_requ_fragment_start: //finished
-        if (isUrlChar(ch))
-        {
-            return s_requ_fragment;
-        }
-        else if (ch == '?')
-        {
-            return s_requ_fragment;
-        }
-        else if (ch == '#')
-        {
-            return s_requ_fragment_start;
-        }
+                                //fragment:
+                                //http://blog.httpwatch.com/2011/03/01/6-things-you-should-know-about-fragment-urls/
+        return s_requ_fragment;
 
         break;
 
@@ -493,7 +493,7 @@ int HttpParser::parseUrl(const char *stream,
     enum state stat;
     enum httpUrlField prefield = HTTP_UF_MAX;
     enum httpUrlField field;
-    bool has_at_char = false;
+    bool has_at_char = false; //TODO:return has_at_char
 
     for (int i = 0; i < len; i++)
     {
