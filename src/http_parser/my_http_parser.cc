@@ -19,37 +19,37 @@
 
 void printUrl(const Url *url)
 {
-    if (url->field_set & HTTP_UF_SCHEMA)
+    if (url->field_set & (1 << HTTP_UF_SCHEMA))
     {
         int off = url->fields[HTTP_UF_SCHEMA].offset;
         int len = url->fields[HTTP_UF_SCHEMA].len;
         printf("schema:%.*s\n", len, url->data + off);
     }
-    if (url->field_set & HTTP_UF_HOST)
+    if (url->field_set & (1 << HTTP_UF_HOST))
     {
         int off = url->fields[HTTP_UF_HOST].offset;
         int len = url->fields[HTTP_UF_HOST].len;
-        printf("host:%.*s\n", len, url->data + off);
+        printf("host:%.*s\n", len, (const char *)url->data + off);
     }
-    if (url->field_set & HTTP_UF_PORT)
+    if (url->field_set & (1 << HTTP_UF_PORT))
     {
         int off = url->fields[HTTP_UF_PORT].offset;
         int len = url->fields[HTTP_UF_PORT].len;
         printf("port:%.*s\n", len, url->data + off);
     }
-    if (url->field_set & HTTP_UF_PATH)
+    if (url->field_set & (1 << HTTP_UF_PATH))
     {
         int off = url->fields[HTTP_UF_PATH].offset;
         int len = url->fields[HTTP_UF_PATH].len;
         printf("path:%.*s\n", len, url->data + off);
     }
-    if (url->field_set & HTTP_UF_QUERY)
+    if (url->field_set & (1 << HTTP_UF_QUERY))
     {
         int off = url->fields[HTTP_UF_QUERY].offset;
         int len = url->fields[HTTP_UF_QUERY].len;
         printf("query:%.*s\n", len, url->data + off);
     }
-    if (url->field_set & HTTP_UF_FRAGMENT)
+    if (url->field_set & (1 << HTTP_UF_FRAGMENT))
     {
         int off = url->fields[HTTP_UF_FRAGMENT].offset;
         int len = url->fields[HTTP_UF_FRAGMENT].len;
@@ -193,7 +193,7 @@ enum http_host_state HttpParser::parseHostChar(const char ch,
 int HttpParser::parseHost(const std::string &stream,
                           int &at,
                           int len,
-                          Url *result,
+                          Url *&result,
                           bool has_at_char)
 {
     //The example of data: dissigil.cn.
@@ -480,16 +480,16 @@ enum state HttpParser::parseUrlChar(const char ch,
     return s_error;
 }
 
-int HttpParser::parseUrl(const std::string &stream,
+int HttpParser::parseUrl(const char *stream,
                          int &at,
                          int len,
-                         Url *result)
+                         Url *&result)
 {
     // std::cout << "function parseUrl\n";
     memset(result, sizeof(Url), 0);
 
-    char *begin = (char *)stream.c_str();
-    result->data = (char *)stream.c_str();
+    char *begin = (char *)stream;
+    result->data = begin;
     enum state prestat = s_requ_url_begin;
     enum state stat;
     enum httpUrlField prefield = HTTP_UF_MAX;
@@ -547,16 +547,19 @@ int HttpParser::parseUrl(const std::string &stream,
             break;
         }
 
+        // std::cout << int(field) << std::endl;
+
         if (field == prefield)
         {
             result->fields[field].len++;
-            continue;
         }
+        else
+        {
+            result->fields[field].offset = at + i;
+            result->fields[field].len = 1;
 
-        result->fields[field].offset = at + i;
-        result->fields[field].len = 1;
-
-        result->field_set |= (1 << field);
+            result->field_set |= (1 << field);
+        }
 
         prefield = field;
         prestat = stat;
@@ -566,6 +569,9 @@ int HttpParser::parseUrl(const std::string &stream,
     {
         int offset = result->fields[HTTP_UF_HOST].offset;
         int len = result->fields[HTTP_UF_HOST].len;
+        // std::string host(result->data + offset, len);
+        // std::cout << "--host:" << host << std::endl;
+
         // if (-1 == parseHost(stream, offset, len, result, has_at_char))
         //     return -1;
     }
@@ -586,6 +592,10 @@ int HttpParser::parseUrl(const std::string &stream,
         }
         // std::cout << "port:" << port << std::endl;
     }
+
+    //FIXME:
+    //TODO:
+    //!!!
 
     return 0;
 }
@@ -973,6 +983,8 @@ int HttpParser::execute(const std::string &stream,
 
         case s_requ_method_start:
             // method_begin = begin + at + i;
+            //do nothing???
+            //TODO:
             if (ch == ' ')
             {
             }
