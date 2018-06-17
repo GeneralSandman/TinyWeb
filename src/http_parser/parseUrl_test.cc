@@ -29,6 +29,11 @@ typedef struct testUrl
 
 testUrl urls[] = {
 
+    {.url = "http://127.0.0.1:9999/index.html",
+     .valid = true,
+     .host = "127.0.0.1:9999",
+     .path = "/index.html"},
+
     {.url = "https://www.dissigil.cn",
      .valid = true,
      .host = "www.dissigil.cn",
@@ -528,7 +533,7 @@ testUrl urls[] = {
      .host = "",
      .path = ""},
 
-     {.url = "http://[%eth]/",
+    {.url = "http://[%eth]/",
      .valid = false,
      .host = "",
      .path = ""},
@@ -547,12 +552,12 @@ void testParseUrl()
 
     int len = sizeof(urls) / sizeof(urls[0]);
 
-    for (int i = 0; i < len; i++)
+    HttpParser parser(&settings);
+    parser.setType(HTTP_REQUEST);
+    
+    for (int i = 0; i < 1; i++)
     {
         alltest++;
-
-        HttpParser parser(&settings);
-        parser.setType(HTTP_REQUEST);
 
         int begin = 0;
         Url *result = new Url;

@@ -126,13 +126,14 @@ void testHttpParserResponse()
 
     HttpParserSettings settings;
 
-    for (int i = 0; i < responses.size(); i++)
+    int len = responses.size();
+    for (int i = 0; i < len; i++)
     {
         std::cout << "----" << i << std::endl;
         HttpParser parser(&settings);
         parser.setType(HTTP_RESPONSE);
         int begin = 0;
-        parser.execute(responses[i], begin, responses[i].size());
+        parser.execute(responses[i].c_str(), begin, responses[i].size());
     }
 }
 
@@ -174,110 +175,24 @@ void testHttpParserRequest()
     // settings.setGetBodyCallback(boost::bind(getBody));
     // settings.setGetEndMessageCallback(boost::bind(endMessage));
 
-    for (int i = 0; i < requests.size(); i++)
+    int len = requests.size();
+    for (int i = 0; i < len; i++)
     {
         std::cout << "---" << i << std::endl;
         HttpParser parser(&settings);
-        parser.setType(HTTP_REQUEST);
+        parser.setType(HTTP_REQUEST); //FIXME:
         int begin = 0;
-        parser.execute(requests[i], begin, requests[i].size());
-    }
-}
-
-void testParseHost()
-{
-    vector<string> hosts = {
-        "127.0.0.1",
-        "255.0.0.0:80",
-        "www.dissigil.cn:8080",
-        "/www.dissigil.cn:80",
-        "[1:2::3:4]",
-        "[1:2::3:4]:80",
-        "[2001:0000:0000:0000:0000:0000:1.9.1.1]",
-        "a.tbcdn.cn:",
-        "a:b@host.com:8080",
-        "a:b@@hostname:443",
-        "a:b@@hostname",
-        "foo bar",
-        "foo\rbar",
-        "foo\nbar",
-        "foo\tbar",
-        "foo\fbar",
-        "a%20:b@host.com",
-        "@hostname",
-        "http://www.dissigil.cn/"};
-
-    for (int i = 0; i < hosts.size(); i++)
-    {
-    }
-}
-
-void testParseUrl()
-{
-    //have bug, wr need init something
-    //replace urls with urls.txt
-    vector<string> urls = {
-        // "https://blog.csdn.net/foruok/article/details/8954726",
-        // "www.baidu.com",
-        "www.dissigil.cn", //false
-        "www.dissigil.cn/index.html",
-        "www.dissigil.cn:80",
-        "www.dissigil.cn:80/index.html",
-        "www.dissigil.cn/home/artile/li.html",
-
-        "https://www.dissigil.cn", //true
-        "https://www.dissigil.cn/index.html",
-        "https://www.dissigil.cn:80",
-        "https://www.dissigil.cn:80/index.html",
-        "https://www.dissigil.cn/home/artile/li.html",
-
-        "http/www.dissigil.cn", //false
-        "http//www.dissigil.cn",
-        "http:www.dissigil.cn",
-        "http:/www.dissigil.cn",
-        "http:://www.dissigil.cn",
-
-        "/index.html", //true
-        "http://127.0.0.1:9999/",
-        "http://[::]/index.html",
-        "/asdf/adsd/sdf.html",
-        "http://a:b@host.com:8080/p/a/t/h?query=string#hash",
-
-        "//index.html", //false
-        "http://foo boar/",
-        "http://foo\nboar/",
-        "http://foo\rboar/",
-        "http://foo\tboar/"
-
-    };
-
-    HttpParserSettings settings;
-
-    for (int i = 0; i < urls.size(); i++)
-    {
-        HttpParser parser(&settings);
-        parser.setType(HTTP_REQUEST);
-        int begin = 0;
-
-        Url result;
-        std::cout << i << "->" << urls[i] << std::endl;
-        if (-1 == parser.parseUrl(urls[i], begin, urls[i].size(), &result))
-        {
-            std::cout << "parse error\n"
-                      << std::endl;
-            continue;
-        }
-        // parser.parseHeader(urls[i], begin, urls[i].size());
-        std::cout << "parse success" << std::endl;
-        printUrl(&result);
-        std::cout << std::endl;
-        // cout << "begin:" << begin << endl;
+        parser.execute(requests[i].c_str(), begin, requests[i].size());
     }
 }
 
 void testParseHeader()
 {
     vector<string> strs = {
+        "Host: 127.0.0.1:9999\r\n"
+        "Connection: keep-alive\r\n"
+        "\r\n",
+
         "Host: 127.0.0.1:9999\r\n"
         "Connection: keep-alive\r\n"
         "Upgrade-Insecure-Requests: 1\r\n"
@@ -316,14 +231,14 @@ void testParseHeader()
 
     HttpParserSettings settings;
 
-    for (int i = 0; i < strs.size(); i++)
+    int len = strs.size();
+    for (int i = 0; i < len; i++)
     {
         HttpParser parser(&settings);
         parser.setType(HTTP_REQUEST);
         int begin = 0;
         std::cout << "---" << i << "---\n";
-        // parser.parseHost(strs[i], begin, strs[i].size());
-        // cout << "begin:" << begin << endl;
+        parser.parseHeader(strs[i].c_str(), begin, strs[i].size());
     }
 }
 
@@ -331,7 +246,7 @@ int main()
 {
     // testHttpParser();
     testHttpParserResponse();
-    // testHttpParserRequest();
+    testHttpParserRequest();
     // testParseHost();
     // testParseUrl();
     // testParseHeader();

@@ -103,6 +103,7 @@ enum state
 	s_requ_query_string,
 	s_requ_fragment_start,
 	s_requ_fragment,
+
 	s_requ_HTTP_start,
 	s_requ_H,
 	s_requ_HT,
@@ -116,11 +117,8 @@ enum state
 	s_requ_line_done,
 
 	//heaser statue
-	// s_header_start,
-	s_header_key_start,
-	s_header_key,
-	s_header_value_start,
-	s_header_value,
+	s_header_start,
+	s_header,
 	s_header_almost_done,
 	s_header_done,
 	s_headers_almost_done,
@@ -314,6 +312,18 @@ class HttpParser
   public:
 	HttpParser(HttpParserSettings *set = nullptr)
 		: m_pSettings(set),
+		  m_nType(0),//FIXME:
+		  m_nFlags(0),
+		  m_nState(0),
+		  m_nHeaderState(0),
+		  m_nRead(0),
+		  m_nContentLength(0),
+		  m_nHttpVersionMajor(0),
+		  m_nHttpVersionMinor(0),
+		  m_nStatusCode(0),
+		  m_nMethod(0),
+		  m_nErrno(0),
+		  m_nIsUpgrade(0),
 		  m_pData(nullptr)
 	{
 		// std::cout << "class HttpParser constructor\n";
