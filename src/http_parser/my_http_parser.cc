@@ -54,7 +54,13 @@ void printUrl(const Url *url)
         int off = url->fields[HTTP_UF_FRAGMENT].offset;
         int len = url->fields[HTTP_UF_FRAGMENT].len;
         printf("fragment:%.*s\n", len, url->data + off);
-    };
+    }
+    if (url->field_set & (1 << HTTP_UF_USERINFO))
+    {
+        int off = url->fields[HTTP_UF_USERINFO].offset;
+        int len = url->fields[HTTP_UF_USERINFO].len;
+        printf("userinfo:%.*s\n", len, url->data + off);
+    }
 }
 
 #define checkOrGoError(con) \
@@ -175,6 +181,14 @@ enum http_host_state HttpParser::parseHostChar(const char ch,
         // else if (ch ==''||
         //          ch =='')
         //     return s_http_host_error;
+
+        else if (isAlphaNum(ch) ||
+            ch == '%' ||
+            ch == '.' ||
+            ch == '-' ||
+            ch == '_' ||
+            ch == '~')
+            return s_http_host_v6_zone;
         break;
 
     case s_http_host_port_start:
@@ -212,6 +226,9 @@ int HttpParser::parseHost(const char *stream,
     enum http_host_state stat;
     for (int i = 0; i < len; i++)
     {
+        char ch = *(begin + i);
+        // std::cout << ch << (unsigned int)prestat << std::endl;
+
         stat = parseHostChar(*(begin + i), prestat);
 
         switch (stat)
@@ -305,11 +322,11 @@ int HttpParser::parseHost(const char *stream,
     case s_http_host_v6:
     case s_http_host_v6_zone_start:
     case s_http_host_v6_zone:
+    case s_http_host_port_start:
         return -1; //invaild
 
     case s_http_host_v4:
     case s_http_host_v6_end:
-    case s_http_host_port_start:
     case s_http_host_port:
         return 0; //vaild
         break;
@@ -367,7 +384,7 @@ enum state HttpParser::parseUrlChar(const char ch,
         if (ch == '/') //http:///
             return s_error;
         else if (ch == '@') //http://@hostname/ is vaild
-            return s_requ_server_at;
+            return s_requ_server;
         else if (ch == '?') //http://?queurystring/ is invaild
             return s_error;
         else if (ch == '#')
@@ -410,7 +427,7 @@ enum state HttpParser::parseUrlChar(const char ch,
     case s_requ_server_at: //finished
         if (ch == '@')     //double '@' in url : invaild
             return s_error;
-        else if(ch=='/')// host://a@/abc
+        else if (ch == '/') // host://a@/abc
             return s_error;
         // checkOrGoError(isUrlChar(ch));
         if (!isUrlChar(ch))
@@ -501,6 +518,8 @@ int HttpParser::parseUrl(const char *stream,
         // std::cout << ch << (unsigned int)prestat << std::endl;
         stat = parseUrlChar(ch, prestat);
         // field = 0;
+        if (ch == '@')
+            has_at_char = true;
 
         switch (stat)
         {
@@ -568,11 +587,11 @@ int HttpParser::parseUrl(const char *stream,
     {
         int offset = result->fields[HTTP_UF_HOST].offset;
         int len = result->fields[HTTP_UF_HOST].len;
-        // std::string host(result->data + offset, len);
-        // std::cout << "--host:" << host << std::endl;
+        std::string host(result->data + offset, len);
+        std::cout << "--host:" << host << std::endl;
 
-        // if (-1 == parseHost(stream, offset, len, result, has_at_char))
-        //     return -1;
+        if (-1 == parseHost(stream, offset, len, result, has_at_char))
+            return -1;
     }
     else if (result->field_set & (1 << HTTP_UF_SCHEMA)) // http:///index.html is invaild
         return -1;

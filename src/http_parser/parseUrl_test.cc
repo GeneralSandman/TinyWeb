@@ -258,7 +258,7 @@ testUrl urls[] = {
      .path = ""},
 
     {.url = "http://hostname:/",
-     .valid = false,
+     .valid = false, //FIXME:
      .host = "",
      .path = ""},
 
@@ -313,7 +313,7 @@ testUrl urls[] = {
      .path = ""},
 
     {.url = "http://@hostname/fo",
-     .valid = true,
+     .valid = true, //FIXME:
      .host = "hostname",
      .path = "/fo"},
 
@@ -343,9 +343,9 @@ testUrl urls[] = {
      .path = ""},
 
     {.url = "http://@jljljl/fo",
-     .valid = false,
-     .host = "",
-     .path = ""},
+     .valid = true,
+     .host = "jljljl",
+     .path = "/fo"},
 
     {.url = "http://toto@/fo",
      .valid = false,
@@ -523,12 +523,22 @@ testUrl urls[] = {
      .host = "host",
      .path = "/toto.html"},
 
+    {.url = "http://[]/",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
+     {.url = "http://[%eth]/",
+     .valid = false,
+     .host = "",
+     .path = ""},
+
 };
 
 void testParseUrl()
 {
-
-    vector<string> notPass;
+    typedef pair<int, string> key;
+    vector<key> notPass;
 
     HttpParserSettings settings;
 
@@ -562,7 +572,7 @@ void testParseUrl()
         {
             std::cout << "not pass test!!!\n";
             string tmp(urls[i].url);
-            notPass.push_back(tmp);
+            notPass.push_back(key(i, tmp));
         }
 
         if (res)
@@ -587,7 +597,7 @@ void testParseUrl()
     {
         cout << "not pass test urls:\n";
         for (auto t : notPass)
-            std::cout << t << std::endl;
+            std::cout << t.first << ")" << t.second << std::endl;
     }
     //We can't judge this urls is valid or invalid,
     //because '@' , IPv6 , UserInfo , port make judgement
