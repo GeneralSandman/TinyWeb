@@ -242,11 +242,24 @@ void testParseHeader()
     }
 }
 
+void testExecute()
+{
+    HttpParserSettings settings;
+    settings.setGetMessageCallback(boost::bind(getMessage));
+    settings.setGetRequestLineCallback(boost::bind(getRequestLine));
+    settings.setGetHeaderCallback(boost::bind(getHeader));
+    settings.setGetBodyCallback(boost::bind(getBody));
+    settings.setGetEndMessageCallback(boost::bind(endMessage));
+
+    HttpParser parser(&settings);
+    parser.setType(HTTP_REQUEST);
+}
+
 int main()
 {
     // testHttpParser();
-    testHttpParserResponse();
-    testHttpParserRequest();
+    // testHttpParserResponse();
+    // testHttpParserRequest();
     // testParseHost();
     // testParseUrl();
     // testParseHeader();

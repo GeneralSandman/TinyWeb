@@ -17,6 +17,59 @@
 #include <string.h>
 #include <stdio.h>
 
+void printHttpHeaders(const HttpHeaders *headers)
+{
+    std::cout << "<++++++++++HttpHeaders Information++++++++++>" << std::endl;
+    if (headers->host != nullptr)
+    {
+        std::cout << headers->host->key << ":"
+                  << headers->host->key << std::endl;
+    }
+    if (headers->connection != nullptr)
+    {
+        std::cout << headers->connection->key << ":"
+                  << headers->connection->key << std::endl;
+    }
+    if (headers->content_lenght != nullptr)
+    {
+
+        std::cout << headers->content_lenght->key << ":"
+                  << headers->content_lenght->key << std::endl;
+    }
+    if (headers->transfer_encoding != nullptr)
+    {
+
+        std::cout << headers->transfer_encoding->key << ":"
+                  << headers->transfer_encoding->key << std::endl;
+    }
+    if (headers->if_modified_since != nullptr)
+    {
+
+        std::cout << headers->if_modified_since->key << ":"
+                  << headers->if_modified_since->key << std::endl;
+    }
+    if (headers->referer != nullptr)
+    {
+
+        std::cout << headers->referer->key << ":"
+                  << headers->referer->key << std::endl;
+    }
+    if (headers->upgrade != nullptr)
+    {
+
+        std::cout << headers->upgrade->key << ":"
+                  << headers->upgrade->key << std::endl;
+    }
+
+    for (auto t : headers->generals)
+    {
+
+        std::cout << t->key << ":"
+                  << t->value << std::endl;
+    }
+    std::cout << "<+++++++++++++++++++++++++++++++++++++++++++>" << std::endl;
+}
+
 void printUrl(const Url *url)
 {
     if (url->field_set & (1 << HTTP_UF_SCHEMA))
@@ -804,6 +857,151 @@ int HttpParser::parseHeader(const char *stream,
 
         prestat = stat;
     }
+}
+
+int HttpParser::parseBody(const char *stream,
+                          int &at,
+                          int len,
+                          bool isChunked)
+{
+    std::cout << "function HttpParser::parseBody()\n";
+
+    //chunk or content-length or eof
+
+    const char *begin = stream;
+
+    enum http_body_state stat = (isChunked)
+                                    ? s_http_body_chunk_size
+                                    : s_http_body_identify_by_eof;
+
+    unsigned long long chunk_size = 0;
+
+    for (int i = 0; i < len; i++)
+    {
+        char ch = *(begin + at + i);
+
+        // std::cout << i << " " << int(stat) << std::endl;
+
+        switch (stat)
+        {
+        case s_http_body_error:
+            return -1;
+            break;
+
+        case s_http_body_identify_by_length:
+        {
+            unsigned long long to_read = MIN(chunk_size,
+                                             len - i);
+            i += to_read;
+            // content_length -= to_read;
+            // if (content_length == 0)
+            {
+                //message done;
+            }
+        }
+        break;
+
+        case s_http_body_identify_by_eof:
+            i = len; //FIXME:
+            //message done'
+            break;
+
+        case s_http_body_chunk_size_start:
+        {
+            short int tmp = getHex(ch);
+            if (tmp == -1)
+            {
+                std::cout << "chunk size invalid\n";
+                return -1;
+            }
+            chunk_size *= 16;
+            chunk_size += tmp;
+            stat = s_http_body_chunk_size;
+        }
+        break;
+
+        case s_http_body_chunk_size:
+        {
+            if (ch == CR)
+            {
+                stat = s_http_body_chunk_size_almost_done;
+                break;
+            }
+            else if (ch == ' ')
+            {
+                stat = s_http_body_chunk_size;
+                break;
+            }
+
+            short int tmp = getHex(ch);
+            if (tmp == -1)
+            {
+                std::cout << "chunk size invalid\n";
+                return -1;
+            }
+            chunk_size *= 16;
+            chunk_size += tmp;
+        }
+        break;
+
+        case s_http_body_chunk_size_almost_done:
+            checkOrGoError((ch == LF));
+            std::cout << "chunk size:" << chunk_size << std::endl;
+            if (chunk_size != 0)
+                stat = s_http_body_chunk_data;
+            else
+            {
+                //is trailing;
+            }
+            stat = s_http_body_chunk_data;
+            break;
+
+        case s_http_body_chunk_size_done:
+            //TODO:finish
+            break;
+
+        case s_http_body_chunk_data:
+        {
+            unsigned long long to_read = MIN(chunk_size,
+                                             len - i);
+            std::string data(begin + at + i, to_read);
+            std::cout << "chunk data:" << data << std::endl;
+            i += to_read - 1;
+            stat = s_http_body_chunk_data_almost_done;
+        }
+
+        break;
+
+        case s_http_body_chunk_data_almost_done:
+            checkOrGoError((ch == CR));
+            stat = s_http_body_chunk_data_done;
+            break;
+
+        case s_http_body_chunk_data_done:
+            checkOrGoError((ch == LF));
+            if (chunk_size == 0)
+            {
+                std::cout << "It is traling chunk\n";
+                stat = s_http_body_chunks_done;
+            }
+            else
+            {
+                stat = s_http_body_chunk_size_start;
+                chunk_size = 0;
+            }
+            // stat = s_http_body_chunk;
+            break;
+
+        case s_http_body_chunks_done:
+            return 0;
+            break;
+        }
+    }
+
+    return 0;
+
+error:
+    return -1;
 }
 
 int HttpParser::execute(const char *stream,

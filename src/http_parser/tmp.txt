@@ -1,4 +1,4 @@
-GET https://www.baidu.com:/link?url=M4lzXYwk9Eeq4NFp91crQLQy-D_Cy3VfAbGEJjUI3nIHWyyuvvKi0zFEBUmv2O_D HTTP/1.1
+GET https://www.baidu.com/ HTTP/1.1
 Host: www.baidu.com
 Connection: keep-alive
 Pragma: no-cache
@@ -6,7 +6,7 @@ Cache-Control: no-cache
 Upgrade-Insecure-Requests: 1
 User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.162 Safari/537.36
 Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8
-Accept-Encoding: gzip, deflate, br
+Transfer-Encoding: chunked
 Accept-Language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7
 Cookie: BAIDUID=E50BF57FB6A27383FAF6EFD07FB3186C:FG=1; PSTM=1521556275; BIDUPSID=C1E68B9B73BEF9F8DB2744C5D2B7CB48; BD_UPN=123353; ispeed_lsm=0; BD_HOME=0; H_PS_PSSID=1469_26257_21092_26350; BD_CK_SAM=1; PSINO=2; BDORZ=B490B5EBF6F3CD402E515D22BCDA1598; H_PS_645EC=8acch5C4TYv809Ony9v90g3qAuYWL%2B9Ko779DqOVFqRAVu1Qivdny0xPlio; BDSVRTM=95
 

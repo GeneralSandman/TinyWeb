@@ -1844,7 +1844,7 @@ reexecute:
          */
         MARK(body);
         parser->content_length -= to_read;
-        p += to_read - 1;
+        p += to_read - 1;//???
 
         if (parser->content_length == 0) {
           UPDATE_STATE(s_message_done);
@@ -1875,7 +1875,7 @@ reexecute:
       case s_message_done:
         UPDATE_STATE(NEW_MESSAGE());
         CALLBACK_NOTIFY(message_complete);
-        if (parser->upgrade) {
+        if (parser->upgrade) {//TODO:
           /* Exit, the rest of the message is in a different protocol. */
           RETURN((p - data) + 1);
         }
@@ -1925,6 +1925,7 @@ reexecute:
         t += unhex_val;
 
         /* Overflow? Test against a conservative limit for simplicity. */
+        //why ???
         if (UNLIKELY((ULLONG_MAX - 16) / 16 < parser->content_length)) {
           SET_ERRNO(HPE_INVALID_CONTENT_LENGTH);
           goto error;

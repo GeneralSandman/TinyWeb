@@ -45,6 +45,19 @@
 #define isIpv4Char(c) (isNum(c) || (c) == '.')
 #define isIpv6Char(c) (isHexChar(c) || (c) == ':' || (c) == '.')
 
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+
+inline short int getHex(char c)
+{
+	if ('0' <= c && c <= '9')
+		return (c - '0');
+	else if ('A' <= c && c <= 'F')
+		return (c - 'A' + 10);
+	else if ('a' <= c && c <= 'f')
+		return (c - 'a' + 10);
+	return -1;
+}
+
 //the values set to HttpParser::m_nType
 enum httpParserType
 {
@@ -165,6 +178,24 @@ enum http_header_state
 	s_http_headers_done,
 };
 
+enum http_body_state
+{
+	s_http_body_error = 1,
+
+	s_http_body_identify_by_length,
+	s_http_body_identify_by_eof,
+
+	s_http_body_chunk_size_start,
+	s_http_body_chunk_size,
+	s_http_body_chunk_size_almost_done,
+	s_http_body_chunk_size_done,
+
+	s_http_body_chunk_data,
+	s_http_body_chunk_data_almost_done,
+	s_http_body_chunk_data_done,
+	s_http_body_chunks_done
+};
+
 typedef struct Url
 {
 	unsigned int port : 16;
@@ -191,7 +222,7 @@ enum httpHeaderField
 
 typedef struct HttpHeader
 {
-	std::string key; //take place with string_t
+	std::string key; //TODO:take place with string_t
 	std::string value;
 } HttpHeader;
 
@@ -207,6 +238,8 @@ typedef struct HttpHeaders
 
 	std::list<HttpHeader *> generals; //take place in list_t
 } HttpHeaders;
+
+void printHttpHeaders(const HttpHeaders *headers);
 
 void printUrl(const Url *url);
 
@@ -312,7 +345,7 @@ class HttpParser
   public:
 	HttpParser(HttpParserSettings *set = nullptr)
 		: m_pSettings(set),
-		  m_nType(0),//FIXME:
+		  m_nType(0), //FIXME:
 		  m_nFlags(0),
 		  m_nState(0),
 		  m_nHeaderState(0),
@@ -341,16 +374,35 @@ class HttpParser
 					 unsigned int len);
 
 	// enum state
-	enum http_host_state parseHostChar(const char ch, enum http_host_state s);
-	int parseHost(const char *stream, int &at, int len, Url *&result, bool has_at_char);
+	enum http_host_state parseHostChar(const char ch,
+									   enum http_host_state s);
+	int parseHost(const char *stream,
+				  int &at,
+				  int len,
+				  Url *&result,
+				  bool has_at_char);
 
-	enum state parseUrlChar(const char ch, enum state s);
-	int parseUrl(const char *stream, int &at, int len, Url *&result);
+	enum state parseUrlChar(const char ch,
+							enum state s);
+	int parseUrl(const char *stream,
+				 int &at,
+				 int len,
+				 Url *&result);
 
-	enum http_header_state parseHeaderChar(const char ch, enum http_header_state s);
-	int parseHeader(const char *stream, int &at, int len);
+	enum http_header_state parseHeaderChar(const char ch,
+										   enum http_header_state s);
+	int parseHeader(const char *stream,
+					int &at,
+					int len);
 
-	int execute(const char *stream, int &at, int len);
+	int parseBody(const char *stream,
+				  int &at,
+				  int len,
+				  bool isChunked);
+
+	int execute(const char *stream,
+				int &at,
+				int len);
 
 	~HttpParser()
 	{
