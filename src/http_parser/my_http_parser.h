@@ -393,7 +393,8 @@ class HttpParser
 										   enum http_header_state s);
 	int parseHeader(const char *stream,
 					int &at,
-					int len);
+					int len,
+					HttpHeaders *result);
 
 	int parseBody(const char *stream,
 				  int &at,

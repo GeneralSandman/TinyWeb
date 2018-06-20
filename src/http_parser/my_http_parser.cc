@@ -774,7 +774,8 @@ enum http_header_state HttpParser::parseHeaderChar(const char ch,
 
 int HttpParser::parseHeader(const char *stream,
                             int &at,
-                            int len)
+                            int len,
+                            HttpHeaders *result)
 {
 
     char *begin = (char *)stream;
@@ -839,8 +840,16 @@ int HttpParser::parseHeader(const char *stream,
             //   << " key len:" << keylen
             //   << "->value begin:" << valuebegin
             //   << " value len:" << valuelen << std::endl;
-            printf("%.*s->%.*s^\n", keylen, begin + keybegin,
-                   valuelen, begin + valuebegin);
+            // printf("%.*s->%.*s^\n", keylen, begin + keybegin,
+            //    valuelen, begin + valuebegin);
+            {
+                std::string key(begin + keybegin, keylen);
+                std::string value(begin + valuebegin, valuelen);
+                HttpHeader *header = new HttpHeader;
+                header->key = key;
+                header->value = value; //FIXME:
+                result->generals.push_back(header);
+            }
             headers++;
             keybegin = keylen = 0;
             valuebegin = valuelen = 0;
@@ -1434,7 +1443,8 @@ int HttpParser::execute(const char *stream,
         {
             // std::cout << "headers:" << headers << std::endl;
             int begin = 0;
-            int tmp = parseHeader(headers.c_str(), begin, headers_len);
+            int tmp;
+            // tmp = parseHeader(headers.c_str(), begin, headers_len);
             bool res = (tmp == -1) ? false : true;
             if (res)
                 std::cout << "headers valid\n";
