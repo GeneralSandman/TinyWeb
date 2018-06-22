@@ -16,6 +16,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <memory>
 
 void printHttpHeaders(const HttpHeaders *headers)
 {
@@ -258,7 +259,7 @@ enum http_host_state HttpParser::parseHostChar(const char ch,
 }
 
 int HttpParser::parseHost(const char *stream,
-                          int &at,
+                          int at,
                           int len,
                           Url *&result,
                           bool has_at_char)
@@ -550,12 +551,14 @@ enum state HttpParser::parseUrlChar(const char ch,
 }
 
 int HttpParser::parseUrl(const char *stream,
-                         int &at,
+                         int at,
                          int len,
-                         Url *&result)
+                         Url *result)
 {
-    // std::cout << "function parseUrl\n";
+    std::cout << "function parseUrl\n";
     memset(result, 0, sizeof(Url));
+
+    // assert(result->data=)
 
     char *begin = (char *)stream;
     result->data = begin;
@@ -571,7 +574,7 @@ int HttpParser::parseUrl(const char *stream,
     for (int i = 0; i < len; i++)
     {
         char ch = *(begin + at + i);
-        // std::cout << ch << (unsigned int)prestat << std::endl;
+        // std::cout << "[Debug]" << ch << (unsigned int)prestat << std::endl;
         stat = parseUrlChar(ch, prestat);
         // field = 0;
         if (ch == '@')
@@ -773,7 +776,7 @@ enum http_header_state HttpParser::parseHeaderChar(const char ch,
 }
 
 int HttpParser::parseHeader(const char *stream,
-                            int &at,
+                            int at,
                             int len,
                             HttpHeaders *result)
 {
@@ -798,21 +801,6 @@ int HttpParser::parseHeader(const char *stream,
         char ch = *(begin + at + i);
         stat = parseHeaderChar(ch, prestat);
 
-        if (('a' <= ch && ch <= 'z') || ch == '-')
-        {
-        }
-        else if (('A' <= ch && ch <= 'Z'))
-        {
-            ch += 32;
-        }
-        else
-            ch = -1;
-        if (ch == -1)
-        {
-            std::cout << "key is invalid\n";
-            break;
-        }
-
         switch (stat)
         {
         case s_http_header_error:
@@ -826,10 +814,14 @@ int HttpParser::parseHeader(const char *stream,
         case s_http_header_key_start:
             keybegin = at + i;
             keylen = 1;
+            if (isLower(ch) || isUpper(ch) || ch == '-')
+                ch = toLower(ch);
             hash = getHash(hash, ch);
             break;
 
         case s_http_header_key:
+            if (isLower(ch) || isUpper(ch) || ch == '-')
+                ch = toLower(ch);
             hash = getHash(hash, ch);
             keylen++;
             break;
@@ -890,14 +882,14 @@ int HttpParser::parseHeader(const char *stream,
 }
 
 int HttpParser::parseHeaders(const char *stream,
-                             int &at,
+                             int at,
                              int len,
                              HttpHeaders *result)
 {
 }
 
 int HttpParser::parseBody(const char *stream,
-                          int &at,
+                          int at,
                           int len,
                           bool isChunked)
 {
@@ -1042,12 +1034,17 @@ error:
 }
 
 int HttpParser::execute(const char *stream,
-                        int &at,
-                        int len)
+                        int at,
+                        int len,
+                        HttpRequest *request)
 {
     std::cout << "function HttpParser::execute()\n";
 
-    const char *begin = stream;
+    const char *begin = stream + at;
+
+    int return_val = 0;
+
+    enum http_method method;
 
     unsigned int url_begin = 0;
     unsigned int url_len = 0;
@@ -1094,7 +1091,8 @@ int HttpParser::execute(const char *stream,
 
     for (int i = 0; i < len; i++)
     {
-        char ch = *(begin + at + i);
+        char ch = *(begin + i);
+        // std::cout << "[Debug]:" << ch << std::endl;
 
         switch (m_nState)
         {
@@ -1165,7 +1163,6 @@ int HttpParser::execute(const char *stream,
         case s_resp_status_code_start:
             m_nStatusCode = 0;
             checkOrGoError(isNum(ch));
-            // std::cout << *(begin + i) << std::endl;
             m_nStatusCode *= 10;
             m_nStatusCode += ch - '0';
             m_nState = s_resp_status_code;
@@ -1187,8 +1184,7 @@ int HttpParser::execute(const char *stream,
 
         case s_resp_status_phrase_start:
             checkOrGoError(isAlpha(ch));
-            status_phrase_begin = at + i;
-            // std::cout << "DEBUG:" << ch << std::endl;
+            status_phrase_begin = i;
             status_phrase_len = 1;
             m_nState = s_resp_status_phrase;
             break;
@@ -1208,8 +1204,6 @@ int HttpParser::execute(const char *stream,
                      ch == ' ' ||
                      ch == '-')
             {
-                //TODO:this condition need to fix
-                // std::cout << "DEBUG:" << ch << std::endl;
                 status_phrase_len++;
             }
             break;
@@ -1217,7 +1211,7 @@ int HttpParser::execute(const char *stream,
         case s_resp_line_almost_done:
             checkOrGoError((ch == '\n'));
             {
-                // std::cout << "request line done:" << std::endl;
+                std::cout << "request line done:" << std::endl;
                 m_nState = s_resp_line_done;
             }
             break;
@@ -1236,24 +1230,21 @@ int HttpParser::execute(const char *stream,
             }
 
             checkOrGoError(isAlpha(ch));
-            headers_begin = at + i;
+            headers_begin = i;
             m_nState = s_header_start;
             break;
 
         case s_requ_start:
             m_nState = s_requ_method; //FIXME:
-            method_begin = at + i;
+            method_begin = i;
             method_len = 1;
             break;
 
         case s_requ_method_start:
-            // method_begin = begin + at + i;
-            //do nothing???
-            //TODO:
             if (ch == ' ')
             {
             }
-            checkOrGoError(isAlpha(ch));
+            checkOrGoError((isUpper(ch) || ch == '_'));
             method_len++;
 
             break;
@@ -1263,7 +1254,7 @@ int HttpParser::execute(const char *stream,
             {
                 m_nState = s_requ_url_begin;
             }
-            else
+            else if (isUpper(ch) || ch == '_')
             {
                 method_len++;
             }
@@ -1272,7 +1263,7 @@ int HttpParser::execute(const char *stream,
         case s_requ_url_begin:
             if (isUrlChar(ch))
             {
-                url_begin = at + i;
+                url_begin = i;
                 url_len = 1;
                 m_nState = s_requ_url;
             }
@@ -1352,8 +1343,6 @@ int HttpParser::execute(const char *stream,
         case s_requ_version_minor:
             checkOrGoError((ch == '\r'));
             m_nState = s_requ_line_almost_done;
-            // std::cout << "http version:HTTP/" << m_nHttpVersionMajor << "."
-            //   << m_nHttpVersionMinor << std::endl;
             break;
 
         case s_requ_line_almost_done:
@@ -1375,7 +1364,7 @@ int HttpParser::execute(const char *stream,
 
             checkOrGoError(isAlpha(ch));
             m_nState = s_header_start;
-            headers_begin = at + i;
+            headers_begin = i;
             headers_len = 1;
             break;
 
@@ -1435,63 +1424,67 @@ int HttpParser::execute(const char *stream,
         }
     }
 
+    //base information of HttpRequest
+    request->method = getMethod(begin + method_begin, method_len);
+    request->http_version_major = m_nHttpVersionMajor;
+    request->http_version_minor = m_nHttpVersionMinor;
+    request->method_s = std::string(begin + method_begin, method_len);
+
+    //parse url information of HttpRequest
+    request->url = new Url;
+    request->url->data = (char *)begin;
+    request->url->offset = url_begin;
+    request->url->len = url_len;
+    return_val = parseUrl(begin,
+                          url_begin,
+                          url_len,
+                          request->url);
+    if (return_val == -1)
+    {
+        std::cout << "[url is invalid]:"
+                  << std::string(begin + url_begin, url_len)
+                  << std::endl;
+        goto error;
+    }
+    else if (return_val == 0)
+    {
+    }
+
+    //parse headers information.
+    request->headers = new HttpHeaders;
+    request->headers->data = (char *)begin;
+    request->headers->offset = headers_begin;
+    request->headers->len = headers_len;
+
+    return_val = parseHeader(begin,
+                             headers_begin,
+                             headers_len,
+                             request->headers);
+
+    if (return_val == -1)
+    {
+        std::cout << "[headers is invalid]"
+                  << std::endl;
+        goto error;
+    }
+    else if (return_val == 0)
+    {
+    }
+
     { //debug
         std::string url(begin + url_begin, url_len);
         std::string status_phrase(begin + status_phrase_begin, status_phrase_len);
         std::string headers(begin + headers_begin, headers_len);
         std::string method(begin + method_begin, method_len);
-
-        std::cout << "<+++++++++++++++++>" << std::endl;
-        if (!url.empty())
-        {
-            //parseUrl
-            std::cout << "url:" << url << std::endl;
-            int begin = 0;
-            Url *result = new Url;
-            int tmp = parseUrl(url.c_str(),
-                               begin,
-                               url.size(),
-                               result);
-
-            bool res = (tmp == -1) ? false : true;
-            if (res)
-            {
-                std::cout << "url valid\n";
-                printUrl(result);
-                std::cout << std::endl;
-            }
-            else
-            {
-                std::cout << "url invalid\n";
-            }
-
-            delete result;
-        }
-        if (!headers.empty())
-        {
-            // std::cout << "headers:" << headers << std::endl;
-            int begin = 0;
-            int tmp;
-            // tmp = parseHeader(headers.c_str(), begin, headers_len);
-            bool res = (tmp == -1) ? false : true;
-            if (res)
-                std::cout << "headers valid\n";
-            else
-                std::cout << "headers invalid\n";
-        }
-
-        std::cout << "http version:HTTP/" << m_nHttpVersionMajor << "." << m_nHttpVersionMinor << std::endl;
-        if (!method.empty())
-            std::cout << "method:" << method << std::endl;
-        if (m_nStatusCode)
-            std::cout << "status code:" << m_nStatusCode << std::endl;
-        if (!status_phrase.empty())
-            std::cout << "status_phrase:" << status_phrase << std::endl;
-
-        std::cout << "<+++++++++++++++++>" << std::endl;
-
-        return 0;
+        std::cout << "<++++++++DEBUG+++++++++>" << std::endl;
+        std::cout << "url:" << url << std::endl;
+        std::cout << "method:" << method << std::endl;
+        std::cout << "status code:" << m_nStatusCode << std::endl;
+        std::cout << "status_phrase:" << status_phrase << std::endl;
+        std::cout << "<++++++++++++++++++++++>" << std::endl;
     }
+
+    return 0;
 
 error:
     std::cout << "parser error\n";

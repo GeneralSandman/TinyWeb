@@ -133,7 +133,7 @@ void testHttpParserResponse()
         HttpParser parser(&settings);
         parser.setType(HTTP_RESPONSE);
         int begin = 0;
-        parser.execute(responses[i].c_str(), begin, responses[i].size());
+        // parser.execute(responses[i].c_str(), begin, responses[i].size());
     }
 }
 
@@ -176,13 +176,24 @@ void testHttpParserRequest()
     // settings.setGetEndMessageCallback(boost::bind(endMessage));
 
     int len = requests.size();
-    for (int i = 0; i < len; i++)
+    for (int i = 0; i < 1; i++)
     {
-        std::cout << "---" << i << std::endl;
+        std::cout << i << ")" << std::endl;
         HttpParser parser(&settings);
         parser.setType(HTTP_REQUEST); //FIXME:
-        int begin = 0;
-        parser.execute(requests[i].c_str(), begin, requests[i].size());
+        HttpRequest *request = new HttpRequest;
+        memset(request, 0, sizeof(HttpRequest));
+        parser.execute(requests[i].c_str(), 0, requests[i].size(), request);
+
+        if (request->url != nullptr)
+            delete request->url;
+
+        if (request->headers != nullptr)
+            delete request->headers;
+
+        if (request->body != nullptr)
+            delete request->body;
+        delete request;
     }
 }
 
@@ -300,14 +311,73 @@ void testHeaderKeyHash()
     }
 }
 
+void testGetMethod()
+{
+    int all = 0;
+    int pass = 0;
+
+    std::cout << pass << "/" << all << std::endl;
+}
+
+void testLitterCon()
+{
+    std::string tmp = "[]!@#$%^&*()_++=-:;'<>,./?\"`~";
+
+    std::string str;
+
+    for (int i = 0; i < 26; i++)
+    {
+        str += char(i + 'a');
+        str += char(i + 'A');
+    }
+    str += tmp;
+
+    std::string up;
+    for (int i = 0; i < 26; i++)
+    {
+        up += char(i + 'A');
+        up += char(i + 'A');
+    }
+    up += tmp;
+
+    std::string lower;
+    for (int i = 0; i < 26; i++)
+    {
+        lower += char(i + 'a');
+        lower += char(i + 'a');
+    }
+    lower += tmp;
+
+    std::string res1;
+    for (auto t : str)
+        res1 += toLower(t);
+
+    std::string res2;
+    for (auto t : str)
+        res2 += toUpper(t);
+
+    std::cout << res1 << std::endl
+              << lower << std::endl
+              << res2 << std::endl
+              << up << std::endl;
+
+    if (lower != res1 || up != res2)
+        std::cout << "false\n";
+    else
+    {
+        std::cout << "test pass\n";
+    }
+}
+
 int main()
 {
     // testHttpParser();
     // testHttpParserResponse();
-    // testHttpParserRequest();
+    testHttpParserRequest();
     // testParseHost();
     // testParseUrl();
     // testParseHeader();
-    testHeaderKeyHash();
+    // testHeaderKeyHash();
+    // testLitterCon();
     return 0;
 }

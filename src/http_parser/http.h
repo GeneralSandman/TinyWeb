@@ -137,7 +137,7 @@ enum http_status
 
 enum http_method
 {
-#define XX(num, name, string) HTTP_##name = num,
+#define XX(num, name, string) HTTP_METHOD_##name = num,
     HTTP_METHOD_MAP(XX)
 #undef XX
 };
