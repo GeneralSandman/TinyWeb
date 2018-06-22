@@ -316,6 +316,20 @@ void testGetMethod()
     int all = 0;
     int pass = 0;
 
+    for (int i = 0; i < 34; i++)
+    {
+        const char *method = httpMethodStr((enum http_method)i);
+        int len = strlen(method);
+
+        if (i == (unsigned int)getMethod(method, len))
+            pass++;
+        else
+        {
+            std::cout << i << ":" << method << std::endl;
+        }
+        all++;
+    }
+
     std::cout << pass << "/" << all << std::endl;
 }
 
@@ -373,11 +387,12 @@ int main()
 {
     // testHttpParser();
     // testHttpParserResponse();
-    testHttpParserRequest();
+    // testHttpParserRequest();
     // testParseHost();
     // testParseUrl();
     // testParseHeader();
     // testHeaderKeyHash();
+    testGetMethod();
     // testLitterCon();
     return 0;
 }

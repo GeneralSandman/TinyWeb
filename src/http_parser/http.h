@@ -18,6 +18,78 @@
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 #define ELEM_AT(a, i, v) ((unsigned int)(i) < ARRAY_SIZE(a) ? (a)[(i)] : (v))
 
+#define strcmp_3(m, s) ((*(m + 0) == *(s + 0)) && \
+                        (*(m + 1) == *(s + 1)) && \
+                        (*(m + 2) == *(s + 2)))
+
+#define strcmp_4(m, s) ((*(m + 0) == *(s + 0)) && \
+                        (*(m + 1) == *(s + 1)) && \
+                        (*(m + 2) == *(s + 2)) && \
+                        (*(m + 3) == *(s + 3)))
+
+#define strcmp_5(m, s) ((*(m + 0) == *(s + 0)) && \
+                        (*(m + 1) == *(s + 1)) && \
+                        (*(m + 2) == *(s + 2)) && \
+                        (*(m + 3) == *(s + 3)) && \
+                        (*(m + 4) == *(s + 4)))
+
+#define strcmp_6(m, s) ((*(m + 0) == *(s + 0)) && \
+                        (*(m + 1) == *(s + 1)) && \
+                        (*(m + 2) == *(s + 2)) && \
+                        (*(m + 3) == *(s + 3)) && \
+                        (*(m + 4) == *(s + 4)) && \
+                        (*(m + 5) == *(s + 5)))
+
+#define strcmp_7(m, s) ((*(m + 0) == *(s + 0)) && \
+                        (*(m + 1) == *(s + 1)) && \
+                        (*(m + 2) == *(s + 2)) && \
+                        (*(m + 3) == *(s + 3)) && \
+                        (*(m + 4) == *(s + 4)) && \
+                        (*(m + 5) == *(s + 5)) && \
+                        (*(m + 6) == *(s + 6)))
+
+#define strcmp_8(m, s) ((*(m + 0) == *(s + 0)) && \
+                        (*(m + 1) == *(s + 1)) && \
+                        (*(m + 2) == *(s + 2)) && \
+                        (*(m + 3) == *(s + 3)) && \
+                        (*(m + 4) == *(s + 4)) && \
+                        (*(m + 5) == *(s + 5)) && \
+                        (*(m + 6) == *(s + 6)) && \
+                        (*(m + 7) == *(s + 7)))
+
+#define strcmp_9(m, s) ((*(m + 0) == *(s + 0)) && \
+                        (*(m + 1) == *(s + 1)) && \
+                        (*(m + 2) == *(s + 2)) && \
+                        (*(m + 3) == *(s + 3)) && \
+                        (*(m + 4) == *(s + 4)) && \
+                        (*(m + 5) == *(s + 5)) && \
+                        (*(m + 6) == *(s + 6)) && \
+                        (*(m + 7) == *(s + 7)) && \
+                        (*(m + 8) == *(s + 8)))
+
+#define strcmp_10(m, s) ((*(m + 0) == *(s + 0)) && \
+                         (*(m + 1) == *(s + 1)) && \
+                         (*(m + 2) == *(s + 2)) && \
+                         (*(m + 3) == *(s + 3)) && \
+                         (*(m + 4) == *(s + 4)) && \
+                         (*(m + 5) == *(s + 5)) && \
+                         (*(m + 6) == *(s + 6)) && \
+                         (*(m + 7) == *(s + 7)) && \
+                         (*(m + 8) == *(s + 8)) && \
+                         (*(m + 9) == *(s + 9)))
+
+#define strcmp_11(m, s) ((*(m + 0) == *(s + 0)) && \
+                         (*(m + 1) == *(s + 1)) && \
+                         (*(m + 2) == *(s + 2)) && \
+                         (*(m + 3) == *(s + 3)) && \
+                         (*(m + 4) == *(s + 4)) && \
+                         (*(m + 5) == *(s + 5)) && \
+                         (*(m + 6) == *(s + 6)) && \
+                         (*(m + 7) == *(s + 7)) && \
+                         (*(m + 8) == *(s + 8)) && \
+                         (*(m + 9) == *(s + 9)) && \
+                         (*(m + 10) == *(s + 10)))
+
 /* begin Http status */
 #define HTTP_STATUS_MAP(XX)                                                   \
     XX(100, CONTINUE, Continue)                                               \
@@ -87,6 +159,8 @@ enum http_status
 #undef XX
 };
 
+const char *httpStatusStr(enum http_status s);
+
 /* end Http status */
 
 /* begin Http Request Methods */
@@ -120,7 +194,7 @@ enum http_status
     XX(22, CHECKOUT, CHECKOUT)       \
     XX(23, MERGE, MERGE)             \
     /* upnp */                       \
-    XX(24, MSEARCH, M - SEARCH)      \
+    XX(24, MSEARCH, MSEARCH)         \
     XX(25, NOTIFY, NOTIFY)           \
     XX(26, SUBSCRIBE, SUBSCRIBE)     \
     XX(27, UNSUBSCRIBE, UNSUBSCRIBE) \
@@ -141,6 +215,154 @@ enum http_method
     HTTP_METHOD_MAP(XX)
 #undef XX
 };
+
+const char *httpMethodStr(enum http_method m);
+
+inline enum http_method getMethod(const char *begin,
+                                  unsigned short len)
+{
+    switch (len)
+    {
+    case 3:
+    {
+        if (strcmp_3(begin, "GET"))
+            return HTTP_METHOD_GET;
+
+        if (strcmp_3(begin, "PUT"))
+            return HTTP_METHOD_PUT;
+
+        if (strcmp_3(begin, "ACL"))
+            return HTTP_METHOD_ACL;
+    }
+    break;
+
+    case 4:
+    {
+        if (strcmp_4(begin, "HEAD"))
+            return HTTP_METHOD_HEAD;
+
+        if (strcmp_4(begin, "POST"))
+            return HTTP_METHOD_POST;
+
+        if (strcmp_4(begin, "COPY"))
+            return HTTP_METHOD_COPY;
+
+        if (strcmp_4(begin, "LOCK"))
+            return HTTP_METHOD_LOCK;
+
+        if (strcmp_4(begin, "MOVE"))
+            return HTTP_METHOD_MOVE;
+
+        if (strcmp_4(begin, "BIND"))
+            return HTTP_METHOD_BIND;
+
+        if (strcmp_4(begin, "LINK"))
+            return HTTP_METHOD_LINK;
+    }
+    break;
+
+    case 5:
+    {
+        if (strcmp_5(begin, "TRACE"))
+            return HTTP_METHOD_TRACE;
+
+        if (strcmp_5(begin, "MKCOL"))
+            return HTTP_METHOD_MKCOL;
+
+        if (strcmp_5(begin, "MERGE"))
+            return HTTP_METHOD_MERGE;
+
+        if (strcmp_5(begin, "PATCH"))
+            return HTTP_METHOD_PATCH;
+
+        if (strcmp_5(begin, "PURGE"))
+            return HTTP_METHOD_PURGE;
+    }
+    break;
+
+    case 6:
+    {
+        if (strcmp_6(begin, "DELETE"))
+            return HTTP_METHOD_DELETE;
+
+        if (strcmp_6(begin, "SEARCH"))
+            return HTTP_METHOD_SEARCH;
+
+        if (strcmp_6(begin, "UNLOCK"))
+            return HTTP_METHOD_UNLOCK;
+
+        if (strcmp_6(begin, "REBIND"))
+            return HTTP_METHOD_REBIND;
+
+        if (strcmp_6(begin, "UNBIND"))
+            return HTTP_METHOD_UNBIND;
+
+        if (strcmp_6(begin, "REPORT"))
+            return HTTP_METHOD_REPORT;
+
+        if (strcmp_6(begin, "NOTIFY"))
+            return HTTP_METHOD_NOTIFY;
+
+        if (strcmp_6(begin, "UNLINK"))
+            return HTTP_METHOD_UNLINK;
+
+        if (strcmp_6(begin, "SOURCE"))
+            return HTTP_METHOD_SOURCE;
+    }
+    break;
+
+    case 7:
+    {
+        if (strcmp_7(begin, "CONNECT"))
+            return HTTP_METHOD_CONNECT;
+
+        if (strcmp_7(begin, "OPTIONS"))
+            return HTTP_METHOD_OPTIONS;
+
+        if (strcmp_7(begin, "MSEARCH"))
+            return HTTP_METHOD_MSEARCH;
+    }
+    break;
+
+    case 8:
+    {
+        if (strcmp_8(begin, "PROPFIND"))
+            return HTTP_METHOD_PROPFIND;
+
+        if (strcmp_8(begin, "CHECKOUT"))
+            return HTTP_METHOD_CHECKOUT;
+    }
+    break;
+
+    case 9:
+    {
+        if (strcmp_9(begin, "PROPPATCH"))
+            return HTTP_METHOD_PROPPATCH;
+
+        if (strcmp_9(begin, "CHECKOUT"))
+            return HTTP_METHOD_CHECKOUT;
+
+        if (strcmp_9(begin, "SUBSCRIBE"))
+            return HTTP_METHOD_SUBSCRIBE;
+    }
+    break;
+
+    case 10:
+    {
+        if (strcmp_10(begin, "MKACTIVITY"))
+            return HTTP_METHOD_MKACTIVITY;
+        if (strcmp_10(begin, "MKCALENDAR"))
+            return HTTP_METHOD_MKCALENDAR;
+    }
+
+    break;
+
+    case 11:
+        if (strcmp_11(begin, "UNSUBSCRIBE"))
+            return HTTP_METHOD_UNSUBSCRIBE;
+        break;
+    }
+}
 
 /* end Http Request Methods */
 
@@ -199,6 +421,8 @@ enum http_errno
 };
 #undef HTTP_ERRNO_GEN
 
+const char *httpErrnoStr(enum http_errno e);
+
 /* end Http Errors */
 
 extern const unsigned char urlChar[32];
@@ -208,7 +432,5 @@ extern const unsigned char urlChar[32];
         (1 << ((unsigned int)(i)&7))))
 
 #define isUrlChar(c) (bitAt(urlChar, (unsigned char)c))
-
-
 
 #endif
