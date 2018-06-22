@@ -238,7 +238,7 @@ void testParseHeader()
         parser.setType(HTTP_REQUEST);
         int begin = 0;
         std::cout << "---" << i << "---\n";
-        parser.parseHeader(strs[i].c_str(), begin, strs[i].size());
+        // parser.parseHeader(strs[i].c_str(), begin, strs[i].size());
     }
 }
 
@@ -255,6 +255,51 @@ void testExecute()
     parser.setType(HTTP_REQUEST);
 }
 
+void testHeaderKeyHash()
+{
+    vector<string> keys =
+        {
+            "Connection",
+            "Content-Length",
+            "Host",
+            "Content-Type",
+            "Accept-Encoding",
+            "Cookie",
+            "If-Modified-Since",
+            "Referer",
+            "Last-Modified",
+            "Transfer-Encoding",
+        };
+
+    for (auto k : keys)
+    {
+        unsigned long long hash = 0;
+        string key;
+        for (int i = 0; i < k.size(); i++)
+        {
+            char ch = k[i];
+            if (('a' <= ch && ch <= 'z') || ch == '-')
+            {
+            }
+            else if (('A' <= ch && ch <= 'Z'))
+            {
+                ch += 32;
+            }
+            else
+                ch = -1;
+            if (ch == -1)
+            {
+                std::cout << "key is invalid\n";
+                break;
+            }
+
+            key += ch;
+            hash = getHash(hash, ch);
+        }
+        std::cout << key << ":" << hash << std::endl;
+    }
+}
+
 int main()
 {
     // testHttpParser();
@@ -263,5 +308,6 @@ int main()
     // testParseHost();
     // testParseUrl();
     // testParseHeader();
+    testHeaderKeyHash();
     return 0;
 }

@@ -52,6 +52,96 @@ testHeaders headers[] = {
     },
 
     {
+        .str = "Connection: close\r\n",
+        .valid = true,
+        .headerNum = 1,
+        .headers = {
+            {"Connection", "close"},
+        },
+    },
+
+    {
+        .str = "Content-Type: text/xml; charset=utf-8\r\n",
+        .valid = true,
+        .headerNum = 1,
+        .headers = {
+            {"Content-Type", "text/xml; charset=utf-8"},
+        },
+    },
+
+    {
+        .str = "Accept-Encoding: compress, gzip\r\n",
+        .valid = true,
+        .headerNum = 1,
+        .headers = {
+            {"Accept-Encoding", "compress, gzip"},
+        },
+    },
+
+    {
+        .str = "Cookie: $Version=1; Skin=new;\r\n",
+        .valid = true,
+        .headerNum = 1,
+        .headers = {
+            {"Cookie", "$Version=1; Skin=new;"},
+        },
+    },
+
+    {
+        .str = "If-Modified-Since: Sat, 29 Oct 2010 19:43:31 GMT\r\n",
+        .valid = true,
+        .headerNum = 1,
+        .headers = {
+            {"If-Modified-Since", "Sat, 29 Oct 2010 19:43:31 GMT"},
+        },
+    },
+
+    {
+        .str = "Referer: http://www.zcmhi.com/archives/71.html\r\n",
+        .valid = true,
+        .headerNum = 1,
+        .headers = {
+            {"Referer", "http://www.zcmhi.com/archives/71.html"},
+        },
+    },
+
+    {
+        .str = "Content-Length: 348\r\n",
+        .valid = true,
+        .headerNum = 1,
+        .headers = {
+            {"Content-Length", "348"},
+        },
+    },
+
+    {
+        .str = "Last-Modified: Fri, 20 Apr 2018 08:12:56 GMT\r\n",
+        .valid = true,
+        .headerNum = 1,
+        .headers = {
+            {"Last-Modified", "Fri, 20 Apr 2018 08:12:56 GMT"},
+        },
+    },
+
+    {
+        .str = "Transfer-Encoding: chunked\r\n",
+        .valid = true,
+        .headerNum = 1,
+        .headers = {
+            {"Transfer-Encoding", "chunked"},
+        },
+    },
+
+    {
+        .str = "\r\n",
+        .valid = true,
+        .headerNum = 1,
+        .headers = {
+            {},
+        },
+    },
+
+    {
         .str = "Date: Tue, 04 Aug 2009 07:59:32 GMT\r\n"
                "Server: Apache\r\n"
                "X-Powered-By: Servlet/2.5 JSP/2.1\r\n"
@@ -190,8 +280,9 @@ void testParseHeader()
 
     int len = sizeof(headers) / sizeof(headers[0]);
 
-    for (int i = 2; i < 3; i++)
+    for (int i = 0; i < 10; i++)
     {
+        std::cout << i << ")  >>>>>" << std::endl;
         alltest++;
 
         HttpParser parser(&settings);
@@ -209,24 +300,20 @@ void testParseHeader()
         {
             if (res)
             {
-                std::cout << "url valid\n";
-                printHttpHeaders(result);
+                // printHttpHeaders(result);
 
                 int j = 0;
                 int lenj = headers[i].headerNum;
-                std::cout << lenj << std::endl;
 
                 auto p = result->generals.begin();
                 auto lenp = result->generals.end();
 
                 while (j != lenj && p != lenp)
                 {
-                    // std::cout << headers[i].headers[j][0] << (*p)->key.c_str() << std::endl;
-                    // std::cout << headers[i].headers[j][1] << (*p)->value.c_str() << std::endl;
                     if (0 != strcmp(headers[i].headers[j][0], (*p)->key.c_str()) ||
                         0 != strcmp(headers[i].headers[j][1], (*p)->value.c_str()))
                     {
-                        std::cout << "-------------\n";
+                        std::cout << "-------false------\n";
                         break;
                     }
 
@@ -240,8 +327,6 @@ void testParseHeader()
         }
         else
         {
-            std::cout << "not pass test!!!\n";
-            printHttpHeaders(result);
             notPass.push_back(i);
         }
         for (auto t : result->generals)

@@ -791,10 +791,27 @@ int HttpParser::parseHeader(const char *stream,
     unsigned int valuebegin = 0;
     unsigned int valuelen = 0;
 
+    unsigned long long hash = 0;
+
     for (int i = 0; i < len; i++)
     {
         char ch = *(begin + at + i);
         stat = parseHeaderChar(ch, prestat);
+
+        if (('a' <= ch && ch <= 'z') || ch == '-')
+        {
+        }
+        else if (('A' <= ch && ch <= 'Z'))
+        {
+            ch += 32;
+        }
+        else
+            ch = -1;
+        if (ch == -1)
+        {
+            std::cout << "key is invalid\n";
+            break;
+        }
 
         switch (stat)
         {
@@ -809,9 +826,11 @@ int HttpParser::parseHeader(const char *stream,
         case s_http_header_key_start:
             keybegin = at + i;
             keylen = 1;
+            hash = getHash(hash, ch);
             break;
 
         case s_http_header_key:
+            hash = getHash(hash, ch);
             keylen++;
             break;
 
@@ -842,17 +861,19 @@ int HttpParser::parseHeader(const char *stream,
             //   << " value len:" << valuelen << std::endl;
             // printf("%.*s->%.*s^\n", keylen, begin + keybegin,
             //    valuelen, begin + valuebegin);
+            printf("[%lld]%.*s\n", hash, keylen, begin + keybegin);
             {
                 std::string key(begin + keybegin, keylen);
                 std::string value(begin + valuebegin, valuelen);
                 HttpHeader *header = new HttpHeader;
                 header->key = key;
-                header->value = value; //FIXME:
+                header->value = value; //FIXME:performance
                 result->generals.push_back(header);
             }
             headers++;
             keybegin = keylen = 0;
             valuebegin = valuelen = 0;
+            hash = 0;
             stat = s_http_header_start;
             break;
 
@@ -866,6 +887,13 @@ int HttpParser::parseHeader(const char *stream,
 
         prestat = stat;
     }
+}
+
+int HttpParser::parseHeaders(const char *stream,
+                             int &at,
+                             int len,
+                             HttpHeaders *result)
+{
 }
 
 int HttpParser::parseBody(const char *stream,

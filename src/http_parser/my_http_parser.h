@@ -47,6 +47,8 @@
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
+#define getHash(hash, c) ((unsigned long long)((hash)*27 + (c)))
+
 inline short int getHex(char c)
 {
 	if ('0' <= c && c <= '9')
@@ -222,6 +224,7 @@ enum httpHeaderField
 
 typedef struct HttpHeader
 {
+	int keyHash;
 	std::string key; //TODO:take place with string_t
 	std::string value;
 } HttpHeader;
@@ -230,18 +233,47 @@ typedef struct HttpHeaders
 {
 	HttpHeader *host;
 	HttpHeader *connection;
-	HttpHeader *content_lenght;
-	HttpHeader *transfer_encoding;
 	HttpHeader *if_modified_since;
+	HttpHeader *if_unmodified_since;
+	HttpHeader *user_agent;
 	HttpHeader *referer;
+
+	HttpHeader *content_lenght;
+	HttpHeader *content_type;
+	HttpHeader *transfer_encoding;
+	HttpHeader *accept_encoding;
+
 	HttpHeader *upgrade;
+	HttpHeader *expect;
 
 	std::list<HttpHeader *> generals; //take place in list_t
 } HttpHeaders;
 
+typedef struct HttpBody
+{
+	void *data;
+	unsigned int offset;
+	unsigned int len;
+} HttpBody;
+
 void printHttpHeaders(const HttpHeaders *headers);
 
 void printUrl(const Url *url);
+
+typedef struct HttpRequest
+{
+	unsigned short method;
+	unsigned short http_version_major : 8;
+	unsigned short http_version_minor : 8;
+
+	std::string method_s;
+
+	Url *url;
+	int headerNum;
+	HttpHeaders *headers;
+	HttpBody *body;
+
+} HttpRequest;
 
 typedef boost::function<int()> HttpCallback;
 typedef boost::function<int()> HttpDataCallback;
@@ -395,6 +427,10 @@ class HttpParser
 					int &at,
 					int len,
 					HttpHeaders *result);
+	int parseHeaders(const char *stream,
+					 int &at,
+					 int len,
+					 HttpHeaders *result);
 
 	int parseBody(const char *stream,
 				  int &at,

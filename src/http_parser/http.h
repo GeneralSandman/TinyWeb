@@ -204,9 +204,11 @@ enum http_errno
 extern const unsigned char urlChar[32];
 
 #define bitAt(a, i)                                 \
-	(!!((unsigned int)(a)[(unsigned int)(i) >> 3] & \
-		(1 << ((unsigned int)(i)&7))))
+    (!!((unsigned int)(a)[(unsigned int)(i) >> 3] & \
+        (1 << ((unsigned int)(i)&7))))
 
 #define isUrlChar(c) (bitAt(urlChar, (unsigned char)c))
+
+
 
 #endif
