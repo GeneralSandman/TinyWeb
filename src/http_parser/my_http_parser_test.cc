@@ -289,16 +289,13 @@ void testHeaderKeyHash()
         for (int i = 0; i < k.size(); i++)
         {
             char ch = k[i];
-            if (('a' <= ch && ch <= 'z') || ch == '-')
+
+            if (isLower(ch) || isUpper(ch) || ch == '-')
             {
-            }
-            else if (('A' <= ch && ch <= 'Z'))
-            {
-                ch += 32;
+                ch = toUpper(ch);
+                hash = getHash(hash, ch);
             }
             else
-                ch = -1;
-            if (ch == -1)
             {
                 std::cout << "key is invalid\n";
                 break;
@@ -308,6 +305,7 @@ void testHeaderKeyHash()
             hash = getHash(hash, ch);
         }
         std::cout << key << ":" << hash << std::endl;
+        printf("%s:%llu\n", key.c_str(), hash);
     }
 }
 
@@ -391,8 +389,8 @@ int main()
     // testParseHost();
     // testParseUrl();
     // testParseHeader();
-    // testHeaderKeyHash();
-    testGetMethod();
+    testHeaderKeyHash();
+    // testGetMethod();
     // testLitterCon();
     return 0;
 }

@@ -815,13 +815,13 @@ int HttpParser::parseHeader(const char *stream,
             keybegin = at + i;
             keylen = 1;
             if (isLower(ch) || isUpper(ch) || ch == '-')
-                ch = toLower(ch);
+                ch = toUpper(ch);
             hash = getHash(hash, ch);
             break;
 
         case s_http_header_key:
             if (isLower(ch) || isUpper(ch) || ch == '-')
-                ch = toLower(ch);
+                ch = toUpper(ch);
             hash = getHash(hash, ch);
             keylen++;
             break;
@@ -854,6 +854,7 @@ int HttpParser::parseHeader(const char *stream,
             // printf("%.*s->%.*s^\n", keylen, begin + keybegin,
             //    valuelen, begin + valuebegin);
             printf("[%lld]%.*s\n", hash, keylen, begin + keybegin);
+            std::cout << hash << std::endl;
             {
                 std::string key(begin + keybegin, keylen);
                 std::string value(begin + valuebegin, valuelen);
@@ -1038,7 +1039,7 @@ int HttpParser::execute(const char *stream,
                         int len,
                         HttpRequest *request)
 {
-    std::cout << "function HttpParser::execute()\n";
+    // std::cout << "function HttpParser::execute()\n";
 
     const char *begin = stream + at;
 

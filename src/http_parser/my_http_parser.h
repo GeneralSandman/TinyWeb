@@ -52,7 +52,10 @@
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
-#define getHash(hash, c) ((unsigned long long)((hash)*27 + (c)))
+//is only used by http method:method only have lower , upper or '-' char.
+#define getLetterHashNoCase(c) ((isUpper(c) || isLower(c)) ? (toUpper(c) - 'A') : 26)
+//It is only used by http method;
+#define getHash(hash, c) ((unsigned long long)((hash)*27 + getLetterHashNoCase(c)))
 
 inline short int getHex(char c)
 {

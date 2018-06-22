@@ -43,6 +43,32 @@ typedef struct testHeaders
 
 testHeaders headers[] = {
     {
+        .str = "Host: 127.0.0.1:9999\r\n"
+               "Connection: close\r\n"
+               "Content-Type: text/xml; charset=utf-8\r\n"
+               "Accept-Encoding: compress, gzip\r\n"
+               "Cookie: $Version=1; Skin=new;\r\n"
+               "If-Modified-Since: Sat, 29 Oct 2010 19:43:31 GMT\r\n"
+               "Referer: http://www.zcmhi.com/archives/71.html\r\n"
+               "Content-Length: 348\r\n"
+               "Last-Modified: Fri, 20 Apr 2018 08:12:56 GMT\r\n"
+               "\r\n",
+        .valid = true,
+        .headerNum = 9,
+        .headers = {
+            {"Host", "127.0.0.1:9999"},
+            {"Connection", "close"},
+            {"Content-Type", "text/xml; charset=utf-8"},
+            {"Accept-Encoding", "compress, gzip"},
+            {"Cookie", "$Version=1; Skin=new;"},
+            {"If-Modified-Since", "Sat, 29 Oct 2010 19:43:31 GMT"},
+            {"Referer", "http://www.zcmhi.com/archives/71.html"},
+            {"Content-Length", "348"},
+            {"Last-Modified", "Fri, 20 Apr 2018 08:12:56 GMT"},
+        },
+    },
+
+    {
         .str = "Host: 127.0.0.1:9999\r\n",
         .valid = true,
         .headerNum = 1,
@@ -280,9 +306,9 @@ void testParseHeader()
 
     int len = sizeof(headers) / sizeof(headers[0]);
 
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 1; i++)
     {
-        std::cout << i << ")  >>>>>" << std::endl;
+        std::cout << i << ")" << std::endl;
         alltest++;
 
         HttpParser parser(&settings);
@@ -300,7 +326,7 @@ void testParseHeader()
         {
             if (res)
             {
-                // printHttpHeaders(result);
+                printHttpHeaders(result);
 
                 int j = 0;
                 int lenj = headers[i].headerNum;
@@ -313,7 +339,7 @@ void testParseHeader()
                     if (0 != strcmp(headers[i].headers[j][0], (*p)->key.c_str()) ||
                         0 != strcmp(headers[i].headers[j][1], (*p)->value.c_str()))
                     {
-                        std::cout << "-------false------\n";
+                        std::cout << "[Debug]-------false------\n";
                         break;
                     }
 
