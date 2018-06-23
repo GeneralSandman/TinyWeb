@@ -1935,7 +1935,7 @@ reexecute:
         break;
       }
 
-      case s_chunk_parameters:
+      case s_chunk_parameters://TODO:
       {
         assert(parser->flags & F_CHUNKED);
         /* just ignore this shit. TODO check for overflow */
@@ -1955,7 +1955,7 @@ reexecute:
 
         if (parser->content_length == 0) {
           parser->flags |= F_TRAILING;
-          UPDATE_STATE(s_header_field_start);
+          UPDATE_STATE(s_header_field_start);//TODO:why???
         } else {
           UPDATE_STATE(s_chunk_data);
         }

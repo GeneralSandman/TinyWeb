@@ -255,15 +255,6 @@ class DictIter
 	}
 };
 
-//regit
-
-bool hsetCommand(std::deque<std::string> &args);
-bool hmsetCommand(std::deque<std::string> &args);
-bool hgetCommand(std::deque<std::string> &args);
-bool hlenCommand(std::deque<std::string> &args);
-bool hclearCommand(std::deque<std::string> &args);
-// RegisterCommand("hset",hsetCommand);
-
 //........api.............//
 
 template <typename K, typename V>

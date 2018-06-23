@@ -17,6 +17,7 @@
 // #include <tiny_base/log.h>
 
 #include "http.h"
+#include "str_t.h"
 
 #include <iostream>
 #include <stdio.h>
@@ -236,9 +237,9 @@ enum httpHeaderField
 
 typedef struct HttpHeader
 {
-	int keyHash;
-	std::string key; //TODO:take place with string_t
-	std::string value;
+	unsigned int keyHash;
+	Str key;
+	Str value;
 } HttpHeader;
 
 typedef struct HttpHeaders
@@ -265,6 +266,10 @@ typedef struct HttpHeaders
 	std::list<HttpHeader *> generals; //take place in list_t
 } HttpHeaders;
 
+void pushHeader(HttpHeaders *headers,
+				HttpHeader *header,
+				unsigned int key_hash);
+
 typedef struct HttpBody
 {
 	void *data;
@@ -275,6 +280,8 @@ typedef struct HttpBody
 void printHttpHeaders(const HttpHeaders *headers);
 
 void printUrl(const Url *url);
+
+void printBody(const HttpBody *body);
 
 #include <memory>
 typedef struct HttpRequest
@@ -448,9 +455,9 @@ class HttpParser
 	enum http_header_state parseHeaderChar(const char ch,
 										   enum http_header_state s);
 	int parseHeader(const char *stream,
-					int at,
+					int &at,
 					int len,
-					HttpHeaders *result);
+					HttpHeader *result);
 	int parseHeaders(const char *stream,
 					 int at,
 					 int len,
@@ -471,6 +478,16 @@ class HttpParser
 	{
 		// std::cout << "class HttpParser destructor\n";
 	}
+};
+
+//It is used by header key
+inline unsigned int JSHash(const char *str, int len)
+{
+	unsigned int hash = 1315423911;
+	// nearly a prime - 1315423911 = 3 * 438474637
+	for (int i = 0; i < len; i++)
+		hash ^= ((hash << 5) + (*(str + i) + (hash >> 2)));
+	return (hash & 0x7FFFFFFF);
 };
 
 #endif
