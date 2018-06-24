@@ -388,8 +388,8 @@ void testParseHeaders()
                 cout << "list size:" << headers->generals.size() << endl;
                 for (auto t : headers->generals)
                 {
-                    std::cout << t->keyHash << std::endl;
-                    printStr(&(t->key));
+                    // std::cout << t->keyHash << std::endl;
+                    // printStr(&(t->key));
                     // printStr(&(t->value));
                 }
             }
@@ -484,15 +484,36 @@ void testHeaderKeyHash2()
             "last-modified",
         };
 
+    vector<string> tests =
+        {
+            "Host",
+            "COnnection",
+            "IF-Modified-since",
+            "If-unmodified-since",
+            "User-agent",
+            "Referer",
+
+            "Content-Length",
+            "Content-TYpe",
+            "Transfer-Encoding",
+            "Accept-Encoding",
+
+            "Upgrade",
+            "Expect",
+
+            "Cookie",
+            "Last-modified",
+        };
+
     extern std::unordered_map<unsigned int, header> headerKeyHash;
-    for (auto k : keys)
+    for (auto k : tests)
     {
         unsigned int hash = JSHash(k.c_str(), k.size());
-        std::cout << k << ":" << hash << std::endl;
+        // std::cout << k << ":" << hash << std::endl;
         auto p = headerKeyHash.find(hash);
         if (p != headerKeyHash.end())
         {
-            std::cout << "find:" << p->second.offset << "\n";
+            std::cout << "find" << std::endl;
         }
         else
         {

@@ -27,15 +27,15 @@
 
 #define CR '\r'
 #define LF '\n'
-#define isNum(c) ('0' <= (c) && (c) <= '9')
+#define isNum(c) (('0' <= (c) && (c) <= '9'))
 #define isAlpha(c) ('a' <= (c) && (c) <= 'z' || 'A' <= (c) && (c) <= 'Z')
 #define isAlphaNum(c) (isNum(c) || isAlpha(c))
 
-#define isLower(c) ('a' <= (c) && (c) <= 'z')
-#define isUpper(c) ('A' <= (c) && (c) <= 'Z')
+#define isLower(c) (('a' <= (c) && (c) <= 'z'))
+#define isUpper(c) (('A' <= (c) && (c) <= 'Z'))
 
-#define toLower(c) isUpper(c) ? (unsigned char)((c) | 0x20) : c
-#define toUpper(c) isLower(c) ? (unsigned char)((c)&0xdf) : c
+#define toLower(c) (isUpper(c) ? (unsigned char)((c) | 0x20) : c)
+#define toUpper(c) (isLower(c) ? (unsigned char)((c)&0xdf) : c)
 
 #define isHexChar(c) (isNum(c) || ('a' <= toLower(c) && toLower(c) <= 'f'))
 
@@ -513,9 +513,7 @@ inline unsigned int JSHash(const char *str, int len)
 	unsigned int hash = 1315423911;
 	// nearly a prime - 1315423911 = 3 * 438474637
 	for (int i = 0; i < len; i++)
-	{
 		hash ^= ((hash << 5) + (toLower(*(str + i)) + (hash >> 2)));
-	}
 	return (hash & 0x7FFFFFFF);
 };
 

@@ -890,8 +890,8 @@ int HttpParser::parseHeader(const char *stream,
             result->value.data = begin + valuebegin;
             result->value.len = valuelen;
 
-            printf("[%u]%.*s->%.*s^\n", result->keyHash, keylen, begin + keybegin,
-                   valuelen, begin + valuebegin);
+            // printf("[%u]%.*s->%.*s^\n", result->keyHash, keylen, begin + keybegin,
+            //    valuelen, begin + valuebegin);
 
             at += i;
             return 0;
@@ -953,19 +953,19 @@ int HttpParser::parseHeaders(const char *stream,
 #include <boost/bind.hpp>
 header headers_in[] = {
     {
-        .name = Str("Host"),
+        .name = Str("host"),
         .offset = offsetof__(HttpHeaders, host),
         .fun = boost::bind(testHeaderFun),
     },
 
     {
-        .name = Str("Connection"),
+        .name = Str("connection"),
         .offset = offsetof__(HttpHeaders, connection),
         .fun = boost::bind(testHeaderFun),
     },
 
     {
-        .name = Str("If-Modified-Since"),
+        .name = Str("if-modified-since"),
         .offset = offsetof__(HttpHeaders, if_modified_since),
         .fun = boost::bind(testHeaderFun),
     },
@@ -1046,7 +1046,7 @@ void init()
     for (int i = 0; i < len; i++)
     {
         unsigned int hash = JSHash(headers_in[i].name.data, headers_in[i].name.len);
-        std::cout << "[INIT]:(" << hash << "):" << std::string(headers_in[i].name.data, headers_in[i].name.len) << std::endl;
+        // std::cout << "[INIT]:(" << hash << "):" << std::string(headers_in[i].name.data, headers_in[i].name.len) << std::endl;
         headerKeyHash[hash] = headers_in[i];
     }
 }
@@ -1057,18 +1057,23 @@ int HttpParser::parseHeadersMeaning(HttpHeaders *headers)
     HttpHeader *res = NULL;
     for (auto t : headers->generals)
     {
-        printStr(&(t->key));
+        // printStr(&(t->key));
 
         auto p = headerKeyHash.find(t->keyHash);
         if (p == headerKeyHash.end())
         {
-            std::cout << "general header" << std::endl;
+            // std::cout << "general header" << std::endl;
         }
         else
         {
+            printStr(&(t->key));
             std::cout << "find and store" << std::endl;
-            HttpHeader **tmp = (HttpHeader **)(headers + p->second.offset);
+            HttpHeader **tmp = (HttpHeader **)((char *)headers + p->second.offset);
             *tmp = t;
+
+            std::cout << "headers address:" << headers << std::endl;
+            std::cout << "offset:" << p->second.offset << std::endl;
+            std::cout << "the address wil:" << tmp << std::endl;
         }
     }
 }
