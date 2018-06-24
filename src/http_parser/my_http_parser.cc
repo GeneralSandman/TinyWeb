@@ -21,83 +21,83 @@
 void printHttpHeaders(const HttpHeaders *headers)
 {
     std::cout << "<++++++++++[Debug]-HttpHeaders Information++++++++++>" << std::endl;
-    // if (headers->host != nullptr)
-    // {
-    //     std::cout << headers->host->key << ":"
-    //               << headers->host->key << std::endl;
-    // }
-    // if (headers->connection != nullptr)
-    // {
-    //     std::cout << headers->connection->key << ":"
-    //               << headers->connection->key << std::endl;
-    // }
-    // if (headers->if_modified_since != nullptr)
-    // {
-    //     std::cout << headers->if_modified_since->key << ":"
-    //               << headers->if_modified_since->key << std::endl;
-    // }
-    // if (headers->if_unmodified_since != nullptr)
-    // {
-    //     std::cout << headers->if_unmodified_since->key << ":"
-    //               << headers->if_unmodified_since->key << std::endl;
-    // }
-    // if (headers->user_agent != nullptr)
-    // {
+    if (headers->host != nullptr)
+    {
+        printStr(&(headers->host->key));
+        printStr(&(headers->host->value));
+    }
+    if (headers->connection != nullptr)
+    {
+        printStr(&(headers->connection->key));
+        printStr(&(headers->connection->value));
+    }
+    if (headers->if_modified_since != nullptr)
+    {
+        printStr(&(headers->if_modified_since->key));
+        printStr(&(headers->if_modified_since->value));
+    }
+    if (headers->if_unmodified_since != nullptr)
+    {
+        printStr(&(headers->if_unmodified_since->key));
+        printStr(&(headers->if_unmodified_since->value));
+    }
+    if (headers->user_agent != nullptr)
+    {
+        printStr(&(headers->user_agent->key));
+        printStr(&(headers->user_agent->value));
+    }
+    if (headers->referer != nullptr)
+    {
+        printStr(&(headers->referer->key));
+        printStr(&(headers->referer->value));
+    }
+    if (headers->content_length != nullptr)
+    {
+        printStr(&(headers->content_length->key));
+        printStr(&(headers->content_length->value));
+    }
+    if (headers->content_type != nullptr)
+    {
+        printStr(&(headers->content_type->key));
+        printStr(&(headers->content_type->value));
+    }
+    if (headers->transfer_encoding != nullptr)
+    {
+        printStr(&(headers->transfer_encoding->key));
+        printStr(&(headers->transfer_encoding->value));
+    }
+    if (headers->accept_encoding != nullptr)
+    {
+        printStr(&(headers->accept_encoding->key));
+        printStr(&(headers->accept_encoding->value));
+    }
+    if (headers->upgrade != nullptr)
+    {
+        printStr(&(headers->upgrade->key));
+        printStr(&(headers->upgrade->value));
+    }
+    if (headers->expect != nullptr)
+    {
+        printStr(&(headers->expect->key));
+        printStr(&(headers->expect->value));
+    }
+    if (headers->cookie != nullptr)
+    {
+        printStr(&(headers->cookie->key));
+        printStr(&(headers->cookie->value));
+    }
+    if (headers->last_modified != nullptr)
+    {
+        printStr(&(headers->last_modified->key));
+        printStr(&(headers->last_modified->value));
+    }
+    std::cout << "+++++generals+++++\n";
+    for (auto t : headers->generals)
+    {
 
-    //     std::cout << headers->user_agent->key << ":"
-    //               << headers->user_agent->key << std::endl;
-    // }
-    // if (headers->referer != nullptr)
-    // {
-
-    //     std::cout << headers->referer->key << ":"
-    //               << headers->referer->key << std::endl;
-    // }
-
-    // if (headers->content_lenght != nullptr)
-    // {
-
-    //     std::cout << headers->content_lenght->key << ":"
-    //               << headers->content_lenght->key << std::endl;
-    // }
-    // if (headers->content_type != nullptr)
-    // {
-
-    //     std::cout << headers->content_type->key << ":"
-    //               << headers->content_type->key << std::endl;
-    // }
-    // if (headers->transfer_encoding != nullptr)
-    // {
-
-    //     std::cout << headers->transfer_encoding->key << ":"
-    //               << headers->transfer_encoding->key << std::endl;
-    // }
-    // if (headers->accept_encoding != nullptr)
-    // {
-
-    //     std::cout << headers->accept_encoding->key << ":"
-    //               << headers->accept_encoding->key << std::endl;
-    // }
-
-    // if (headers->upgrade != nullptr)
-    // {
-
-    //     std::cout << headers->upgrade->key << ":"
-    //               << headers->upgrade->key << std::endl;
-    // }
-    // if (headers->expect != nullptr)
-    // {
-
-    //     std::cout << headers->expect->key << ":"
-    //               << headers->expect->key << std::endl;
-    // }
-
-    // for (auto t : headers->generals)
-    // {
-
-    //     std::cout << t->key << ":"
-    //               << t->value << std::endl;
-    // }
+        printStr(&(t->key));
+        printStr(&(t->value));
+    }
     std::cout << "<+++++++++++++++++++++++++++++++++++++++++++++++++++>" << std::endl;
 }
 
@@ -884,14 +884,15 @@ int HttpParser::parseHeader(const char *stream,
             break;
 
         case s_http_header_done:
-            // printf("[%u]%.*s->%.*s^\n", hash, keylen, begin + keybegin,
-            //    valuelen, begin + valuebegin);
-
             result->keyHash = JSHash(begin + keybegin, keylen);
             result->key.data = begin + keybegin;
             result->key.len = keylen;
             result->value.data = begin + valuebegin;
             result->value.len = valuelen;
+
+            printf("[%u]%.*s->%.*s^\n", result->keyHash, keylen, begin + keybegin,
+                   valuelen, begin + valuebegin);
+
             at += i;
             return 0;
             stat = s_http_header_start;
@@ -952,19 +953,19 @@ int HttpParser::parseHeaders(const char *stream,
 #include <boost/bind.hpp>
 header headers_in[] = {
     {
-        .name = Str("host"),
+        .name = Str("Host"),
         .offset = offsetof__(HttpHeaders, host),
         .fun = boost::bind(testHeaderFun),
     },
 
     {
-        .name = Str("connection"),
+        .name = Str("Connection"),
         .offset = offsetof__(HttpHeaders, connection),
         .fun = boost::bind(testHeaderFun),
     },
 
     {
-        .name = Str("if-modified-since"),
+        .name = Str("If-Modified-Since"),
         .offset = offsetof__(HttpHeaders, if_modified_since),
         .fun = boost::bind(testHeaderFun),
     },
@@ -1041,18 +1042,35 @@ std::unordered_map<unsigned int, header> headerKeyHash;
 
 void init()
 {
-	int len = ARRAY_SIZE(headers_in);
-	for (int i = 0; i < len; i++)
-	{
-		unsigned int hash = JSHash(headers_in[i].name.data, headers_in[i].name.len);
-		std::cout << "[INIT]:(" << hash << "):" << std::string(headers_in[i].name.data, headers_in[i].name.len) << std::endl;
-		headerKeyHash[hash] = headers_in[i];
-	}
+    int len = ARRAY_SIZE(headers_in);
+    for (int i = 0; i < len; i++)
+    {
+        unsigned int hash = JSHash(headers_in[i].name.data, headers_in[i].name.len);
+        std::cout << "[INIT]:(" << hash << "):" << std::string(headers_in[i].name.data, headers_in[i].name.len) << std::endl;
+        headerKeyHash[hash] = headers_in[i];
+    }
 }
 
 int HttpParser::parseHeadersMeaning(HttpHeaders *headers)
 {
     //hash->key
+    HttpHeader *res = NULL;
+    for (auto t : headers->generals)
+    {
+        printStr(&(t->key));
+
+        auto p = headerKeyHash.find(t->keyHash);
+        if (p == headerKeyHash.end())
+        {
+            std::cout << "general header" << std::endl;
+        }
+        else
+        {
+            std::cout << "find and store" << std::endl;
+            HttpHeader **tmp = (HttpHeader **)(headers + p->second.offset);
+            *tmp = t;
+        }
+    }
 }
 
 int HttpParser::parseBody(const char *stream,

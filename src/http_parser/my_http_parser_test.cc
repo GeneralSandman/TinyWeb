@@ -312,6 +312,19 @@ void testParseHeaders()
         ":scheme: https\r\n"
         "\r\n",
 
+        "Connection: close\r\n"
+        "Host: 127.0.0.1:9999\r\n"
+        "Accept-Encoding: gzip, deflate, br\r\n"
+        "Upgrade-Insecure-Requests: 1\r\n"
+        "Cookie: _ga=GA1.2.2068106829.1526513886; _gid=GA1.2.1899421896.1528880409\r\n"
+        "Transfer-Encoding: chunked\r\n"
+        "Content-Length: 1000\r\n"
+        "If-Modified-Since: Sat, 29 Oct 2010 19:43:31 GMT\r\n"
+        "If-Unmodified-Since: Sat, 29 Oct 2010 19:43:31 GMT\r\n"
+        "Last-Modified: Tue, 15 Nov 2010 12:45:26 GMT\r\n"
+        "Referer: www.baidu.com\r\n"
+        "\r\n",
+
         "Accept: text/plain, text/html\r\n"
         "Accept-Charset: iso-8859-5\r\n"
         "Accept-Encoding: compress, gzip\r\n"
@@ -333,7 +346,7 @@ void testParseHeaders()
     HttpParserSettings settings;
 
     int len = strs.size();
-    for (int i = 4; i < len; i++)
+    for (int i = 4; i < 5; i++)
     {
         HttpParser parser(&settings);
         parser.setType(HTTP_REQUEST);
@@ -346,6 +359,25 @@ void testParseHeaders()
             int str_len = strs[i].size();
 
             HttpHeaders *headers = new HttpHeaders;
+
+            headers->host = NULL;
+            headers->connection = NULL;
+            headers->if_modified_since = NULL;
+            headers->if_unmodified_since = NULL;
+            headers->user_agent = NULL;
+            headers->referer = NULL;
+
+            headers->content_length = NULL;
+            headers->content_type = NULL;
+            headers->transfer_encoding = NULL;
+            headers->accept_encoding = NULL;
+
+            headers->upgrade = NULL;
+            headers->expect = NULL;
+
+            headers->cookie = NULL;
+            headers->last_modified = NULL;
+
             return_val = parser.parseHeaders(begin, offset, str_len, headers);
             if (return_val == -1)
             {
@@ -356,11 +388,14 @@ void testParseHeaders()
                 cout << "list size:" << headers->generals.size() << endl;
                 for (auto t : headers->generals)
                 {
-                    // std::cout << t->keyHash << std::endl;
+                    std::cout << t->keyHash << std::endl;
                     printStr(&(t->key));
                     // printStr(&(t->value));
                 }
             }
+
+            parser.parseHeadersMeaning(headers);
+            printHttpHeaders(headers);
 
             for (auto t : headers->generals)
                 delete t;
@@ -444,7 +479,7 @@ void testHeaderKeyHash2()
 
             "upgrade",
             "expect",
-            
+
             "cookie",
             "last-modified",
         };
@@ -628,16 +663,17 @@ void testAll()
 
 int main()
 {
+    init();
+
     // testHttpParser();
     // testHttpParserResponse();
     // testHttpParserRequest();
     // testParseHost();
     // testParseUrl();
     // testParseHeader();
-    // testParseHeaders();
+    testParseHeaders();
     // testHeaderKeyHash();
-    init();
-    testHeaderKeyHash2();
+    // testHeaderKeyHash2();
     // testGetMethod();
     // testLitterCon();
     // testAll();

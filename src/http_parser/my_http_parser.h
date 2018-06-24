@@ -269,7 +269,7 @@ typedef struct HttpHeaders
 	HttpHeader *cookie;
 	HttpHeader *last_modified;
 
-	std::list<HttpHeader *> generals; //take place in list_t
+	std::list<HttpHeader *> generals; //TODO:take place in list_t
 
 	char *data;
 	unsigned int offset;
@@ -513,7 +513,9 @@ inline unsigned int JSHash(const char *str, int len)
 	unsigned int hash = 1315423911;
 	// nearly a prime - 1315423911 = 3 * 438474637
 	for (int i = 0; i < len; i++)
-		hash ^= ((hash << 5) + (*(str + i) + (hash >> 2)));
+	{
+		hash ^= ((hash << 5) + (toLower(*(str + i)) + (hash >> 2)));
+	}
 	return (hash & 0x7FFFFFFF);
 };
 
