@@ -425,6 +425,47 @@ void testHeaderKeyHash()
     }
 }
 
+#include <unordered_map>
+void testHeaderKeyHash2()
+{
+    vector<string> keys =
+        {
+            "host",
+            "connection",
+            "if-modified-since",
+            "if-unmodified-since",
+            "user-agent",
+            "referer",
+
+            "content-length",
+            "content-type",
+            "transfer-encoding",
+            "accept-encoding",
+
+            "upgrade",
+            "expect",
+            
+            "cookie",
+            "last-modified",
+        };
+
+    extern std::unordered_map<unsigned int, header> headerKeyHash;
+    for (auto k : keys)
+    {
+        unsigned int hash = JSHash(k.c_str(), k.size());
+        std::cout << k << ":" << hash << std::endl;
+        auto p = headerKeyHash.find(hash);
+        if (p != headerKeyHash.end())
+        {
+            std::cout << "find:" << p->second.offset << "\n";
+        }
+        else
+        {
+            std::cout << "not find:" << k << std::endl;
+        }
+    }
+}
+
 void testGetMethod()
 {
     int all = 0;
@@ -593,8 +634,10 @@ int main()
     // testParseHost();
     // testParseUrl();
     // testParseHeader();
-    testParseHeaders();
+    // testParseHeaders();
     // testHeaderKeyHash();
+    init();
+    testHeaderKeyHash2();
     // testGetMethod();
     // testLitterCon();
     // testAll();

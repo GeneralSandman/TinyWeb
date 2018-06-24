@@ -251,10 +251,6 @@ enum HttpHeaderIndex
 
 typedef struct HttpHeaders
 {
-	char *data;
-	unsigned int offset;
-	unsigned int len;
-
 	HttpHeader *host;
 	HttpHeader *connection;
 	HttpHeader *if_modified_since;
@@ -262,7 +258,7 @@ typedef struct HttpHeaders
 	HttpHeader *user_agent;
 	HttpHeader *referer;
 
-	HttpHeader *content_lenght;
+	HttpHeader *content_length;
 	HttpHeader *content_type;
 	HttpHeader *transfer_encoding;
 	HttpHeader *accept_encoding;
@@ -270,7 +266,14 @@ typedef struct HttpHeaders
 	HttpHeader *upgrade;
 	HttpHeader *expect;
 
+	HttpHeader *cookie;
+	HttpHeader *last_modified;
+
 	std::list<HttpHeader *> generals; //take place in list_t
+
+	char *data;
+	unsigned int offset;
+	unsigned int len;
 } HttpHeaders;
 
 void pushHeader(HttpHeaders *headers,
@@ -489,10 +492,19 @@ class HttpParser
 	}
 };
 
+#include <boost/function.hpp>
+typedef boost::function<int()> headerFun;
+
+inline int testHeaderFun()
+{
+	std::cout << "header fun\n";
+}
+
 typedef struct header
 {
 	Str name;
-	unsigned int offset;
+	size_t offset;
+	headerFun fun;
 } header;
 
 //It is used by header key
@@ -504,5 +516,11 @@ inline unsigned int JSHash(const char *str, int len)
 		hash ^= ((hash << 5) + (*(str + i) + (hash >> 2)));
 	return (hash & 0x7FFFFFFF);
 };
+
+#include <unordered_map>
+extern header headers_in[];
+extern std::unordered_map<unsigned int, header> headerKeyHash;
+
+void init();
 
 #endif

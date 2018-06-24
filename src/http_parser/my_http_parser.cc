@@ -947,10 +947,108 @@ int HttpParser::parseHeaders(const char *stream,
     return 0;
 }
 
+#define offsetof__(s, m) (size_t) & (((s *)0)->m)
+
+#include <boost/bind.hpp>
 header headers_in[] = {
-    {.name = Str("host"),
-     .offset = offsetof(HttpHeaders, host)},
+    {
+        .name = Str("host"),
+        .offset = offsetof__(HttpHeaders, host),
+        .fun = boost::bind(testHeaderFun),
+    },
+
+    {
+        .name = Str("connection"),
+        .offset = offsetof__(HttpHeaders, connection),
+        .fun = boost::bind(testHeaderFun),
+    },
+
+    {
+        .name = Str("if-modified-since"),
+        .offset = offsetof__(HttpHeaders, if_modified_since),
+        .fun = boost::bind(testHeaderFun),
+    },
+
+    {
+        .name = Str("if-unmodified-since"),
+        .offset = offsetof__(HttpHeaders, if_unmodified_since),
+        .fun = boost::bind(testHeaderFun),
+    },
+
+    {
+        .name = Str("user-agent"),
+        .offset = offsetof__(HttpHeaders, user_agent),
+        .fun = boost::bind(testHeaderFun),
+    },
+
+    {
+        .name = Str("referer"),
+        .offset = offsetof__(HttpHeaders, referer),
+        .fun = boost::bind(testHeaderFun),
+    },
+
+    {
+        .name = Str("content-length"),
+        .offset = offsetof__(HttpHeaders, content_length),
+        .fun = boost::bind(testHeaderFun),
+    },
+
+    {
+        .name = Str("content-type"),
+        .offset = offsetof__(HttpHeaders, content_type),
+        .fun = boost::bind(testHeaderFun),
+    },
+
+    {
+        .name = Str("transfer-encoding"),
+        .offset = offsetof__(HttpHeaders, transfer_encoding),
+        .fun = boost::bind(testHeaderFun),
+    },
+
+    {
+        .name = Str("accept-encoding"),
+        .offset = offsetof__(HttpHeaders, accept_encoding),
+        .fun = boost::bind(testHeaderFun),
+    },
+
+    {
+        .name = Str("upgrade"),
+        .offset = offsetof__(HttpHeaders, upgrade),
+        .fun = boost::bind(testHeaderFun),
+    },
+
+    {
+        .name = Str("expect"),
+        .offset = offsetof__(HttpHeaders, expect),
+        .fun = boost::bind(testHeaderFun),
+    },
+
+    {
+        .name = Str("cookie"),
+        .offset = offsetof__(HttpHeaders, cookie),
+        .fun = boost::bind(testHeaderFun),
+    },
+
+    {
+        .name = Str("last-modified"),
+        .offset = offsetof__(HttpHeaders, last_modified),
+        .fun = boost::bind(testHeaderFun),
+    },
 };
+
+#include <unordered_map>
+std::unordered_map<unsigned int, header> headerKeyHash;
+
+void init()
+{
+	int len = ARRAY_SIZE(headers_in);
+	for (int i = 0; i < len; i++)
+	{
+		unsigned int hash = JSHash(headers_in[i].name.data, headers_in[i].name.len);
+		std::cout << "[INIT]:(" << hash << "):" << std::string(headers_in[i].name.data, headers_in[i].name.len) << std::endl;
+		headerKeyHash[hash] = headers_in[i];
+	}
+}
 
 int HttpParser::parseHeadersMeaning(HttpHeaders *headers)
 {
@@ -1591,58 +1689,3 @@ error:
     std::cout << "parser error\n";
     return -1;
 };
-
-std::vector<std::string> keys =
-    {
-        "host",
-        "connection",
-        "if-modified-since",
-        "if-unmodified-since",
-        "user-agent",
-        "referer",
-
-        "content-length",
-        "content-type",
-        "transfer-encoding",
-        "accept-encoding",
-
-        "upgrade",
-        "expect",
-
-        "cookie",
-        "last-modified",
-};
-#include <unordered_map>
-std::unordered_map<unsigned int, std::string> headerKeyHash;
-
-#define INIT                                                 \
-    do                                                       \
-    {                                                        \
-        for (auto t : keys)                                  \
-        {                                                    \
-            unsigned int hash = JSHash(t.c_str(), t.size()); \
-            headerKeyHash[hash] = t;                         \
-        }                                                    \
-    } while (0)
-
-void pushHeader(HttpHeaders *headers,
-                HttpHeader *header,
-                unsigned int key_hash)
-{
-    //     if (headerKeyHash.end() != headerKeyHash.find(key_hash))
-    //     {
-    //         std::string tmp = headerKeyHash[key_hash];
-
-    //         if (tmp.size() == header->key.size())
-    //         {
-    //             for (int i = 0; i < tmp.size(); i++)
-    //             {
-    //                 if (tmp[i] != header->key[i])
-    //                     goto end;
-    //             }
-    //         }
-    //     }
-
-    // end:
-    //     headers->generals.push_back(header);
-}
