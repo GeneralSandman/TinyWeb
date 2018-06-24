@@ -242,6 +242,13 @@ typedef struct HttpHeader
 	Str value;
 } HttpHeader;
 
+enum HttpHeaderIndex
+{
+	HTTP_HEADER_HOST = 0,
+	HTTP_HEADER_,
+
+};
+
 typedef struct HttpHeaders
 {
 	char *data;
@@ -463,6 +470,8 @@ class HttpParser
 					 int len,
 					 HttpHeaders *result);
 
+	int parseHeadersMeaning(HttpHeaders *headers);
+
 	//parse body
 	int parseBody(const char *stream,
 				  int at,
@@ -479,6 +488,12 @@ class HttpParser
 		// std::cout << "class HttpParser destructor\n";
 	}
 };
+
+typedef struct header
+{
+	Str name;
+	unsigned int offset;
+} header;
 
 //It is used by header key
 inline unsigned int JSHash(const char *str, int len)

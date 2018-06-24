@@ -947,6 +947,16 @@ int HttpParser::parseHeaders(const char *stream,
     return 0;
 }
 
+header headers_in[] = {
+    {.name = Str("host"),
+     .offset = offsetof(HttpHeaders, host)},
+};
+
+int HttpParser::parseHeadersMeaning(HttpHeaders *headers)
+{
+    //hash->key
+}
+
 int HttpParser::parseBody(const char *stream,
                           int at,
                           int len,
@@ -1532,7 +1542,7 @@ int HttpParser::execute(const char *stream,
     request->headers->offset = headers_begin;
     request->headers->len = headers_len;
 
-    // return_val = parseHeader(begin,
+    // return_val = parseHeaders(begin,
     //                          headers_begin,
     //                          headers_len,
     //                          request->headers);
