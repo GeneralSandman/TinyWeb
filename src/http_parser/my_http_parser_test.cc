@@ -291,7 +291,7 @@ void testParseHeaders()
 {
     vector<string> strs = {
         "Host: 127.0.0.1:9999\r\n"
-        "Connection: keep-alive\r\n"
+        "Connection: close\r\n"
         "\r\n",
 
         "Host: 127.0.0.1:9999\r\n"
@@ -302,8 +302,6 @@ void testParseHeaders()
         "Accept-Encoding: gzip, deflate, br\r\n"
         "Accept-Language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7\r\n"
         "\r\n",
-
-        "sdfasd",
 
         "Connection: upgrade\r\n"
         ":authority: pingtas.qq.com\r\n"
@@ -346,7 +344,7 @@ void testParseHeaders()
     HttpParserSettings settings;
 
     int len = strs.size();
-    for (int i = 4; i < 5; i++)
+    for (int i = 3; i < 4; i++)
     {
         HttpParser parser(&settings);
         parser.setType(HTTP_REQUEST);
@@ -385,7 +383,7 @@ void testParseHeaders()
             }
             else if (return_val == 0)
             {
-                cout << "list size:" << headers->generals.size() << endl;
+                cout << "header number:" << headers->generals.size() << endl;
                 for (auto t : headers->generals)
                 {
                     // std::cout << t->keyHash << std::endl;
@@ -395,7 +393,7 @@ void testParseHeaders()
             }
 
             parser.parseHeadersMeaning(headers);
-            printHttpHeaders(headers);
+            // printHttpHeaders(headers);
 
             for (auto t : headers->generals)
                 delete t;
@@ -520,6 +518,20 @@ void testHeaderKeyHash2()
             std::cout << "not find:" << k << std::endl;
         }
     }
+}
+
+typedef struct
+{
+    char *s1;
+    char *s2;
+    int len;
+} testStr;
+
+void teststrncmp_case()
+{
+    //TODO:
+    // if (0 == strncmp_case("abc\0aaa", "abc\0bbb", 7))
+        cout << "same\n";
 }
 
 void testGetMethod()
@@ -699,5 +711,6 @@ int main()
     // testLitterCon();
     // testAll();
     // testJSHash();
+    // teststrncmp_case();
     return 0;
 }

@@ -34,8 +34,8 @@
 #define isLower(c) (('a' <= (c) && (c) <= 'z'))
 #define isUpper(c) (('A' <= (c) && (c) <= 'Z'))
 
-#define toLower(c) (isUpper(c) ? (unsigned char)((c) | 0x20) : c)
-#define toUpper(c) (isLower(c) ? (unsigned char)((c)&0xdf) : c)
+#define toLower(c) (isUpper(c) ? (unsigned char)((c) | 0x20) : (c))
+#define toUpper(c) (isLower(c) ? (unsigned char)((c)&0xdf) : (c))
 
 #define isHexChar(c) (isNum(c) || ('a' <= toLower(c) && toLower(c) <= 'f'))
 
@@ -274,6 +274,11 @@ typedef struct HttpHeaders
 	char *data;
 	unsigned int offset;
 	unsigned int len;
+
+	unsigned int host_valid : 1;
+	unsigned int keep_alive : 1;
+	unsigned int close : 1;
+	//TODO:more information
 } HttpHeaders;
 
 void pushHeader(HttpHeaders *headers,
@@ -492,12 +497,57 @@ class HttpParser
 	}
 };
 
-#include <boost/function.hpp>
-typedef boost::function<int()> headerFun;
-
-inline int testHeaderFun()
+inline int strncasecmp__(const char *s1, const char *s2, int len)
 {
-	std::cout << "header fun\n";
+	char c1, c2;
+	while (len--)
+	{
+		c1 = toLower(*s1);
+		c2 = toLower(*s2);
+		s1++;
+		s2++;
+		if (c1 == c2)
+		{
+			if (c1)
+				continue;
+			return 0;
+		}
+		return c1 - c2;
+	}
+	return 0;
+}
+
+#include <boost/function.hpp>
+typedef boost::function<int(const Str *, HttpHeaders *const)> headerFun;
+
+inline int testHeaderFun(const Str *s)
+{
+	printStr(s);
+}
+
+inline int parseHostValue(const Str *s, HttpHeaders *const headers)
+{
+	printf("get host:%.*s\n", s->len, s->data);
+	headers->host_valid = 1;
+}
+
+inline int parseConnectionValue(const Str *s, HttpHeaders *const headers)
+{
+	if (0 == strncasecmp__(s->data, "keep-alive", s->len))
+	{
+		headers->keep_alive = 1;
+		std::cout << "connection keep alive\n";
+	}
+	else if (0 == strncasecmp__(s->data, "close", s->len))
+	{
+		headers->close = 1;
+		std::cout << "connection close\n";
+	}
+}
+
+inline int parseValue(const Str *s, HttpHeaders *const headers)
+{
+	printf("get value:%.*s\n", s->len, s->data);
 }
 
 typedef struct header

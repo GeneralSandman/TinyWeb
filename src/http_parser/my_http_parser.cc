@@ -955,85 +955,85 @@ header headers_in[] = {
     {
         .name = Str("host"),
         .offset = offsetof__(HttpHeaders, host),
-        .fun = boost::bind(testHeaderFun),
+        .fun = boost::bind(parseHostValue, _1, _2),
     },
 
     {
         .name = Str("connection"),
         .offset = offsetof__(HttpHeaders, connection),
-        .fun = boost::bind(testHeaderFun),
+        .fun = boost::bind(parseConnectionValue, _1, _2),
     },
 
     {
         .name = Str("if-modified-since"),
         .offset = offsetof__(HttpHeaders, if_modified_since),
-        .fun = boost::bind(testHeaderFun),
+        .fun = boost::bind(parseValue, _1, _2),
     },
 
     {
         .name = Str("if-unmodified-since"),
         .offset = offsetof__(HttpHeaders, if_unmodified_since),
-        .fun = boost::bind(testHeaderFun),
+        .fun = boost::bind(parseValue, _1, _2),
     },
 
     {
         .name = Str("user-agent"),
         .offset = offsetof__(HttpHeaders, user_agent),
-        .fun = boost::bind(testHeaderFun),
+        .fun = boost::bind(parseValue, _1, _2),
     },
 
     {
         .name = Str("referer"),
         .offset = offsetof__(HttpHeaders, referer),
-        .fun = boost::bind(testHeaderFun),
+        .fun = boost::bind(parseValue, _1, _2),
     },
 
     {
         .name = Str("content-length"),
         .offset = offsetof__(HttpHeaders, content_length),
-        .fun = boost::bind(testHeaderFun),
+        .fun = boost::bind(parseValue, _1, _2),
     },
 
     {
         .name = Str("content-type"),
         .offset = offsetof__(HttpHeaders, content_type),
-        .fun = boost::bind(testHeaderFun),
+        .fun = boost::bind(parseValue, _1, _2),
     },
 
     {
         .name = Str("transfer-encoding"),
         .offset = offsetof__(HttpHeaders, transfer_encoding),
-        .fun = boost::bind(testHeaderFun),
+        .fun = boost::bind(parseValue, _1, _2),
     },
 
     {
         .name = Str("accept-encoding"),
         .offset = offsetof__(HttpHeaders, accept_encoding),
-        .fun = boost::bind(testHeaderFun),
+        .fun = boost::bind(parseValue, _1, _2),
     },
 
     {
         .name = Str("upgrade"),
         .offset = offsetof__(HttpHeaders, upgrade),
-        .fun = boost::bind(testHeaderFun),
+        .fun = boost::bind(parseValue, _1, _2),
     },
 
     {
         .name = Str("expect"),
         .offset = offsetof__(HttpHeaders, expect),
-        .fun = boost::bind(testHeaderFun),
+        .fun = boost::bind(parseValue, _1, _2),
     },
 
     {
         .name = Str("cookie"),
         .offset = offsetof__(HttpHeaders, cookie),
-        .fun = boost::bind(testHeaderFun),
+        .fun = boost::bind(parseValue, _1, _2),
     },
 
     {
         .name = Str("last-modified"),
         .offset = offsetof__(HttpHeaders, last_modified),
-        .fun = boost::bind(testHeaderFun),
+        .fun = boost::bind(parseValue, _1, _2),
     },
 };
 
@@ -1066,14 +1066,15 @@ int HttpParser::parseHeadersMeaning(HttpHeaders *headers)
         }
         else
         {
-            printStr(&(t->key));
-            std::cout << "find and store" << std::endl;
+            // printStr(&(t->key));
+            // std::cout << "find and store" << std::endl;
             HttpHeader **tmp = (HttpHeader **)((char *)headers + p->second.offset);
             *tmp = t;
 
-            std::cout << "headers address:" << headers << std::endl;
-            std::cout << "offset:" << p->second.offset << std::endl;
-            std::cout << "the address wil:" << tmp << std::endl;
+            p->second.fun(&(t->value), headers);
+            // std::cout << "headers address:" << headers << std::endl;
+            // std::cout << "offset:" << p->second.offset << std::endl;
+            // std::cout << "the address wil:" << tmp << std::endl;
         }
     }
 }
