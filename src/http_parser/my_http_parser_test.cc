@@ -358,7 +358,8 @@ void testParseHeaders()
             int str_len = strs[i].size();
 
             HttpHeaders *headers = new HttpHeaders;
-
+            // memset(headers, 0, sizeof(HttpHeaders));
+            // headers->generals = std::list<HttpHeader *>();
             headers->host = NULL;
             headers->connection = NULL;
             headers->if_modified_since = NULL;
@@ -377,6 +378,19 @@ void testParseHeaders()
             headers->cookie = NULL;
             headers->last_modified = NULL;
 
+            headers->content_length_n = 0;
+            headers->valid_host = 0;
+            headers->valid_referer = 0;
+
+            headers->connection_keep_alive = 0;
+            headers->connection_close = 0;
+
+            headers->chrome = 0;
+
+            headers->content_identify_length = 0;
+            headers->content_identify_eof = 0;
+            headers->chunked = 0;
+
             return_val = parser.parseHeaders(begin, offset, str_len, headers);
             if (return_val == -1)
             {
@@ -385,7 +399,7 @@ void testParseHeaders()
             else if (return_val == 0)
             {
                 cout << "header number:" << headers->generals.size() << endl;
-                for (auto t : headers->generals)
+                // for (auto t : headers->generals)
                 {
                     // std::cout << t->keyHash << std::endl;
                     // printStr(&(t->key));
@@ -394,7 +408,7 @@ void testParseHeaders()
             }
 
             parser.parseHeadersMeaning(headers);
-            // printHttpHeaders(headers);
+            printHttpHeaders(headers);
 
             for (auto t : headers->generals)
                 delete t;
@@ -617,13 +631,14 @@ void testAll()
         // "Accept-Encoding: gzip, deflate, br\r\n"
         // "Upgrade-Insecure-Requests: 1\r\n"
         // "Cookie: _ga=GA1.2.2068106829.1526513886; _gid=GA1.2.1899421896.1528880409\r\n"
-        // "Transfer-Encoding: chunked\r\n"
-        // "Content-Length: 1000\r\n"
+        "Transfer-Encoding: chunked\r\n"
+        "Content-Length: 16\r\n"
         // "If-Modified-Since: Sat, 29 Oct 2010 19:43:31 GMT\r\n"
         // "If-Unmodified-Since: Sat, 29 Oct 2010 19:43:31 GMT\r\n"
         // "Last-Modified: Tue, 15 Nov 2010 12:45:26 GMT\r\n"
         // "Referer: www.baidu.com\r\n"
         "\r\n"
+        //  "<xml>hello</xml>???" /* fake body */;
         "25  \r\n"
         "This is the data in the first chunk..\r\n"
         "1C\r\n"
@@ -639,17 +654,13 @@ void testAll()
     int return_val = parser.execute(str.c_str(), 0, str.size(), request);
 
     if (return_val == -1)
-    {
         std::cout << "this request is invalid\n";
-    }
     else
     {
         std::cout << "request valid[Debug]\n";
-        //TODO:print somthind
-
-        printUrl(request->url);
-        printHttpHeaders(request->headers);
-        printBody(request->body);
+        // printUrl(request->url);
+        // printHttpHeaders(request->headers);
+        // printBody(request->body);
     }
 }
 
@@ -703,14 +714,14 @@ int main()
     // testHttpParserResponse();
     // testHttpParserRequest();
     // testParseHeader();
-    testParseHeaders();
+    // testParseHeaders();
     // testExecute();
     // testHeaderKeyHash();
     // testHeaderKeyHash2();
     // teststrncmp_case();
     // testGetMethod();
     // testLitterCon();
-    // testAll();
+    testAll();
     // testJSHash();
     return 0;
 }

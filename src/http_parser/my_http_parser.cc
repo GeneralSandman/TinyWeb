@@ -21,6 +21,16 @@
 void printHttpHeaders(const HttpHeaders *headers)
 {
     std::cout << "<++++++++++[Debug]-HttpHeaders Information++++++++++>" << std::endl;
+
+    printf("valid_host:%d\n", headers->valid_host);
+    printf("valid_referer:%d\n", headers->valid_referer);
+    printf("connection_keep_alive:%d\n", headers->connection_keep_alive);
+    printf("connection_close:%d\n", headers->connection_close);
+    printf("chrome:%d\n", headers->chrome);
+    printf("content_identify_length:%d\n", headers->content_identify_length);
+    printf("content_identify_eof:%d\n", headers->content_identify_eof);
+    printf("chunked:%d\n", headers->chunked);
+
     if (headers->host != nullptr)
     {
         printStr(&(headers->host->key));
@@ -1079,17 +1089,38 @@ int HttpParser::parseHeadersMeaning(HttpHeaders *headers)
 int HttpParser::parseBody(const char *stream,
                           int at,
                           int len,
-                          bool isChunked)
+                          enum http_body_type body_type,
+                          unsigned int content_length_n)
 {
     std::cout << "function HttpParser::parseBody()\n";
 
     //chunk or content-length or eof
+    std::cout << "body len:" << len << std::endl;
 
     const char *begin = stream;
 
-    enum http_body_state stat = (isChunked)
-                                    ? s_http_body_chunk_size
-                                    : s_http_body_identify_by_eof;
+    enum http_body_state stat;
+
+    switch (body_type)
+    {
+    case t_http_body_type_init:
+        break;
+
+    case t_http_body_end_by_length:
+        stat = s_http_body_identify_by_length;
+        break;
+
+    case t_http_body_end_by_eof:
+        stat = s_http_body_identify_by_eof;
+        break;
+
+    case t_http_body_chunked:
+        stat = s_http_body_chunk_size;
+        break;
+
+    case t_http_body_skip:
+        break;
+    }
 
     unsigned long long chunk_size = 0;
 
@@ -1107,9 +1138,11 @@ int HttpParser::parseBody(const char *stream,
 
         case s_http_body_identify_by_length:
         {
-            unsigned long long to_read = MIN(chunk_size,
+            unsigned long long to_read = MIN(content_length_n,
                                              len - i);
+            printf("content:%.*s\n", to_read, begin + at + i);
             i += to_read;
+            return 0;
             // content_length -= to_read;
             // if (content_length == 0)
             {
@@ -1236,6 +1269,7 @@ int HttpParser::execute(const char *stream,
     bool chunked = true;
 
     enum http_method method;
+    enum http_body_type body_type = t_http_body_type_init;
 
     unsigned int url_begin = 0;
     unsigned int url_len = 0;
@@ -1661,11 +1695,10 @@ int HttpParser::execute(const char *stream,
     request->headers->offset = headers_begin;
     request->headers->len = headers_len;
 
-    // return_val = parseHeaders(begin,
-    //                          headers_begin,
-    //                          headers_len,
-    //                          request->headers);
-    //TODO:
+    return_val = parseHeaders(begin,
+                              headers_begin,
+                              headers_len,
+                              request->headers);
 
     if (return_val == -1)
     {
@@ -1677,11 +1710,49 @@ int HttpParser::execute(const char *stream,
     {
     }
 
+    return_val = parseHeadersMeaning(request->headers);
+    if (return_val == -1)
+    {
+        std::cout << "[headers meaning is invalid]"
+                  << std::endl;
+        goto error;
+    }
+    else if (return_val == 0)
+    {
+    }
+
+    /*--------------------------*/
+    {
+        HttpHeaders *hs = request->headers;
+        if (hs->content_identify_length && hs->chunked)
+        {
+            std::cout << "both have length and chunked error\n";
+        }
+        else if (hs->content_identify_length && !hs->chunked)
+        {
+            std::cout << "identify body by length\n";
+            body_type = t_http_body_end_by_length;
+            content_length = hs->content_length_n;
+        }
+        else if (!hs->content_identify_length && hs->chunked)
+        {
+            std::cout << "identify body by chunk\n";
+            body_type = t_http_body_chunked;
+        }
+        else //(hs->content_identify_length && hs->chunked)
+        {
+            std::cout << "identify body by eof\n";
+            body_type = t_http_body_end_by_eof;
+        }
+    }
+
+    /*--------------------------*/
+
     //parse http body
     //TODO: We need to make a judgement of whether parse body or skip body.
     //Basis are Chunked and Content-Length.
     //So we need to get information from HttpHeaders.
-    return_val = parseBody(begin, body_begin, len, chunked);
+    return_val = parseBody(begin, body_begin, len - body_begin, body_type, content_length);
     if (return_val == -1)
     {
         std::cout << "[body is invalid]"

@@ -189,6 +189,15 @@ enum http_header_state
 	s_http_headers_done,
 };
 
+enum http_body_type
+{
+	t_http_body_type_init = 0,
+	t_http_body_end_by_length,
+	t_http_body_end_by_eof,
+	t_http_body_chunked,
+	t_http_body_skip,
+};
+
 enum http_body_state
 {
 	s_http_body_error = 1,
@@ -495,7 +504,8 @@ class HttpParser
 	int parseBody(const char *stream,
 				  int at,
 				  int len,
-				  bool isChunked);
+				  enum http_body_type body_type,
+				  unsigned int content_length_n);
 
 	int execute(const char *stream,
 				int at,
@@ -543,12 +553,12 @@ inline int parseConnectionValue(const Str *s, HttpHeaders *const headers)
 	if (0 == strncasecmp__(s->data, "keep-alive", s->len))
 	{
 		headers->connection_keep_alive = 1;
-		std::cout << "connection keep alive\n";
+		// std::cout << "connection keep alive\n";
 	}
 	else if (0 == strncasecmp__(s->data, "close", s->len))
 	{
 		headers->connection_close = 1;
-		std::cout << "connection close\n";
+		// std::cout << "connection close\n";
 	}
 }
 
@@ -571,7 +581,7 @@ inline int parseContentLength(const Str *s, HttpHeaders *const headers)
 	headers->content_length_n = res;
 	headers->content_identify_length = 1;
 
-	std::cout << "parse Content-Length:" << headers->content_length_n << std::endl;
+	// std::cout << "parse Content-Length:" << headers->content_length_n << std::endl;
 	return 0;
 }
 
@@ -594,7 +604,7 @@ inline int parseTransferEncoding(const Str *s, HttpHeaders *const headers)
 	if (0 == strncasecmp__(s->data, "chunked", s->len))
 	{
 		headers->chunked = 1;
-		std::cout << "chunked\n";
+		// std::cout << "chunked\n";
 		return 0;
 	}
 	else
@@ -605,7 +615,7 @@ inline int parseTransferEncoding(const Str *s, HttpHeaders *const headers)
 
 inline int parseValue(const Str *s, HttpHeaders *const headers)
 {
-	printf("get value:%.*s\n", s->len, s->data);
+	// printf("get value:%.*s\n", s->len, s->data);
 }
 
 typedef struct header
