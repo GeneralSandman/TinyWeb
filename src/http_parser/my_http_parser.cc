@@ -979,19 +979,19 @@ header headers_in[] = {
     {
         .name = Str("user-agent"),
         .offset = offsetof__(HttpHeaders, user_agent),
-        .fun = boost::bind(parseValue, _1, _2),
+        .fun = boost::bind(parseUserAgent, _1, _2),
     },
 
     {
         .name = Str("referer"),
         .offset = offsetof__(HttpHeaders, referer),
-        .fun = boost::bind(parseValue, _1, _2),
+        .fun = boost::bind(parseRefer, _1, _2),
     },
 
     {
         .name = Str("content-length"),
         .offset = offsetof__(HttpHeaders, content_length),
-        .fun = boost::bind(parseValue, _1, _2),
+        .fun = boost::bind(parseContentLength, _1, _2),
     },
 
     {
@@ -1003,7 +1003,7 @@ header headers_in[] = {
     {
         .name = Str("transfer-encoding"),
         .offset = offsetof__(HttpHeaders, transfer_encoding),
-        .fun = boost::bind(parseValue, _1, _2),
+        .fun = boost::bind(parseTransferEncoding, _1, _2),
     },
 
     {
@@ -1053,12 +1053,9 @@ void init()
 
 int HttpParser::parseHeadersMeaning(HttpHeaders *headers)
 {
-    //hash->key
     HttpHeader *res = NULL;
     for (auto t : headers->generals)
     {
-        // printStr(&(t->key));
-
         auto p = headerKeyHash.find(t->keyHash);
         if (p == headerKeyHash.end())
         {

@@ -275,9 +275,20 @@ typedef struct HttpHeaders
 	unsigned int offset;
 	unsigned int len;
 
-	unsigned int host_valid : 1;
-	unsigned int keep_alive : 1;
-	unsigned int close : 1;
+	unsigned long long content_length_n;
+
+	unsigned int valid_host : 1;
+	unsigned int valid_referer : 1;
+
+	unsigned int connection_keep_alive : 1;
+	unsigned int connection_close : 1;
+
+	unsigned int chrome : 1;
+
+	unsigned int content_identify_length : 1;
+	unsigned int content_identify_eof : 1;
+	unsigned int chunked : 1;
+
 	//TODO:more information
 } HttpHeaders;
 
@@ -520,28 +531,75 @@ inline int strncasecmp__(const char *s1, const char *s2, int len)
 #include <boost/function.hpp>
 typedef boost::function<int(const Str *, HttpHeaders *const)> headerFun;
 
-inline int testHeaderFun(const Str *s)
-{
-	printStr(s);
-}
-
 inline int parseHostValue(const Str *s, HttpHeaders *const headers)
 {
-	printf("get host:%.*s\n", s->len, s->data);
-	headers->host_valid = 1;
+	// printf("get host:%.*s\n", s->len, s->data);
+	//test the host is valid
+	headers->valid_host = 1;
 }
 
 inline int parseConnectionValue(const Str *s, HttpHeaders *const headers)
 {
 	if (0 == strncasecmp__(s->data, "keep-alive", s->len))
 	{
-		headers->keep_alive = 1;
+		headers->connection_keep_alive = 1;
 		std::cout << "connection keep alive\n";
 	}
 	else if (0 == strncasecmp__(s->data, "close", s->len))
 	{
-		headers->close = 1;
+		headers->connection_close = 1;
 		std::cout << "connection close\n";
+	}
+}
+
+inline int parseContentLength(const Str *s, HttpHeaders *const headers)
+{
+	unsigned long long res = 0;
+	char *p = s->data;
+	for (int i = 0; i < s->len; i++)
+	{
+		char ch = *(p + i);
+		if (!isNum(ch))
+		{
+			std::cout << "Content-Length value invalid\n";
+			return -1;
+		}
+		res *= 10;
+		res += ch - '0';
+	}
+
+	headers->content_length_n = res;
+	headers->content_identify_length = 1;
+
+	std::cout << "parse Content-Length:" << headers->content_length_n << std::endl;
+	return 0;
+}
+
+inline int parseUserAgent(const Str *s, HttpHeaders *const headers)
+{
+	// printf("parse User-Agent:%.*s\n", s->len, s->data);
+	//FIXME:
+	headers->chrome = 1;
+}
+
+inline int parseRefer(const Str *s, HttpHeaders *const headers)
+{
+	// printf("get refer:%.*s\n", s->len, s->data);
+	//test the refer is valid
+	headers->valid_referer = 1;
+}
+
+inline int parseTransferEncoding(const Str *s, HttpHeaders *const headers)
+{
+	if (0 == strncasecmp__(s->data, "chunked", s->len))
+	{
+		headers->chunked = 1;
+		std::cout << "chunked\n";
+		return 0;
+	}
+	else
+	{
+		return -1;
 	}
 }
 

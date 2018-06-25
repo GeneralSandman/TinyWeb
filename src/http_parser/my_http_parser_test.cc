@@ -312,6 +312,7 @@ void testParseHeaders()
 
         "Connection: close\r\n"
         "Host: 127.0.0.1:9999\r\n"
+        "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.162 Safari/537.36\r\n"
         "Accept-Encoding: gzip, deflate, br\r\n"
         "Upgrade-Insecure-Requests: 1\r\n"
         "Cookie: _ga=GA1.2.2068106829.1526513886; _gid=GA1.2.1899421896.1528880409\r\n"
@@ -531,7 +532,7 @@ void teststrncmp_case()
 {
     //TODO:
     // if (0 == strncmp_case("abc\0aaa", "abc\0bbb", 7))
-        cout << "same\n";
+    cout << "same\n";
 }
 
 void testGetMethod()
@@ -701,16 +702,15 @@ int main()
     // testHttpParser();
     // testHttpParserResponse();
     // testHttpParserRequest();
-    // testParseHost();
-    // testParseUrl();
     // testParseHeader();
     testParseHeaders();
+    // testExecute();
     // testHeaderKeyHash();
     // testHeaderKeyHash2();
+    // teststrncmp_case();
     // testGetMethod();
     // testLitterCon();
     // testAll();
     // testJSHash();
-    // teststrncmp_case();
     return 0;
 }
