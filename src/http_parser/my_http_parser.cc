@@ -616,7 +616,7 @@ int HttpParser::parseUrl(const char *stream,
     enum state stat;
     enum httpUrlField prefield = HTTP_UF_MAX;
     enum httpUrlField field;
-    bool has_at_char = false; //TODO:return has_at_char
+    bool has_at_char = false;
 
     for (int i = 0; i < len; i++)
     {
@@ -715,10 +715,6 @@ int HttpParser::parseUrl(const char *stream,
         }
         // std::cout << "port:" << port << std::endl;
     }
-
-    //FIXME:
-    //TODO:
-    //!!!
 
     return 0;
 }
@@ -1037,7 +1033,7 @@ header headers_in[] = {
     {
         .name = Str("cookie"),
         .offset = offsetof__(HttpHeaders, cookie),
-        .fun = boost::bind(parseValue, _1, _2),
+        .fun = boost::bind(parseCookie, _1, _2),
     },
 
     {
@@ -1143,16 +1139,11 @@ int HttpParser::parseBody(const char *stream,
             printf("content:%.*s\n", to_read, begin + at + i);
             i += to_read;
             return 0;
-            // content_length -= to_read;
-            // if (content_length == 0)
-            {
-                //message done;
-            }
         }
         break;
 
         case s_http_body_identify_by_eof:
-            i = len; //FIXME:
+            i = len;
             //message done'
             break;
 
@@ -1381,8 +1372,6 @@ int HttpParser::execute(const char *stream,
         case s_resp_version_minor:
             checkOrGoError((ch == ' '));
             m_nState = s_resp_status_code_start;
-            // std::cout << "response http version:HTTP/" << m_nHttpVersionMajor << "."
-            //           << m_nHttpVersionMinor << std::endl;
             break;
 
         case s_resp_status_code_start:
@@ -1444,7 +1433,6 @@ int HttpParser::execute(const char *stream,
         case s_resp_line_done:
             if (ch == '\r')
             {
-                //FIXME:s_headers_almost_done;
                 m_nState = s_headers_almost_done;
                 break;
             }
@@ -1460,7 +1448,7 @@ int HttpParser::execute(const char *stream,
             break;
 
         case s_requ_start:
-            m_nState = s_requ_method; //FIXME:
+            m_nState = s_requ_method;
             method_begin = i;
             method_len = 1;
             break;
@@ -1744,14 +1732,53 @@ int HttpParser::execute(const char *stream,
             std::cout << "identify body by eof\n";
             body_type = t_http_body_end_by_eof;
         }
+
+        if (m_nHttpVersionMajor * 10 + m_nHttpVersionMinor <= 9)
+        {
+            //HTTP/0.9
+            body_type = t_http_body_skip;
+        }
+
+        if (method == HTTP_METHOD_HEAD)
+        {
+            body_type = t_http_body_skip;
+        }
+
+        if (!hs->valid_host && m_nHttpVersionMajor * 10 + m_nHttpVersionMinor >= 11)
+        {
+            printf("Must have host field in HTTP/%d.%d\n", m_nHttpVersionMajor, m_nHttpVersionMinor);
+            //error
+        }
+
+        if (method == HTTP_METHOD_PUT && !hs->valid_content_length)
+        {
+            printf("Must have content in method PUT\n");
+            //error
+        }
+
+        if (method == HTTP_METHOD_TRACE)
+        {
+            printf("Client request with method TRACE\n");
+        }
+
+        if (hs->has_upgrade && hs->connection_upgrade)
+        {
+            //Upgrade: WebSocket
+            //Connection: Upgrade
+            //TODO:
+            //search google
+        }
+
+        if (method == HTTP_METHOD_CONNECT && m_nHttpVersionMajor * 10 + m_nHttpVersionMinor <= 10)
+        {
+            //https://blog.csdn.net/kobejayandy/article/details/24606521
+            printf("Must using connect method after HTTP version %d,%d\n", m_nHttpVersionMajor, m_nHttpVersionMinor);
+        }
     }
 
     /*--------------------------*/
 
     //parse http body
-    //TODO: We need to make a judgement of whether parse body or skip body.
-    //Basis are Chunked and Content-Length.
-    //So we need to get information from HttpHeaders.
     return_val = parseBody(begin, body_begin, len - body_begin, body_type, content_length);
     if (return_val == -1)
     {
@@ -1764,9 +1791,9 @@ int HttpParser::execute(const char *stream,
     }
 
     { //debug
-        std::string url(begin + url_begin, url_len);
-        std::string status_phrase(begin + status_phrase_begin, status_phrase_len);
-        std::string method(begin + method_begin, method_len);
+        // std::string url(begin + url_begin, url_len);
+        // std::string status_phrase(begin + status_phrase_begin, status_phrase_len);
+        // std::string method(begin + method_begin, method_len);
         // std::cout << "<++++++++DEBUG+++++++++>" << std::endl;
         // std::cout << "url:" << url << std::endl;
         // std::cout << "method:" << method << std::endl;
