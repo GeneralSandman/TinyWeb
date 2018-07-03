@@ -58,7 +58,7 @@
 //It is only used by http method;
 #define getHash(hash, c) ((unsigned long long)((hash)*27 + getLetterHashNoCase(c)))
 
-inline short int getHex(char c)
+inline short int getHex(char c
 {
 	if ('0' <= c && c <= '9')
 		return (c - '0');
@@ -232,6 +232,11 @@ typedef struct Url
 	} fields[HTTP_UF_MAX];
 } Url;
 
+void urlInit(Url *url){
+	memset(url,0,sizeof(Url));
+	url->data=nullptr;
+}
+
 enum httpHeaderField
 {
 	HTTP_HF__SCHEMA = 0,
@@ -250,6 +255,12 @@ typedef struct HttpHeader
 	Str key;
 	Str value;
 } HttpHeader;
+
+void httpHeaderInit(HttpHeader *header){
+	header->keyHash=0;
+	header->key="";
+	header->value="";
+}
 
 enum HttpHeaderIndex
 {
@@ -300,6 +311,27 @@ typedef struct HttpHeaders
 
 	//TODO:more information
 } HttpHeaders;
+
+void httpHeadersInit(HttpHeaders * headers){
+	memset(headers,0,sizeof(HttpHeaders));
+	httpHeaderInit(headers->host);
+	httpHeaderInit(headers->connection);
+	httpHeaderInit(headers->if_modified_since);
+	httpHeaderInit(headers->if_unmodified_since);
+	httpHeaderInit(headers->user_agent);
+	httpHeaderInit(headers->referer);
+	httpHeaderInit(headers->content_length);
+	httpHeaderInit(headers->content_type);
+	httpHeaderInit(headers->transter_encoding);
+	httpHeaderInit(headers->accept_encoding);
+	httpHeaderInit(headers->upgrade);
+	httpHeaderInit(headers->expect);
+	httpHeaderInit(headers->cookie);
+	httpHeaderInit(headers->last_modified);
+
+	data=nullptr;
+
+}
 
 void pushHeader(HttpHeaders *headers,
 				HttpHeader *header,
