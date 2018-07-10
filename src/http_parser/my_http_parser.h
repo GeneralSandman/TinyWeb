@@ -232,6 +232,7 @@ typedef struct Url
 	} fields[HTTP_UF_MAX];
 } Url;
 
+<<<<<<< HEAD
 void urlInit(Url *url){
 	memset(url,0,sizeof(Url));
 	url->data=nullptr;
@@ -248,6 +249,8 @@ enum httpHeaderField
 	HTTP_HF__USERINFO = 6,
 	HTTP_HF__MAX = 7
 };
+=======
+>>>>>>> dev
 
 typedef struct HttpHeader
 {
@@ -297,17 +300,21 @@ typedef struct HttpHeaders
 
 	unsigned long long content_length_n;
 
+	unsigned int valid_content_length : 1;
 	unsigned int valid_host : 1;
 	unsigned int valid_referer : 1;
 
 	unsigned int connection_keep_alive : 1;
 	unsigned int connection_close : 1;
+	unsigned int connection_upgrade : 1;
 
 	unsigned int chrome : 1;
 
 	unsigned int content_identify_length : 1;
 	unsigned int content_identify_eof : 1;
 	unsigned int chunked : 1;
+
+	unsigned int has_upgrade : 1;
 
 	//TODO:more information
 } HttpHeaders;
@@ -370,6 +377,43 @@ typedef struct HttpRequest
 	HttpBody *body;
 
 } HttpRequest;
+
+inline bool endMessageByEof(const HttpRequest *request)
+{
+	HttpHeaders *hs = request->headers;
+
+	if (hs->valid_content_length ||
+		hs->chunked)
+		return false; //Don't need eof
+
+	/* See RFC 2616 section 4.4 */
+	//   if (parser->status_code / 100 == 1 || /* 1xx e.g. Continue */
+	//       parser->status_code == 204 ||     /* No Content */
+	//       parser->status_code == 304 ||     /* Not Modified */
+	//       parser->flags & F_SKIPBODY) {     /* response to a HEAD request */
+	//     return 0;
+	//   }
+
+	return true;
+}
+
+inline bool shouldKeepAlive(const HttpRequest *request)
+{
+	if (request->http_version_major >= 1 && request->http_version_minor >= 1)
+	{
+		//HTTP/1.1
+		if (request->headers->connection_close)
+			return false;
+	}
+	else
+	{
+		if (request->headers->connection_keep_alive)
+			return true;
+	}
+
+	if (!endMessageByEof(request))
+		return true;
+}
 
 typedef boost::function<int()> HttpCallback;
 typedef boost::function<int()> HttpDataCallback;
@@ -611,6 +655,7 @@ inline int parseContentLength(const Str *s, HttpHeaders *const headers)
 	}
 
 	headers->content_length_n = res;
+	headers->valid_content_length = 1;
 	headers->content_identify_length = 1;
 
 	// std::cout << "parse Content-Length:" << headers->content_length_n << std::endl;
@@ -643,6 +688,11 @@ inline int parseTransferEncoding(const Str *s, HttpHeaders *const headers)
 	{
 		return -1;
 	}
+}
+
+inline int parseCookie(const Str *s, HttpHeaders *const headers)
+{
+	// printf("get value:%.*s\n", s->len, s->data);
 }
 
 inline int parseValue(const Str *s, HttpHeaders *const headers)
