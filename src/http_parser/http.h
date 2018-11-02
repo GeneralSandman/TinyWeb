@@ -207,7 +207,8 @@ const char *httpStatusStr(enum http_status s);
     XX(31, LINK, LINK)               \
     XX(32, UNLINK, UNLINK)           \
     /* icecast */                    \
-    XX(33, SOURCE, SOURCE)
+    XX(33, SOURCE, SOURCE)           \
+    XX(34, INVALID, INVALID)
 
 enum http_method
 {

@@ -22,56 +22,67 @@ using namespace std;
 int getMessage()
 {
     std::cout << "get Message\n";
+    return 0;
 }
 
 int getUrl()
 {
     cout << "get url\n";
+    return 0;
 }
 
 int getStatus()
 {
     cout << "get status\n";
+    return 0;
 }
 
 int getRequestLine()
 {
     cout << "get request line\n";
+    return 0;
 }
 
 int getHeader()
 {
     cout << "get request header\n";
+    return 0;
 }
 
 int getHeaderKey()
 {
     cout << "get header key\n";
+    return 0;
 }
 
 int getHeaderValue()
 {
     cout << "get header value\n";
+    return 0;
 }
 
 int getBody()
 {
     cout << "get body\n";
+    return 0;
 }
 
 int endMessage()
 {
     cout << "end message\n";
+    return 0;
 }
 
 int getChunk()
 {
     cout << "get chunk\n";
+    return 0;
 }
 
 int endChunk()
 {
     cout << "end chunk\n";
+    return 0;
 }
 
 void testHttpParser()
@@ -242,7 +253,7 @@ void testParseHeader()
 
     HttpParserSettings settings;
 
-    int len = strs.size();
+    unsigned long len = strs.size();
     for (int i = 0; i < 1; i++)
     {
         HttpParser parser(&settings);
@@ -658,9 +669,9 @@ void testAll()
     else
     {
         std::cout << "request valid[Debug]\n";
-        // printUrl(request->url);
-        // printHttpHeaders(request->headers);
-        // printBody(request->body);
+        printUrl(request->url);
+        printHttpHeaders(request->headers);
+        printBody(request->body);
     }
 }
 
@@ -710,8 +721,8 @@ int main()
 {
     init();
 
-    // testHttpParser();
-    // testHttpParserResponse();
+    testHttpParser();
+    testHttpParserResponse();
     // testHttpParserRequest();
     // testParseHeader();
     // testParseHeaders();
@@ -721,7 +732,7 @@ int main()
     // teststrncmp_case();
     // testGetMethod();
     // testLitterCon();
-    testAll();
+    //testAll();
     // testJSHash();
     return 0;
 }

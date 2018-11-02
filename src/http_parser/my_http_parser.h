@@ -58,7 +58,7 @@
 //It is only used by http method;
 #define getHash(hash, c) ((unsigned long long)((hash)*27 + getLetterHashNoCase(c)))
 
-inline short int getHex(char c
+inline short int getHex(char c)
 {
 	if ('0' <= c && c <= '9')
 		return (c - '0');
@@ -69,13 +69,6 @@ inline short int getHex(char c
 	return -1;
 }
 
-//the values set to HttpParser::m_nType
-enum httpParserType
-{
-	HTTP_REQUEST = 1,
-	HTTP_RESPONSE,
-	HTTP_BOTH
-};
 
 enum httpUrlField
 {
@@ -232,8 +225,7 @@ typedef struct Url
 	} fields[HTTP_UF_MAX];
 } Url;
 
-<<<<<<< HEAD
-void urlInit(Url *url){
+inline void urlInit(Url *url){
 	memset(url,0,sizeof(Url));
 	url->data=nullptr;
 }
@@ -249,8 +241,6 @@ enum httpHeaderField
 	HTTP_HF__USERINFO = 6,
 	HTTP_HF__MAX = 7
 };
-=======
->>>>>>> dev
 
 typedef struct HttpHeader
 {
@@ -259,10 +249,10 @@ typedef struct HttpHeader
 	Str value;
 } HttpHeader;
 
-void httpHeaderInit(HttpHeader *header){
+inline void httpHeaderInit(HttpHeader *header){
 	header->keyHash=0;
-	header->key="";
-	header->value="";
+    setStrNull(&(header->key));
+    setStrNull(&(header->value));
 }
 
 enum HttpHeaderIndex
@@ -295,7 +285,7 @@ typedef struct HttpHeaders
 	std::list<HttpHeader *> generals; //TODO:take place in list_t
 
 	char *data;
-	unsigned int offset;
+	unsigned int offset;	
 	unsigned int len;
 
 	unsigned long long content_length_n;
@@ -319,7 +309,7 @@ typedef struct HttpHeaders
 	//TODO:more information
 } HttpHeaders;
 
-void httpHeadersInit(HttpHeaders * headers){
+inline void httpHeadersInit(HttpHeaders * headers){
 	memset(headers,0,sizeof(HttpHeaders));
 	httpHeaderInit(headers->host);
 	httpHeaderInit(headers->connection);
@@ -329,14 +319,14 @@ void httpHeadersInit(HttpHeaders * headers){
 	httpHeaderInit(headers->referer);
 	httpHeaderInit(headers->content_length);
 	httpHeaderInit(headers->content_type);
-	httpHeaderInit(headers->transter_encoding);
+	httpHeaderInit(headers->transfer_encoding);
 	httpHeaderInit(headers->accept_encoding);
 	httpHeaderInit(headers->upgrade);
 	httpHeaderInit(headers->expect);
 	httpHeaderInit(headers->cookie);
 	httpHeaderInit(headers->last_modified);
 
-	data=nullptr;
+	headers->data=nullptr;
 
 }
 
@@ -358,11 +348,23 @@ void printUrl(const Url *url);
 void printBody(const HttpBody *body);
 
 #include <memory>
+enum HttpContentType
+{
+    HTTP_TYPE_BOTH,
+    HTTP_TYPE_REQUEST,
+    HTTP_TYPE_RESPONSE,
+};
+
 typedef struct HttpRequest
 {
+    HttpContentType type;
+
 	unsigned short method : 8;
 	unsigned short http_version_major : 8;
 	unsigned short http_version_minor : 8;
+
+    unsigned int statusCode;
+    Str statusPhrase;
 
 	std::string method_s;
 
@@ -534,7 +536,7 @@ class HttpParser
 		// std::cout << "class HttpParser constructor\n";
 	}
 
-	void setType(enum httpParserType type);
+	void setType(enum HttpContentType type);
 
 	enum http_errno getErrno()
 	{
