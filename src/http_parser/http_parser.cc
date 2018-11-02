@@ -898,7 +898,7 @@ int HttpParser::parseHeader(const char *stream,
                 result->value.len = valuelen;
 
                 printf("[%u]%.*s->%.*s^\n", result->keyHash, keylen, begin + keybegin,
-                    valuelen, begin + valuebegin);
+                        valuelen, begin + valuebegin);
 
                 at += i;
                 return 0;
@@ -970,7 +970,7 @@ header headers_in[] = {
         .offset = offsetof__(HttpHeaders, connection),
         .fun = boost::bind(parseConnectionValue, _1, _2),
     },
-    
+
     {
         .name = Str("content-length"),
         .offset = offsetof__(HttpHeaders, content_length),
@@ -1083,11 +1083,6 @@ int HttpParser::parseBody(const char *stream,
         enum http_body_type body_type,
         unsigned int content_length_n)
 {
-    std::cout << "function HttpParser::parseBody()\n";
-
-    //chunk or content-length or eof
-    std::cout << "body len:" << len << std::endl;
-
     const char *begin = stream;
 
     enum http_body_state stat;
@@ -1129,7 +1124,7 @@ int HttpParser::parseBody(const char *stream,
 
             case s_http_body_identify_by_length:
                 {
-                    unsigned long long to_read = MIN(content_length_n,
+                    unsigned int to_read = MIN(content_length_n,
                             len - i);
                     printf("content:%.*s\n", to_read, begin + at + i);
                     i += to_read;
@@ -1138,8 +1133,8 @@ int HttpParser::parseBody(const char *stream,
                 break;
 
             case s_http_body_identify_by_eof:
+                printf("content:%.*s\n", len-i, begin + at +i);
                 i = len;
-                //message done'
                 break;
 
             case s_http_body_chunk_size_start:
@@ -1613,16 +1608,10 @@ int HttpParser::execute(const char *stream,
 
             case s_headers_done:
                 //TODO: do something by headers meaning
-                if (content_length > 0)
-                {
-                    m_nState = s_body;
-                }
-                else if (chunked == true)
-                {
-                    m_nState = s_chunk;
-                    body_begin = i;
-                    break_for = true;
-                }
+                std::cout << "[Debug] body begin\n";
+                body_begin = i;
+                m_nState = s_body_start;
+                break_for = true;
                 break;
 
             case s_body_start:
@@ -1660,8 +1649,7 @@ int HttpParser::execute(const char *stream,
                 request->url);
         if (return_val == -1)
             goto error;
-            //change goto error command
-
+        //change goto error command
     }
     else
     {
@@ -1692,38 +1680,32 @@ int HttpParser::execute(const char *stream,
     if (return_val == -1)
         goto error;
 
-    //parse http body type in according of headers'meaning
-    return_val = parseBody(begin, body_begin, len - body_begin, body_type, content_length);
-    if (return_val == -1)
-        goto error;
-
-    /*--------------------------*/
-    {
+    //switch body type : chunk or end-by-eof or end-by-length
+    {   //must keep this "{}", because goto command
         HttpHeaders *hs = request->headers;
         if (hs->content_identify_length && hs->chunked)
         {
-            std::cout << "both have length and chunked error\n";
+            std::cout << "[Debug] both have length and chunked error\n";
         }
         else if (hs->content_identify_length && !hs->chunked)
         {
-            std::cout << "identify body by length\n";
+            std::cout << "[Debug] identify body by length\n";
             body_type = t_http_body_end_by_length;
             content_length = hs->content_length_n;
         }
         else if (!hs->content_identify_length && hs->chunked)
         {
-            std::cout << "identify body by chunk\n";
+            std::cout << "[Debug] identify body by chunk\n";
             body_type = t_http_body_chunked;
         }
-        else //(hs->content_identify_length && hs->chunked)
+        else
         {
-            std::cout << "identify body by eof\n";
+            std::cout << "[Debug] identify body by eof\n";
             body_type = t_http_body_end_by_eof;
         }
 
         if (m_nHttpVersionMajor * 10 + m_nHttpVersionMinor <= 9)
         {
-            //HTTP/0.9
             body_type = t_http_body_skip;
         }
 
@@ -1749,7 +1731,7 @@ int HttpParser::execute(const char *stream,
             printf("Client request with method TRACE\n");
         }
 
-        if (hs->has_upgrade && hs->connection_upgrade)
+        //if (hs->has_upgrade && hs->connection_upgrade)
         {
             //Upgrade: WebSocket
             //Connection: Upgrade
@@ -1762,6 +1744,11 @@ int HttpParser::execute(const char *stream,
             //https://blog.csdn.net/kobejayandy/article/details/24606521
         }
     }
+
+    //parse http body type in according of body_type which parse from headersMeaning
+    return_val = parseBody(begin, body_begin, len - body_begin, body_type, content_length);
+    if (return_val == -1)
+        goto error;
 
     return 0;
 

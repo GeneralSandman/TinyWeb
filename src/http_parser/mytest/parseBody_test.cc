@@ -34,7 +34,6 @@ testBody bodys[]=
         .str = 
             "GET http://127.0.0.1:9999/index.html HTTP/1.1\r\n"
             "Transfer-Encoding: chunked\r\n"
-            "Content-Length: 16\r\n"
             "\r\n"
             "25\r\n"
             "This is the data in the first chunk..\r\n"
@@ -45,6 +44,25 @@ testBody bodys[]=
         .valid = true,
         .body = "This is the data in the first chunk.."
             "and this is the second one..",
+    },
+
+    {
+        .str = 
+            "GET http://127.0.0.1:9999/index.html HTTP/1.1\r\n"
+            "Content-Length: 10\r\n"
+            "\r\n"
+            "helloworlddd",
+        .valid = true,
+        .body = "helloworld",
+    },
+
+    {
+        .str = 
+            "GET http://127.0.0.1:9999/index.html HTTP/1.1\r\n"
+            "\r\n"
+            "helloworld",
+        .valid = true,
+        .body = "helloworld",
     },
 
     {
@@ -75,7 +93,6 @@ testBody bodys[]=
             "\r\n"
             "0\r\n"
             "\r\n",
-        .valid = false,
         .valid = true,
         .body = "",
     },
@@ -141,17 +158,19 @@ void testPraseBody()
 
     int len = sizeof(bodys) / sizeof(bodys[0]);
 
-    HttpParser parser(&settings);
-    parser.setType(HTTP_TYPE_REQUEST);
 
-    for (int i = 0; i < len; i++)
+    for (int i = 0; i < 3; i++)
     {
+        std::cout << i << ")" << std::endl;
         alltest++;
         int begin = 0;
-        int tmp = parser.parseBody(bodys[i].str,
+        HttpParser parser(&settings);
+        parser.setType(HTTP_TYPE_REQUEST);
+        HttpRequest *result = new HttpRequest;
+        int tmp = parser.execute(bodys[i].str,
                 begin,
                 strlen(bodys[i].str),
-                true);
+                result);
 
         bool res = (tmp == -1) ? false : true;
 
@@ -163,6 +182,8 @@ void testPraseBody()
         {
             cout << "body invalid\n";
         }
+
+        delete result;
     }
 
     std::cout << passtest << "/" << alltest << std::endl;
@@ -170,6 +191,7 @@ void testPraseBody()
 
 int main()
 {
+    headerMeaningInit();
     testPraseBody();
     return 0;
 }
