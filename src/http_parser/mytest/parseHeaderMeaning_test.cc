@@ -322,20 +322,16 @@ testHeaders headers[] = {
     },
 };
 
-void testParseHeader()
+void testParseHeaderMeaning()
 {
     vector<int> notPass;
 
     HttpParserSettings settings;
 
-    int alltest = 0;
-    int passtest = 0;
-
     int len = sizeof(headers) / sizeof(headers[0]);
 
-    for (int i = 0; i < len; i++)
+    for (int i = 0; i < 1; i++)
     {
-        alltest++;
 
         HttpParser parser(&settings);
         parser.setType(HTTP_TYPE_REQUEST);
@@ -350,63 +346,19 @@ void testParseHeader()
         bool res = (tmp == -1) ? false : true;
         if (res == headers[i].valid)
         {
-            if (res)
-            {
-                //printHttpHeaders(result);
-
-                int j = 0;
-                int lenj = headers[i].headerNum;
-
-                auto p = result->generals.begin();
-                auto lenp = result->generals.end();
-
-                while (j != lenj && p != lenp)
-                {
-                    if (0 != strncmp(headers[i].headers[j][0], (*p)->key.data, (*p)->key.len) ||
-                        0 != strncmp(headers[i].headers[j][1], (*p)->value.data, (*p)->value.len))
-                    {
-                        break;
-                    }
-
-                    j++;
-                    p++;
-                }
-
-                if (j == lenj && p == lenp)
-                {
-                    passtest++;
-                }
-                else
-                {
-                    notPass.push_back(i);
-                }
-            }
-            else
-            {
-                passtest++;
-            }
-        }
-        else
-        {
-            notPass.push_back(i);
+            parser.parseHeadersMeaning(result);
+            printHttpHeaders(result);
         }
         for (auto t : result->generals)
             delete t;
         delete result;
     }
 
-    std::cout << "pass/all = " << passtest << "/" << alltest << std::endl;
-
-    if (!notPass.empty())
-    {
-        cout << "not pass :\n";
-        for (auto t : notPass)
-            std::cout << t << " " << std::endl;
-    }
 };
 
 int main()
 {
-    testParseHeader();
+    headerMeaningInit();
+    testParseHeaderMeaning();
     return 0;
 }

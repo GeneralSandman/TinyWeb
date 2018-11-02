@@ -11,7 +11,7 @@
 *
 */
 
-#include "my_http_parser.h"
+#include "http_parser.h"
 #include <boost/bind.hpp>
 #include <iostream>
 #include <string>
@@ -637,19 +637,9 @@ void testAll()
     std::string str =
         "GET http://127.0.0.1:9999/index.html HTTP/1.1\r\n"
         "Content-Type: text/xml; charset=utf-8\r\n"
-        // "Connection: close\r\n"
-        // "Host: 127.0.0.1:9999\r\n"
-        // "Accept-Encoding: gzip, deflate, br\r\n"
-        // "Upgrade-Insecure-Requests: 1\r\n"
-        // "Cookie: _ga=GA1.2.2068106829.1526513886; _gid=GA1.2.1899421896.1528880409\r\n"
         "Transfer-Encoding: chunked\r\n"
         "Content-Length: 16\r\n"
-        // "If-Modified-Since: Sat, 29 Oct 2010 19:43:31 GMT\r\n"
-        // "If-Unmodified-Since: Sat, 29 Oct 2010 19:43:31 GMT\r\n"
-        // "Last-Modified: Tue, 15 Nov 2010 12:45:26 GMT\r\n"
-        // "Referer: www.baidu.com\r\n"
         "\r\n"
-        //  "<xml>hello</xml>???" /* fake body */;
         "25  \r\n"
         "This is the data in the first chunk..\r\n"
         "1C\r\n"

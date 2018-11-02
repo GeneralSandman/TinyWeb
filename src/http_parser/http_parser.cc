@@ -2,7 +2,7 @@
  *Author:GeneralSandman
  *Code:https://github.com/GeneralSandman/TinyWeb
  *E-mail:generalsandman@163.com
- *Web:www.generalsandman.cn
+ *Web:www.dissigil.cn
  */
 
 /*---XXX---
@@ -12,7 +12,7 @@
  */
 
 #include "http.h"
-#include "my_http_parser.h"
+#include "http_parser.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -31,6 +31,7 @@ void printHttpHeaders(const HttpHeaders *headers)
     printf("content_identify_eof:%d\n", headers->content_identify_eof);
     printf("chunked:%d\n", headers->chunked);
 
+    std::cout << "++++special header+++\n";
     if (headers->host != nullptr)
     {
         printStr(&(headers->host->key));
@@ -896,8 +897,8 @@ int HttpParser::parseHeader(const char *stream,
                 result->value.data = begin + valuebegin;
                 result->value.len = valuelen;
 
-                // printf("[%u]%.*s->%.*s^\n", result->keyHash, keylen, begin + keybegin,
-                //    valuelen, begin + valuebegin);
+                printf("[%u]%.*s->%.*s^\n", result->keyHash, keylen, begin + keybegin,
+                    valuelen, begin + valuebegin);
 
                 at += i;
                 return 0;
@@ -969,6 +970,12 @@ header headers_in[] = {
         .offset = offsetof__(HttpHeaders, connection),
         .fun = boost::bind(parseConnectionValue, _1, _2),
     },
+    
+    {
+        .name = Str("content-length"),
+        .offset = offsetof__(HttpHeaders, content_length),
+        .fun = boost::bind(parseContentLength, _1, _2),
+    },
 
     {
         .name = Str("if-modified-since"),
@@ -995,23 +1002,21 @@ header headers_in[] = {
     },
 
     {
-        .name = Str("content-length"),
-        .offset = offsetof__(HttpHeaders, content_length),
-        .fun = boost::bind(parseContentLength, _1, _2),
+        .name = Str("transfer-encoding"),
+        .offset = offsetof__(HttpHeaders, transfer_encoding),
+        .fun = boost::bind(parseTransferEncoding, _1, _2),
+    },
 
-
+    {
+        .name = Str("cookie"),
+        .offset = offsetof__(HttpHeaders, cookie),
+        .fun = boost::bind(parseCookie, _1, _2),
     },
 
     {
         .name = Str("content-type"),
         .offset = offsetof__(HttpHeaders, content_type),
         .fun = boost::bind(parseValue, _1, _2),
-    },
-
-    {
-        .name = Str("transfer-encoding"),
-        .offset = offsetof__(HttpHeaders, transfer_encoding),
-        .fun = boost::bind(parseTransferEncoding, _1, _2),
     },
 
     {
@@ -1033,12 +1038,6 @@ header headers_in[] = {
     },
 
     {
-        .name = Str("cookie"),
-        .offset = offsetof__(HttpHeaders, cookie),
-        .fun = boost::bind(parseCookie, _1, _2),
-    },
-
-    {
         .name = Str("last-modified"),
         .offset = offsetof__(HttpHeaders, last_modified),
         .fun = boost::bind(parseValue, _1, _2),
@@ -1048,7 +1047,7 @@ header headers_in[] = {
 #include <unordered_map>
 std::unordered_map<unsigned int, header> headerKeyHash;
 
-void init()
+void headerMeaningInit()
 {
     int len = ARRAY_SIZE(headers_in);
     for (int i = 0; i < len; i++)
@@ -1067,19 +1066,13 @@ int HttpParser::parseHeadersMeaning(HttpHeaders *headers)
         auto p = headerKeyHash.find(t->keyHash);
         if (p == headerKeyHash.end())
         {
-            // std::cout << "general header" << std::endl;
+            std::cout << "general header" << std::endl;
         }
         else
         {
-            // printStr(&(t->key));
-            // std::cout << "find and store" << std::endl;
             HttpHeader **tmp = (HttpHeader **)((char *)headers + p->second.offset);
             *tmp = t;
-
             p->second.fun(&(t->value), headers);
-            // std::cout << "headers address:" << headers << std::endl;
-            // std::cout << "offset:" << p->second.offset << std::endl;
-            // std::cout << "the address wil:" << tmp << std::endl;
         }
     }
 }
@@ -1301,7 +1294,7 @@ int HttpParser::execute(const char *stream,
 
         case s_start_resp_or_requ:
             request->type = HTTP_TYPE_BOTH;
-            std::cout<<"[Debug] http request or response start\n";
+            std::cout<<"[Debug] http content maybe http request or response start\n";
             break;
 
         default:
@@ -1316,7 +1309,8 @@ int HttpParser::execute(const char *stream,
         {
 
             case s_start_resp_or_requ:
-                if (ch == 'H') //response
+                // need to fix FIXME:
+                if (ch == 'H') //is http response
                 {
                     m_nState = s_resp_H;
                     // invokeByName("getResponseMessage", nullptr, 0);TODO:
@@ -1326,7 +1320,7 @@ int HttpParser::execute(const char *stream,
                     m_nState = s_requ_start;
                     // invokeByName("getRequestsMessage", nullptr, 0);TODO:
                 }
-                invokeByName("getMessage", nullptr, 0);
+                // invokeByName("getMessage", nullptr, 0);TODO:
                 break;
 
             case s_resp_start: //not finished
@@ -1424,8 +1418,7 @@ int HttpParser::execute(const char *stream,
             case s_resp_line_almost_done:
                 checkOrGoError((ch == '\n'));
                 {
-                    std::cout << "[Debug]request line done:" << std::endl;
-                    //should invoke some callback function?
+                    //invokeByName("", nullptr, 0);TODO:
                     m_nState = s_resp_line_done;
                 }
                 break;
@@ -1442,7 +1435,7 @@ int HttpParser::execute(const char *stream,
                     break;
                 }
 
-                checkOrGoError(isAlpha(ch));
+                checkOrGoError(isAlphaNum(ch));
                 headers_begin = i;
                 m_nState = s_header_start;
                 break;
@@ -1619,6 +1612,7 @@ int HttpParser::execute(const char *stream,
                 break;
 
             case s_headers_done:
+                //TODO: do something by headers meaning
                 if (content_length > 0)
                 {
                     m_nState = s_body;
@@ -1698,7 +1692,7 @@ int HttpParser::execute(const char *stream,
     if (return_val == -1)
         goto error;
 
-    //parse http body
+    //parse http body type in according of headers'meaning
     return_val = parseBody(begin, body_begin, len - body_begin, body_type, content_length);
     if (return_val == -1)
         goto error;
@@ -1766,7 +1760,6 @@ int HttpParser::execute(const char *stream,
         if (method == HTTP_METHOD_CONNECT && m_nHttpVersionMajor * 10 + m_nHttpVersionMinor <= 10)
         {
             //https://blog.csdn.net/kobejayandy/article/details/24606521
-            printf("Must using connect method after HTTP version %d,%d\n", m_nHttpVersionMajor, m_nHttpVersionMinor);
         }
     }
 
