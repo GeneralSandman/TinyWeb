@@ -13,6 +13,15 @@
 
 #include "http.h"
 
+
+/*Array statusCodes is used by httpStatueCode()*/
+static const char *statusCodes[] =
+    {
+#define XX(num, name, string) #num,
+        HTTP_STATUS_MAP(XX)
+#undef XX
+};
+
 /*Array statusStrings is used by httpStatueStr()*/
 static const char *statusStrings[] =
     {
@@ -20,6 +29,11 @@ static const char *statusStrings[] =
         HTTP_STATUS_MAP(XX)
 #undef XX
 };
+
+const char *httpStatusCode(enum http_status s)
+{
+    return ELEM_AT(statusCodes, s, "<invalid>");
+}
 
 const char *httpStatusStr(enum http_status s)
 {

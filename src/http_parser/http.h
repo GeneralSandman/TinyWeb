@@ -159,6 +159,7 @@ enum http_status
 #undef XX
 };
 
+const char *httpStatusCode(enum http_status s);
 const char *httpStatusStr(enum http_status s);
 
 /* end Http status */
