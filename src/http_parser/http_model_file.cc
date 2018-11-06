@@ -23,10 +23,74 @@
 #include <fcntl.h>
 #include <errno.h>
 
+
+std::string getType(const std::string &f)
+{
+    std::string res;
+    bool findPoint = false;
+    for (int i = f.size() - 1; i >= 0; i--)
+    {
+        if (f[i] == '.')
+        {
+            findPoint = true;
+            break;
+        }
+        if (f[i] == '/')
+            break; //encounter a slash
+        res = f[i] + res;
+    }
+    if (!findPoint)
+        res = "";
+    return res;
+}
+
+std::string getMimeType(const std::string &type)
+{
+    //TODO: change code
+    std::string res;
+
+    if ("html" == type)
+    {
+        res = "text/html";
+    }
+    else if ("htm" == type)
+    {
+        res = "text/htm";
+    }
+    else if ("css" == type)
+    {
+        res = "text/css";
+    }
+    else if ("js" == type)
+    {
+        res = "application/javascript";
+    }
+    else if ("bmp" == type)
+    {
+        res = "image/bmp";
+    }
+    else if ("gif" == type)
+    {
+        res = "image/gif";
+    }
+    else if ("jpeg" == type)
+    {
+        res = "image/jpeg";
+    }
+    else if ("png" == type)
+    {
+        res = "image/png";
+    }
+
+    return res;
+}
+
 int initFile(File *file, const std::string &fname)
 {
     file->name = fname;
     file->offset = 0;
+    file->type = getType(fname);
+    file->mime_type = getMimeType(file->type);
 
     int return_val = stat(file->name.c_str(), &(file->info));
     if (return_val < 0)
@@ -88,3 +152,5 @@ int sendfile(int outFd, File *file)
 
     return res;
 }
+
+

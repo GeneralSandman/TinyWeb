@@ -17,9 +17,9 @@
 
 using namespace std;
 
-int main()
+void testFile()
 {
-    
+
     std::cout << "input file =";
     std::string fname;
     std::cin >> fname;
@@ -30,12 +30,44 @@ int main()
     if(return_val < 0)
     {
         std::cout << return_val << std::endl;
-        return 1;
+        return ;
     }
 
     sendfile(0, &inputFile);
 
     destoryFile(&inputFile);
+}
+
+void testFile2()
+{
+
+    std::cout << "input file =";
+    std::string fname;
+    std::cin >> fname;
+
+    File inputFile;
+    
+    int return_val = initFile(&inputFile, fname);
+    if(return_val < 0)
+    {
+        std::cout << return_val << std::endl;
+        return ;
+    }
+
+    time_t t = inputFile.info.st_mtime;
+    char tmpBuf[156];
+    strftime(tmpBuf, 156, "%Y-%m-%d %H:%M:%S", localtime(&t)); //format date and time.
+
+    std::cout << "last modified time:" << tmpBuf << std::endl;
+
+    destoryFile(&inputFile);
+
+}
+
+int main()
+{
+    
+    testFile2();
 
     return 0;
 }

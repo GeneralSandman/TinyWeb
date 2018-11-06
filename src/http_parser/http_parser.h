@@ -620,6 +620,7 @@ inline int strncasecmp__(const char *s1, const char *s2, int len)
 
 #include <boost/function.hpp>
 typedef boost::function<int(const Str *, HttpHeaders *const)> headerFun;
+typedef boost::function<int(const std::string &, HttpHeaders *const)> deheaderFun;
 
 inline int parseHostValue(const Str *s, HttpHeaders *const headers)
 {
@@ -627,6 +628,12 @@ inline int parseHostValue(const Str *s, HttpHeaders *const headers)
     //ignore the valid of host field
     //TODO: to test the host field
     headers->valid_host = 1;
+    return 0;
+}
+
+inline int builtHostValue(const std::string &s, HttpHeaders *const headers)
+{
+
     return 0;
 }
 

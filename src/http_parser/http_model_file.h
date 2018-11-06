@@ -18,9 +18,15 @@
 #include <string>
 #include <sys/stat.h>
 
+
+std::string getType(const std::string &f);
+std::string getMimeType(const std::string &type);
+
 typedef struct File
 {
     std::string name;
+    std::string type;
+    std::string mime_type;
     bool valid;
     int fd;
     struct stat info;
