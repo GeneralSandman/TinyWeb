@@ -11,7 +11,7 @@
  *
  */
 
-#include"../my_http_parser.h"
+#include"../http_parser.h"
 
 #include <iostream>
 
@@ -29,7 +29,7 @@ typedef struct testResponseLine
 
 bool sameUrl(const Url * url, const char * str)
 {
-    return (0 == strncmp(url->data+url->offset,str,url->len));
+    return (0 == strncmp(url->data, str, url->len));
 }
 
 testResponseLine responseLines[] ={

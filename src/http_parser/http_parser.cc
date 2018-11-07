@@ -897,8 +897,8 @@ int HttpParser::parseHeader(const char *stream,
             result->value.data = begin + valuebegin;
             result->value.len = valuelen;
 
-            printf("[%u]%.*s->%.*s^\n", result->keyHash, keylen, begin + keybegin,
-                   valuelen, begin + valuebegin);
+            // printf("[%u]%.*s->%.*s^\n", result->keyHash, keylen, begin + keybegin,
+            //       valuelen, begin + valuebegin);
 
             at += i;
             return 0;
@@ -1649,8 +1649,6 @@ int HttpParser::execute(const char *stream,
     {
         //HTTP_TYPE_RESPONSE
         request->statusCode = m_nStatusCode;
-        //setStrn(&(request->statusPhrase),
-        //      begin + status_phrase_begin, status_phrase_len );
     }
 
     request->http_version_major = m_nHttpVersionMajor;

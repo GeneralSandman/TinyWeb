@@ -325,13 +325,16 @@ testHeaders headers[] = {
 void testParseHeaderMeaning()
 {
     vector<int> notPass;
+    int alltest = 0;
+    int passtest = 0;
 
     HttpParserSettings settings;
 
     int len = sizeof(headers) / sizeof(headers[0]);
 
-    for (int i = 0; i < 1; i++)
+    for (int i = 0; i < len; i++)
     {
+        alltest ++;
 
         HttpParser parser(&settings);
         parser.setType(HTTP_TYPE_REQUEST);
@@ -347,11 +350,22 @@ void testParseHeaderMeaning()
         if (res == headers[i].valid)
         {
             parser.parseHeadersMeaning(result);
-            printHttpHeaders(result);
+            //printHttpHeaders(result);
+            passtest++;
         }
         for (auto t : result->generals)
             delete t;
         delete result;
+    }
+
+    std::cout << "[Parse HeaderMeaning Test] pass/all = " << passtest << "/" << alltest << std::endl;
+
+    if (!notPass.empty())
+    {
+        cout << "not pass url index:\n";
+        for (auto t : notPass)
+            std::cout<< t << " ";
+        std::cout << std::endl;
     }
 
 };

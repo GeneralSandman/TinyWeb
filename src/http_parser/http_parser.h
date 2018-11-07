@@ -622,7 +622,7 @@ typedef boost::function<int(const std::string &, HttpHeaders *const)> deheaderFu
 
 inline int parseHostValue(const Str *s, HttpHeaders *const headers)
 {
-    std::cout << "[parse headerMeaning callback]get host value and parse\n";
+    // std::cout << "[parse headerMeaning callback]get host value and parse\n";
     //ignore the valid of host field
     //TODO: to test the host field
     headers->valid_host = 1;
@@ -637,21 +637,21 @@ inline int builtHostValue(const std::string &s, HttpHeaders *const headers)
 
 inline int parseConnectionValue(const Str *s, HttpHeaders *const headers)
 {
-    std::cout << "[parse headerMeaning callback]get connetion field:\n";
+    // std::cout << "[parse headerMeaning callback]get connetion field:\n";
     if (0 == strncasecmp__(s->data, "keep-alive", s->len))
     {
         headers->connection_keep_alive = 1;
-        std::cout << "connection keep alive\n";
+        // std::cout << "connection keep alive\n";
     }
     else if (0 == strncasecmp__(s->data, "close", s->len))
     {
         headers->connection_close = 1;
-        std::cout << "connection close\n";
+        // std::cout << "connection close\n";
     }
     else if (0 == strncasecmp__(s->data, "upgrade", s->len))
     {
         headers->connection_upgrade = 1;
-        std::cout << "connection upgrade\n";
+        // std::cout << "connection upgrade\n";
     }
     else
     {
@@ -662,7 +662,7 @@ inline int parseConnectionValue(const Str *s, HttpHeaders *const headers)
 
 inline int parseContentLength(const Str *s, HttpHeaders *const headers)
 {
-    std::cout << "[parse headerMeaning callback]get content-length field:\n";
+    // std::cout << "[parse headerMeaning callback]get content-length field:\n";
     unsigned int res = 0;
     char *p = s->data;
     for (int i = 0; i < s->len; i++)
@@ -681,32 +681,32 @@ inline int parseContentLength(const Str *s, HttpHeaders *const headers)
     headers->valid_content_length = 1;
     headers->content_identify_length = 1;
 
-    std::cout << "parse Content-Length:" << headers->content_length_n << std::endl;
+    //std::cout << "parse Content-Length:" << headers->content_length_n << std::endl;
     return 0;
 }
 
 inline int parseUserAgent(const Str *s, HttpHeaders *const headers)
 {
-    std::cout << "[parse headerMeaning callback]get useragent:\n";
+    // std::cout << "[parse headerMeaning callback]get useragent:\n";
     headers->chrome = 1;
-    std::cout << "client brower is chrome\n";
+    // std::cout << "client brower is chrome\n";
     return 0;
 }
 
 inline int parseRefer(const Str *s, HttpHeaders *const headers)
 {
-    std::cout << "[parse headerMeaning callback]get refer:\n";
+    // std::cout << "[parse headerMeaning callback]get refer:\n";
     headers->valid_referer = 1;
     return 0;
 }
 
 inline int parseTransferEncoding(const Str *s, HttpHeaders *const headers)
 {
-    std::cout << "[parse headerMeaning callback]get transfer-encoding:\n";
+    // std::cout << "[parse headerMeaning callback]get transfer-encoding:\n";
     if (0 == strncasecmp__(s->data, "chunked", s->len))
     {
         headers->chunked = 1;
-        std::cout << "chunked\n";
+        // std::cout << "chunked\n";
         return 0;
     }
     else
@@ -717,14 +717,14 @@ inline int parseTransferEncoding(const Str *s, HttpHeaders *const headers)
 
 inline int parseCookie(const Str *s, HttpHeaders *const headers)
 {
-    std::cout << "[parse headerMeaning callback]get cookie:\n";
+    // std::cout << "[parse headerMeaning callback]get cookie:\n";
     // printf("get value:%.*s\n", s->len, s->data);
     return 0;
 }
 
 inline int parseValue(const Str *s, HttpHeaders *const headers)
 {
-    std::cout << "[parse headerMeaning callback]get value:\n";
+    // std::cout << "[parse headerMeaning callback]get value:\n";
     // printf("get value:%.*s\n", s->len, s->data);
     return 0;
 }
