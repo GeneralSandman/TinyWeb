@@ -139,7 +139,7 @@ int sendfile(int outFd, File *file)
         return -1;
     }
 
-    std::cout << "file size:" << file->info.st_size << std::endl;
+    //std::cout << "file size:" << file->info.st_size << std::endl;
 
     ssize_t res = sendfile(outFd, file->fd, &(file->offset), file->info.st_size);
     if (res < 0)
@@ -148,7 +148,7 @@ int sendfile(int outFd, File *file)
         std::cout << "[Debug] responser sendfile (" << file->name << ") failed" << std::endl;
         printf("%s\n", strerror(errno));
     }
-    std::cout << "[Debug] responser sendfile size =" << res << std::endl;
+    //std::cout << "[Debug] responser sendfile size =" << res << std::endl;
 
     return res;
 }

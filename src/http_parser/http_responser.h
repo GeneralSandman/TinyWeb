@@ -54,6 +54,13 @@ typedef struct HttpResponseHeaders
     unsigned int content_length_n;
 }HttpResponseHeaders;
 
+typedef struct HttpResponse
+{
+    HttpResponseLine line;
+    HttpResponseHeaders headers;
+
+}HttpResponse;
+
 
 class HttpResponser
 {
@@ -73,7 +80,7 @@ class HttpResponser
 
         void responseLineToStr(const HttpResponseLine *line, std::string &line_str)
         {
-            line_str = "HTTP/";
+            line_str += "HTTP/";
 
             line_str += char(line->http_version_major + '0');
             line_str += '.'; 
@@ -147,15 +154,45 @@ class HttpResponser
             res += "\r\n";
         }
 
-        void buildResponse(const HttpRequest *req, Http * response)
+        void buildResponse(const HttpRequest *req, HttpResponse * response)
         {
 
-        }
-        
-        void response()
-        {
-            buildResponse(nullptr, nullptr);
+            HttpResponseLine *line = &(response->line);
+            line->http_version_major = req->http_version_major;
+            line->http_version_minor = req->http_version_minor;
+            line->status = HTTP_STATUS_OK;
+
+            HttpResponseHeaders *headers = &(response->headers);
+            headers->file_type = "html";
+            headers->valid_content_length = 1;
+            headers->connection_keep_alive = 1;
+            headers->chunked = 1;
+            headers->server = 1;
             
+        }
+
+        void response(const HttpRequest *req)
+        {
+            HttpResponse *resp = new HttpResponse;
+            buildResponse(req, resp);
+
+            std::string fname = "input.txt";
+            File inputFile;
+            int return_val = initFile(&inputFile, fname);
+            if(return_val < 0)
+            {
+                std::cout << return_val << std::endl;
+                return ;
+            }
+
+
+            std::string result;
+            responseLineToStr(&(resp->line), result);
+            responseHeadersToStr(&(resp->headers), result);
+            std::cout << result;
+            sendfile(0, &inputFile);
+
+            destoryFile(&inputFile);
 
 
         }
