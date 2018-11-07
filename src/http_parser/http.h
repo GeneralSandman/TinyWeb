@@ -2,7 +2,7 @@
 *Author:GeneralSandman
 *Code:https://github.com/GeneralSandman/TinyWeb
 *E-mail:generalsandman@163.com
-*Web:www.generalsandman.cn
+*Web:www.dissigil.cn
 */
 
 /*---Basic of Http Protocol---
@@ -15,8 +15,10 @@
 #ifndef HTTP_H
 #define HTTP_H
 
+
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 #define ELEM_AT(a, i, v) ((unsigned int)(i) < ARRAY_SIZE(a) ? (a)[(i)] : (v))
+
 
 #define strcmp_3(m, s) ((*(m + 0) == *(s + 0)) && \
                         (*(m + 1) == *(s + 1)) && \
@@ -90,7 +92,9 @@
                          (*(m + 9) == *(s + 9)) && \
                          (*(m + 10) == *(s + 10)))
 
+
 /* begin Http status */
+
 #define HTTP_STATUS_MAP(XX)                                                       \
     XX(0, 100, CONTINUE, Continue)                                                \
     XX(1, 101, SWITCHING_PROTOCOLS, Switching Protocols)                          \
@@ -164,7 +168,8 @@ const char *httpStatusStr(enum http_status s);
 
 /* end Http status */
 
-/* begin Http Request Methods */
+
+/* begin Http Methods */
 
 #define HTTP_METHOD_MAP(XX)          \
     XX(0, DELETE, DELETE)            \
@@ -366,7 +371,8 @@ inline enum http_method getMethod(const char *begin,
     }
 }
 
-/* end Http Request Methods */
+/* end Http Methods */
+
 
 /* begin Http Errors */
 
@@ -426,6 +432,7 @@ enum http_errno
 const char *httpErrnoStr(enum http_errno e);
 
 /* end Http Errors */
+
 
 extern const unsigned char urlChar[32];
 

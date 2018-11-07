@@ -11,7 +11,7 @@
  *
  */
 
-#include "../my_http_parser.h"
+#include "../http_parser.h"
 
 #include <iostream>
 #include <vector>
@@ -30,7 +30,7 @@ typedef struct testUrl
 
 testUrl urls[] = {
 
-    {
+    {   // 0
         .url = "http://127.0.0.1:9090/index.html",
         .valid = true,
         .host = "127.0.0.1",
@@ -170,11 +170,11 @@ testUrl urls[] = {
     {
         .url = "http://127.0.0.1:9999/",
         .valid = true,
-        .host = "127.0.0.1:9999",
-        .port = "",
+        .host = "127.0.0.1",
+        .port = "9999",
         .path = "/"},
 
-    {
+    {   // 19
         .url = "http://127.0.0.1/",
         .valid = true,
         .host = "127.0.0.1",
@@ -188,46 +188,46 @@ testUrl urls[] = {
         .port = "",
         .path = "/asdf/adsd/sdf.html"},
 
-    {
+    {   //userinfo
         .url = "http://a:b@host.com:8080/p/a/t/h?query=string#hash",
         .valid = true,
-        .host = "a:b@host.com:8080",
-        .port = "",
+        .host = "host.com",
+        .port = "8080",
         .path = "/p/a/t/h"},
 
     {
         .url = "http://hostname:80/home?query=li#head",
         .valid = true,
-        .host = "hostname:80",
-        .port = "",
+        .host = "hostname",
+        .port = "80",
         .path = "/home"},
 
     {
         .url = "http://hostname:80/home#?query=li#head",
         .valid = true,
-        .host = "hostname:80",
-        .port = "",
+        .host = "hostname",
+        .port = "80",
         .path = "/home"},
 
     {
         .url = "http://hostname:80/home??query=li##head",
         .valid = true,
-        .host = "hostname:80",
-        .port = "",
+        .host = "hostname",
+        .port = "80",
         .path = "/home"},
 
     {
         .url = "http://hostname:80/home?abcd=abcd?query=li##head",
         .valid = true,
-        .host = "hostname:80",
-        .port = "",
+        .host = "hostname",
+        .port = "80",
         .path = "/home"},
 
     {
         .url = "http://hostname:80/hom#e?query=li#head",
         .valid = true,
-        .host = "hostname:80",
-        .port = "",
+        .host = "hostname",
+        .port = "80",
         .path = "/hom"},
 
     {
@@ -235,7 +235,7 @@ testUrl urls[] = {
         .valid = true,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "/home/index.html"},
 
     {
         .url = "http://foo boar/",
@@ -244,7 +244,7 @@ testUrl urls[] = {
         .port = "",
         .path = ""},
 
-    {
+    {   // 29
         .url = "http://foo\nboar/",
         .valid = false,
         .host = "",
@@ -268,15 +268,15 @@ testUrl urls[] = {
     {
         .url = "http://hostname:444/",
         .valid = true,
-        .host = "hostname:444",
-        .port = "",
+        .host = "hostname",
+        .port = "444",
         .path = "/"},
 
-    {
+    {   
         .url = "hostname:443",
         .valid = false,
-        .host = "",
-        .port = "",
+        .host = "hostname",
+        .port = "443",
         .path = ""},
 
     {
@@ -286,24 +286,24 @@ testUrl urls[] = {
         .port = "",
         .path = "/"},
 
-    {
+    {   // 35
         .url = "http://[1:2::3:4]:67/",
         .valid = true,
-        .host = "[1:2::3:4]:67",
-        .port = "",
+        .host = "1:2::3:4",
+        .port = "67",
         .path = "/"},
 
-    {
+    {   // 36
         .url = "http://[1:2::3:4]:67/index/hom#e?query=li#head",
         .valid = true,
-        .host = "[1:2::3:4]:67",
-        .port = "",
+        .host = "1:2::3:4",
+        .port = "67",
         .path = "/index/hom"},
 
-    {
+    {   // 37
         .url = "http://[2001:0000:0000:0000:0000:0000:1.9.1.1]/",
         .valid = true,
-        .host = "[2001:0000:0000:0000:0000:0000:1.9.1.1]",
+        .host = "2001:0000:0000:0000:0000:0000:1.9.1.1",
         .port = "",
         .path = "/"},
 
@@ -316,7 +316,7 @@ testUrl urls[] = {
         .port = "",
         .path = "/p/fp/2010c/"},
 
-    {
+    {   // 39
         .url = "/toto.html?toto=a%20b",
         .valid = true,
         .host = "",
@@ -340,15 +340,15 @@ testUrl urls[] = {
     {
         .url = "http://host.com:8080/p/a/t/h?query=string#hash",
         .valid = true,
-        .host = "host.com:8080",
-        .port = "",
+        .host = "host.com",
+        .port = "8080",
         .path = "/p/a/t/h"},
 
     {
         .url = "http://a:b@host.com:8080/p/a/t/h?query=string#hash",
         .valid = true,
-        .host = "a:b@host.com:8080",
-        .port = "",
+        .host = "host.com",
+        .port = "8080",
         .path = "/p/a/t/h"},
 
     {
@@ -386,14 +386,14 @@ testUrl urls[] = {
         .port = "",
         .path = ""},
 
-    {
+    {   //49
         .url = "hostname:",
         .valid = false,
         .host = "",
         .port = "",
         .path = ""},
 
-    {
+    {   
         .url = "hostname:443/",
         .valid = false,
         .host = "",
@@ -410,7 +410,7 @@ testUrl urls[] = {
     {
         .url = "http://a%20:b@host.com/",
         .valid = true,
-        .host = "a%20:b@host.com",
+        .host = "host.com",
         .port = "",
         .path = "/"},
 
@@ -431,7 +431,7 @@ testUrl urls[] = {
     {
         .url = "http://a::b@host.com/",
         .valid = true,
-        .host = "a::b@host.com",
+        .host = "host.com",
         .port = "",
         .path = "/"},
 
@@ -456,14 +456,14 @@ testUrl urls[] = {
         .port = "",
         .path = ""},
 
-    {
+    {   // 59
         .url = "http://host%name/fo",
         .valid = false,
         .host = "",
         .port = "",
         .path = ""},
 
-    {
+    {   
         .url = "http://host;ame/fo",
         .valid = false,
         .host = "",
@@ -526,7 +526,7 @@ testUrl urls[] = {
         .port = "",
         .path = "/"},
 
-    {
+    {   // 69
         .url = "http://[fe80::a%]/",
         .valid = false,
         .host = "",
@@ -583,10 +583,10 @@ testUrl urls[] = {
         .port = "",
         .path = ""},
 
-    {
+    {   // 77
         .url = "http://@hostname/",
         .valid = true,
-        .host = "@hostname",
+        .host = "hostname",
         .port = "",
         .path = "/"},
 
@@ -597,7 +597,7 @@ testUrl urls[] = {
         .port = "",
         .path = ""},
 
-    {
+    {   // 79
         .url = "http://ABC.com/%7esmith/home.html",
         .valid = true,
         .host = "ABC.com",
@@ -609,16 +609,16 @@ testUrl urls[] = {
         .valid = true,
         .host = "ABC.com",
         .port = "",
-        .path = "/%7esmith/home.html"},
+        .path = "/%7Esmith/home.html"},
 
     {
         .url = "http://abc.com:80/~smith/home.html",
         .valid = true,
-        .host = "abc.com:80",
-        .port = "",
+        .host = "abc.com",
+        .port = "80",
         .path = "/~smith/home.html"},
 
-    {
+    {   //82
         .url = "https://did.cn/../dsf",
         .valid = true, //FIXME: not sure valid or invalid
         .host = "did.cn",
@@ -671,7 +671,7 @@ testUrl urls[] = {
         .port = "",
         .path = ""},
 
-    {
+    {   // 89
         .url = "http://host;ame/fo",
         .valid = false,
         .host = "",
@@ -741,7 +741,7 @@ testUrl urls[] = {
         .port = "",
         .path = ""},
 
-    {
+    {   // 99
         .url = "http://[%eth]/",
         .valid = false,
         .host = "",
@@ -753,13 +753,11 @@ testUrl urls[] = {
 
 void testParseUrl()
 {
-    typedef pair<int, string> key;
     vector<int> notPass;
-
-    HttpParserSettings settings;
-
     int alltest = 0;
     int passtest = 0;
+
+    HttpParserSettings settings;
 
     int len = sizeof(urls) / sizeof(urls[0]);
 
@@ -770,11 +768,9 @@ void testParseUrl()
     {
         alltest++;
 
-        int begin = 0;
         Url *result = new Url;
-        //std::cout << i << "):" << std::endl;
+        // std::cout << i << "):" << std::endl;
         int tmp = parser.parseUrl(urls[i].url,
-                begin,
                 strlen(urls[i].url),
                 result);
 
@@ -783,9 +779,9 @@ void testParseUrl()
         {
             if (res)
             {
-                bool sameHost = ~strncmp(urls[i].host, result->data + result->fields[HTTP_UF_HOST].offset, result->fields[HTTP_UF_HOST].len);
-                bool samePort = ~strncmp(urls[i].port, result->data + result->fields[HTTP_UF_PORT].offset, result->fields[HTTP_UF_PORT].len);
-                bool samePath = ~strncmp(urls[i].path, result->data + result->fields[HTTP_UF_PATH].offset, result->fields[HTTP_UF_PATH].len);
+                bool sameHost = (0==strncmp(urls[i].host, result->data + result->fields[HTTP_UF_HOST].offset, result->fields[HTTP_UF_HOST].len));
+                bool samePort = (0==strncmp(urls[i].port, result->data + result->fields[HTTP_UF_PORT].offset, result->fields[HTTP_UF_PORT].len));
+                bool samePath = (0==strncmp(urls[i].path, result->data + result->fields[HTTP_UF_PATH].offset, result->fields[HTTP_UF_PATH].len));
 
                 if(sameHost && samePath && samePort)
                 {
@@ -819,13 +815,14 @@ void testParseUrl()
         delete result;
     }
 
-    std::cout << "pass/all = " << passtest << "/" << alltest << std::endl;
+    std::cout << "[Parse Url Test] pass/all = " << passtest << "/" << alltest << std::endl;
 
     if (!notPass.empty())
     {
-        cout << "not pass test urls:\n";
+        cout << "not pass url index:\n";
         for (auto t : notPass)
-            std::cout<< t << std::endl;
+            std::cout<< t << " ";
+        std::cout << std::endl;
     }
     //We can't judge this urls is valid or invalid,
     //because '@' , IPv6 , UserInfo , port make judgement
@@ -840,6 +837,5 @@ void testParseUrl()
 int main()
 {
     testParseUrl();
-    // testParseUrl_();
     return 0;
 }

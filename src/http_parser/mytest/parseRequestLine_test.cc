@@ -11,7 +11,7 @@
  *
  */
 
-#include"../my_http_parser.h"
+#include"../http_parser.h"
 
 #include <iostream>
 
@@ -28,7 +28,7 @@ typedef struct testRequestLine
 
 bool sameUrl(const Url * url, const char * str)
 {
-    return (0 == strncmp(url->data+url->offset,str,url->len));
+    return (0 == strncmp(url->data,str,url->len));
 }
 
 testRequestLine requestLines[] ={
@@ -57,19 +57,19 @@ testRequestLine requestLines[] ={
     },
 
     {
-        .str = "GET / HTTP/1.1\r\n",
+        .str = "POST /index.html HTTP/1.1\r\n",
         .valid = true,
-        .method = HTTP_METHOD_GET,
-        .url = "/",
+        .method = HTTP_METHOD_POST,
+        .url = "/index.html",
         .httpVersion = 11,
     },
 
     {
-        .str = "GET / HTTP/1.1\r\n",
+        .str = "POST /index.html HTTP/1.0\r\n",
         .valid = true,
-        .method = HTTP_METHOD_GET,
-        .url = "/",
-        .httpVersion = 11,
+        .method = HTTP_METHOD_POST,
+        .url = "/index.html",
+        .httpVersion = 10,
     },
 
 };
@@ -77,27 +77,25 @@ testRequestLine requestLines[] ={
 void testParseRequestLine()
 {
     vector<int> notPass;
-
-    HttpParserSettings settings;
-
     int alltest = 0;
     int passtest = 0;
+
+    HttpParserSettings settings;
 
     int len = sizeof(requestLines) / sizeof(requestLines[0]);
 
     for (int i = 0; i < len; i++)
     {
-        std::cout << i << ")" << std::endl;
         alltest++;
 
         HttpParser parser(&settings);
         parser.setType(HTTP_TYPE_REQUEST);
 
         int begin = 0;
-        int len = strlen(requestLines[i].str);
+        int str_len = strlen(requestLines[i].str);
         HttpRequest *request = new HttpRequest;
 
-        int tmp = parser.execute(requestLines[i].str, begin, len, request);
+        int tmp = parser.execute(requestLines[i].str, begin, str_len, request);
 
         bool res = (tmp == -1) ? false : true;
         if (res == requestLines[i].valid)
@@ -111,7 +109,6 @@ void testParseRequestLine()
 
                 if (sameversion && sameurl && samemethod)
                 {
-                    std::cout<<"pass test"<<std::endl;
                     passtest++;
                 }
                 else
@@ -121,7 +118,6 @@ void testParseRequestLine()
             }
             else
             {
-                std::cout<<"pass test"<<std::endl;
                 passtest++;
             }
         }
@@ -133,12 +129,14 @@ void testParseRequestLine()
         delete request;
     }
 
-    std::cout << passtest << "/" << alltest << std::endl;
+    std::cout << "[Parse ReqLine Test] pass/all = " << passtest << "/" << alltest << std::endl;
 
     if (!notPass.empty())
     {
+        cout << "not pass req-line index:\n";
         for (auto t : notPass)
-            std::cout << requestLines[t].str << " " << std::endl;
+            std::cout << t << " ";
+        std::cout << std::endl;
     }
 };
 

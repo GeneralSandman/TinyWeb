@@ -334,7 +334,7 @@ int HttpParser::parseHost(const char *stream,
         char ch = *(begin + i);
         // std::cout << ch << (unsigned int)prestat << std::endl;
 
-        stat = parseHostChar(*(begin + i), prestat);
+        stat = parseHostChar(ch, prestat);
 
         switch (stat)
         {
@@ -602,26 +602,28 @@ enum state HttpParser::parseUrlChar(const char ch,
 }
 
 int HttpParser::parseUrl(const char *stream,
-                         int at,
                          int len,
                          Url *result)
 {
-    // std::cout << "function parseUrl\n";
     memset(result, 0, sizeof(Url));
 
     //assert something
 
     char *begin = (char *)stream;
     result->data = begin;
+    result->len = len;
+
     enum state prestat = s_requ_url_begin;
     enum state stat;
+
     enum httpUrlField prefield = HTTP_UF_MAX;
     enum httpUrlField field;
+
     bool has_at_char = false;
 
     for (int i = 0; i < len; i++)
     {
-        char ch = *(begin + at + i);
+        char ch = *(begin + i);
         // std::cout << "[Debug]" << ch << (unsigned int)prestat << std::endl;
         stat = parseUrlChar(ch, prestat);
         // field = 0;
@@ -634,7 +636,7 @@ int HttpParser::parseUrl(const char *stream,
             return -1;
             break;
 
-            /* Skip delimeters */
+        /* Skip delimeters */
         case s_requ_schema_slash: //finished
         case s_requ_schema_slash_slash:
         case s_requ_server_start:
@@ -680,7 +682,7 @@ int HttpParser::parseUrl(const char *stream,
         }
         else
         {
-            result->fields[field].offset = at + i;
+            result->fields[field].offset = i;
             result->fields[field].len = 1;
 
             result->field_set |= (1 << field);
@@ -692,8 +694,8 @@ int HttpParser::parseUrl(const char *stream,
 
     if (result->field_set & (1 << HTTP_UF_HOST))
     {
-        int offset = result->fields[HTTP_UF_HOST].offset;
-        int len = result->fields[HTTP_UF_HOST].len;
+        unsigned int offset = result->fields[HTTP_UF_HOST].offset;
+        unsigned int len = result->fields[HTTP_UF_HOST].len;
         std::string host(begin + offset, len);
         // std::cout << "[parseUrl]::host:" << len << ":" << host << std::endl;
         if (-1 == parseHost(stream, offset, len, result, has_at_char))
@@ -829,8 +831,6 @@ int HttpParser::parseHeader(const char *stream,
 
     enum http_header_state prestat = s_http_header_start;
     enum http_header_state stat;
-
-    unsigned int hash = 0;
 
     unsigned int keybegin = 0;
     unsigned int keylen = 0;
@@ -1060,13 +1060,12 @@ void headerMeaningInit()
 
 int HttpParser::parseHeadersMeaning(HttpHeaders *headers)
 {
-    HttpHeader *res = NULL;
     for (auto t : headers->generals)
     {
         auto p = headerKeyHash.find(t->keyHash);
         if (p == headerKeyHash.end())
         {
-            std::cout << "general header" << std::endl;
+            // std::cout << "general header" << std::endl;
         }
         else
         {
@@ -1126,14 +1125,14 @@ int HttpParser::parseBody(const char *stream,
         {
             unsigned int to_read = MIN(content_length_n,
                                        len - i);
-            printf("content:%.*s\n", to_read, begin + at + i);
+            //printf("content:%.*s\n", to_read, begin + at + i);
             i += to_read;
             return 0;
         }
         break;
 
         case s_http_body_identify_by_eof:
-            printf("content:%.*s\n", len - i, begin + at + i);
+            //printf("content:%.*s\n", len - i, begin + at + i);
             i = len;
             break;
 
@@ -1196,7 +1195,7 @@ int HttpParser::parseBody(const char *stream,
             unsigned long long to_read = MIN(chunk_size,
                                              len - i);
             std::string data(begin + at + i, to_read);
-            std::cout << "chunk data:" << data << std::endl;
+            //std::cout << "chunk data:" << data << std::endl;
             i += to_read - 1;
             stat = s_http_body_chunk_data_almost_done;
         }
@@ -1240,12 +1239,11 @@ int HttpParser::execute(const char *stream,
                         int len,
                         HttpRequest *request)
 {
-    const char *begin = stream + at;
+    char *begin = (char *)stream + at;
 
     int return_val = 0;
     bool break_for = false;
     int content_length = 0;
-    bool chunked = false;
 
     enum http_method method;
     enum http_body_type body_type = t_http_body_type_init;
@@ -1260,12 +1258,12 @@ int HttpParser::execute(const char *stream,
     unsigned int headers_len = 0;
 
     unsigned int body_begin = 0;
-    unsigned int body_len = 0;
+    //unsigned int body_len = 0;
 
     unsigned int method_begin = 0;
     unsigned int method_len = 0;
 
-    unsigned int headerNum = 0;
+    //unsigned int headerNum = 0;
 
     if (getErrno() != HPE_OK)
         return 0;
@@ -1279,17 +1277,17 @@ int HttpParser::execute(const char *stream,
     {
     case s_resp_start:
         request->type = HTTP_TYPE_RESPONSE;
-        std::cout << "[Debug] http response start\n";
+        //std::cout << "[Debug] http response start\n";
         break;
 
     case s_requ_start:
         request->type = HTTP_TYPE_REQUEST;
-        std::cout << "[Debug] http request start\n";
+        //std::cout << "[Debug] http request start\n";
         break;
 
     case s_start_resp_or_requ:
         request->type = HTTP_TYPE_BOTH;
-        std::cout << "[Debug] http content maybe http request or response start\n";
+        //std::cout << "[Debug] http content maybe http request or response start\n";
         break;
 
     default:
@@ -1608,7 +1606,7 @@ int HttpParser::execute(const char *stream,
 
         case s_headers_done:
             //TODO: do something by headers meaning
-            std::cout << "[Debug] body begin\n";
+            //std::cout << "[Debug] body begin\n";
             body_begin = i;
             m_nState = s_body_start;
             break_for = true;
@@ -1640,11 +1638,7 @@ int HttpParser::execute(const char *stream,
         request->method_s = std::string(begin + method_begin, method_len);
 
         request->url = new Url;
-        request->url->data = (char *)begin;
-        request->url->offset = url_begin;
-        request->url->len = url_len;
-        return_val = parseUrl(begin,
-                              url_begin,
+        return_val = parseUrl(begin + url_begin,
                               url_len,
                               request->url);
         if (return_val == -1)
@@ -1685,22 +1679,22 @@ int HttpParser::execute(const char *stream,
         HttpHeaders *hs = request->headers;
         if (hs->content_identify_length && hs->chunked)
         {
-            std::cout << "[Debug] both have length and chunked error\n";
+            //std::cout << "[Debug] both have length and chunked error\n";
         }
         else if (hs->content_identify_length && !hs->chunked)
         {
-            std::cout << "[Debug] identify body by length\n";
+            //std::cout << "[Debug] identify body by length\n";
             body_type = t_http_body_end_by_length;
             content_length = hs->content_length_n;
         }
         else if (!hs->content_identify_length && hs->chunked)
         {
-            std::cout << "[Debug] identify body by chunk\n";
+            //std::cout << "[Debug] identify body by chunk\n";
             body_type = t_http_body_chunked;
         }
         else
         {
-            std::cout << "[Debug] identify body by eof\n";
+            //std::cout << "[Debug] identify body by eof\n";
             body_type = t_http_body_end_by_eof;
         }
 
@@ -1716,19 +1710,19 @@ int HttpParser::execute(const char *stream,
 
         if (!hs->valid_host && m_nHttpVersionMajor * 10 + m_nHttpVersionMinor >= 11)
         {
-            printf("Must have host field in HTTP/%d.%d\n", m_nHttpVersionMajor, m_nHttpVersionMinor);
+            //printf("Must have host field in HTTP/%d.%d\n", m_nHttpVersionMajor, m_nHttpVersionMinor);
             //error
         }
 
         if (method == HTTP_METHOD_PUT && !hs->valid_content_length)
         {
-            printf("Must have content in method PUT\n");
+            //printf("Must have content in method PUT\n");
             //error
         }
 
         if (method == HTTP_METHOD_TRACE)
         {
-            printf("Client request with method TRACE\n");
+            //printf("Client request with method TRACE\n");
         }
 
         //if (hs->has_upgrade && hs->connection_upgrade)
@@ -1753,6 +1747,6 @@ int HttpParser::execute(const char *stream,
     return 0;
 
 error:
-    std::cout << "parser error\n";
+    // std::cout << "parser error\n";
     return -1;
 };

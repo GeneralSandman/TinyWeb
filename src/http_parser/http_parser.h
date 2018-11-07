@@ -212,7 +212,6 @@ enum http_body_state
 typedef struct Url
 {
     char *data;
-    unsigned int offset;
     unsigned int len;
 
     unsigned int port : 16;
@@ -480,7 +479,7 @@ class HttpParserSettings
 
         HttpCallback getMethodByName(const std::string &fname)
         {
-            auto p = m_nReflection.find(fname);
+            //auto p = m_nReflection.find(fname);
             // if (p == m_nReflection.end())
             // 	return nullptr;
             // else
@@ -562,7 +561,6 @@ class HttpParser
         enum state parseUrlChar(const char ch,
                 enum state s);
         int parseUrl(const char *stream,
-                int at,
                 int len,
                 Url *result);
 
