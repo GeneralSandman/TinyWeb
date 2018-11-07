@@ -353,7 +353,6 @@ void testParseHeader()
             if (res)
             {
                 //printHttpHeaders(result);
-
                 int j = 0;
                 int lenj = headers[i].headerNum;
 
@@ -395,11 +394,11 @@ void testParseHeader()
         delete result;
     }
 
-    std::cout << "pass/all = " << passtest << "/" << alltest << std::endl;
+    std::cout << "[Parse Header Test] pass/all = " << passtest << "/" << alltest << std::endl;
 
     if (!notPass.empty())
     {
-        cout << "not pass :\n";
+        cout << "not pass header index:\n";
         for (auto t : notPass)
             std::cout << t << " " << std::endl;
     }
