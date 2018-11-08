@@ -1,0 +1,13 @@
+#http_parser/CMakeLists.txt
+
+cmake_minimum_required(VERSION 2.8)
+
+add_definitions("-Wall -std=c++11")
+
+add_library(http_parser_model STATIC
+    http.cc
+    http_model_file.cc
+    http_parser.cc
+    http_responser.cc
+    str_t.cc
+)

@@ -37,3 +37,6 @@
 *.log
 *_test
 ./log/*
+
+src/cmake_install.cmake
+src/CMakeCache.txt
