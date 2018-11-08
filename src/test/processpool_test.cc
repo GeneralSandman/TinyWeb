@@ -23,7 +23,7 @@ int main()
         std::cout << "[Process Pool Test]" << std::endl;
         ProcessPool pool;
         pool.init();
-        pool.createProcess(1);
+        pool.createProcess(2);
     }
 
     return 0;

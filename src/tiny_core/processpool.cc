@@ -104,12 +104,12 @@ void ProcessPool::createProcess(int nums)
         m_nPids.push_back(t);
     for (int i=0; i<pair_tmp.size(); i++)
     {
-        int i[2];
-        i[0] = pair_tmp[i].d1;
-        i[1] = pair_tmp[i].d2;
+        int pair[2];
+        pair[0] = pair_tmp[i].d1;
+        pair[1] = pair_tmp[i].d2;
         std::cout << "[parent]:establish connection with child(" << m_nPids[i] <<")\n";
         // SocketPair *pipe = new SocketPair(m_pEventLoop, i);
-        std::shared_ptr<SocketPair> pipe(new SocketPair(m_pEventLoop.get(), i));
+        std::shared_ptr<SocketPair> pipe(new SocketPair(m_pEventLoop.get(), pair));
         m_nPipes.push_back(pipe);
         pipe->setParentSocket();
         pipe->setMessageCallback(boost::bind(&test_parent_MessageCallback, _1, _2, _3)); //FIXME:
