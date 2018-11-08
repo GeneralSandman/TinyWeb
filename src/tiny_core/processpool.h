@@ -16,6 +16,7 @@
 
 #include <tiny_core/process.h>
 #include <tiny_base/signalmanager.h>
+#include <tiny_base/buffer.h>
 #include <tiny_base/api.h>
 
 #include <vector>
@@ -42,7 +43,6 @@ struct pair
   int d2;
 };
 
-#include <tiny_base/buffer.h>
 void test_parent_MessageCallback(Connection *con, Buffer *buf, Time time);
 
 void period_print_test(void);
@@ -69,22 +69,22 @@ private:
 
   static void parentSignalHandler(int sign)
   {
-    std::cout << "[parent]:signal manager get signal:" << sign << std::endl;
+    std::cout << "[parent] signal manager get signal:" << sign << std::endl;
     switch (sign)
     {
     case SIGINT:
     case SIGTERM:
       status_terminate = 1;
-      std::cout << "[parent]:parent will terminate all slave process\n";
+      std::cout << "[parent] parent will terminate all slave process\n";
       break;
     case SIGQUIT:
       status_quit_softly = 1;
-      std::cout << "[parent]:quit softly\n";
+      std::cout << "[parent] quit softly\n";
     case SIGCHLD:
       status_child_quit = 1;
       int status;
       pid_t pid = waitpid(-1, &status, WNOHANG);
-      std::cout << "[parent]:collect information from child[" << pid << "]\n";
+      std::cout << "[parent] collect information from child(" << pid << ")\n";
       break;
       //invoke waitpid() to collect the resource of child
       // case SIGHUP:
@@ -102,7 +102,7 @@ private:
     int index = 0;
     for (; index < m_nPids.size(); index++)
     {
-      if (m_nPids[index] = pid)
+      if (m_nPids[index] == pid)
         break;
     }
     assert(index!=m_nPids.size());

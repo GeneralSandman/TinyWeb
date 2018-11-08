@@ -2,7 +2,7 @@
 *Author:GeneralSandman
 *Code:https://github.com/GeneralSandman/TinyWeb
 *E-mail:generalsandman@163.com
-*Web:www.generalsandman.cn
+*Web:www.dissigil.cn
 */
 
 /*---XXX---
@@ -28,7 +28,7 @@
 #include <tiny_base/buffer.h>
 void test_child_MessageCallback(Connection *con, Buffer *buf, Time time)
 {
-  std::cout << "[child]:get message:"
+  std::cout << "[child] get message:"
             << buf->getAll() << std::endl;
 }
 

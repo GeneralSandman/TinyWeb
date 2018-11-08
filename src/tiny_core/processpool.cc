@@ -16,6 +16,8 @@
 #include <tiny_core/eventloop.h>
 #include <tiny_core/master.h>
 #include <tiny_core/timerid.h>
+#include <tiny_base/buffer.h>
+#include <tiny_base/signalmanager.h>
 #include <tiny_base/log.h>
 
 #include <unistd.h>
@@ -26,17 +28,16 @@
 #include <memory>
 #include <boost/bind.hpp>
 
-#include <tiny_base/buffer.h>
 void test_parent_MessageCallback(Connection *con, Buffer *buf, Time time)
 {
 
-    std::cout << "[parent]:get message:"
+    std::cout << "[parent] get message:"
               << buf->getAll() << std::endl;
 }
 
 void period_print_test(void)
 {
-    std::cout << "[parent]:print every second\n";
+    std::cout << "[parent] print every second\n";
 }
 
 ProcessPool::ProcessPool()
@@ -91,30 +92,28 @@ void ProcessPool::createProcess(int nums)
             //setting information after forking.
             //1.push socketpair
             //2.push pid
-            std::cout << "create process:[" << pid << "]\n";
+            std::cout << "create process(" << pid << ")\n";
             pair_tmp.push_back({socketpairFds[0],
                                 socketpairFds[1]});
             pids_tmp.push_back(pid);
         }
     }
 
-    //second-step:build pipe with every child process
-    for (auto t : pair_tmp)
+    //Parent process second-step:build pipe with every child process
+    for (auto t : pids_tmp)
+        m_nPids.push_back(t);
+    for (int i=0; i<pair_tmp.size(); i++)
     {
         int i[2];
-        i[0] = t.d1;
-        i[1] = t.d2;
-        std::cout << "[parent]:establish connection with child\n";
+        i[0] = pair_tmp[i].d1;
+        i[1] = pair_tmp[i].d2;
+        std::cout << "[parent]:establish connection with child(" << m_nPids[i] <<")\n";
         // SocketPair *pipe = new SocketPair(m_pEventLoop, i);
         std::shared_ptr<SocketPair> pipe(new SocketPair(m_pEventLoop.get(), i));
         m_nPipes.push_back(pipe);
         pipe->setParentSocket();
         pipe->setMessageCallback(boost::bind(&test_parent_MessageCallback, _1, _2, _3)); //FIXME:
         setSignalHandlers();
-    }
-    for (auto t : pids_tmp)
-    {
-        m_nPids.push_back(t);
     }
     assert(m_nPids.size() == m_nPipes.size());
 
@@ -145,8 +144,8 @@ void ProcessPool::start()
 
         for (int index = 0; index < m_nPipes.size(); index++)
         {
-            std::cout << "[parent]:I will send to child[" << m_nPids[index]
-                      << "] message every one seconds\n";
+            std::cout << "[parent] I will send to child(" << m_nPids[index]
+                      << ") message every one seconds\n";
 
             TimerId id1 = m_pEventLoop->runEvery(1, boost::bind(&SocketPair::writeToChild,
                                                                 m_nPipes[index],
@@ -165,14 +164,14 @@ void ProcessPool::start()
 void ProcessPool::killAll()
 {
     //This function will be invoked by master.
-    std::cout << "[parent]:kill all chilern\n";
+    std::cout << "[parent] kill all chilern\n";
     for (auto t : m_nPids)
     {
-        std::cout << "[parent]:kill child[" << t << "]\n";
+        std::cout << "[parent] kill child(" << t << ")\n";
         int res = kill(t, SIGTERM);
         if (res == 0)
         {
-            std::cout << "[parent]:kill child [" << t << "] successfully\n";
+            std::cout << "[parent]:kill child (" << t << ") successfully\n";
             m_fDestoryProcess(t);
         }
     }
@@ -180,7 +179,7 @@ void ProcessPool::killAll()
 
 void ProcessPool::killSoftly()
 {
-    std::cout << "[parent]:kill chilern softly\n";
+    std::cout << "[parent] kill chilern softly\n";
     //the difference with killAll
     //FIXME:
 }

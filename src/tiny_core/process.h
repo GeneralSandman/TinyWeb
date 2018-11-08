@@ -17,6 +17,7 @@
 #include <tiny_base/signalmanager.h>
 #include <tiny_base/api.h>
 #include <tiny_core/socketpair.h>
+#include <tiny_base/buffer.h>
 
 #include <iostream>
 #include <string>
@@ -35,7 +36,6 @@ extern int status_child_quit;  //CHLD
 
 typedef boost::function<void()> Fun;
 
-#include <tiny_base/buffer.h>
 void test_child_MessageCallback(Connection *con, Buffer *buf, Time time);
 
 enum ProcStatus
@@ -63,18 +63,19 @@ private:
 
   static void childSignalHandler(int sign)
   {
-    std::cout << "[child]:[" << getpid() << "]signal manager get signal:" << sign << std::endl;
+    pid_t pid = getpid();
+    std::cout << "[child] (" << pid << ")signal manager get signal:" << sign << std::endl;
 
     switch (sign)
     {
     case SIGINT:
     case SIGTERM:
       status_terminate = 1;
-      std::cout << "[child]:terminate\n";
+      std::cout << "[child] (" << pid << ") will terminate\n";
       break;
     case SIGQUIT:
       status_quit_softly = 1;
-      std::cout << "[child]:quit softly\n";
+      std::cout << "[child] (" << pid << ") will quit softly\n";
       break;
     }
   }

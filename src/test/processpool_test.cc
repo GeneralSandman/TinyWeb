@@ -20,6 +20,7 @@ using namespace std;
 int main()
 {
     {
+        std::cout << "[Process Pool Test]" << std::endl;
         ProcessPool pool;
         pool.init();
         pool.createProcess(1);
