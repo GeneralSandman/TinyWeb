@@ -57,9 +57,5 @@ int main()
     printStr(&str5);
     //core dump because delete malloc-memory
 
-
-    //error using
-    //compiler error
-
     return 0;
 }

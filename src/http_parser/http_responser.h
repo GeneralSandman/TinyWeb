@@ -21,6 +21,7 @@
 #include <iostream>
 #include <list>
 #include <string.h>
+#include <stdlib.h>
 
 void specialResponseBody(enum http_status s, std::string &res);
 
@@ -58,6 +59,7 @@ typedef struct HttpResponse
 {
     HttpResponseLine line;
     HttpResponseHeaders headers;
+    File file;
 
 }HttpResponse;
 
@@ -115,7 +117,9 @@ class HttpResponser
             {
                 HttpHeader *h2 = new HttpHeader;
                 setStr(&(h2->key), "Content-Length");
-                setStr(&(h2->value), "1000");
+                std::string len = std::to_string(headers->content_length_n);
+                std::cout << "---" << len << std::endl;
+                setStr(&(h2->value), len.c_str());
                 headers->generals.push_back(h2);
             }
 
@@ -139,15 +143,15 @@ class HttpResponser
             {
                 HttpHeader *h4 = new HttpHeader;
                 setStr(&(h4->key), "Content-Type");
-                setStr(&(h4->value), "text/html");
+                setStr(&(h4->value), headers->file_type.c_str());
                 headers->generals.push_back(h4);
             }
 
             std::string result;
             for(auto t: headers->generals)
             {
-                //printf("%.*s->%.*s\n", t->key.len, t->key.data,
-                //        t->value.len, t->value.data);
+                printf("%.*s->%.*s\n", t->key.len, t->key.data,
+                        t->value.len, t->value.data);
                 deheader(t, res);
                 res += "\r\n";
             }
@@ -163,12 +167,22 @@ class HttpResponser
             line->status = HTTP_STATUS_OK;
 
             HttpResponseHeaders *headers = &(response->headers);
-            headers->file_type = "html";
-            headers->valid_content_length = 1;
             headers->connection_keep_alive = 1;
             headers->chunked = 1;
             headers->server = 1;
             
+            std::string fname = "input.html";
+            File *inputFile = &(response->file);
+            int return_val = initFile(inputFile, fname);
+            if(return_val < 0)
+            {
+                std::cout << return_val << std::endl;
+                return ;
+            }
+
+            headers->file_type = response->file.mime_type;
+            headers->valid_content_length = 1;
+            headers->content_length_n = response->file.info.st_size;
         }
 
         void response(const HttpRequest *req)
@@ -176,25 +190,14 @@ class HttpResponser
             HttpResponse *resp = new HttpResponse;
             buildResponse(req, resp);
 
-            std::string fname = "input.txt";
-            File inputFile;
-            int return_val = initFile(&inputFile, fname);
-            if(return_val < 0)
-            {
-                std::cout << return_val << std::endl;
-                return ;
-            }
-
-
             std::string result;
             responseLineToStr(&(resp->line), result);
             responseHeadersToStr(&(resp->headers), result);
+
             std::cout << result;
-            sendfile(0, &inputFile);
+            sendfile(0, &(resp->file));
 
-            destoryFile(&inputFile);
-
-
+            destoryFile(&(resp->file));
         }
 
         ~HttpResponser()
