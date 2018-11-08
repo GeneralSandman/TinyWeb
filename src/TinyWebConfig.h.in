@@ -1,0 +1,3 @@
+#define TinyWeb_VERSION_MAJOR @Tutorial_VERSION_MAJOR@
+#define TinyWeb_VERSION_MIDDLE @Tutorial_VERSION_MIDDLE@
+#define TinyWeb_VERSION_MINOR @Tutorial_VERSION_MINOR@
