@@ -2,15 +2,25 @@
 
 cmake_minimum_required(VERSION 2.8)
 
-add_subdirectory(../tiny_base) 
-add_subdirectory(../tiny_core) 
-add_subdirectory(../tiny_http) 
-add_subdirectory(../tiny_struct) 
+add_definitions("-Wall -std=c++11")
 
-add_executable(Main)
+SET (SOURCE_DIR ../)
 
-target_link_libraries(Main
-    tiny_base_model
+include_directories(${SOURCE_DIR})
+
+add_subdirectory("${SOURCE_DIR}/tiny_base" tiny_base.out)
+add_subdirectory("${SOURCE_DIR}/tiny_core" tiny_core.out)
+add_subdirectory("${SOURCE_DIR}/tiny_http" tiny_http.out)
+add_subdirectory("${SOURCE_DIR}/tiny_struct" tiny_struct.out)
+
+
+add_executable(processpool_test
+    processpool_test.cc
+    )
+
+target_link_libraries(processpool_test
     tiny_core_model
     tiny_http_model
-    tiny_http_struct)
+    tiny_struct_model
+    tiny_base_model
+    )
