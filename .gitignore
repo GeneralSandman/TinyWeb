@@ -40,3 +40,7 @@
 
 src/cmake_install.cmake
 src/CMakeCache.txt
+
+src/tiny_base/api\.cc
+
+src/tiny_core/processpool\.cc

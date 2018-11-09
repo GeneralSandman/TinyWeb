@@ -67,9 +67,18 @@ private:
   int m_nListenSocketFd;
   SignalManager m_nSignalManager;
 
+  static ProcessPool* m_pPoolInstance;
+
   static void parentSignalHandler(int sign)
   {
-    std::cout << "[parent] signal manager get signal:" << sign << std::endl;
+    m_fSignalHandler(m_pPoolInstance, sign);
+  }
+
+  static void m_fSignalHandler(ProcessPool *pool, int sign)
+  {
+    std::cout << "[parent] signal manager get signal(" << sign << ")\n";
+    int status;
+    pid_t pid;
     switch (sign)
     {
     case SIGINT:
@@ -82,9 +91,9 @@ private:
       std::cout << "[parent] quit softly\n";
     case SIGCHLD:
       status_child_quit = 1;
-      int status;
-      pid_t pid = waitpid(-1, &status, WNOHANG);
+      pid = waitpid(-1, &status, WNOHANG);
       std::cout << "[parent] collect information from child(" << pid << ")\n";
+      pool->m_fDestoryProcess(pid);
       break;
       //invoke waitpid() to collect the resource of child
       // case SIGHUP:
@@ -92,9 +101,10 @@ private:
       //   std::cout << "[parent]:reconfigure\n";
       //   //kill childern softly and create new process
       //   break;
-      // case SIGPIPE:; //i
-      //   norncppe      break;
+    case SIGPIPE:
+      break;
     }
+
   }
 
   void m_fDestoryProcess(pid_t pid)

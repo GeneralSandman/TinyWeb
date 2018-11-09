@@ -65,7 +65,8 @@ void Process::setSignalHandlers()
       Signal(SIGTERM, "SIGTERM", "killSoftly", childSignalHandler),
       Signal(SIGQUIT, "QIGQUIT", "quit softly", childSignalHandler),
       Signal(SIGPIPE, "SIGPIPE", "socket close", childSignalHandler),
-      Signal(SIGHUP, "SIGHUP", "reconfigure", childSignalHandler)};
+      Signal(SIGHUP, "SIGHUP", "reconfigure", childSignalHandler),
+      };
 
   for (auto t : signals)
     m_nSignalManager.addSignal(t);

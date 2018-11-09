@@ -19,6 +19,10 @@
 #include <tiny_core/time.h>
 #include <tiny_base/log.h>
 
+#include <sys/types.h>
+#include <unistd.h>
+
+
 extern int status_quit_softly;
 extern int status_terminate;
 
@@ -52,7 +56,7 @@ void EventLoop::loop()
         //stop this loop if get signal SIGINT SIGTERM SIGKILL SIGQUIT
         if (status_quit_softly == 1 || status_terminate == 1)
         {
-            std::cout << "quit this eventloop\n";
+            std::cout << "process(" << getpid() << ") quit this eventloop\n";
             m_nRunning = false;
         }
     }

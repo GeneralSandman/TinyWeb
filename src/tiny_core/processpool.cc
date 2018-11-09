@@ -35,10 +35,17 @@ void test_parent_MessageCallback(Connection *con, Buffer *buf, Time time)
               << buf->getAll() << std::endl;
 }
 
+void test_parent_CloseCallback(Connection *con)
+{
+    std::cout << "[parent] one connection close" << std::endl;
+}
+
 void period_print_test(void)
 {
     std::cout << "[parent] print every second\n";
 }
+
+ProcessPool* ProcessPool::m_pPoolInstance = nullptr;
 
 ProcessPool::ProcessPool()
     : m_pEventLoop(new EventLoop()),
@@ -46,7 +53,7 @@ ProcessPool::ProcessPool()
       m_pProcess(nullptr),
       m_nListenSocketFd(-1)
 {
-
+    m_pPoolInstance = this;
     LOG(Debug) << "class ProcessPoll constructor\n";
 }
 
@@ -113,6 +120,7 @@ void ProcessPool::createProcess(int nums)
         m_nPipes.push_back(pipe);
         pipe->setParentSocket(int(m_nPids[i]));
         pipe->setMessageCallback(boost::bind(&test_parent_MessageCallback, _1, _2, _3)); //FIXME:
+        pipe->setCloseCallback(boost::bind(&test_parent_CloseCallback, _1));
         setSignalHandlers();
     }
     assert(m_nPids.size() == m_nPipes.size());
@@ -142,16 +150,16 @@ void ProcessPool::start()
         //Parent process
         assert(m_nPipes.size() == m_nPids.size());
 
-        for (int index = 0; index < m_nPipes.size(); index++)
-        {
-            std::cout << "[parent] I will send to child(" << m_nPids[index]
-                      << ") message every one seconds\n";
+        // for (int index = 0; index < m_nPipes.size(); index++)
+        // {
+        //     std::cout << "[parent] I will send to child(" << m_nPids[index]
+        //               << ") message every one seconds\n";
 
-            TimerId id1 = m_pEventLoop->runEvery(1, boost::bind(&SocketPair::writeToChild,
-                                                                m_nPipes[index],
-                                                                "parent send message to child"));
-            // TimerId id2 = m_pEventLoop->runEvery(1, boost::bind(&period_print_test));
-        }
+        //     TimerId id1 = m_pEventLoop->runEvery(1, boost::bind(&SocketPair::writeToChild,
+        //                                                         m_nPipes[index],
+        //                                                         "parent send message to child"));
+        //     // TimerId id2 = m_pEventLoop->runEvery(1, boost::bind(&period_print_test));
+        // }
         m_pMaster->work();
     }
     else
@@ -164,7 +172,7 @@ void ProcessPool::start()
 void ProcessPool::killAll()
 {
     //This function will be invoked by master.
-    std::cout << "[parent] kill all chilern\n";
+    std::cout << "[parent] kill " << m_nPids.size() << " chilern\n";
     for (auto t : m_nPids)
     {
         std::cout << "[parent] kill child(" << t << ")\n";

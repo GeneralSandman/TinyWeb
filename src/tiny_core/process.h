@@ -64,7 +64,7 @@ private:
   static void childSignalHandler(int sign)
   {
     pid_t pid = getpid();
-    std::cout << "[child] (" << pid << ")signal manager get signal:" << sign << std::endl;
+    std::cout << "[child] (" << pid << ") signal manager get signal(" << sign << ")\n";
 
     switch (sign)
     {
