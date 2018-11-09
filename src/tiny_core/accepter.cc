@@ -46,7 +46,7 @@ Accepter::Accepter(EventLoop *loop, const NetAddress &server,int listenSocket)
 {
     m_nListenChannel.setReadCallback(
         boost::bind(&Accepter::m_fHandleRead, this));
-    m_nListenSocket.bindAddress(server);
+    //m_nListenSocket.bindAddress(server);
 
     LOG(Debug) << "class Accepter constructor\n";
 }

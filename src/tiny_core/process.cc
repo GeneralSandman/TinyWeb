@@ -47,9 +47,9 @@ Process::Process(const std::string &name,
   LOG(Debug) << "class Process constructor\n";
 }
 
-void Process::setAsChild()
+void Process::setAsChild(int port)
 {
-  m_nPipe.setChildSocket();
+  m_nPipe.setChildSocket(port);
   m_nPipe.setMessageCallback(boost::bind(&test_child_MessageCallback, _1, _2, _3));
 }
 

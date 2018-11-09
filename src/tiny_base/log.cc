@@ -17,6 +17,9 @@
 #include <memory>
 #include <string>
 #include <algorithm>
+#include <sys/types.h>
+#include <unistd.h>
+
 
 #include <tiny_base/log.h>
 
@@ -175,6 +178,7 @@ std::ostream &Logger::log(log_level level,
 
     //if the current log level is Info,so the LOG(Debug) do nothing
     return getStream(level) << "[" << tmpBuf << "]"
+                            << "(" << getpid() << ")"
                             << "--"
                             << "[" << level_string << "]"
                             << "--"

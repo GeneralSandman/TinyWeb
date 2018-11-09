@@ -35,8 +35,8 @@ private:
 
 public:
   SocketPair(EventLoop *loop, int fds[2]);
-  void setParentSocket();
-  void setChildSocket();
+  void setParentSocket(int port);
+  void setChildSocket(int port);
   void writeToChild(const std::string &data);
   void writeToParent(const std::string &data);
 

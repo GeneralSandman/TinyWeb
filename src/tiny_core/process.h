@@ -84,7 +84,7 @@ public:
   Process(const std::string &name,
           int number,
           int sockfd[2]);
-  void setAsChild();
+  void setAsChild(int port);
   void createListenServer(int listen);
   void setSignalHandlers();
   void start();

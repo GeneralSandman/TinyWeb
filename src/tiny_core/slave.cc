@@ -18,13 +18,17 @@
 #include <tiny_core/server.h>
 #include <tiny_core/netaddress.h>
 
+#include <sys/types.h>
+#include <unistd.h>
+
+
 Slave::Slave(EventLoop *loop, int num, const std::string &name)
     : m_pEventLoop(loop),
       m_nNumber(num),
       m_nName(name),
       m_pProtocol(new WebProtocol()),
       m_pFactory(new Factory(m_pEventLoop, m_pProtocol)),
-      m_nListenAddress(NetAddress("127.0.0.1:9999"))
+      m_nListenAddress(NetAddress(int(getpid())))
 {
     LOG(Debug) << "class Slave constuctor\n";
 }

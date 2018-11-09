@@ -111,12 +111,13 @@ Connection::Connection(EventLoop *loop,
       m_nLocalAddress(local),
       m_nPeerAddress(peer)
 {
+    //m_pConnectSocket->bindAddress(m_nLocalAddress);
     m_pChannel->setReadCallback(boost::bind(&Connection::m_fHandleRead, this, _1));
     m_pChannel->setWriteCallback(boost::bind(&Connection::m_fHandleWrite, this));
     m_pChannel->setCloseCallback(boost::bind(&Connection::m_fHandleClose, this));
     m_pChannel->setErrorCallback(boost::bind(&Connection::m_fHandleError, this));
 
-    LOG(Info) << "get connection" << m_nPeerAddress.getIpPort() << std::endl;
+    LOG(Info) << "get connection " << m_nPeerAddress.getIpPort() << std::endl;
 
     LOG(Debug) << "class Connection constructor\n";
 }

@@ -29,23 +29,25 @@ SocketPair::SocketPair(EventLoop *loop, int fds[2])
     LOG(Debug) << "class SocketPair constructor\n";
 }
 
-void SocketPair::setParentSocket()
+void SocketPair::setParentSocket(int port)
 {
     Close(m_nFds[1]);
     m_nIsParent = true;
     std::cout << "switch parent:" << getpid() << std::endl;
-    NetAddress tmp;
+    NetAddress tmp(port);
+    std::cout << "socketpair parent set connection port:" << port << std::endl;
     m_pConnection = new Connection(m_pEventLoop, m_nFds[0],
                                    tmp, tmp);
     m_pConnection->establishConnection();
 }
 
-void SocketPair::setChildSocket()
+void SocketPair::setChildSocket(int port)
 {
     Close(m_nFds[0]);
     m_nIsParent = false;
     std::cout << "switch child:" << getpid() << std::endl;
-    NetAddress tmp;
+    std::cout << "socketpair child set connection port:" << port << std::endl;
+    NetAddress tmp(port);
     m_pConnection = new Connection(m_pEventLoop, m_nFds[1],
                                    tmp, tmp);
     m_pConnection->establishConnection();

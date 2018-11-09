@@ -15,6 +15,7 @@
 #include <tiny_core/eventloop.h>
 #include <tiny_core/master.h>
 #include <tiny_core/netaddress.h>
+#include <tiny_core/socket.h>
 #include <tiny_core/protocol.h>
 #include <tiny_core/factory.h>
 #include <tiny_base/log.h>
@@ -29,19 +30,21 @@ Master::Master(ProcessPool *pool, EventLoop *loop, int num, const std::string &n
     : m_pProcessPool(pool),
       m_pEventLoop(loop),
       m_nNumber(num),
-      m_nName(name)
+      m_nName(name),
+      m_pListenSocket(new Socket(createNoBlockSocket()))
 {
     LOG(Debug) << "class Master constuctor\n";
 }
 
 void Master::init()
 {
-    m_nListenSocket = createNoBlockSocket();
+    NetAddress tmp(9999);
+    m_pListenSocket->bindAddress(tmp);
 }
 
 int Master::getListenSocket()
 {
-    return m_nListenSocket;
+    return m_pListenSocket->getFd();
 }
 
 void Master::work()

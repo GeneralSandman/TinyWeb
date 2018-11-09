@@ -81,7 +81,7 @@ void ProcessPool::createProcess(int nums)
             //3.create listen server
             m_pProcess = std::make_shared<Process>(std::to_string(i),
                                                    i, socketpairFds);
-            m_pProcess->setAsChild();
+            m_pProcess->setAsChild(int(getpid()));
             m_pProcess->setSignalHandlers();
             m_pProcess->createListenServer(m_nListenSocketFd);
             goto WAIT;
@@ -111,7 +111,7 @@ void ProcessPool::createProcess(int nums)
         // SocketPair *pipe = new SocketPair(m_pEventLoop, i);
         std::shared_ptr<SocketPair> pipe(new SocketPair(m_pEventLoop.get(), pair));
         m_nPipes.push_back(pipe);
-        pipe->setParentSocket();
+        pipe->setParentSocket(int(m_nPids[i]));
         pipe->setMessageCallback(boost::bind(&test_parent_MessageCallback, _1, _2, _3)); //FIXME:
         setSignalHandlers();
     }
