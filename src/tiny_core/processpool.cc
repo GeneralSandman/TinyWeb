@@ -137,7 +137,8 @@ void ProcessPool::setSignalHandlers()
         Signal(SIGCHLD, "SIGCHLD", "childdead", parentSignalHandler),
         Signal(SIGQUIT, "QIGQUIT", "quit softly", parentSignalHandler),
         Signal(SIGPIPE, "SIGPIPE", "socket close", parentSignalHandler),
-        Signal(SIGHUP, "SIGHUP", "reconfigure", parentSignalHandler)};
+        Signal(SIGHUP, "SIGHUP", "reconfigure", parentSignalHandler),
+        };
 
     for (auto t : signals)
         m_nSignalManager.addSignal(t);

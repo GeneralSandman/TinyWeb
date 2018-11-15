@@ -32,6 +32,11 @@ void test_child_MessageCallback(Connection *con, Buffer *buf, Time time)
             << buf->getAll() << std::endl;
 }
 
+void test_child_CloseCallback(Connection *con)
+{
+  std::cout << "[child] connection with parent close" << std::endl;
+}
+
 Process::Process(const std::string &name,
                  int number,
                  int sockfd[2])

@@ -14,6 +14,7 @@ add_subdirectory("${SOURCE_DIR}/tiny_http" tiny_http.out)
 add_subdirectory("${SOURCE_DIR}/tiny_struct" tiny_struct.out)
 
 
+# processpool_test
 add_executable(processpool_test
     processpool_test.cc
     )
@@ -24,3 +25,25 @@ target_link_libraries(processpool_test
     tiny_struct_model
     tiny_base_model
     )
+
+# memorypool_test
+add_executable(memorypool_test
+    memorypool_test.cc
+    )
+
+target_link_libraries(memorypool_test
+    tiny_core_model
+    tiny_http_model
+    tiny_struct_model
+    tiny_base_model
+    )
+
+# sdstr_test
+add_executable(sdstr_test
+    sdstr_test.cc
+    )
+
+target_link_libraries(sdstr_test
+    tiny_base_model
+    )
+

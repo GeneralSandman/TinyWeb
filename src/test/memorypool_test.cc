@@ -1,15 +1,15 @@
 /*
-*Author:GeneralSandman
-*Code:https://github.com/GeneralSandman/TinyWeb
-*E-mail:generalsandman@163.com
-*Web:www.generalsandman.cn
-*/
+ *Author:GeneralSandman
+ *Code:https://github.com/GeneralSandman/TinyWeb
+ *E-mail:generalsandman@163.com
+ *Web:www.dissigil.cn
+ */
 
 /*---XXX---
-*
-****************************************
-*
-*/
+ *
+ ****************************************
+ *
+ */
 
 #include <tiny_base/memorypool.h>
 
@@ -17,7 +17,21 @@
 
 using namespace std;
 
+void test1()
+{
+    MemoryPool pool;
+    for (int i = 0; i < 6;i++)
+        pool.allocate(8);
+    cout << pool.allocatedSpace() << endl;
+
+}
+
 int main()
+{
+    test1();
+}
+
+int main_()
 {
     {
         MemoryPool pool;
