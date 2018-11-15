@@ -20,33 +20,8 @@
 #include <stdarg.h>
 using namespace std;
 
-int my_snprintf(char *s, int size, const char *fmt, ...) //该自定义函数，与系统提供的snprintf()函数相同。
-{
-    va_list ap;
-    int n=0;
-    va_start(ap, fmt); //获得可变参数列表
-    n=vsnprintf (s, size, fmt, ap); //写入字符串s
-    va_end(ap); //释放资源
-    return n; //返回写入的字符个数
-}
-
 int test1()
 {
-    {
-
-        char str[10];
-        snprintf( str, sizeof(str), "list=%d,%d,%d,%d str=%s",5,6,7,8,"helloworld");
-        printf("%s\n",str);
-
-    }
-
-    {
-        char str[1024];
-        my_snprintf( str, sizeof(str), "list=%d,%d,%d,%d str=%s",5,6,7,8,"helloworld");
-        printf("%s\n",str);
-
-    }
-
     return 0;
 }
 
@@ -101,7 +76,7 @@ int test3()
 
         sdsncatsds(&tmp, &tmp2, tmp2.len);
         printf(&tmp);
-        
+
         destory(&tmp);
         destory(&tmp2);
     }
@@ -139,7 +114,7 @@ int test3()
 
         printf(&tmp1);
         printf(&tmp2);
-        
+
         sdsncpysds(&tmp2, &tmp1, tmp1.len);
         printf(&tmp2);
 
@@ -157,7 +132,7 @@ int test3()
 
         printf(&tmp1);
         printf(&tmp2);
-        
+
         sdsncpysds(&tmp2, &tmp1, tmp1.len);
         printf(&tmp2);
 
@@ -214,7 +189,7 @@ void test4()
         printf(&tmp);
         destory(&tmp);
     }
-    
+
     //------
 
     {
@@ -306,7 +281,32 @@ void test4()
 
 }
 
+int my_snprintf(char *s, int size, const char *fmt, ...) //该自定义函数，与系统提供的snprintf()函数相同。
+{
+    std::cout << "fmt size(" << strlen(fmt) << ")\n";
+    va_list ap;
+    int n=0;
+    va_start(ap, fmt); //获得可变参数列表
+    n=vsnprintf (s, size, fmt, ap); //写入字符串s
+    va_end(ap); //释放资源
+    return n; //返回写入的字符个数
+}
+
+void test5()
+{
+    {
+        std::string str;
+        for(int i=0;i<2024;i++)
+            str += char('0'+i%10);
+        std::cout << str.size() << std::endl;
+        sdstr tmp;
+        sdssprintf(&tmp,"a=%d,b=%d,s=%s",101,101,str.c_str());
+        printf(&tmp);
+        destory(&tmp);
+    }
+}
+
 int main()
 {
-    test4();
+    test5();
 }

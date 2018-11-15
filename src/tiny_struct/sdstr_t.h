@@ -14,12 +14,14 @@
 #ifndef SDSTR_H
 #define SDSTR_H
 
+#include <tiny_base/memorypool.h>
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <string>
 
-class MemoryPool;
 
 typedef struct sdstr
 {
@@ -212,9 +214,56 @@ void sdsclear(sdstr * str)
     str->len = 0;
 }
 
+void sdsvsprintf(sdstr *str, const char *fmt, va_list ap)
+{
+    va_list copy;
+    char staticbuf[1024];
+    char *newbuf = staticbuf;
+    unsigned int buflen = strlen(fmt)*2;
+
+    if (buflen > sizeof(staticbuf))
+        newbuf = (char *)malloc(buflen);
+    else
+        buflen = sizeof(staticbuf);
+
+    while(1)
+    {
+        newbuf[buflen-2] = '\0';
+        va_copy(copy,ap);
+        vsnprintf(newbuf, buflen, fmt, copy);
+        va_end(copy);
+        if (*(newbuf + buflen - 2) != '\0')
+        {
+            buflen *= 2;
+            if (newbuf != staticbuf)
+                newbuf = (char *)realloc(newbuf, buflen);
+            else
+                newbuf = (char *)malloc(buflen);
+            if (newbuf == nullptr)
+                return;
+            continue;
+        }
+        break;
+
+    }
+
+    sdsnset(str, newbuf, strlen(newbuf));
+    
+    if (newbuf != staticbuf)
+        free(newbuf);
+}
+
+void sdssprintf(sdstr *str, const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    sdsvsprintf(str, fmt, ap);
+    va_end(ap);
+}
+
 void printf(sdstr *str)
 {
-    printf("[sdstr](alloc=%d)(len=%d)(str=%.*s)\n",str->alloc, str->len, str->len, str->data);
+    printf("[sdstr](alloc=%d)(len=%d)(str=\"%.*s\")\n",str->alloc, str->len, str->len, str->data);
 }
 
 void destory(sdstr *str)
