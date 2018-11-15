@@ -4,6 +4,17 @@ cmake_minimum_required(VERSION 2.8)
 
 project (TinyWeb)
 
+set (TinyWeb_VERSION_MAJOR 0)
+set (TinyWeb_VERSION_MIDDLE 0)
+set (TinyWeb_VERSION_MINOR 10)
+
+# configure a header file to pass some of the CMake settings
+# to the source code
+configure_file (
+    "${PROJECT_SOURCE_DIR}/TinyWebConfig.h.in"
+    "${PROJECT_SOURCE_DIR}/TinyWebConfig.h"
+  )
+
 add_definitions("-Wall -std=c++11")
 
 # add the binary tree to the search path for include files
@@ -76,6 +87,15 @@ add_executable(parseUrl
     )
 
 target_link_libraries(parseUrl
+    http_parser_model
+    )
+
+# responser_test
+add_executable(responser_test
+    responser_test.cc
+    )
+
+target_link_libraries(responser_test
     http_parser_model
     )
 

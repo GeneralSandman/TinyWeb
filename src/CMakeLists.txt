@@ -11,7 +11,7 @@ set (TinyWeb_VERSION_MINOR 1)
 # to the source code
 configure_file (
     "${PROJECT_SOURCE_DIR}/TinyWebConfig.h.in"
-    "${PROJECT_BINARY_DIR}/TinyWebConfig.h"
+    "${PROJECT_SOURCE_DIR}/TinyWebConfig.h"
   )
 
 # add the binary tree to the search path for include files

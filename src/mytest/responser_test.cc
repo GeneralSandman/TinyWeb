@@ -17,6 +17,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <stdio.h>
 
 using namespace std;
 
@@ -187,8 +188,10 @@ void testResponser()
     std::cout << passtest << "/" << alltest << std::endl;
 }
 
+#include "TinyWebConfig.h"
 int main()
 {
+    printf("version:TinyWeb/%d.%d.%d\n",TinyWeb_VERSION_MAJOR,TinyWeb_VERSION_MIDDLE,TinyWeb_VERSION_MINOR);
     headerMeaningInit();
     testResponser();
     return 0;

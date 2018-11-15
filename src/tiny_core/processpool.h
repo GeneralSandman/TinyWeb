@@ -1,15 +1,15 @@
 /*
-*Author:GeneralSandman
-*Code:https://github.com/GeneralSandman/TinyWeb
-*E-mail:generalsandman@163.com
-*Web:www.dissigil.cn
-*/
+ *Author:GeneralSandman
+ *Code:https://github.com/GeneralSandman/TinyWeb
+ *E-mail:generalsandman@163.com
+ *Web:www.dissigil.cn
+ */
 
 /*---XXX---
-*
-****************************************
-*
-*/
+ *
+ ****************************************
+ *
+ */
 
 #ifndef PROCESS_POOL_H
 #define PROCESS_POOL_H
@@ -39,8 +39,8 @@ class EventLoop;
 
 struct pair
 {
-  int d1;
-  int d2;
+    int d1;
+    int d2;
 };
 
 void test_parent_MessageCallback(Connection *con, Buffer *buf, Time time);
@@ -50,90 +50,88 @@ void period_print_test(void);
 class ProcessPool
 {
 
-private:
-  // EventLoop *m_pEventLoop;
-  // Master *m_pMaster;
-  // Process *m_pProcess;
+    private:
+        pid_t m_nPid;
+        std::shared_ptr<EventLoop> m_pEventLoop;
+        std::shared_ptr<Master> m_pMaster;
+        std::shared_ptr<Process> m_pProcess;
 
-  std::shared_ptr<EventLoop> m_pEventLoop;
-  std::shared_ptr<Master> m_pMaster;
-  std::shared_ptr<Process> m_pProcess;
+        std::vector<std::shared_ptr<SocketPair>> m_nPipes;
+        std::vector<pid_t> m_nPids;
+        int m_nProcessNum;
 
-  std::vector<std::shared_ptr<SocketPair>> m_nPipes;
-  // std::vector<SocketPair *> m_nPipes;
-  std::vector<pid_t> m_nPids;
-  int m_nProcessNum;
+        int m_nListenSocketFd;
+        SignalManager m_nSignalManager;
 
-  int m_nListenSocketFd;
-  SignalManager m_nSignalManager;
+        static ProcessPool* m_pPoolInstance;
 
-  static ProcessPool* m_pPoolInstance;
+        static void parentSignalHandler(int sign)
+        {
+            m_fSignalHandler(m_pPoolInstance, sign);
+        }
 
-  static void parentSignalHandler(int sign)
-  {
-    m_fSignalHandler(m_pPoolInstance, sign);
-  }
+        static void m_fSignalHandler(ProcessPool *pool, int sign)
+        {
+            std::cout << "[parent(" << m_nPid 
+                << ")] signal manager get signal(" << sign << ")\n";
+            int status;
+            pid_t pid;
+            switch (sign)
+            {
+                case SIGINT:
+                case SIGTERM:
+                    status_terminate = 1;
+                    std::cout << "[parent] parent will terminate all slave process\n";
+                    break;
+                case SIGQUIT:
+                    status_quit_softly = 1;
+                    std::cout << "[parent] quit softly\n";
+                case SIGCHLD:
+                    status_child_quit = 1;
+                    pid = waitpid(-1, &status, WNOHANG);
+                    std::cout << "[parent] collect information from child(" << pid << ")\n";
+                    pool->m_fDestoryProcess(pid);
+                    break;
+                    //invoke waitpid() to collect the resource of child
+                    // case SIGHUP:
+                    //   status_reconfigure = 1;
+                    //   std::cout << "[parent]:reconfigure\n";
+                    //   //kill childern softly and create new process
+                    //   break;
+                case SIGPIPE:
+                    break;
+                default:
+                    break;
+            }
+        }
 
-  static void m_fSignalHandler(ProcessPool *pool, int sign)
-  {
-    std::cout << "[parent] signal manager get signal(" << sign << ")\n";
-    int status;
-    pid_t pid;
-    switch (sign)
-    {
-    case SIGINT:
-    case SIGTERM:
-      status_terminate = 1;
-      std::cout << "[parent] parent will terminate all slave process\n";
-      break;
-    case SIGQUIT:
-      status_quit_softly = 1;
-      std::cout << "[parent] quit softly\n";
-    case SIGCHLD:
-      status_child_quit = 1;
-      pid = waitpid(-1, &status, WNOHANG);
-      std::cout << "[parent] collect information from child(" << pid << ")\n";
-      pool->m_fDestoryProcess(pid);
-      break;
-      //invoke waitpid() to collect the resource of child
-      // case SIGHUP:
-      //   status_reconfigure = 1;
-      //   std::cout << "[parent]:reconfigure\n";
-      //   //kill childern softly and create new process
-      //   break;
-    case SIGPIPE:
-      break;
-    }
+        void m_fDestoryProcess(pid_t pid)
+        {
+            int index = 0;
+            for (; index < m_nPids.size(); index++)
+            {
+                if (m_nPids[index] == pid)
+                    break;
+            }
+            assert(index!=m_nPids.size());
 
-  }
+            m_nPipes[index]->clearSocket();
+            m_nPipes.erase(m_nPipes.begin() + index);
+            m_nPids.erase(m_nPids.begin() + index);
+            m_nProcessNum--;
+        }
 
-  void m_fDestoryProcess(pid_t pid)
-  {
-    int index = 0;
-    for (; index < m_nPids.size(); index++)
-    {
-      if (m_nPids[index] == pid)
-        break;
-    }
-    assert(index!=m_nPids.size());
-
-    m_nPipes[index]->clearSocket();
-    m_nPipes.erase(m_nPipes.begin() + index);
-    m_nPids.erase(m_nPids.begin() + index);
-    m_nProcessNum--;
-  }
-
-public:
-  ProcessPool();
-  void init();
-  void createProcess(int nums);
-  inline int processNum() { return m_nProcessNum; }
-  void setSignalHandlers();
-  void start();
-  void killAll();
-  void killSoftly();
-  ~ProcessPool();
-  friend class Process;
+    public:
+        ProcessPool();
+        void init();
+        void createProcess(int nums);
+        inline int processNum() { return m_nProcessNum; }
+        void setSignalHandlers();
+        void start();
+        void killAll();
+        void killSoftly();
+        ~ProcessPool();
+        friend class Process;
 };
 
 #endif

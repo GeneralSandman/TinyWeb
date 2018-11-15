@@ -14,9 +14,9 @@
 #ifndef HTTP_RESPONSER_H
 #define HTTP_REsPONSER_H
 
-#include "http.h"
-#include "http_model_file.h"
-#include "http_parser.h"
+#include <http_parser/http.h>
+#include <http_parser/http_model_file.h>
+#include <http_parser/http_parser.h>
 
 #include <iostream>
 #include <list>
@@ -170,7 +170,7 @@ class HttpResponser
             headers->connection_keep_alive = 1;
             headers->chunked = 1;
             headers->server = 1;
-            
+
             std::string fname = "input.html";
             File *inputFile = &(response->file);
             int return_val = initFile(inputFile, fname);

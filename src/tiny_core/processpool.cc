@@ -1,15 +1,15 @@
 /*
-*Author:GeneralSandman
-*Code:https://github.com/GeneralSandman/TinyWeb
-*E-mail:generalsandman@163.com
-*Web:www.dissigil.cn
-*/
+ *Author:GeneralSandman
+ *Code:https://github.com/GeneralSandman/TinyWeb
+ *E-mail:generalsandman@163.com
+ *Web:www.dissigil.cn
+ */
 
 /*---XXX---
-*
-****************************************
-*
-*/
+ *
+ ****************************************
+ *
+ */
 
 #include <tiny_core/processpool.h>
 #include <tiny_core/process.h>
@@ -32,7 +32,7 @@ void test_parent_MessageCallback(Connection *con, Buffer *buf, Time time)
 {
 
     std::cout << "[parent] get message:"
-              << buf->getAll() << std::endl;
+        << buf->getAll() << std::endl;
 }
 
 void test_parent_CloseCallback(Connection *con)
@@ -49,10 +49,11 @@ ProcessPool* ProcessPool::m_pPoolInstance = nullptr;
 
 ProcessPool::ProcessPool()
     : m_pEventLoop(new EventLoop()),
-      m_pMaster(new Master(this, m_pEventLoop.get(), 0, "master")),
-      m_pProcess(nullptr),
-      m_nListenSocketFd(-1)
+    m_pMaster(new Master(this, m_pEventLoop.get(), 0, "master")),
+    m_pProcess(nullptr),
+    m_nListenSocketFd(-1)
 {
+    m_nPid = getpid();
     m_pPoolInstance = this;
     LOG(Debug) << "class ProcessPoll constructor\n";
 }
@@ -87,7 +88,7 @@ void ProcessPool::createProcess(int nums)
             //2.set signal handlers
             //3.create listen server
             m_pProcess = std::make_shared<Process>(std::to_string(i),
-                                                   i, socketpairFds);
+                    i, socketpairFds);
             m_pProcess->setAsChild(int(getpid()));
             m_pProcess->setSignalHandlers();
             m_pProcess->createListenServer(m_nListenSocketFd);
@@ -101,7 +102,7 @@ void ProcessPool::createProcess(int nums)
             //2.push pid
             std::cout << "create process(" << pid << ")\n";
             pair_tmp.push_back({socketpairFds[0],
-                                socketpairFds[1]});
+                    socketpairFds[1]});
             pids_tmp.push_back(pid);
         }
     }
@@ -138,7 +139,7 @@ void ProcessPool::setSignalHandlers()
         Signal(SIGQUIT, "QIGQUIT", "quit softly", parentSignalHandler),
         Signal(SIGPIPE, "SIGPIPE", "socket close", parentSignalHandler),
         Signal(SIGHUP, "SIGHUP", "reconfigure", parentSignalHandler),
-        };
+    };
 
     for (auto t : signals)
         m_nSignalManager.addSignal(t);
@@ -180,7 +181,7 @@ void ProcessPool::killAll()
         int res = kill(t, SIGTERM);
         if (res == 0)
         {
-            std::cout << "[parent]:kill child (" << t << ") successfully\n";
+            std::cout << "[parent] kill child (" << t << ") successfully\n";
             m_fDestoryProcess(t);
         }
     }
@@ -195,6 +196,5 @@ void ProcessPool::killSoftly()
 
 ProcessPool::~ProcessPool()
 {
-
     LOG(Debug) << "class ProcessPoll destructor\n";
 }
