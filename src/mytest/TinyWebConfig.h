@@ -1,1 +1,1 @@
-#define TINYWEB_VERSION "0.0.10"
+#define TINYWEB_VERSION "TinyWeb/0.0.10"

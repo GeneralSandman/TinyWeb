@@ -74,12 +74,6 @@ class HttpResponser
             std::cout << "class HttpResponser constructor\n";
         }
 
-        void deheader(const HttpHeader * header, sdstr *res)
-        {
-            sdscatsprintf(res, "%.*s: %.*s", header->key.len, header->key.data,
-                    header->value.len, header->value.data);
-        }
-
         void responseLineToStr(const HttpResponseLine *line, sdstr *line_str)
         {
             unsigned int major = line->http_version_major;
@@ -92,60 +86,46 @@ class HttpResponser
 
         void responseHeadersToStr(HttpResponseHeaders *headers, sdstr *res)
         {
+            sdstr tmp;
+            //sdsnnew(&tmp, nullptr, 256);
+            sdsnewempty(&tmp, 256); // more efficient
             if (headers->connection_keep_alive)
             {
-                HttpHeader *h1 = new HttpHeader;
-                setStr(&(h1->key), "Connection");
-                setStr(&(h1->value), "keep-alive");
-                headers->generals.push_back(h1);
+                sdscat(&tmp, "Connection: keep-alive\r\n");
             }
             else if (headers->connection_close)
             {
-                HttpHeader *h1 = new HttpHeader;
-                setStr(&(h1->key), "Connection");
-                setStr(&(h1->value), "close");
-                headers->generals.push_back(h1);
+                sdscat(&tmp, "Connection: close\r\n");
             }
 
             if (headers->valid_content_length)
             {
-                HttpHeader *h2 = new HttpHeader;
-                setStr(&(h2->key), "Content-Length");
-                std::string len = std::to_string(headers->content_length_n);
-                setStr(&(h2->value), len.c_str());
-                headers->generals.push_back(h2);
+                sdscatsprintf(&tmp, "Content-Length: %u\r\n", headers->content_length_n);
             }
 
             if (headers->chunked)
             {
-                HttpHeader *h3 = new HttpHeader;
-                setStr(&(h3->key), "Transfer-Encoding");
-                setStr(&(h3->value), "chunked");
-                headers->generals.push_back(h3);
+                sdscat(&tmp, "Transfer-Encoding: chunked\r\n");
             }
 
             if (headers->server)
             {
-                HttpHeader *h3 = new HttpHeader;
-                setStr(&(h3->key), "Server");
-                setStr(&(h3->value), "TinyWeb/0.0.1 (ubuntu)");
-                headers->generals.push_back(h3);
+                sdscat(&tmp, "Server: TinyWeb/0.0.1 (ubuntu)\r\n");
             }
 
             if (headers->file_type.size())
             {
-                HttpHeader *h4 = new HttpHeader;
-                setStr(&(h4->key), "Content-Type");
-                setStr(&(h4->value), headers->file_type.c_str());
-                headers->generals.push_back(h4);
+                sdscatsprintf(&tmp, "Content-Type: %s\r\n", headers->file_type.c_str());
             }
 
-            for(auto t: headers->generals)
-            {
-                deheader(t, res);
-                sdscat(res, "\r\n");
-            }
+            sdscatsds(res, &tmp);
             sdscat(res, "\r\n");
+
+            std::cout << "-----" << std::endl;
+            printf(&tmp);
+            std::cout << "-----" << std::endl;
+
+            destory(&tmp);
         }
 
         void buildResponse(const HttpRequest *req, HttpResponse * response)

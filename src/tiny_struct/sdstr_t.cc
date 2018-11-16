@@ -35,7 +35,10 @@ void sdsnnew(sdstr * str, const char * init, unsigned int len)
     unsigned int alloc;
 
     if (init == nullptr)
+    {
         alloc = 0;
+        len = 0;
+    }
     else 
         alloc = ROUND_UP(len);
     // else if ROUND_UP
@@ -52,10 +55,12 @@ void sdsnnew(sdstr * str, const char * init, unsigned int len)
 
     memset(res, 0, alloc);
     if (nullptr != init)
+    {
         memcpy(res, init, len);
-    str->data = (char *)res;
-    *(str->data + len) = '\0';
+        *(str->data + len) = '\0';
+    }
     str->len = len;
+    str->data = (char *)res;
     str->alloc = alloc;
 }
 
@@ -65,9 +70,28 @@ void sdsnew(sdstr * str, const char * init)
     sdsnnew(str, init, len);
 }
 
-void sdsnewempty(sdstr *str)
+void sdsnewempty(sdstr *str, unsigned int alloc)
 {
-    sdsnnew(str, nullptr, 0);
+    if (str == nullptr)
+        return;
+
+    str->pool = nullptr;
+    str->data = nullptr;
+    str->len = 0;
+    str->alloc = 0;
+
+    alloc = ROUND_UP(alloc);
+
+    void *res = malloc(alloc);
+    if (res == nullptr)
+    {
+        //FIXME:
+        return;
+    }
+    // std::cout << "[sds] malloc size(" << alloc << ")\n";
+    memset(res, 0, alloc);
+    str->data = (char *)res;
+    str->alloc = alloc;
 }
 
 void sdsnewdup(sdstr *str, const sdstr *src)

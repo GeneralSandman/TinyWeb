@@ -403,6 +403,19 @@ void test6()
 
         destory(&tmp);
     }
+    std::cout << "----------\n";
+    {
+        sdstr tmp;
+        sdsnewempty(&tmp, 1024);
+
+        for (int i=0; i<1024; i++)
+        {
+            sdsncat(&tmp, "1", 1);
+            printf(&tmp);
+        }
+
+        destory(&tmp);
+    }
 }
 
 void test7()
@@ -458,12 +471,12 @@ void test8()
 
 int main(int argc, char *argv[])
 {
-    test1();
-    test2();
-    test3();
-    test4();
-    test5();
+    //test1();
+    //test2();
+    //test3();
+    //test4();
+    //test5();
     test6();
-    test7();
-    test8();
+    //test7();
+    //test8();
 }

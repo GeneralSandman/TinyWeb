@@ -189,9 +189,10 @@ void testResponser()
 }
 
 #include "TinyWebConfig.h"
+
 int main()
 {
-    printf("version:TinyWeb/%d.%d.%d\n",TinyWeb_VERSION_MAJOR,TinyWeb_VERSION_MIDDLE,TinyWeb_VERSION_MINOR);
+    std::cout << "version:" << TINYWEB_VERSION << std::endl;
     headerMeaningInit();
     testResponser();
     return 0;

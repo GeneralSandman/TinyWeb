@@ -36,7 +36,7 @@ void sdsnnew(sdstr * str, const char * init, unsigned int len);
 
 void sdsnew(sdstr * str, const char * init);
 
-void sdsnewempty(sdstr *str);
+void sdsnewempty(sdstr *str, unsigned int alloc=0);
 
 void sdsnewdup(sdstr *str, const sdstr *src);
 
