@@ -1,15 +1,15 @@
 /*
-*Author:GeneralSandman
-*Code:https://github.com/GeneralSandman/TinyWeb
-*E-mail:generalsandman@163.com
-*Web:www.dissigil.cn
-*/
+ *Author:GeneralSandman
+ *Code:https://github.com/GeneralSandman/TinyWeb
+ *E-mail:generalsandman@163.com
+ *Web:www.dissigil.cn
+ */
 
 /*---XXX---
-*
-****************************************
-*
-*/
+ *
+ ****************************************
+ *
+ */
 
 #ifndef HTTP_MODEL_FILE_H
 #define HTTP_MODEL_FILE_H

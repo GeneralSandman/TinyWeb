@@ -1,4 +1,1 @@
-#define TINY_VER_MAJOR 0
-#define TINY_VER_MIDDLE 0
-#define TINY_VER_MINOR 10
-#define TINY_VER 0.0.10;STRING
+#define TINYWEB_VERSION "0.0.10"
