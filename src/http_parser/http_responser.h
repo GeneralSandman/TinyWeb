@@ -17,6 +17,7 @@
 #include <http_parser/http.h>
 #include <http_parser/http_model_file.h>
 #include <http_parser/http_parser.h>
+#include <tiny_struct/sdstr_t.h>
 
 #include <iostream>
 #include <list>
@@ -73,30 +74,23 @@ class HttpResponser
             std::cout << "class HttpResponser constructor\n";
         }
 
-        void deheader(const HttpHeader * header, std::string &res)
+        void deheader(const HttpHeader * header, sdstr *res)
         {
-            res += std::string(header->key.data, header->key.len);
-            res += ": ";
-            res += std::string(header->value.data, header->value.len);
+            sdscatsprintf(res, "%.*s: %.*s", header->key.len, header->key.data,
+                    header->value.len, header->value.data);
         }
 
-        void responseLineToStr(const HttpResponseLine *line, std::string &line_str)
+        void responseLineToStr(const HttpResponseLine *line, sdstr *line_str)
         {
-            line_str += "HTTP/";
-
-            line_str += char(line->http_version_major + '0');
-            line_str += '.'; 
-            line_str += char(line->http_version_minor + '0');
-            line_str += " ";
-
-            line_str += std::string(httpStatusCode(line->status));
-            line_str += " ";
-            line_str += std::string(httpStatusStr(line->status));
-            line_str += "\r\n";
-
+            unsigned int major = line->http_version_major;
+            unsigned int minor = line->http_version_minor;
+            const char *code = httpStatusCode(line->status);
+            const char *phrase = httpStatusStr(line->status);
+            
+            sdscatsprintf(line_str, "HTTP/%d.%d %s %s\r\n", major, minor, code, phrase);
         }
 
-        void responseHeadersToStr(HttpResponseHeaders *headers, std::string &res)
+        void responseHeadersToStr(HttpResponseHeaders *headers, sdstr *res)
         {
             if (headers->connection_keep_alive)
             {
@@ -118,7 +112,6 @@ class HttpResponser
                 HttpHeader *h2 = new HttpHeader;
                 setStr(&(h2->key), "Content-Length");
                 std::string len = std::to_string(headers->content_length_n);
-                std::cout << "---" << len << std::endl;
                 setStr(&(h2->value), len.c_str());
                 headers->generals.push_back(h2);
             }
@@ -147,15 +140,12 @@ class HttpResponser
                 headers->generals.push_back(h4);
             }
 
-            std::string result;
             for(auto t: headers->generals)
             {
-                printf("%.*s->%.*s\n", t->key.len, t->key.data,
-                        t->value.len, t->value.data);
                 deheader(t, res);
-                res += "\r\n";
+                sdscat(res, "\r\n");
             }
-            res += "\r\n";
+            sdscat(res, "\r\n");
         }
 
         void buildResponse(const HttpRequest *req, HttpResponse * response)
@@ -190,13 +180,16 @@ class HttpResponser
             HttpResponse *resp = new HttpResponse;
             buildResponse(req, resp);
 
-            std::string result;
-            responseLineToStr(&(resp->line), result);
-            responseHeadersToStr(&(resp->headers), result);
+            sdstr result;
+            sdsnewempty(&result);
 
-            std::cout << result;
+            responseLineToStr(&(resp->line), &result);
+            responseHeadersToStr(&(resp->headers), &result);
+
+            printf(&result);
             sendfile(0, &(resp->file));
 
+            destory(&result);
             destoryFile(&(resp->file));
         }
 

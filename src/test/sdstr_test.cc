@@ -18,131 +18,224 @@
 #include <string>
 #include <stdio.h>
 #include <stdarg.h>
+
 using namespace std;
 
-int test1()
+void test1()
 {
-    return 0;
-}
-
-int test2()
-{
-
-    std::string str = "helloworld";
-    void *res1 = malloc(10);
-    memcpy(res1, (void *)(str.c_str()), str.size());
-    char *tmp = (char *)res1;
-    printf("%.*s\n", str.size(), tmp);
-
-    void *res2 = realloc(res1, 20);
-    tmp = (char*)res2;
-    memcpy(res2+10, (void *)(str.c_str()), str.size());
-    printf("%.*s\n", str.size() * 2, tmp);
-
-    free(res2);
-
-    return 0;
-
-}
-
-int test3()
-{
-    std::string str = "helloworld";
+    std::string str = "zhenhuli";
     unsigned int len = str.size();
 
     {
         sdstr tmp;
-        sdsnset(&tmp, nullptr, 0);
-        sdsncat(&tmp, str.c_str(), len);
+        sdsnnew(&tmp, nullptr, 0);
         printf(&tmp);
         destory(&tmp);
     }
 
     {
         sdstr tmp;
-        sdsnset(&tmp, nullptr, 0);
-        sdscat(&tmp, str.c_str());
+        sdsnew(&tmp, nullptr);
         printf(&tmp);
         destory(&tmp);
     }
 
     {
         sdstr tmp;
-        sdsnset(&tmp, nullptr, 0);
-
-        sdstr tmp2;
-        std::string str2 = "zhl";
-        sdsnset(&tmp2, str2.c_str(), str2.size());
-
-        sdsncatsds(&tmp, &tmp2, tmp2.len);
+        sdsnewempty(&tmp);
         printf(&tmp);
-
-        destory(&tmp);
-        destory(&tmp2);
-    }
-
-    {
-        sdstr tmp;
-        sdsnset(&tmp, str.c_str(), str.size());
-
-        std::string s = "zhenhuli";
-        sdsncpy(&tmp, s.c_str(), s.size());
-        printf(&tmp);
-
         destory(&tmp);
     }
 
     {
         sdstr tmp;
-        sdsnset(&tmp, str.c_str(), str.size());
+        sdsnnew(&tmp, str.c_str(), len);
+        printf(&tmp);
+        destory(&tmp);
+    }
 
-        std::string s = "zhenhuli";
-        sdscpy(&tmp, s.c_str());
+    {
+        sdstr tmp;
+        sdsnew(&tmp, str.c_str());
+        printf(&tmp);
+        destory(&tmp);
+    }
+
+    {
+        sdstr tmp;
+        sdsnew(&tmp, str.c_str());
+        printf(&tmp);
+        destory(&tmp);
+    }
+
+    {
+        sdstr tmp;
+
+        {
+            sdstr s1;
+            sdsnew(&s1, str.c_str());
+            sdsnewdup(&tmp, &s1);
+            destory(&s1);
+        }
+
+        printf(&tmp);
+        destory(&tmp);
+    }
+}
+
+void test2()
+{
+    std::string str1 = "zhenhuli";
+    unsigned int len1 = str1.size();
+
+    std::string str2 = "helloworld";
+    unsigned int len2 = str2.size();
+    
+    sdstr sds;
+    sdsnew(&sds, str1.c_str());
+
+    sdstr sds2;
+    sdsnew(&sds2, str2.c_str());
+
+    {
+        sdstr tmp;
+        sdsnewempty(&tmp);
+        sdsncat(&tmp, str1.c_str(), len1);
+        printf(&tmp);
+
+        sdsncat(&tmp, str2.c_str(), len2);
+        printf(&tmp);
+        
+        destory(&tmp);
+    }
+
+    {
+        sdstr tmp;
+        sdsnewempty(&tmp);
+        sdscat(&tmp, str1.c_str());
+        printf(&tmp);
+
+        sdscat(&tmp, str2.c_str());
         printf(&tmp);
 
         destory(&tmp);
-
     }
 
     {
-        sdstr tmp1;
-        sdstr tmp2;
+        sdstr tmp;
+        sdsnewempty(&tmp);
+        sdsncatsds(&tmp, &sds, sds.len);
+        printf(&tmp);
 
-        std::string s = "zhenhuli";
-        sdsnset(&tmp1, str.c_str(), str.size());
-        sdsnset(&tmp2, s.c_str(), s.size());
+        sdsncatsds(&tmp, &sds2, sds2.len);
+        printf(&tmp);
 
-        printf(&tmp1);
-        printf(&tmp2);
-
-        sdsncpysds(&tmp2, &tmp1, tmp1.len);
-        printf(&tmp2);
-
-        destory(&tmp1);
-        destory(&tmp2);
+        destory(&tmp);
     }
 
     {
-        sdstr tmp1;
-        sdstr tmp2;
+        sdstr tmp;
+        sdsnewempty(&tmp);
+        sdscatsds(&tmp, &sds);
+        printf(&tmp);
 
-        std::string s = "zhenhuli";
-        sdsnset(&tmp1, str.c_str(), str.size());
-        sdsnset(&tmp2, s.c_str(), s.size());
+        sdscatsds(&tmp, &sds2);
+        printf(&tmp);
 
-        printf(&tmp1);
-        printf(&tmp2);
-
-        sdsncpysds(&tmp2, &tmp1, tmp1.len);
-        printf(&tmp2);
-
-        destory(&tmp1);
+        destory(&tmp);
     }
+    
+    destory(&sds);
+    destory(&sds2);
+
+}
+
+void test3()
+{
+    std::string str1 = "zhenhuli";
+    unsigned int len1 = str1.size();
+
+    std::string str2 = "helloworld";
+    unsigned int len2 = str2.size();
+    
+    sdstr sds;
+    sdsnew(&sds, str1.c_str());
+
+    sdstr sds2;
+    sdsnew(&sds2, str2.c_str());
 
     {
-
+        sdstr tmp;
+        sdsnew(&tmp, str1.c_str());
+        printf(&tmp);
+        sdsncpy(&tmp, str2.c_str(), len2);
+        printf(&tmp);
+        destory(&tmp);
     }
-    return 0;
+    {
+        sdstr tmp;
+        sdsnew(&tmp, str1.c_str());
+        printf(&tmp);
+        sdscpy(&tmp, str2.c_str());
+        printf(&tmp);
+        destory(&tmp);
+    }
+    {
+        sdstr tmp;
+        sdsnew(&tmp, str1.c_str());
+        printf(&tmp);
+        sdsncpysds(&tmp, &sds2, sds2.len);
+        printf(&tmp);
+        destory(&tmp);
+    }
+    {
+        sdstr tmp;
+        sdsnew(&tmp, str1.c_str());
+        printf(&tmp);
+        sdscpysds(&tmp, &sds2);
+        printf(&tmp);
+        destory(&tmp);
+    }
+
+    std::cout << "--------\n";
+
+    {
+        sdstr tmp;
+        sdsnew(&tmp, str2.c_str());
+        printf(&tmp);
+        sdsncpy(&tmp, str1.c_str(), len1);
+        printf(&tmp);
+        destory(&tmp);
+    }
+    {
+        sdstr tmp;
+        sdsnew(&tmp, str2.c_str());
+        printf(&tmp);
+        sdscpy(&tmp, str1.c_str());
+        printf(&tmp);
+        destory(&tmp);
+    }
+    {
+        sdstr tmp;
+        sdsnew(&tmp, str2.c_str());
+        printf(&tmp);
+        sdsncpysds(&tmp, &sds, sds.len);
+        printf(&tmp);
+        destory(&tmp);
+    }
+    {
+        sdstr tmp;
+        sdsnew(&tmp, str2.c_str());
+        printf(&tmp);
+        sdscpysds(&tmp, &sds);
+        printf(&tmp);
+        destory(&tmp);
+    }
+
+    std::cout << "--------\n";
+
+    destory(&sds);
+    destory(&sds2);
 }
 
 void test4()
@@ -281,17 +374,6 @@ void test4()
 
 }
 
-int my_snprintf(char *s, int size, const char *fmt, ...) //该自定义函数，与系统提供的snprintf()函数相同。
-{
-    std::cout << "fmt size(" << strlen(fmt) << ")\n";
-    va_list ap;
-    int n=0;
-    va_start(ap, fmt); //获得可变参数列表
-    n=vsnprintf (s, size, fmt, ap); //写入字符串s
-    va_end(ap); //释放资源
-    return n; //返回写入的字符个数
-}
-
 void test5()
 {
     {
@@ -300,13 +382,88 @@ void test5()
             str += char('0'+i%10);
         std::cout << str.size() << std::endl;
         sdstr tmp;
-        sdssprintf(&tmp,"a=%d,b=%d,s=%s",101,101,str.c_str());
+        sdsnewempty(&tmp);
+        sdscatsprintf(&tmp,"a=%d,b=%d,s=%s",101,101,str.c_str());
         printf(&tmp);
         destory(&tmp);
     }
 }
 
-int main()
+void test6()
 {
+    {
+        sdstr tmp;
+        sdsnewempty(&tmp);
+
+        for (int i=0; i<1024; i++)
+        {
+            sdsncat(&tmp, "1", 1);
+            printf(&tmp);
+        }
+
+        destory(&tmp);
+    }
+}
+
+void test7()
+{
+    std::string str = "helloworld";
+    unsigned int len = str.size();
+    
+    std::string sep = ".";
+    unsigned int seplen = sep.size();
+
+    sdstr sdss[100];
+    for (int i=0; i<100; i++)
+    {
+        sdsnew(sdss+i, str.c_str());
+    }
+
+
+    sdstr result;
+    sdsnewempty(&result);
+    sdsjoinsds(&result, sdss, 100, sep.c_str(), seplen);
+    printf(&result);
+    destory(&result);
+
+    
+    for (int i=0; i<100; i++)
+    {
+        destory(sdss+i);
+    }
+}
+
+void test8()
+{
+    std::string str = "helloworld";
+    unsigned int len = str.size();
+
+    const char * sdss[100];
+    for (int i=0; i<100; i++)
+    {
+        *(sdss+i) = str.c_str();
+    }
+    
+    std::string sep = ".";
+    unsigned int seplen = sep.size();
+
+
+    sdstr result;
+    sdsnewempty(&result);
+    sdsjoinstr(&result, sdss, 100, sep.c_str(), seplen);
+    printf(&result);
+    destory(&result);
+    
+}
+
+int main(int argc, char *argv[])
+{
+    test1();
+    test2();
+    test3();
+    test4();
     test5();
+    test6();
+    test7();
+    test8();
 }

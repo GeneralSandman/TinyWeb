@@ -4,9 +4,10 @@ cmake_minimum_required(VERSION 2.8)
 
 project (TinyWeb)
 
-set (TinyWeb_VERSION_MAJOR 0)
-set (TinyWeb_VERSION_MIDDLE 0)
-set (TinyWeb_VERSION_MINOR 10)
+set (TINY_VER_MAJOR 0)
+set (TINY_VER_MIDDLE 0)
+set (TINY_VER_MINOR 10)
+set (TINY_VER "0.0.10" STRING)
 
 # configure a header file to pass some of the CMake settings
 # to the source code
@@ -25,6 +26,10 @@ SET (SOURCE_DIR ../)
 include_directories(${SOURCE_DIR})
 
 add_subdirectory("${SOURCE_DIR}/http_parser" http_parser.out)
+add_subdirectory("${SOURCE_DIR}/tiny_base" tiny_base.out)
+add_subdirectory("${SOURCE_DIR}/tiny_core" tiny_core.out)
+add_subdirectory("${SOURCE_DIR}/tiny_http" tiny_http.out)
+add_subdirectory("${SOURCE_DIR}/tiny_struct" tiny_struct.out)
 
 
 # parseBody
@@ -97,5 +102,6 @@ add_executable(responser_test
 
 target_link_libraries(responser_test
     http_parser_model
+    tiny_struct_model
     )
 

@@ -9,4 +9,5 @@ add_library(tiny_struct_model STATIC
     list_t.cc
     rbtree_t.cc
     string_t.cc
+    sdstr_t.cc
 )
