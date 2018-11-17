@@ -1,17 +1,17 @@
 /*
-*Author:GeneralSandman
-*Code:https://github.com/GeneralSandman/TinyWeb
-*E-mail:generalsandman@163.com
-*Web:www.dissigil.cn
-*/
+ *Author:GeneralSandman
+ *Code:https://github.com/GeneralSandman/TinyWeb
+ *E-mail:generalsandman@163.com
+ *Web:www.dissigil.cn
+ */
 
 /*---XXX---
-*
-****************************************
-*
-*/
+ *
+ ****************************************
+ *
+ */
 
-#include "http_model_file.h"
+#include <http_parser/http_model_file.h>
 
 #include <iostream>
 #include <string>
@@ -85,7 +85,7 @@ std::string getMimeType(const std::string &type)
     return res;
 }
 
-int initFile(File *file, const std::string &fname)
+int initFile(File *file, const std::string & fname)
 {
     file->name = fname;
     file->offset = 0;
@@ -100,7 +100,7 @@ int initFile(File *file, const std::string &fname)
         if (errno == ENOENT)
         {
             std::cout << "no such file\n"
-                      << std::endl;
+                << std::endl;
             return -1;
         }
         return -2;

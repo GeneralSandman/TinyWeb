@@ -11,7 +11,7 @@
  *
  */
 
-#include "http_model_file.h"
+#include <http_parser/http_model_file.h>
 
 #include <iostream>
 
@@ -59,6 +59,7 @@ void testFile2()
     strftime(tmpBuf, 156, "%Y-%m-%d %H:%M:%S", localtime(&t)); //format date and time.
 
     std::cout << "last modified time:" << tmpBuf << std::endl;
+    sendfile(2, &inputFile);
 
     destoryFile(&inputFile);
 

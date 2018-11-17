@@ -34,7 +34,39 @@ testBody bodys[]=
 {
     {
         .str = 
-            "GET http://127.0.0.1:9999/index.html HTTP/1.1\r\n"
+            "GET http://127.0.0.1:9999/welcome.html HTTP/1.1\r\n"
+            "Transfer-Encoding: chunked\r\n"
+            "\r\n"
+            "25\r\n"
+            "This is the data in the first chunk..\r\n"
+            "1C\r\n"
+            "and this is the second one..\r\n"
+            "0\r\n"
+            "\r\n",
+        .valid = true,
+        .body = "This is the data in the first chunk.."
+            "and this is the second one..",
+    },
+
+    {
+        .str = 
+            "GET http://127.0.0.1:9999/ HTTP/1.1\r\n"
+            "Transfer-Encoding: chunked\r\n"
+            "\r\n"
+            "25\r\n"
+            "This is the data in the first chunk..\r\n"
+            "1C\r\n"
+            "and this is the second one..\r\n"
+            "0\r\n"
+            "\r\n",
+        .valid = true,
+        .body = "This is the data in the first chunk.."
+            "and this is the second one..",
+    },
+
+    {
+        .str = 
+            "GET http://127.0.0.1:9999 HTTP/1.1\r\n"
             "Transfer-Encoding: chunked\r\n"
             "\r\n"
             "25\r\n"
@@ -160,9 +192,9 @@ void testResponser()
 
     int len = sizeof(bodys) / sizeof(bodys[0]);
 
-    for (int i = 0; i < 1; i++)
+    for (int i = 0; i < 3; i++)
     {
-        // std::cout << i << ")" << std::endl;
+        std::cout << i << ")" << std::endl;
         alltest++;
 
         int begin = 0;
@@ -177,7 +209,6 @@ void testResponser()
         bool res = (tmp == -1) ? false : true;
         if (res)
         {
-
             HttpResponser responser;
             responser.response(result);
         }
@@ -188,11 +219,8 @@ void testResponser()
     std::cout << passtest << "/" << alltest << std::endl;
 }
 
-#include "TinyWebConfig.h"
-
 int main()
 {
-    std::cout << "version:" << TINYWEB_VERSION << std::endl;
     headerMeaningInit();
     testResponser();
     return 0;

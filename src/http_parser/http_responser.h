@@ -18,6 +18,7 @@
 #include <http_parser/http_model_file.h>
 #include <http_parser/http_parser.h>
 #include <tiny_struct/sdstr_t.h>
+#include <TinyWebConfig.h>
 
 #include <iostream>
 #include <list>
@@ -87,7 +88,6 @@ class HttpResponser
         void responseHeadersToStr(HttpResponseHeaders *headers, sdstr *res)
         {
             sdstr tmp;
-            //sdsnnew(&tmp, nullptr, 256);
             sdsnewempty(&tmp, 256); // more efficient
             if (headers->connection_keep_alive)
             {
@@ -110,7 +110,8 @@ class HttpResponser
 
             if (headers->server)
             {
-                sdscat(&tmp, "Server: TinyWeb/0.0.1 (ubuntu)\r\n");
+                char * version = TINYWEB_VERSION;
+                sdscatsprintf(&tmp, "Server: %s\r\n", version);
             }
 
             if (headers->file_type.size())
@@ -121,15 +122,27 @@ class HttpResponser
             sdscatsds(res, &tmp);
             sdscat(res, "\r\n");
 
-            std::cout << "-----" << std::endl;
-            printf(&tmp);
-            std::cout << "-----" << std::endl;
-
             destory(&tmp);
         }
 
         void buildResponse(const HttpRequest *req, HttpResponse * response)
         {
+            Url * url = req->url;
+            sdstr wwwpath;
+            sdsnewempty(&wwwpath);
+            sdscat(&wwwpath, "/home/dell/TinyWeb/www");
+            if (url->field_set & (1 << HTTP_UF_PATH))
+            {
+                unsigned int off = url->fields[HTTP_UF_PATH].offset;
+                unsigned int len = url->fields[HTTP_UF_PATH].len;
+                sdsncat(&wwwpath, url->data + off, len);
+            }
+            else
+            {
+                sdscat(&wwwpath, "/index.html");
+            }
+            std::cout << "file=";
+            printf(&wwwpath);
 
             HttpResponseLine *line = &(response->line);
             line->http_version_major = req->http_version_major;
@@ -141,8 +154,8 @@ class HttpResponser
             headers->chunked = 1;
             headers->server = 1;
 
-            std::string fname = "input.html";
             File *inputFile = &(response->file);
+            std::string fname(wwwpath.data, wwwpath.len);// change to sdstr
             int return_val = initFile(inputFile, fname);
             if(return_val < 0)
             {
@@ -153,6 +166,8 @@ class HttpResponser
             headers->file_type = response->file.mime_type;
             headers->valid_content_length = 1;
             headers->content_length_n = response->file.info.st_size;
+
+            destory(&wwwpath);
         }
 
         void response(const HttpRequest *req)
@@ -167,7 +182,7 @@ class HttpResponser
             responseHeadersToStr(&(resp->headers), &result);
 
             printf(&result);
-            sendfile(0, &(resp->file));
+            // sendfile(0, &(resp->file));
 
             destory(&result);
             destoryFile(&(resp->file));

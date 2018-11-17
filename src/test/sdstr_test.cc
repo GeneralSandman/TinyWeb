@@ -90,7 +90,7 @@ void test2()
 
     std::string str2 = "helloworld";
     unsigned int len2 = str2.size();
-    
+
     sdstr sds;
     sdsnew(&sds, str1.c_str());
 
@@ -105,7 +105,7 @@ void test2()
 
         sdsncat(&tmp, str2.c_str(), len2);
         printf(&tmp);
-        
+
         destory(&tmp);
     }
 
@@ -144,7 +144,7 @@ void test2()
 
         destory(&tmp);
     }
-    
+
     destory(&sds);
     destory(&sds2);
 
@@ -157,7 +157,7 @@ void test3()
 
     std::string str2 = "helloworld";
     unsigned int len2 = str2.size();
-    
+
     sdstr sds;
     sdsnew(&sds, str1.c_str());
 
@@ -422,7 +422,7 @@ void test7()
 {
     std::string str = "helloworld";
     unsigned int len = str.size();
-    
+
     std::string sep = ".";
     unsigned int seplen = sep.size();
 
@@ -439,7 +439,7 @@ void test7()
     printf(&result);
     destory(&result);
 
-    
+
     for (int i=0; i<100; i++)
     {
         destory(sdss+i);
@@ -456,7 +456,7 @@ void test8()
     {
         *(sdss+i) = str.c_str();
     }
-    
+
     std::string sep = ".";
     unsigned int seplen = sep.size();
 
@@ -466,17 +466,57 @@ void test8()
     sdsjoinstr(&result, sdss, 100, sep.c_str(), seplen);
     printf(&result);
     destory(&result);
-    
+
+}
+
+void errtest()
+{
+    {
+        sdstr tmp;
+        std::string str = "helloworld";
+        unsigned int len = str.size();
+        sdsnnew(&tmp, str.c_str(), len);
+        printf(&tmp);
+        destory(&tmp);
+    }
+    {
+        sdstr tmp;
+        const char *str = "helloworld";
+        sdsnnew(&tmp, str, strlen(str));
+        printf(&tmp);
+        destory(&tmp);
+    }
+    {
+        sdstr tmp;
+        char *str = "helloworld";
+        sdsnnew(&tmp, str, strlen(str));
+        printf(&tmp);
+        destory(&tmp);
+    }
+    {
+        sdstr tmp;
+        char str[] = "helloworld";
+        sdsnnew(&tmp, str, strlen(str));
+        printf(&tmp);
+        destory(&tmp);
+    }
+    {
+        sdstr tmp;
+        sdsnnew(&tmp, "helloworld", 10);
+        printf(&tmp);
+        destory(&tmp);
+    }
 }
 
 int main(int argc, char *argv[])
 {
-    //test1();
-    //test2();
-    //test3();
-    //test4();
-    //test5();
+    test1();
+    test2();
+    test3();
+    test4();
+    test5();
     test6();
-    //test7();
-    //test8();
+    test7();
+    test8();
+    errtest();
 }

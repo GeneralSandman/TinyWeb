@@ -102,3 +102,12 @@ target_link_libraries(responser_test
     tiny_struct_model
     )
 
+# model_file_test
+add_executable(model_file_test
+    model_file_test.cc
+    )
+
+target_link_libraries(model_file_test
+    http_parser_model
+    )
+

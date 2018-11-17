@@ -33,7 +33,7 @@ typedef struct File
     off_t offset;
 } File;
 
-int initFile(File * file, const std::string &fname);
+int initFile(File * file, const std::string & fname);
 void destoryFile(File *file);
 
 int sendfile(int outFd, File* file);

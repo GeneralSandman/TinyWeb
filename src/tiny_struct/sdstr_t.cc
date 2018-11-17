@@ -48,16 +48,18 @@ void sdsnnew(sdstr * str, const char * init, unsigned int len)
     if (res == nullptr)
     {
         //FIXME:
+        std::cout << "[sds] malloc error\n";
         return;
     }
 
-    // std::cout << "[sds] malloc size(" << alloc << ")\n";
+    std::cout << "[sds] malloc size(" << alloc << ")\n";
 
     memset(res, 0, alloc);
-    if (nullptr != init)
+    if (nullptr != init && len)
     {
-        memcpy(res, init, len);
-        *(str->data + len) = '\0';
+        memcpy(res, (void *)init, len);
+        if (len < alloc)
+            *((char*)res + len) = '\0';
     }
     str->len = len;
     str->data = (char *)res;
@@ -86,9 +88,10 @@ void sdsnewempty(sdstr *str, unsigned int alloc)
     if (res == nullptr)
     {
         //FIXME:
+        std::cout << "[sds] malloc error\n";
         return;
     }
-    // std::cout << "[sds] malloc size(" << alloc << ")\n";
+    std::cout << "[sds] malloc size(" << alloc << ")\n";
     memset(res, 0, alloc);
     str->data = (char *)res;
     str->alloc = alloc;
