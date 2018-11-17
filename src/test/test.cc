@@ -15,8 +15,6 @@ typedef boost::function <void()> hand;
 
 int main()
 {
-    hand h=boost::bind(&print,1);
-    h();
 
     return 0;
 }
