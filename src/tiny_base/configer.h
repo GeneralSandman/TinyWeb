@@ -1,21 +1,19 @@
 /*
-*Author:GeneralSandman
-*Code:https://github.com/GeneralSandman/TinyWeb
-*E-mail:generalsandman@163.com
-*Web:www.generalsandman.cn
-*/
+ *Author:GeneralSandman
+ *Code:https://github.com/GeneralSandman/TinyWeb
+ *E-mail:generalsandman@163.com
+ *Web:www.dissigil.cn
+ */
 
 /*---Configer Class---
-*We need to upgrade this class
-*in order to handle config file error
-****************************************
-*
-*/
+ *We need to upgrade this class
+ *in order to handle config file error
+ ****************************************
+ *
+ */
 
 #ifndef CONFIGER_H
 #define CONFIGER_H
-
-#include <tiny_base/reader.h>
 
 #include <map>
 #include <string>
@@ -23,40 +21,53 @@
 
 void setConfigerFile(const std::string &file);
 bool loadConfig();
-std::string getConfigValue(const std::string &key);
 
 class Configer
 {
-  private:
-    static std::string m_nFile;
-    static Reader m_nFileReader;
-    std::map<std::string, std::string> m_nValue;
-
-    void m_fInitDefaultKeyValue();
-    bool m_fParseLine(std::string &, std::string &, std::string &);
-    Configer();
-    Configer(const Configer &c) //disable
+    class Basic
     {
-    }
+        int processpool;
+        bool sendfile;
+        std::string mimetype;
+        bool gzip;
+    };
 
-  public:
-    static Configer &getConfigerInstance()
+    class Server
     {
-        static Configer ConfigerInstance;
-        return ConfigerInstance;
-    }
+        int listen;
+        std::list<std::string> servername;
+        std::string www;
+        std::list<std::string> indexpage;
+        std::list<std::string> errorpage;
+    };
 
-    void setConfigerFile(const std::string &file);
-    bool loadConfig();
-    std::string getConfigValue(const std::string &);
-    void test()
+    class Log
     {
-        for (auto t : m_nValue)
+        std::string level; 
+        std::string path;
+        std::string debugfile;
+        std::string infofile;
+        std::string warnfile;
+        std::string errorfile;
+        std::string fatalfile;
+    };
+
+    private:
+        static std::string m_nFile;
+        Configer();
+        Configer(const Configer &c) //disable
         {
-            std::cout << "-" << t.first << "=" << t.second << "-" << std::endl;
         }
-    }
-    ~Configer();
+
+    public:
+        static Configer &getConfigerInstance()
+        {
+            static Configer ConfigerInstance;
+            return ConfigerInstance;
+        }
+        void setConfigerFile(const std::string &file);
+        bool loadConfig();
+        ~Configer();
 };
 
 #endif //
