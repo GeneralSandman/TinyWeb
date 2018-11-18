@@ -49,3 +49,12 @@ target_link_libraries(sdstr_test
     tiny_struct_model
     )
 
+# gzip_test
+add_executable(gzip_test
+    gzip_test.cc
+    )
+
+target_link_libraries(gzip_test
+    z
+    )
+
