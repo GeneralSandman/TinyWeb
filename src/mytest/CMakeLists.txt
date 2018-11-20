@@ -111,3 +111,13 @@ target_link_libraries(model_file_test
     http_parser_model
     )
 
+# httpTime_test
+add_executable(httpTime_test
+    httpTime_test.cc
+    )
+
+target_link_libraries(httpTime_test
+    )
+
+
+

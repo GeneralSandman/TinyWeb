@@ -26,8 +26,6 @@
 
 using namespace std;
 
-// gzip格式
-// (u16)MAGIC + (u8)DEFLATE + (u8)flag + (u32)time + (u8)deflate_flag + (u8)OS_CODE
 
 int compress(const std::string &inputfile, const std::string &outputfile)
 {
@@ -35,7 +33,7 @@ int compress(const std::string &inputfile, const std::string &outputfile)
     int inputfd = open(inputfile.c_str(), O_RDONLY);
     if (-1 == inputfd)
     {
-        std::cout << "open input file error\n";
+        printf("open input-file(%s) error\n", inputfile.c_str());
         return -1;
     }
 
@@ -43,13 +41,13 @@ int compress(const std::string &inputfile, const std::string &outputfile)
     int outputfd = open(outputfile.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0666);
     if (-1 == outputfd)
     {
-        std::cout << "open output file error\n";
+        printf("create input-file(%s) error\n", outputfile.c_str());
         return -1;
     }
 
     //malloc read buf
     char *read_buf = (char *)malloc(8192);
-    if (NULL == read_buf)
+    if (nullptr == read_buf)
     {
         std::cout << "create read buffer error\n";
         return -1;
@@ -57,17 +55,17 @@ int compress(const std::string &inputfile, const std::string &outputfile)
 
     //malloc write buf
     char *write_buf = (char *)malloc(8192 * 4);
-    if (NULL == write_buf)
+    if (nullptr == write_buf)
     {
         std::cout << "create write buffer error\n";
         return -1;
     }
 
-    //init zlib
+    //init zlib stream
     z_stream stream;
-    stream.zalloc = NULL;
-    stream.zfree = NULL;
-    stream.opaque = NULL;
+    stream.zalloc = nullptr;
+    stream.zfree = nullptr;
+    stream.opaque = nullptr;
 
     int ret = deflateInit2(&stream, Z_DEFAULT_COMPRESSION, Z_DEFLATED,
                            MAX_WBITS + 16,
@@ -76,7 +74,7 @@ int compress(const std::string &inputfile, const std::string &outputfile)
 
     if (Z_OK != ret)
     {
-        printf("init deflate error\n");
+        printf("deflateInit2 error\n");
         return ret;
     }
 
@@ -113,7 +111,7 @@ AGAIN:
 
             int avail = write_len - stream.avail_out;
             write(outputfd, write_buf, avail);
-        } while (stream.avail_out == 0); // 如果avail_out不够用了,说明输入的buffer还有没有压缩的部分,那么要继续压缩.
+        } while (stream.avail_out == 0); // output-buffer is fullness, maybe you need to compress continuely.
 
         // 如果输入长度不是0,说明压缩不完整,可以直接退出.
         assert(stream.avail_in == 0);
@@ -127,12 +125,6 @@ AGAIN:
     if (read_len < 0 && errno == EINTR)
         goto AGAIN;
 
-    deflateEnd(&stream);
-    free((void *)read_buf);
-    free((void *)write_buf);
-    close(inputfd);
-    close(outputfd);
-    return 0;
 ERROR:
     deflateEnd(&stream);
     free((void *)read_buf);
@@ -148,7 +140,7 @@ int uncompress(const std::string &inputfile, const std::string &outputfile)
     int inputfd = open(inputfile.c_str(), O_RDONLY);
     if (-1 == inputfd)
     {
-        std::cout << "open input file error\n";
+        printf("open input-file(%s) error\n", inputfile.c_str());
         return -1;
     }
 
@@ -156,13 +148,13 @@ int uncompress(const std::string &inputfile, const std::string &outputfile)
     int outputfd = open(outputfile.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0666);
     if (-1 == outputfd)
     {
-        std::cout << "open output file error\n";
+        printf("create input-file(%s) error\n", outputfile.c_str());
         return -1;
     }
 
     //malloc read buf
     char *read_buf = (char *)malloc(8192);
-    if (NULL == read_buf)
+    if (nullptr == read_buf)
     {
         std::cout << "create read buffer error\n";
         return -1;
@@ -170,7 +162,7 @@ int uncompress(const std::string &inputfile, const std::string &outputfile)
 
     //malloc write buf
     char *write_buf = (char *)malloc(8192 * 4);
-    if (NULL == write_buf)
+    if (nullptr == write_buf)
     {
         std::cout << "create write buffer error\n";
         return -1;
@@ -178,14 +170,14 @@ int uncompress(const std::string &inputfile, const std::string &outputfile)
 
     //init zlib
     z_stream stream;
-    stream.zalloc = NULL;
-    stream.zfree = NULL;
-    stream.opaque = NULL;
+    stream.zalloc = nullptr;
+    stream.zfree = nullptr;
+    stream.opaque = nullptr;
 
     int ret = inflateInit2(&stream, MAX_WBITS + 16);
     if (Z_OK != ret)
     {
-        printf("init deflate error\n");
+        printf("inflateInit2 error\n");
         return ret;
     }
 
@@ -217,6 +209,7 @@ AGAIN:
                 ret = Z_DATA_ERROR; /* and fall through */
             case Z_DATA_ERROR:
             case Z_MEM_ERROR:
+                goto ERROR;
                 (void)inflateEnd(&stream);
                 return ret;
             }
@@ -240,12 +233,6 @@ AGAIN:
     if (read_len < 0 && errno == EINTR)
         goto AGAIN;
 
-    deflateEnd(&stream);
-    free((void *)read_buf);
-    free((void *)write_buf);
-    close(inputfd);
-    close(outputfd);
-    return 0;
 ERROR:
     deflateEnd(&stream);
     free((void *)read_buf);
@@ -267,13 +254,13 @@ int readFileList(const std::string &basePath, std::vector<std::string> &files)
     DIR *dir;
     struct dirent *ptr;
 
-    if ((dir = opendir(basePath.c_str())) == NULL)
+    if ((dir = opendir(basePath.c_str())) == nullptr)
     {
-        std::cout << "open dir error\n";
+        printf("open dir(%s) error\n", basePath.c_str());
         return 1;
     }
 
-    while ((ptr = readdir(dir)) != NULL)
+    while ((ptr = readdir(dir)) != nullptr)
     {
         if (ptr->d_type == 8)
         {
@@ -283,16 +270,15 @@ int readFileList(const std::string &basePath, std::vector<std::string> &files)
     }
 
     closedir(dir);
-    return 1;
+    return 0;
 }
 
 int main(void)
 {
-    DIR *dir;
     std::string basePath;
     std::cin >> basePath;
     std::vector<std::string> files;
-    readFileList(basePath.c_str(), files);
+    readFileList(basePath, files);
 
     int alltest = 0;
     int passtest = 0;
@@ -304,13 +290,9 @@ int main(void)
         compress(file, gzfile);
         uncompress(gzfile, ungzfile);
         if (0 == diff(file, ungzfile))
-        {
             passtest++;
-        }
         else
-        {
-            std::cout << "not pass:" << file << std::endl;
-        }
+            printf("not pass file(%s)\n", file.c_str());
     }
 
     for (auto file : files)

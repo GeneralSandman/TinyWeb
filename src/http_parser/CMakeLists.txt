@@ -9,5 +9,6 @@ add_library(http_parser_model STATIC
     http_model_file.cc
     http_parser.cc
     http_responser.cc
+    http_time.cc
     str_t.cc
 )
