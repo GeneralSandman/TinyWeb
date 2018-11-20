@@ -1,15 +1,15 @@
 /*
-*Author:GeneralSandman
-*Code:https://github.com/GeneralSandman/TinyWeb
-*E-mail:generalsandman@163.com
-*Web:www.generalsandman.cn
-*/
+ *Author:GeneralSandman
+ *Code:https://github.com/GeneralSandman/TinyWeb
+ *E-mail:generalsandman@163.com
+ *Web:www.dissigil.cn
+ */
 
 /*---class Proxyer---
-*
-****************************************
-*
-*/
+ *
+ ****************************************
+ *
+ */
 
 #ifndef PROXYER_H
 #define PROXYER_H
@@ -36,24 +36,24 @@ class Factory;
 
 class Proxyer
 {
-private:
-  // std::map<NetAddress, Connection *> m_nServers;
-  // std::map<NetAddress, Connection *> m_nClients;
+    private:
+        // std::map<NetAddress, Connection *> m_nServers;
+        // std::map<NetAddress, Connection *> m_nClients;
 
-  // Server m_nServer;
-  // Client m_nClient;
-  // EventLoop *m_pEventLoop;
-  // bool m_nStarted;
-  ConnectionCallback m_nConnectCallback;
-  MessageCallback m_nMessageCallback;
-  WriteCompleteCallback m_nWriteCompleteCallback;
-  CloseCallback m_nCloseCallback;
-  // Factory *m_pFactory;
+        // Server m_nServer;
+        // Client m_nClient;
+        // EventLoop *m_pEventLoop;
+        // bool m_nStarted;
+        ConnectionCallback m_nConnectCallback;
+        MessageCallback m_nMessageCallback;
+        WriteCompleteCallback m_nWriteCompleteCallback;
+        CloseCallback m_nCloseCallback;
+        // Factory *m_pFactory;
 
-public:
-  Proxyer();
-  void start();
-  ~Proxyer();
+    public:
+        Proxyer();
+        void start();
+        ~Proxyer();
 };
 
 #endif // !PROXYER_H

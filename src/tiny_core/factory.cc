@@ -1,15 +1,15 @@
 /*
-*Author:GeneralSandman
-*Code:https://github.com/GeneralSandman/TinyWeb
-*E-mail:generalsandman@163.com
-*Web:www.generalsandman.cn
-*/
+ *Author:GeneralSandman
+ *Code:https://github.com/GeneralSandman/TinyWeb
+ *E-mail:generalsandman@163.com
+ *Web:www.dissigil.cn
+ */
 
 /*---XXX---
-*
-****************************************
-*
-*/
+ *
+ ****************************************
+ *
+ */
 
 #include <tiny_core/factory.h>
 #include <tiny_core/eventloop.h>
@@ -22,8 +22,8 @@
 
 Factory::Factory(EventLoop *loop, Protocol *prot)
     : m_pLoop(loop),
-      m_nNumProts(0),
-      m_pProtocol(prot)
+    m_nNumProts(0),
+    m_pProtocol(prot)
 {
     LOG(Debug) << "class Factory constructor\n";
 }
@@ -43,8 +43,8 @@ void Factory::createConnection(Connection *newCon)
 }
 
 void Factory::getMessage(Connection *con,
-                         Buffer *input,
-                         Time time)
+        Buffer *input,
+        Time time)
 {
     //It's used by Server
     //can't be override
