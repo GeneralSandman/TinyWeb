@@ -4,17 +4,21 @@
 
 using namespace std;
 #include <boost/function.hpp>
-// #include <functional>
 #include <boost/bind.hpp>
+#include <vector>
+#include <iostream>
 
-void print(int i){
-    cout<<i<<endl;
-}
-
-typedef boost::function <void()> hand;
 
 int main()
 {
+    vector<int> v(8);
+    std::cout << v.size() << std::endl;
+    std::cout << v.capacity() << std::endl;
+
+    vector<int> v2;
+    v2.reserve(8);
+    std::cout << v2.size() << std::endl;
+    std::cout << v2.capacity() << std::endl;
 
     return 0;
 }

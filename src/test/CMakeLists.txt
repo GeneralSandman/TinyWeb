@@ -8,7 +8,6 @@ SET (SOURCE_DIR ../)
 
 include_directories(${SOURCE_DIR})
 
-add_subdirectory("${SOURCE_DIR}/http_parser" http_parser.out)
 add_subdirectory("${SOURCE_DIR}/tiny_base" tiny_base.out)
 add_subdirectory("${SOURCE_DIR}/tiny_core" tiny_core.out)
 add_subdirectory("${SOURCE_DIR}/tiny_http" tiny_http.out)

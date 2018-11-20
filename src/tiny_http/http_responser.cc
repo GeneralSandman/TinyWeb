@@ -11,8 +11,8 @@
  *
  */
 
-#include <http_parser/http.h>
-#include <http_parser/http_parser.h>
+#include <tiny_http/http.h>
+#include <tiny_http/http_parser.h>
 
 #include <iostream>
 #include <string>
