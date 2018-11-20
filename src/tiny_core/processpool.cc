@@ -30,7 +30,6 @@
 
 void test_parent_MessageCallback(Connection *con, Buffer *buf, Time time)
 {
-
     std::cout << "[parent] get message:"
         << buf->getAll() << std::endl;
 }
@@ -68,18 +67,21 @@ void ProcessPool::createProcess(int nums)
 {
     std::vector<pair> pair_tmp;
     std::vector<pid_t> pids_tmp;
+    pair_tmp.reserve(nums);
+    pids_tmp.reserve(nums);
+
     //first-step:create nums process
     for (int i = 0; i < nums; i++)
     {
         int socketpairFds[2];
         int res = socketpair(AF_UNIX, SOCK_STREAM, 0, socketpairFds);
         if (res == -1)
-            handle_error("socketpair error:");
+            handle_error("[processpool] socketpair error:");
 
         pid_t pid = fork();
         if (pid < 0)
         {
-            std::cout << "fork error\n";
+            LOG(Debug) << "[processpool] fork error\n";
         }
         else if (pid == 0)
         {
@@ -97,10 +99,11 @@ void ProcessPool::createProcess(int nums)
         else
         {
             //Parent process:
-            //setting information after forking.
+            //Store information of process.
+            //And set something after forking.
             //1.push socketpair
             //2.push pid
-            std::cout << "create process(" << pid << ")\n";
+            LOG(Debug) << "[processpool] create process(" << pid << ")\n";
             pair_tmp.push_back({socketpairFds[0],
                     socketpairFds[1]});
             pids_tmp.push_back(pid);
@@ -115,10 +118,10 @@ void ProcessPool::createProcess(int nums)
         int pair[2];
         pair[0] = pair_tmp[i].d1;
         pair[1] = pair_tmp[i].d2;
-        std::cout << "[parent]:establish connection with child(" << m_nPids[i] <<")\n";
-        // SocketPair *pipe = new SocketPair(m_pEventLoop, i);
+        LOG(Debug) << "[parent]:establish connection with child(" << m_nPids[i] <<")\n";
         std::shared_ptr<SocketPair> pipe(new SocketPair(m_pEventLoop.get(), pair));
         m_nPipes.push_back(pipe);
+
         pipe->setParentSocket(int(m_nPids[i]));
         pipe->setMessageCallback(boost::bind(&test_parent_MessageCallback, _1, _2, _3)); //FIXME:
         pipe->setCloseCallback(boost::bind(&test_parent_CloseCallback, _1));
@@ -174,14 +177,14 @@ void ProcessPool::start()
 void ProcessPool::killAll()
 {
     //This function will be invoked by master.
-    std::cout << "[parent] kill " << m_nPids.size() << " chilern\n";
+    LOG(Debug) << "[parent] kill " << m_nPids.size() << " chilern\n";
     for (auto t : m_nPids)
     {
-        std::cout << "[parent] kill child(" << t << ")\n";
+        LOG(Debug) << "[parent] kill child(" << t << ")\n";
         int res = kill(t, SIGTERM);
         if (res == 0)
         {
-            std::cout << "[parent] kill child (" << t << ") successfully\n";
+            LOG(Debug) << "[parent] kill child (" << t << ") successfully\n";
             m_fDestoryProcess(t);
         }
     }
@@ -189,7 +192,7 @@ void ProcessPool::killAll()
 
 void ProcessPool::killSoftly()
 {
-    std::cout << "[parent] kill chilern softly\n";
+    LOG(Debug) << "[parent] kill chilern softly\n";
     //the difference with killAll
     //FIXME:
 }

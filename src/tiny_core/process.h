@@ -1,15 +1,15 @@
 /*
-*Author:GeneralSandman
-*Code:https://github.com/GeneralSandman/TinyWeb
-*E-mail:generalsandman@163.com
-*Web:www.dissigil.cn
-*/
+ *Author:GeneralSandman
+ *Code:https://github.com/GeneralSandman/TinyWeb
+ *E-mail:generalsandman@163.com
+ *Web:www.dissigil.cn
+ */
 
 /*---XXX---
-*
-****************************************
-*
-*/
+ *
+ ****************************************
+ *
+ */
 
 #ifndef PROCESS_H
 #define PROCESS_H
@@ -38,61 +38,51 @@ typedef boost::function<void()> Fun;
 
 void test_child_MessageCallback(Connection *con, Buffer *buf, Time time);
 
-enum ProcStatus
-{
-  Status_Started,
-  Status_Exited
-};
-
 class EventLoop;
 class Slave;
 
 class Process : boost::noncopyable
 {
-private:
-  EventLoop *m_pEventLoop;
-  Slave *m_pSlave;
-  std::string m_nName;
-  int m_nNumber;
-  pid_t m_nPid;
-  SocketPair m_nPipe;
-  bool m_nStarted;
-  bool m_nExited;
+    private:
+        EventLoop *m_pEventLoop;
+        Slave *m_pSlave;
+        std::string m_nName;
+        int m_nNumber;
+        pid_t m_nPid;
+        SocketPair m_nPipe;
 
-  SignalManager m_nSignalManager;
+        SignalManager m_nSignalManager;
 
-  static void childSignalHandler(int sign)
-  {
-    pid_t pid = getpid();
-    std::cout << "[child] (" << pid << ") signal manager get signal(" << sign << ")\n";
+        static void childSignalHandler(int sign)
+        {
+            pid_t pid = getpid();
+            std::cout << "[child] (" << pid << ") signal manager get signal(" << sign << ")\n";
 
-    switch (sign)
-    {
-    case SIGINT:
-    case SIGTERM:
-      status_terminate = 1;
-      std::cout << "[child] (" << pid << ") will terminate\n";
-      break;
-    case SIGQUIT:
-      status_quit_softly = 1;
-      std::cout << "[child] (" << pid << ") will quit softly\n";
-      break;
-    }
-  }
+            switch (sign)
+            {
+                case SIGINT:
+                case SIGTERM:
+                    status_terminate = 1;
+                    std::cout << "[child] (" << pid << ") will terminate\n";
+                    break;
+                case SIGQUIT:
+                    status_quit_softly = 1;
+                    std::cout << "[child] (" << pid << ") will quit softly\n";
+                    break;
+            }
+        }
 
-public:
-  Process(const std::string &name,
-          int number,
-          int sockfd[2]);
-  void setAsChild(int port);
-  void createListenServer(int listen);
-  void setSignalHandlers();
-  void start();
-  pid_t getPid();
-  bool started();
-  int join();
-  ~Process();
-  friend class ProcessPool;
+    public:
+        Process(const std::string &name, int number, int sockfd[2]);
+        void setAsChild(int port);
+        void createListenServer(int listen);
+        void setSignalHandlers();
+        void start();
+        pid_t getPid();
+        bool started();
+        int join();
+        ~Process();
+        friend class ProcessPool;
 };
 
 #endif // !PROCESS_H

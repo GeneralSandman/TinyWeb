@@ -38,6 +38,7 @@ typedef struct testHttpTime
 
 testHttpTime times[] =
 {
+    // formate 1
     {
         .time = 1541680751,
         .str = "Thu, 08 Nov 2018 12:39:11 GMT",
@@ -87,10 +88,27 @@ testHttpTime times[] =
         .valid = true,
         .timestamp = 0,
     },
+
     {
-        .time = 1541680744,
-        .str = "Thu, 08 Nov 2018 12:39:04 GMT",
+        .time = 1541680751,
+        .str = "Thu, 08 Nov 2018 12:39:11 GMT",
         .fmt = "%a, %d %b %Y %H:%M:%S %Z",
+        .valid = true,
+        .timestamp = 0,
+    },
+    // formate 2
+    {
+        .time = 1541680751,
+        .str = "Thursday, 08-Nov-18 12:39:11 GMT",
+        .fmt = "%A, %d-%b-%y %H:%M:%S %Z",
+        .valid = true,
+        .timestamp = 0,
+    },
+    // formate 3
+    {
+        .time = 1541680751,
+        .str = "Thu Nov  8 12:39:11 2018",
+        .fmt = "%a %b %e %H:%M:%S %Y",
         .valid = true,
         .timestamp = 0,
     },
@@ -133,7 +151,7 @@ void testPraseHttpTime()
 
     int len = sizeof(times) / sizeof(times[0]);
 
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < len; i++)
     {
         std::cout << i << ")" << std::endl;
         alltest++;
@@ -212,7 +230,36 @@ int main_()
     return 0;
 }
 
+void test3Format()
+{
+
+    formatTime time1, time2, time3;
+    time1.fmt = "%a, %d %b %Y %H:%M:%S %Z";
+    time2.fmt = "%A, %d-%b-%y %H:%M:%S %Z";
+    time3.fmt = "%a %b %e %H:%M:%S %Y";
+
+    time_t timestamp = 1541680751;
+    struct tm tmp;
+    memset(&tmp, 0, sizeof(struct tm));
+    convertTime2Gmt(&timestamp, false, &tmp);
+    formate(&tmp, &time1);
+    std::cout << time1.str << std::endl;
+
+    memset(&tmp, 0, sizeof(struct tm));
+    convertTime2Gmt(&timestamp, false, &tmp);
+    formate(&tmp, &time2);
+    std::cout << time2.str << std::endl;
+
+
+    memset(&tmp, 0, sizeof(struct tm));
+    convertTime2Gmt(&timestamp, false, &tmp);
+    formate(&tmp, &time3);
+    std::cout << time3.str << std::endl;
+
+}
+
 int main()
 {
+    test3Format();
     testPraseHttpTime();
 }

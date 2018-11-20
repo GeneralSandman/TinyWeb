@@ -31,6 +31,8 @@ inline void convertTime2Gmt(const time_t *src, bool isLocal, struct tm *gmt)
 
 inline void convertTm2Time(struct tm * gmt, bool isLocal, time_t *time)
 {
+    if (!isLocal)
+        gmt->tm_hour += 8;
     *time = mktime(gmt);
 }
 

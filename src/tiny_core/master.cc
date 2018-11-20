@@ -1,15 +1,15 @@
 /*
-*Author:GeneralSandman
-*Code:https://github.com/GeneralSandman/TinyWeb
-*E-mail:generalsandman@163.com
-*Web:www.generalsandman.cn
-*/
+ *Author:GeneralSandman
+ *Code:https://github.com/GeneralSandman/TinyWeb
+ *E-mail:generalsandman@163.com
+ *Web:www.dissigil.cn
+ */
 
 /*---XXX---
-*
-****************************************
-*
-*/
+ *
+ ****************************************
+ *
+ */
 
 #include <tiny_core/processpool.h>
 #include <tiny_core/eventloop.h>
@@ -28,10 +28,10 @@ extern int status_reconfigure;
 
 Master::Master(ProcessPool *pool, EventLoop *loop, int num, const std::string &name)
     : m_pProcessPool(pool),
-      m_pEventLoop(loop),
-      m_nNumber(num),
-      m_nName(name),
-      m_pListenSocket(new Socket(createNoBlockSocket()))
+    m_pEventLoop(loop),
+    m_nNumber(num),
+    m_nName(name),
+    m_pListenSocket(new Socket(createNoBlockSocket()))
 {
     LOG(Debug) << "class Master constuctor\n";
 }
@@ -49,18 +49,25 @@ int Master::getListenSocket()
 
 void Master::work()
 {
-    std::cout << "[master]:start working\n";
-    m_pEventLoop->loop();
-    if (status_terminate || status_quit_softly)
+    LOG(Debug) << "[master]:start working\n";
+    status = 1;
+
+    while (status)
     {
-        std::cout << "[master]:I will kill all chilern\n";
-        m_pProcessPool->killAll();
-    }
-    if (status_reconfigure)
-    {
-        std::cout << "[master]:reconfigure ,recreate new process\n";
-        m_pProcessPool->killAll();
-        m_pProcessPool->createProcess(m_pProcessPool->processNum());
+        m_pEventLoop->loop();
+        if (status_terminate || status_quit_softly)
+        {
+            LOG(Debug) << "[master]:I will kill all chilern\n";
+            m_pProcessPool->killAll();
+            status = 0;
+        }
+        if (status_reconfigure)
+        {
+            LOG(Debug) << "[master]:reconfigure ,recreate new process\n";
+            m_pProcessPool->killAll();
+            m_pProcessPool->createProcess(m_pProcessPool->processNum());
+        }
+
     }
 }
 

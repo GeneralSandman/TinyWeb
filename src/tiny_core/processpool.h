@@ -44,6 +44,7 @@ struct pair
 };
 
 void test_parent_MessageCallback(Connection *con, Buffer *buf, Time time);
+void test_parent_CloseCallback(Connection *con);
 
 void period_print_test(void);
 
@@ -72,7 +73,10 @@ class ProcessPool
 
         static void m_fSignalHandler(ProcessPool *pool, int sign)
         {
-            std::cout << "[parent(" << m_nPid 
+            assert(nullptr != pool);
+            if (nullptr == pool)
+                return;
+            LOG(Debug) << "[parent(" << m_nPid 
                 << ")] signal manager get signal(" << sign << ")\n";
             int status;
             pid_t pid;
@@ -81,15 +85,15 @@ class ProcessPool
                 case SIGINT:
                 case SIGTERM:
                     status_terminate = 1;
-                    std::cout << "[parent] parent will terminate all slave process\n";
+                    LOG(Debug) << "[parent] parent will terminate all slave process\n";
                     break;
                 case SIGQUIT:
                     status_quit_softly = 1;
-                    std::cout << "[parent] quit softly\n";
+                    LOG(Debug) << "[parent] quit softly\n";
                 case SIGCHLD:
                     status_child_quit = 1;
                     pid = waitpid(-1, &status, WNOHANG);
-                    std::cout << "[parent] collect information from child(" << pid << ")\n";
+                    LOG(Debug) << "[parent] collect information from child(" << pid << ")\n";
                     pool->m_fDestoryProcess(pid);
                     break;
                     //invoke waitpid() to collect the resource of child
@@ -113,7 +117,7 @@ class ProcessPool
                 if (m_nPids[index] == pid)
                     break;
             }
-            assert(index!=m_nPids.size());
+            assert(index != m_nPids.size());
 
             m_nPipes[index]->clearSocket();
             m_nPipes.erase(m_nPipes.begin() + index);
