@@ -102,46 +102,6 @@ class ClientFactory : public Factory
         ClientFactory(EventLoop *, Protocol *);
         virtual void buildProtocol(Protocol *newProt);
         virtual ~ClientFactory();
-};;
-
-/*-----------ServerPoemFactory--------------*/
-
-class ServerPoemFactory : public ServerFactory
-{
-    private:
-        std::string m_nName;
-        std::vector<std::string> m_nPoems;
-
-    public:
-        ServerPoemFactory(EventLoop *, Protocol *);
-        virtual void buildProtocol(Protocol *newProt);
-        virtual ~ServerPoemFactory();
-};
-
-/*-------------ClientPoemFactory------------*/
-
-class ClientPoemFactory : public ClientFactory
-{
-    private:
-        std::string m_nName;
-        std::vector<std::string> m_nPoems;
-
-    public:
-        ClientPoemFactory(EventLoop *, Protocol *);
-        virtual void buildProtocol(Protocol *newProt);
-        virtual ~ClientPoemFactory();
-};
-
-/*-------------ProxyFactory------------*/
-
-class ProxyFactory : public Factory
-{
-    private:
-
-    public:
-        ProxyFactory(EventLoop *, Protocol *);
-        virtual void buildProtocol(Protocol *newProt);
-        virtual ~ProxyFactory();
 };
 
 #endif // FACTORY_H
