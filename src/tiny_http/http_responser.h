@@ -182,7 +182,7 @@ class HttpResponser
             responseHeadersToStr(&(resp->headers), &result);
 
             printf(&result);
-            // sendfile(0, &(resp->file));
+            sendfile(0, &(resp->file));
 
             destory(&result);
             destoryFile(&(resp->file));

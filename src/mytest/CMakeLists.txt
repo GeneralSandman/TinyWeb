@@ -34,7 +34,7 @@ add_executable(parseBody
     )
 
 target_link_libraries(parseBody
-    http_parser_model
+    tiny_http_model
     )
 
 # parseHeader
@@ -43,7 +43,7 @@ add_executable(parseHeader
     )
 
 target_link_libraries(parseHeader
-    http_parser_model
+    tiny_http_model
     )
 
 # parseHeaderMeaning
@@ -52,7 +52,7 @@ add_executable(parseHeaderMeaning
     )
 
 target_link_libraries(parseHeaderMeaning
-    http_parser_model
+    tiny_http_model
     )
 
 # parseHost
@@ -61,7 +61,7 @@ add_executable(parseHost
     )
 
 target_link_libraries(parseHost
-    http_parser_model
+    tiny_http_model
     )
 
 # parseRequestLine
@@ -70,7 +70,7 @@ add_executable(parseRequestLine
     )
 
 target_link_libraries(parseRequestLine
-    http_parser_model
+    tiny_http_model
     )
 
 # parseResponseLine
@@ -79,7 +79,7 @@ add_executable(parseResponseLine
     )
 
 target_link_libraries(parseResponseLine
-    http_parser_model
+    tiny_http_model
     )
 
 # parseUrl
@@ -88,7 +88,7 @@ add_executable(parseUrl
     )
 
 target_link_libraries(parseUrl
-    http_parser_model
+    tiny_http_model
     )
 
 # responser_test
@@ -97,8 +97,9 @@ add_executable(responser_test
     )
 
 target_link_libraries(responser_test
-    http_parser_model
+    tiny_http_model
     tiny_struct_model
+    tiny_base_model
     )
 
 # model_file_test
@@ -107,15 +108,15 @@ add_executable(model_file_test
     )
 
 target_link_libraries(model_file_test
-    http_parser_model
+    tiny_http_model
     )
 
-# httpTime_test
-add_executable(httpTime_test
-    httpTime_test.cc
+# parseHttpTime_test
+add_executable(parseHttpTime_test
+    parseHttpTime_test.cc
     )
 
-target_link_libraries(httpTime_test
+target_link_libraries(parseHttpTime_test
     )
 
 

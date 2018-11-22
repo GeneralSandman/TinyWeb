@@ -14,29 +14,16 @@
 *
 */
 
-/*---class EchoProtocol---
-*
-****************************************
-*
-*/
-
-/*---class WebProtocol---
-*
-****************************************
-*
-*/
 
 #ifndef PROTOCOL_H
 #define PROTOCOL_H
 
-#include <tiny_core/callback.h>
-#include <tiny_core/connection.h>
-#include <tiny_http/parser.h>
-#include <tiny_http/responser.h>
 #include <tiny_base/buffer.h>
-#include <tiny_core/time.h>
 #include <tiny_base/api.h>
 #include <tiny_base/log.h>
+#include <tiny_core/callback.h>
+#include <tiny_core/connection.h>
+#include <tiny_core/time.h>
 
 #include <iostream>
 #include <sstream>

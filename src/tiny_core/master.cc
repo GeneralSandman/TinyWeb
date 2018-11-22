@@ -38,7 +38,7 @@ Master::Master(ProcessPool *pool, EventLoop *loop, int num, const std::string &n
 
 void Master::init()
 {
-    NetAddress tmp(9999);
+    NetAddress tmp(9998);
     m_pListenSocket->bindAddress(tmp);
 }
 

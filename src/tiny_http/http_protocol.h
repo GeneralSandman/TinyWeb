@@ -16,7 +16,7 @@
 
 
 #include <tiny_base/log.h>
-#include <tiny_core/http_protocol.h>
+#include <tiny_core/protocol.h>
 
 /*--------WebProtocol-----------*/
 
@@ -24,8 +24,6 @@ class WebProtocol : public Protocol
 {
 private:
   bool m_nKeepAlive;
-  HttpParser m_nParser;
-  HttpResponser m_nResponser;
 
 public:
   WebProtocol();

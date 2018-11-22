@@ -21,7 +21,6 @@
 
 //default configuration file.
 std::string Configer::m_nFile = "./TinyWeb.conf";
-Reader Configer::m_nFileReader("./TinyWeb.conf");
 
 void setConfigerFile(const std::string &file)
 {

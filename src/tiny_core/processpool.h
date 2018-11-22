@@ -14,10 +14,12 @@
 #ifndef PROCESS_POOL_H
 #define PROCESS_POOL_H
 
-#include <tiny_core/process.h>
 #include <tiny_base/signalmanager.h>
 #include <tiny_base/buffer.h>
 #include <tiny_base/api.h>
+#include <tiny_base/log.h>
+#include <tiny_core/process.h>
+
 
 #include <vector>
 #include <map>
@@ -76,8 +78,7 @@ class ProcessPool
             assert(nullptr != pool);
             if (nullptr == pool)
                 return;
-            LOG(Debug) << "[parent(" << m_nPid 
-                << ")] signal manager get signal(" << sign << ")\n";
+            LOG(Debug) << "[parent] signal manager get signal(" << sign << ")\n";
             int status;
             pid_t pid;
             switch (sign)

@@ -15,10 +15,10 @@
 #define CONNECTION_H
 
 #include <tiny_core/channel.h>
-#include <tiny_base/buffer.h>
 #include <tiny_core/callback.h>
 #include <tiny_core/time.h>
 #include <tiny_core/netaddress.h>
+#include <tiny_base/buffer.h>
 
 #include <boost/function.hpp>
 

@@ -19,8 +19,7 @@
 //--------WebProtocol api-------------//
 
 WebProtocol::WebProtocol()
-    : m_nKeepAlive(false),
-      m_nResponser(this)
+    : m_nKeepAlive(false)
 {
     LOG(Debug) << "class WebProtocol constructor\n";
 }

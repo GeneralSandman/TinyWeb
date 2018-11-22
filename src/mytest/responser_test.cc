@@ -211,6 +211,7 @@ void testResponser()
         {
             HttpResponser responser;
             responser.response(result);
+            passtest++;
         }
 
         delete result;

@@ -12,6 +12,7 @@
  */
 
 #include <tiny_http/http_model_file.h>
+#include <tiny_base/log.h>
 
 #include <iostream>
 #include <string>
@@ -140,6 +141,12 @@ int sendfile(int outFd, File *file)
     }
 
     //std::cout << "file size:" << file->info.st_size << std::endl;
+
+    if (outFd == 0)
+    {
+        LOG(Debug) << "[HttpResponser] sendfile " << file->name << std::endl;
+        return 1;
+    }
 
     ssize_t res = sendfile(outFd, file->fd, &(file->offset), file->info.st_size);
     if (res < 0)

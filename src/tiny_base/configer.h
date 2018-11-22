@@ -17,6 +17,7 @@
 
 #include <map>
 #include <string>
+#include <list>
 #include <iostream>
 
 void setConfigerFile(const std::string &file);
