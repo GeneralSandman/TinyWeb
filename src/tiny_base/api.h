@@ -34,7 +34,7 @@ std::string cstr2string(const char *str);
 void splitString(const std::string &, const std::string &, std::vector<std::string> &);
 void eraseSpace(std::string &);
 void eraseAllSpace(std::string &);
-std::map<char, std::string> getOption(int argc, char *argv[]);
+std::map<char, std::string> getOption(int argc, char *argv[], const struct option *longopts, const char * short_options);
 
 int createSocket(int domain, int type, int protocol);
 int createSocket();

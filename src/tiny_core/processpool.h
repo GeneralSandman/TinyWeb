@@ -105,6 +105,12 @@ class ProcessPool
                     //   break;
                 case SIGPIPE:
                     break;
+                case SIGUSR1:
+                    // restart
+                    break;
+                case SIGUSR2:
+                    // reload config
+                    break;
                 default:
                     break;
             }

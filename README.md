@@ -23,8 +23,9 @@ git clone https://github.com/GeneralSandman/TinyWeb
 ### Install
 ```
 cd TinyWeb/src
-make
-make clean
+mkdir build
+cd build
+cmake ../ && make
 ```
 
 ### Configure
@@ -39,17 +40,9 @@ Each line is a comment line which begin with #.
 |-|-|
 |***Basic-configure***|
 |listen|listen-port|
-|processpoll|number of process|
-|Docs|path of html|
-|HostName|the host of web|
 |***Log-configure***|
 |LogLevel|log level|
-|LogPath|log path|
-|DebugFile|Debug level file|
-|InfoFile|Info level file||
-|WarnFile|Warn level file||
-|ErrorFile|Error level file||
-|FatalFile|Fatal level file||
+
 
 ### Start Server
 
@@ -69,6 +62,49 @@ sudo ./TinyWeb -c /home/li/TinyWeb.conf
 
 ```
 sudo ./TinyWeb -d -c /home/li/TinyWeb.conf
+```
+
+- Stop server safely
+```
+sudo ./TinyWeb -o stop
+
+cat /var/run/TinyWeb.conf
+sudo kill -s SIGQUIT <master-pid> 
+```
+
+- Stop server immeditely
+```
+sudo ./TinyWeb -o stop
+
+cat /var/run/TinyWeb.conf
+sudo kill -s SIGTERM <master-pid> 
+sudo kill -s SIGINT <master-pid> 
+```
+
+- Restart server
+```
+sudo ./TinyWeb -o restart
+
+cat /var/run/TinyWeb.conf
+sudo kill -s SIGUSR1 <master-pid> 
+```
+
+- Reload server with new configure file
+```
+sudo ./TinyWeb -o reload [-c <config-file>]
+
+cat /var/run/TinyWeb.conf
+sudo kill -s SIGUSR2 <master-pid> 
+```
+
+- Test configure file is vliad or not
+```
+sudo ./TinyWeb --tcf /path/path/configfil
+```
+
+- Get version
+```
+sudo ./TinyWeb -v
 ```
 
 ---------------------

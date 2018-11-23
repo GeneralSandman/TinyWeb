@@ -120,18 +120,16 @@ void eraseAllSpace(std::string &s)
     }
 }
 
-std::map<char, std::string> getOption(int argc, char *argv[])
+std::map<char, std::string> getOption(int argc, char *argv[], const struct option *longopts, const char *short_options)
 {
     std::map<char, std::string> result;
-    struct option longopts[] = {
-        {"port", 1, NULL, 'p'},
-        {0, 0, 0, 0},
-    };
-    const char *short_options = "p:";
     int c;
     while ((c = getopt_long(argc, argv, short_options, longopts, NULL)) != -1)
     {
-        result[c] = cstr2string(optarg);
+        if (optarg == nullptr)
+            result[c] = " ";
+        else
+            result[c] = cstr2string(optarg);
     }
 
     return result;

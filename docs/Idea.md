@@ -1,5 +1,5 @@
 
-> # 各种成熟与不成熟想法
+> # 1. 各种成熟与不成熟想法
 - 实现一个高效的内存池，为每个TCP连接维持内存池。参考STL实现。
     - 通过成员函数allocate和deallocate分配释放内存。
     - 当需要的内存大于128Bytes时：直接分配内存（第一级内存配置器）。
@@ -12,13 +12,10 @@
     - 考虑造成的内存碎片
     - 效率
 - 增加异步读磁盘
-- nginx定义了结构体描述接受到信号的行为，定义一个数组注册收到信号的行为。
 - 提升程序为demon进程（demon程序标准输入输出如何处理?）
 - Semphore,SharedMemory,Cache
-- 优化Parser
-- 通过list维护一批请求头，响应头
 - 如何处理url中包含```../```的问题
-- add MIME type
+- 思考mime.type的设计，如何配置 include /home/li/TinyWeb/mime.type
 - 为Connection添加close()功能来作为对shutdownWrite()的补充
 - 如何支持中文url??????
 - 如何使用进程池来处理多个连接
@@ -27,7 +24,6 @@
     - 一个Connection只能属于一个进程，不能多个进程同时处理
     - Connection的读，写，关闭事件均有master进程负责，
         并把相应的事件传给slaver
-- EventLoop与ProcessPoll的逻辑关系如何设计？？？？？
 - 每个Process均有一个EventLoop，不过监听的event不同
     - master监听网络事件
     - slaver监听master的通信事件，和每个Connection的定时器事件
@@ -38,7 +34,6 @@
 - 进程间通信用信号和共享内存
     - 信号控制进程的工作，停止
     - 共享内存更偏重于业务逻辑
-- fork 之后复制的内存如何销毁的问题！！！！！！！！
 - 优化创建进程的方式：通过vfork和exec
 - master和worker实际上是对processpoll和process的高层封装
     - 通过对他们的信号进行控制，进而实现对master对worker的控制，
@@ -114,8 +109,6 @@ ngx_shmtx_t锁是可以在共享内存上使用的,它是Nginx中最常见的锁
 这个文件提供一个锁。l_type的值则取决于用户是想实现阻塞睡眠锁还是想实现非阻塞不会
 睡眠的锁。
 
-- nginx进程间的通信机制
-    -
 
 > # 更新进度（2.7-2.11）
 - 对进程间通信的基本类进行设计
@@ -125,11 +118,9 @@ ngx_shmtx_t锁是可以在共享内存上使用的,它是Nginx中最常见的锁
 - 对进程池进行重新设计，利用IPC基本类进行通信，控制
 
 > # 更新进度
-- 参考nginx内存池，list,rbtree,string,
-- 思考mime.type的设计，如何配置 include /home/li/TinyWeb/mime.type
-- 重新写Makefile
-- 更新EventLoop
-> # 模块的开发文档
+
+
+> # TinyWeb全线改为智能指针
 
 > # 需要处理的信号：
 - SIGCHLD 子进程终止通知父进程
@@ -137,19 +128,15 @@ ngx_shmtx_t锁是可以在共享内存上使用的,它是Nginx中最常见的锁
 - SIGINT Ctrl-c
 - SIGTERM 强制关闭
 - SIGQUIT 软关闭　
-- SIGHUP 终端退出信号，重新加载配置文件。
-
-> # TinyWeb全线改为智能指针
+- SIGHUP 终端退出信号，重新加载配置文件 
 
 > # 如何方便的控制TinyWeb：
 - kill -QUIT PID :softly close
 - kill -TERM PID :close quickly
-- kill -INT PID :同上
-- -c <configfile>:
-- -d :
+- kill -INT PID :close quickly
 
 各种类模块的说明：
-- distingush Protocol & Connection
+- Protocol & Connection
     - Protocol 用来处理用户逻辑，简单的维护用户上下文，不负责数据传输，
         通过简单的重载basic Protocol的共有函数来实现处理Connection读到
         Buffer中的数据。

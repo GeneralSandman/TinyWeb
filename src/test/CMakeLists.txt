@@ -54,6 +54,16 @@ add_executable(gzip_test
     )
 
 target_link_libraries(gzip_test
-    z
+    )
+
+# main_test
+add_executable(main_test
+    main_test.cc
+    )
+
+target_link_libraries(main_test
+    tiny_core_model
+    tiny_http_model
+    tiny_base_model
     )
 
