@@ -113,7 +113,7 @@ void ProcessPool::createProcess(int nums)
     //Parent process second-step:build pipe with every child process
     for (auto t : pids_tmp)
         m_nPids.push_back(t);
-    for (int i = 0; i < pair_tmp.size(); i++)
+    for (unsigned int i = 0; i < pair_tmp.size(); i++)
     {
         int pair[2];
         pair[0] = pair_tmp[i].d1;
@@ -157,12 +157,12 @@ void ProcessPool::start()
         //Parent process
         assert(m_nPipes.size() == m_nPids.size());
 
-        for (int index = 0; index < m_nPipes.size(); index++)
+        for (unsigned int index = 0; index < m_nPipes.size(); index++)
         {
             LOG(Debug) << "[parent] I will send to child(" << m_nPids[index]
                       << ") message every one seconds\n";
 
-            TimerId id1 = m_pEventLoop->runEvery(1, boost::bind(&test_parent_period_print));
+            m_pEventLoop->runEvery(1, boost::bind(&test_parent_period_print));
         }
         status = 1;
         while (status)

@@ -317,7 +317,7 @@ void sdscatsprintf(sdstr *str, const char *fmt, ...)
 void sdsjoinstr(sdstr *dest, const char *src[], unsigned int n, const char *sep, int seplen)
 {
     unsigned int newlen = 0;
-    for (int i=0; i<n; i++)
+    for (unsigned int i=0; i<n; i++)
     {
         if (nullptr != *(src+i))
             newlen += strlen(*(src+i));
@@ -326,7 +326,7 @@ void sdsjoinstr(sdstr *dest, const char *src[], unsigned int n, const char *sep,
 
     sdsMakeSpace(dest, newlen);
     
-    for (int i=0; i<n; i++)
+    for (unsigned int i=0; i<n; i++)
     {
         if (nullptr != *(src+i))
             sdscat(dest, *(src+i));
@@ -338,7 +338,7 @@ void sdsjoinstr(sdstr *dest, const char *src[], unsigned int n, const char *sep,
 void sdsjoinsds(sdstr *dest, sdstr src[], unsigned int n, const char *sep, int seplen)
 {
     unsigned int newlen = 0;
-    for (int i=0; i<n; i++)
+    for (unsigned int i=0; i<n; i++)
     {
         if (nullptr != (src+i))
             newlen += (src+i)->len;
@@ -347,7 +347,7 @@ void sdsjoinsds(sdstr *dest, sdstr src[], unsigned int n, const char *sep, int s
 
     sdsMakeSpace(dest, newlen);
     
-    for (int i=0; i<n; i++)
+    for (unsigned int i=0; i<n; i++)
     {
         if (nullptr != (src+i))
             sdscatsds(dest, src+i);

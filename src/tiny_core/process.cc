@@ -92,7 +92,7 @@ void Process::setSignalHandlers()
 
 void Process::start()
 {
-    TimerId id1 = m_pEventLoop->runEvery(1, boost::bind(&test_child_period_print));
+    m_pEventLoop->runEvery(1, boost::bind(&test_child_period_print));
 
     status = 1;
 
@@ -119,6 +119,7 @@ bool Process::started()
 int Process::join()
 {
     // TODO:
+    return 0;
 }
 
 Process::~Process()

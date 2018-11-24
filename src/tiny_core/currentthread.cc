@@ -23,7 +23,7 @@ __thread const char *t_threadName = "unknown";
 void cacheTid()
 {
     t_cachedTid = gettid();
-    int n = snprintf(t_tidString, sizeof t_tidString, "%5d ",
+    snprintf(t_tidString, sizeof t_tidString, "%5d ",
                      t_cachedTid);
 }
 }

@@ -435,6 +435,7 @@ bool List<T>::getByRange(std::vector<T> &res, int begin, int end)
 bool List<T>::getAll(std::vector<T> &res)
 {
     getByRange(res, 0, m_nLen);
+    return true;
 }
 
     template <typename T>

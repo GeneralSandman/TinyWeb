@@ -49,7 +49,7 @@ NetAddress::NetAddress(const std::string &ipport)
     std::string port;
 
     bool flag = false;
-    for (int i = 0; i < ipport.size(); i++)
+    for (unsigned int i = 0; i < ipport.size(); i++)
     {
         if (ipport[i] == ':')
         {

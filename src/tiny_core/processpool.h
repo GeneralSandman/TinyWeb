@@ -121,7 +121,7 @@ class ProcessPool
 
         void m_fDestoryProcess(pid_t pid)
         {
-            int index = 0;
+            unsigned int index = 0;
             for (; index < m_nPids.size(); index++)
             {
                 if (m_nPids[index] == pid)

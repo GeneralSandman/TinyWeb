@@ -1,15 +1,15 @@
 /*
-*Author:GeneralSandman
-*Code:https://github.com/GeneralSandman/TinyWeb
-*E-mail:generalsandman@163.com
-*Web:www.generalsandman.cn
-*/
+ *Author:GeneralSandman
+ *Code:https://github.com/GeneralSandman/TinyWeb
+ *E-mail:generalsandman@163.com
+ *Web:www.dissigil.cn
+ */
 
 /*---XXX---
-*
-****************************************
-*
-*/
+ *
+ ****************************************
+ *
+ */
 
 #include <cstdlib>
 #include <ctime>
@@ -48,6 +48,7 @@ log_level convertStringToLoglevel(const std::string &s)
     {
         return Fatal;
     }
+    return Debug;
 }
 
 std::ofstream Logger::m_nNullStream(0);
@@ -61,11 +62,11 @@ std::ofstream Logger::m_nFatalLogFile;
 log_level Logger::m_nLevel = Debug;
 
 void initLogger(const std::string &debug_log_filename,
-                const std::string &info_log_filename,
-                const std::string &warn_log_filename,
-                const std::string &error_log_filename,
-                const std::string &fatal_log_filename,
-                log_level level)
+        const std::string &info_log_filename,
+        const std::string &warn_log_filename,
+        const std::string &error_log_filename,
+        const std::string &fatal_log_filename,
+        log_level level)
 {
     // Logger::m_nDebugLogFile.open(debug_log_filename.c_str(), std::ios::in | std::ios::app);
     // Logger::m_nInfoLogFile.open(info_log_filename.c_str(), std::ios::in | std::ios::app);
@@ -145,8 +146,8 @@ std::ostream &Logger::getStream(log_level level)
 }
 
 std::ostream &Logger::log(log_level level,
-                          const int line,
-                          const std::string &function)
+        const int line,
+        const std::string &function)
 {
 
     if (level < Logger::m_nLevel)
@@ -159,36 +160,36 @@ std::ostream &Logger::log(log_level level,
     std::string level_string = "";
     switch (level)
     {
-    case Debug:
-        level_string = "Debug";
-        break;
-    case Info:
-        level_string = "Info";
-        break;
-    case Warn:
-        level_string = "Warn";
-        break;
-    case Error:
-        level_string = "Error";
-        break;
-    case Fatal:
-        level_string = "Fatal";
-        break;
+        case Debug:
+            level_string = "Debug";
+            break;
+        case Info:
+            level_string = "Info";
+            break;
+        case Warn:
+            level_string = "Warn";
+            break;
+        case Error:
+            level_string = "Error";
+            break;
+        case Fatal:
+            level_string = "Fatal";
+            break;
     }
 
     //if the current log level is Info,so the LOG(Debug) do nothing
     return getStream(level) << "[" << tmpBuf << "]"
-                            << "(pid:" << getpid() << ")"
-                            << "[" << level_string << "] "
-                            << "function (" << function << ")"
-                            << "line " << line << ":";
+        << "(pid:" << getpid() << ")"
+        << "[" << level_string << "] "
+        << "function (" << function << ")"
+        << "line " << line << ":";
     // << std::flush;
 }
 
 Logger::~Logger()
 {
     getStream(m_nLevel) << std::endl
-                        << std::flush;
+        << std::flush;
 
     if (Fatal == m_nLevel)
     {

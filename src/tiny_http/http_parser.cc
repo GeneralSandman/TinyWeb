@@ -310,8 +310,8 @@ enum http_host_state HttpParser::parseHostChar(const char ch,
 }
 
 int HttpParser::parseHost(const char *stream,
-                          int at,
-                          int len,
+                          unsigned int at,
+                          unsigned int len,
                           Url *&result,
                           bool has_at_char)
 {
@@ -329,7 +329,7 @@ int HttpParser::parseHost(const char *stream,
                                        ? s_http_userinfo_start
                                        : s_http_host_start;
     enum http_host_state stat;
-    for (int i = 0; i < len; i++)
+    for (unsigned int i = 0; i < len; i++)
     {
         char ch = *(begin + i);
         // std::cout << ch << (unsigned int)prestat << std::endl;
@@ -602,7 +602,7 @@ enum state HttpParser::parseUrlChar(const char ch,
 }
 
 int HttpParser::parseUrl(const char *stream,
-                         int len,
+                         unsigned int len,
                          Url *result)
 {
     memset(result, 0, sizeof(Url));
@@ -621,7 +621,7 @@ int HttpParser::parseUrl(const char *stream,
 
     bool has_at_char = false;
 
-    for (int i = 0; i < len; i++)
+    for (unsigned int i = 0; i < len; i++)
     {
         char ch = *(begin + i);
         // std::cout << "[Debug]" << ch << (unsigned int)prestat << std::endl;
@@ -709,7 +709,7 @@ int HttpParser::parseUrl(const char *stream,
         unsigned int offset = result->fields[HTTP_UF_PORT].offset;
         unsigned int len = result->fields[HTTP_UF_PORT].len;
         unsigned int port = 0;
-        for (int i = 0; i < len; i++)
+        for (unsigned int i = 0; i < len; i++)
         {
             port *= 10;
             port += *(begin + offset + i) - '0';
@@ -822,8 +822,8 @@ enum http_header_state HttpParser::parseHeaderChar(const char ch,
 }
 
 int HttpParser::parseHeader(const char *stream,
-                            int &at,
-                            int len,
+                            unsigned int &at,
+                            unsigned int len,
                             HttpHeader *result)
 {
 
@@ -838,7 +838,7 @@ int HttpParser::parseHeader(const char *stream,
     unsigned int valuebegin = 0;
     unsigned int valuelen = 0;
 
-    for (int i = 0; i < len; i++)
+    for (unsigned int i = 0; i < len; i++)
     {
         char ch = *(begin + at + i);
         stat = parseHeaderChar(ch, prestat);
@@ -916,15 +916,17 @@ int HttpParser::parseHeader(const char *stream,
 
         prestat = stat;
     }
+
+    return 0;
 }
 
 int HttpParser::parseHeaders(const char *stream,
-                             int at,
-                             int len,
+                             unsigned int at,
+                             unsigned int len,
                              HttpHeaders *result)
 {
     int return_val = 0;
-    int offset = at;
+    unsigned int offset = at;
 
     while (1)
     {
@@ -1074,11 +1076,12 @@ int HttpParser::parseHeadersMeaning(HttpHeaders *headers)
             p->second.fun(&(t->value), headers);
         }
     }
+    return 0;
 }
 
 int HttpParser::parseBody(const char *stream,
-                          int at,
-                          int len,
+                          unsigned int at,
+                          unsigned int len,
                           enum http_body_type body_type,
                           unsigned int content_length_n)
 {
@@ -1109,7 +1112,7 @@ int HttpParser::parseBody(const char *stream,
 
     unsigned long long chunk_size = 0;
 
-    for (int i = 0; i < len; i++)
+    for (unsigned int i = 0; i < len; i++)
     {
         char ch = *(begin + at + i);
 
@@ -1235,8 +1238,8 @@ error:
 }
 
 int HttpParser::execute(const char *stream,
-                        int at,
-                        int len,
+                        unsigned int at,
+                        unsigned int len,
                         HttpRequest *request)
 {
     char *begin = (char *)stream + at;
@@ -1245,13 +1248,13 @@ int HttpParser::execute(const char *stream,
     bool break_for = false;
     int content_length = 0;
 
-    enum http_method method;
+    // enum http_method method;
     enum http_body_type body_type = t_http_body_type_init;
 
     unsigned int url_begin = 0;
     unsigned int url_len = 0;
 
-    unsigned int status_phrase_begin = 0;
+    // unsigned int status_phrase_begin = 0;
     unsigned int status_phrase_len = 0;
 
     unsigned int headers_begin = 0;
@@ -1294,7 +1297,7 @@ int HttpParser::execute(const char *stream,
         break;
     }
 
-    for (int i = 0; i < len; i++)
+    for (unsigned int i = 0; i < len; i++)
     {
         char ch = *(begin + i);
 
@@ -1386,7 +1389,7 @@ int HttpParser::execute(const char *stream,
 
         case s_resp_status_phrase_start:
             checkOrGoError(isAlpha(ch));
-            status_phrase_begin = i;
+            // status_phrase_begin = i;
             status_phrase_len = 1;
             m_nState = s_resp_status_phrase;
             break;
@@ -1701,7 +1704,7 @@ int HttpParser::execute(const char *stream,
             body_type = t_http_body_skip;
         }
 
-        if (method == HTTP_METHOD_HEAD)
+        if (request->method == HTTP_METHOD_HEAD)
         {
             body_type = t_http_body_skip;
         }
@@ -1712,13 +1715,13 @@ int HttpParser::execute(const char *stream,
             //error
         }
 
-        if (method == HTTP_METHOD_PUT && !hs->valid_content_length)
+        if (request->method == HTTP_METHOD_PUT && !hs->valid_content_length)
         {
             //printf("Must have content in method PUT\n");
             //error
         }
 
-        if (method == HTTP_METHOD_TRACE)
+        if (request->method == HTTP_METHOD_TRACE)
         {
             //printf("Client request with method TRACE\n");
         }
@@ -1731,7 +1734,7 @@ int HttpParser::execute(const char *stream,
             //search google
         }
 
-        if (method == HTTP_METHOD_CONNECT && m_nHttpVersionMajor * 10 + m_nHttpVersionMinor <= 10)
+        if (request->method == HTTP_METHOD_CONNECT && m_nHttpVersionMajor * 10 + m_nHttpVersionMinor <= 10)
         {
             //https://blog.csdn.net/kobejayandy/article/details/24606521
         }

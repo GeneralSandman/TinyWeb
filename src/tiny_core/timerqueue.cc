@@ -1,15 +1,15 @@
 /*
-*Author:GeneralSandman
-*Code:https://github.com/GeneralSandman/TinyWeb
-*E-mail:generalsandman@163.com
-*Web:www.generalsandman.cn
-*/
+ *Author:GeneralSandman
+ *Code:https://github.com/GeneralSandman/TinyWeb
+ *E-mail:generalsandman@163.com
+ *Web:www.dissigil.cn
+ */
 
 /*---XXX---
-*
-****************************************
-*
-*/
+ *
+ ****************************************
+ *
+ */
 
 #include <tiny_core/timerqueue.h>
 #include <tiny_core/timer.h>
@@ -31,9 +31,9 @@ struct timespec howMuchTimeFromNow(Time when)
     }
     struct timespec ts;
     ts.tv_sec = static_cast<time_t>(
-        microseconds / Time::kMicroSecondsPerSecond);
+            microseconds / Time::kMicroSecondsPerSecond);
     ts.tv_nsec = static_cast<long>(
-        (microseconds % Time::kMicroSecondsPerSecond) * 1000);
+            (microseconds % Time::kMicroSecondsPerSecond) * 1000);
     return ts;
 }
 
@@ -116,7 +116,7 @@ void TimerQueue::m_fResetHappened(std::vector<Timer *> &happened)
             timer(t, t->getIdNum());
 
         if (t->isRepet() &&
-            m_nCancelingTimers.find(timer) ==
+                m_nCancelingTimers.find(timer) ==
                 m_nCancelingTimers.end())
         {
             //If this timer is a repet timer and
@@ -139,7 +139,7 @@ void TimerQueue::m_fResetTimeFd(Time expiration)
     struct itimerspec newValue;
     bzero(&newValue, sizeof newValue);
     newValue.it_value = howMuchTimeFromNow(expiration);
-    int ret = ::timerfd_settime(m_nFd, 0, &newValue, NULL);
+    ::timerfd_settime(m_nFd, 0, &newValue, NULL);
 }
 
 TimerQueue::TimerQueue(EventLoop *loop)

@@ -26,7 +26,7 @@ getName(const Protocol *p)
     std::string tmp(s.str().c_str());
 
     std::string res;
-    for (int i = 0; i < tmp.size(); i++)
+    for (unsigned int i = 0; i < tmp.size(); i++)
         if (!(tmp[i] >= 48 && tmp[i] <= 57))
             res += tmp[i];
     return res;

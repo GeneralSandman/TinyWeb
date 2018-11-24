@@ -26,9 +26,9 @@ OomHandler BasicAllocator::m_nHandler;
 MemoryPool::MemoryPool()
     : m_nAllocatedSpace(0),
     m_nAllSpace(0),
+    m_pCleanHandlers(nullptr),
     m_pHeapBegin(nullptr),
-    m_pHeapEnd(nullptr),
-    m_pCleanHandlers(nullptr)
+    m_pHeapEnd(nullptr)
 {
     for (int i = 0; i < LIST_SIZE; i++)
         m_nFreeList[i] = nullptr;

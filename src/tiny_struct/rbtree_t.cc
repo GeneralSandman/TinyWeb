@@ -1,18 +1,18 @@
 /*
-*Author:GeneralSandman
-*Code:https://github.com/GeneralSandman/TinyWeb
-*E-mail:generalsandman@163.com
-*Web:www.generalsandman.cn
-*/
+ *Author:GeneralSandman
+ *Code:https://github.com/GeneralSandman/TinyWeb
+ *E-mail:generalsandman@163.com
+ *Web:www.dissigil.cn
+ */
 
 /*---XXX---
-*
-****************************************
-*
-*/
+ *
+ ****************************************
+ *
+ */
 
-#include <tiny_struct/rbtree_t.h>
 #include <tiny_base/log.h>
+#include <tiny_struct/rbtree_t.h>
 
 #include <iostream>
 
@@ -195,7 +195,7 @@ void RbTree::m_fFixAfterDelete(RbTreeNode *node, RbTreeNode *parent)
 
             //case2: node的兄弟节点other是黑色的，且other的两个子节点也都是黑色的
             if ((other->m_pLeft == nullptr || other->m_pLeft->m_nColor == black) &&
-                (other->m_pRight == nullptr || other->m_pRight->m_nColor == black))
+                    (other->m_pRight == nullptr || other->m_pRight->m_nColor == black))
             {
                 other->m_nColor = red;
                 node = parent;
@@ -235,7 +235,7 @@ void RbTree::m_fFixAfterDelete(RbTreeNode *node, RbTreeNode *parent)
             }
 
             if ((other->m_pLeft == nullptr || other->m_pLeft->m_nColor == black) &&
-                (other->m_pRight == nullptr || other->m_pRight->m_nColor == black))
+                    (other->m_pRight == nullptr || other->m_pRight->m_nColor == black))
             {
                 // Case 2: node的兄弟other是黑色，且other的俩个子节点都是黑色的
                 other->m_nColor = red;
@@ -378,21 +378,21 @@ void RbTree::m_fLeftRotate(RbTreeNode *node)
     LOG(Debug) << "leftRotate:" << node->m_nValue << std::endl;
 
     /* 
-		 * left rotate function
-		 *     p                       p 
-		 *    /                       / 
-		 *   x                       y 
-		 *  / \                     / \ 
-		 * lx  y      ----->       x  ry 
-		 *    / \                 / \ 
-		 *   ly ry               lx ly 
-		 */
+     * left rotate function
+     *     p                       p 
+     *    /                       / 
+     *   x                       y 
+     *  / \                     / \ 
+     * lx  y      ----->       x  ry 
+     *    / \                 / \ 
+     *   ly ry               lx ly 
+     */
     RbTreeNode *x = node;         //must
     RbTreeNode *p = x->m_pParent; //may be
-    RbTreeNode *lx = x->m_pLeft;  //may be
+    // RbTreeNode *lx = x->m_pLeft;  //may be
     RbTreeNode *y = x->m_pRight;  //must
     RbTreeNode *ly = y->m_pLeft;  //may be
-    RbTreeNode *ry = y->m_pRight; //may be
+    // RbTreeNode *ry = y->m_pRight; //may be
 
     //first step:make link between x and ly
     x->m_pRight = ly;
@@ -423,23 +423,23 @@ void RbTree::m_fRightRotate(RbTreeNode *node)
     LOG(Debug) << "RightRotate:" << node->m_nValue << std::endl;
 
     /* 
-		 * right rotate by node y
-		 *        p                   p 
-		 *       /                   / 
-		 *      y                   x 
-		 *     / \                 / \ 
-		 *    x  ry   ----->      lx  y 
-		 *   / \                     / \ 
-		 * lx  rx                   rx ry 
+     * right rotate by node y
+     *        p                   p 
+     *       /                   / 
+     *      y                   x 
+     *     / \                 / \ 
+     *    x  ry   ----->      lx  y 
+     *   / \                     / \ 
+     * lx  rx                   rx ry 
 
-		 */
+*/
 
     RbTreeNode *y = node;         //must isn't nullptr
     RbTreeNode *p = y->m_pParent; //may be
     RbTreeNode *x = y->m_pLeft;   //must
-    RbTreeNode *lx = x->m_pLeft;  //may be
+    // RbTreeNode *lx = x->m_pLeft;  //may be
     RbTreeNode *rx = x->m_pRight; //may be
-    RbTreeNode *ry = y->m_pRight; //may be
+    // RbTreeNode *ry = y->m_pRight; //may be
 
     //first step:make link between y and rx
     y->m_pLeft = rx;

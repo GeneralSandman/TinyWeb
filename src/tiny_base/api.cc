@@ -1,16 +1,17 @@
 /*
-*Author:GeneralSandman
-*Code:https://github.com/GeneralSandman/TinyWeb
-*E-mail:generalsandman@163.com
-*Web:www.generalsandman.cn
-*/
+ *Author:GeneralSandman
+ *Code:https://github.com/GeneralSandman/TinyWeb
+ *E-mail:generalsandman@163.com
+ *Web:www.dissigil.cn
+ */
 
 /*---XXX---
-*
-****************************************
-*
-*/
+ *
+ ****************************************
+ *
+ */
 #include <tiny_base/api.h>
+#include <tiny_base/log.h>
 
 #include <iostream>
 #include <string.h>
@@ -81,7 +82,7 @@ std::string cstr2string(const char *str)
 }
 
 void splitString(const std::string &s, const std::string &p,
-                 std::vector<std::string> &result)
+        std::vector<std::string> &result)
 {
     std::string::size_type begin, end;
     begin = 0;
@@ -110,7 +111,7 @@ void eraseSpace(std::string &s)
 
 void eraseAllSpace(std::string &s)
 {
-    int index = 0;
+    size_t index = 0;
     if (!s.empty())
     {
         while ((index = s.find(' ', index)) != std::string::npos)
@@ -156,8 +157,8 @@ int getSocketError(int sockfd)
     int opt;
     socklen_t len = sizeof(opt);
     int return_val = getsockopt(sockfd,
-                                SOL_SOCKET, SO_ERROR,
-                                &opt, &len);
+            SOL_SOCKET, SO_ERROR,
+            &opt, &len);
     if (return_val == 0)
     {
         return opt;
@@ -378,10 +379,10 @@ in_addr_t Inet_addr(const std::string &host)
 }
 
 const char *inet_ntop(int af, const void *src,
-                      char *dst, socklen_t size);
+        char *dst, socklen_t size);
 
 std::string Inet_ntop(int af, const void *src,
-                      char *dst, socklen_t size)
+        char *dst, socklen_t size)
 {
     std::string result;
     const char *tmp = inet_ntop(af, src, dst, size);
@@ -415,6 +416,11 @@ int setNoBlock(int fd)
     int status = fcntl(fd, F_GETFD);
     int newstatus = status | O_NONBLOCK;
     int res = fcntl(fd, F_SETFD, newstatus);
+    if (-1 == res)
+    {
+        LOG(Debug) << "setNoBlock error" << std::endl;
+    }
+
     return status;
 }
 
@@ -423,14 +429,23 @@ int setCLOEXEC(int fd)
     int status = fcntl(fd, F_GETFD);
     int newstatus = status | FD_CLOEXEC;
     int res = fcntl(fd, F_SETFD, newstatus);
+    if (-1 == res)
+    {
+        LOG(Debug) << "setCLOEXEC error" << std::endl;
+    }
     return status;
 }
 
 int setSocketReuseAddress(int sockfd_)
 {
     int optval = 1;
-    setsockopt(sockfd_, SOL_SOCKET, SO_REUSEADDR,
-               &optval, sizeof optval);
+    int res = setsockopt(sockfd_, SOL_SOCKET, SO_REUSEADDR,
+            &optval, sizeof optval);
+    if (-1 == res)
+    {
+        LOG(Debug) << "setSocketReuseAddress error" << std::endl;
+    }
+    return 0;
 }
 
 void setTcpDelay(int fd, bool on)
@@ -441,7 +456,7 @@ void setTcpDelay(int fd, bool on)
     //      tcp delay:enable Nagle algorithm.
     int optval = on ? 0 : 1;
     int res = setsockopt(fd, IPPROTO_TCP, TCP_NODELAY,
-                         &optval, sizeof(optval));
+            &optval, sizeof(optval));
     if (res != 0)
         handle_error_s("setsockopt error\n");
 }
@@ -464,7 +479,7 @@ void setTcpKeepAlive(int fd, bool on)
     //      enable tcp keep alive.
     int optval = on ? 1 : 0;
     int res = setsockopt(fd, IPPROTO_TCP, SO_KEEPALIVE,
-                         &optval, sizeof(optval));
+            &optval, sizeof(optval));
     if (res != 0)
         handle_error_s("setsockopt error\n");
 }

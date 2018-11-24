@@ -1,15 +1,15 @@
 /*
-*Author:GeneralSandman
-*Code:https://github.com/GeneralSandman/TinyWeb
-*E-mail:generalsandman@163.com
-*Web:www.generalsandman.cn
-*/
+ *Author:GeneralSandman
+ *Code:https://github.com/GeneralSandman/TinyWeb
+ *E-mail:generalsandman@163.com
+ *Web:www.dissigil.cn
+ */
 
 /*---XXX---
-*
-****************************************
-*
-*/
+ *
+ ****************************************
+ *
+ */
 
 #include <tiny_core/connection.h>
 #include <tiny_core/netaddress.h>
@@ -31,8 +31,8 @@ void Connection::m_fHandleRead(Time arrive)
     {
         if (m_nMessageCallback)
             m_nMessageCallback(this,
-                               &m_nInputBuffer,
-                               arrive);
+                    &m_nInputBuffer,
+                    arrive);
         // LOG(Debug) << arrive.toString() << std::endl;
     }
     else if (n == 0)
@@ -51,7 +51,7 @@ void Connection::m_fHandleWrite()
     {
         std::string send = m_nOutputBuffer.getAll();
         size_t n = writeString(m_pChannel->getFd(),
-                               send);
+                send);
         if (n > 0)
         {
             if (m_nOutputBuffer.readableBytes() == 0)
@@ -101,15 +101,15 @@ void Connection::m_fShutdownWrite()
 }
 
 Connection::Connection(EventLoop *loop,
-                       int connectfd,
-                       const NetAddress &local,
-                       const NetAddress &peer)
+        int connectfd,
+        const NetAddress &local,
+        const NetAddress &peer)
     : m_pEventLoop(loop),
-      m_nState(Connecting),
-      m_pConnectSocket(new Socket(connectfd)),
-      m_pChannel(new Channel(loop, connectfd)),
-      m_nLocalAddress(local),
-      m_nPeerAddress(peer)
+    m_nState(Connecting),
+    m_pConnectSocket(new Socket(connectfd)),
+    m_pChannel(new Channel(loop, connectfd)),
+    m_nLocalAddress(local),
+    m_nPeerAddress(peer)
 {
     //m_pConnectSocket->bindAddress(m_nLocalAddress);
     m_pChannel->setReadCallback(boost::bind(&Connection::m_fHandleRead, this, _1));
@@ -130,7 +130,7 @@ void Connection::send(const std::string &message)
         nwrote = ::write(m_pChannel->getFd(), message.data(), message.size());
         if (nwrote >= 0)
         {
-            if (nwrote == message.size())
+            if ((unsigned int)nwrote == message.size())
             {
                 //write complete
                 if (m_nWriteCompleteCallback)
@@ -149,7 +149,7 @@ void Connection::send(const std::string &message)
         }
     }
 
-    if (nwrote < message.size())
+    if ((unsigned int)nwrote < message.size())
     {
         m_nOutputBuffer.append(message.data() + nwrote, message.size() - nwrote);
         if (!m_pChannel->isWriting())

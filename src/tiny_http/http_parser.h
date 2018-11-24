@@ -28,7 +28,7 @@
 #define CR '\r'
 #define LF '\n'
 #define isNum(c) (('0' <= (c) && (c) <= '9'))
-#define isAlpha(c) ('a' <= (c) && (c) <= 'z' || 'A' <= (c) && (c) <= 'Z')
+#define isAlpha(c) (('a' <= (c) && (c) <= 'z') || ('A' <= (c) && (c) <= 'Z'))
 #define isAlphaNum(c) (isNum(c) || isAlpha(c))
 
 #define isLower(c) (('a' <= (c) && (c) <= 'z'))
@@ -552,8 +552,8 @@ class HttpParser
         enum http_host_state parseHostChar(const char ch,
                 enum http_host_state s);
         int parseHost(const char *stream,
-                int at,
-                int len,
+                unsigned int at,
+                unsigned int len,
                 Url *&result,
                 bool has_at_char);
 
@@ -561,33 +561,33 @@ class HttpParser
         enum state parseUrlChar(const char ch,
                 enum state s);
         int parseUrl(const char *stream,
-                int len,
+                unsigned int len,
                 Url *result);
 
         //parse header
         enum http_header_state parseHeaderChar(const char ch,
                 enum http_header_state s);
         int parseHeader(const char *stream,
-                int &at,
-                int len,
+                unsigned int &at,
+                unsigned int len,
                 HttpHeader *result);
         int parseHeaders(const char *stream,
-                int at,
-                int len,
+                unsigned int at,
+                unsigned int len,
                 HttpHeaders *result);
 
         int parseHeadersMeaning(HttpHeaders *headers);
 
         //parse body
         int parseBody(const char *stream,
-                int at,
-                int len,
+                unsigned int at,
+                unsigned int len,
                 enum http_body_type body_type,
                 unsigned int content_length_n);
 
         int execute(const char *stream,
-                int at,
-                int len,
+                unsigned int at,
+                unsigned int len,
                 HttpRequest *request);
 
         ~HttpParser()
@@ -665,7 +665,7 @@ inline int parseContentLength(const Str *s, HttpHeaders *const headers)
     // std::cout << "[parse headerMeaning callback]get content-length field:\n";
     unsigned int res = 0;
     char *p = s->data;
-    for (int i = 0; i < s->len; i++)
+    for (unsigned int i = 0; i < s->len; i++)
     {
         char ch = *(p + i);
         if (!isNum(ch))

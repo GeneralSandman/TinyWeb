@@ -65,7 +65,7 @@ void EPoller::updateChannel(Channel *channel)
     }
     else if (flag == ChannelFlag_Added)
     { //mod
-        int fd = channel->getFd();
+        // int fd = channel->getFd();
         if (!channel->isNoneEvent())
         { //have event to wait;
             m_fUpdate(EPOLL_CTL_MOD, channel);

@@ -94,6 +94,7 @@ int ListTimerManager::m_fAdjustTimer(ListTimer *timer)
     else{
          //delete and insert
     }
+    return 0;
 }
 ListTimerManager::~ListTimerManager()
 {

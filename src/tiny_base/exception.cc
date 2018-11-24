@@ -27,16 +27,6 @@ Exception::Exception(const Exception &e)
     m_nStack = e.m_nStack;
 }
 
-Exception &Exception::operator=(const Exception &e)
-{
-    if ((&e) != this)
-    {
-        m_nName = e.m_nName;
-        m_nStack = e.m_nStack;
-        return (*this);
-    }
-}
-
 void Exception::m_fFillStackTrace()
 {
     int size = 200;

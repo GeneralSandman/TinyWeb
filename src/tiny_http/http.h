@@ -1,16 +1,16 @@
 /*
-*Author:GeneralSandman
-*Code:https://github.com/GeneralSandman/TinyWeb
-*E-mail:generalsandman@163.com
-*Web:www.dissigil.cn
-*/
+ *Author:GeneralSandman
+ *Code:https://github.com/GeneralSandman/TinyWeb
+ *E-mail:generalsandman@163.com
+ *Web:www.dissigil.cn
+ */
 
 /*---Basic of Http Protocol---
-*This file definite the status,methods,errors of Http,
-*http_test.cc can teach you how to use this header file.
-****************************************
-*
-*/
+ *This file definite the status,methods,errors of Http,
+ *http_test.cc can teach you how to use this header file.
+ ****************************************
+ *
+ */
 
 #ifndef HTTP_H
 #define HTTP_H
@@ -369,6 +369,8 @@ inline enum http_method getMethod(const char *begin,
             return HTTP_METHOD_UNSUBSCRIBE;
         break;
     }
+
+    return HTTP_METHOD_INVALID;
 }
 
 /* end Http Methods */
