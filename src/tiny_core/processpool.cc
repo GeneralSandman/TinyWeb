@@ -30,18 +30,18 @@
 
 void test_parent_MessageCallback(Connection *con, Buffer *buf, Time time)
 {
-    std::cout << "[parent] get message:"
+    LOG(Debug) << "[parent] get message:"
               << buf->getAll() << std::endl;
 }
 
 void test_parent_CloseCallback(Connection *con)
 {
-    std::cout << "[parent] one connection close" << std::endl;
+    LOG(Debug) << "[parent] one connection close" << std::endl;
 }
 
-void period_print_test(void)
+void test_parent_period_print(void)
 {
-    std::cout << "[parent] print every second\n";
+    LOG(Debug) << "[parent] print every second\n";
 }
 
 ProcessPool *ProcessPool::m_pPoolInstance = nullptr;
@@ -139,6 +139,8 @@ void ProcessPool::setSignalHandlers()
         Signal(SIGINT, "SIGINT", "killAll", parentSignalHandler),
         Signal(SIGTERM, "SIGTERM", "killSoftly", parentSignalHandler),
         Signal(SIGCHLD, "SIGCHLD", "childdead", parentSignalHandler),
+        Signal(SIGUSR1, "SIGUSR1", "restart", parentSignalHandler),
+        Signal(SIGUSR2, "SIGUSR2", "reload", parentSignalHandler),
         Signal(SIGQUIT, "QIGQUIT", "quit softly", parentSignalHandler),
         Signal(SIGPIPE, "SIGPIPE", "socket close", parentSignalHandler),
         Signal(SIGHUP, "SIGHUP", "reconfigure", parentSignalHandler),
@@ -155,16 +157,13 @@ void ProcessPool::start()
         //Parent process
         assert(m_nPipes.size() == m_nPids.size());
 
-        // for (int index = 0; index < m_nPipes.size(); index++)
-        // {
-        //     std::cout << "[parent] I will send to child(" << m_nPids[index]
-        //               << ") message every one seconds\n";
+        for (int index = 0; index < m_nPipes.size(); index++)
+        {
+            LOG(Debug) << "[parent] I will send to child(" << m_nPids[index]
+                      << ") message every one seconds\n";
 
-        //     TimerId id1 = m_pEventLoop->runEvery(1, boost::bind(&SocketPair::writeToChild,
-        //                                                         m_nPipes[index],
-        //                                                         "parent send message to child"));
-        //     // TimerId id2 = m_pEventLoop->runEvery(1, boost::bind(&period_print_test));
-        // }
+            TimerId id1 = m_pEventLoop->runEvery(1, boost::bind(&test_parent_period_print));
+        }
         status = 1;
         while (status)
         {

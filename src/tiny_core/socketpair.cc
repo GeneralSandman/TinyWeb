@@ -33,9 +33,9 @@ void SocketPair::setParentSocket(int port)
 {
     Close(m_nFds[1]);
     m_nIsParent = true;
-    std::cout << "switch parent:" << getpid() << std::endl;
+    LOG(Debug) << "switch parent:" << getpid() << std::endl;
     NetAddress tmp(port);
-    std::cout << "socketpair parent set connection port:" << port << std::endl;
+    LOG(Debug) << "socketpair parent set connection port:" << port << std::endl;
     m_pConnection = new Connection(m_pEventLoop, m_nFds[0],
                                    tmp, tmp);
     m_pConnection->establishConnection();
@@ -45,8 +45,8 @@ void SocketPair::setChildSocket(int port)
 {
     Close(m_nFds[0]);
     m_nIsParent = false;
-    std::cout << "switch child:" << getpid() << std::endl;
-    std::cout << "socketpair child set connection port:" << port << std::endl;
+    LOG(Debug) << "switch child:" << getpid() << std::endl;
+    LOG(Debug) << "socketpair child set connection port:" << port << std::endl;
     NetAddress tmp(port);
     m_pConnection = new Connection(m_pEventLoop, m_nFds[1],
                                    tmp, tmp);
@@ -56,14 +56,14 @@ void SocketPair::setChildSocket(int port)
 void SocketPair::writeToChild(const std::string &data)
 {
     assert(m_nIsParent);
-    std::cout << "[parent] send data:" << data << std::endl;
+    LOG(Debug) << "[parent] send data:" << data << std::endl;
     m_pConnection->send(data);
 }
 
 void SocketPair::writeToParent(const std::string &data)
 {
     assert(!m_nIsParent);
-    std::cout << "[child] send data:" << data << std::endl;
+    LOG(Debug) << "[child] send data:" << data << std::endl;
     m_pConnection->send(data);
 }
 

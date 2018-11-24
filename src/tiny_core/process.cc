@@ -15,6 +15,7 @@
 #include <tiny_core/processpool.h>
 #include <tiny_core/slave.h>
 #include <tiny_core/eventloop.h>
+#include <tiny_core/timerid.h>
 #include <tiny_base/api.h>
 #include <tiny_base/log.h>
 
@@ -29,16 +30,23 @@
 void test_child_MessageCallback(Connection *con, Buffer *buf, Time time)
 {
     pid_t pid = getpid();
-    std::cout << "[child] (" << pid << ") get message:"
-              << buf->getAll() << std::endl;
+    LOG(Debug) << "[child] (" << pid << ") get message:"
+               << buf->getAll() << std::endl;
 }
 
 void test_child_CloseCallback(Connection *con)
 {
     pid_t pid = getpid();
-    std::cout << "[child] (" << pid << ") connection with parent close"
-              << std::endl;
+    LOG(Debug) << "[child] (" << pid << ") connection with parent close"
+               << std::endl;
 }
+
+void test_child_period_print(void)
+{
+    LOG(Debug) << "[child] print every second\n";
+}
+
+Process *Process::m_pProcessInstance = nullptr;
 
 Process::Process(const std::string &name,
                  int number,
@@ -58,7 +66,7 @@ void Process::setAsChild(int port)
 {
     m_nPipe.setChildSocket(port);
     m_nPipe.setMessageCallback(boost::bind(&test_child_MessageCallback, _1, _2, _3));
-    m_nPipe.setMessageCallback(boost::bind(&test_child_CloseCallback, _1));
+    m_nPipe.setCloseCallback(boost::bind(&test_child_CloseCallback, _1));
 }
 
 void Process::createListenServer(int listen)
@@ -71,6 +79,8 @@ void Process::setSignalHandlers()
     std::vector<Signal> signals = {
         Signal(SIGINT, "SIGINT", "killAll", childSignalHandler),
         Signal(SIGTERM, "SIGTERM", "killSoftly", childSignalHandler),
+        Signal(SIGUSR1, "SIGUSR1", "restart", childSignalHandler),
+        Signal(SIGUSR2, "SIGUSR2", "reload", childSignalHandler),
         Signal(SIGQUIT, "QIGQUIT", "quit softly", childSignalHandler),
         Signal(SIGPIPE, "SIGPIPE", "socket close", childSignalHandler),
         Signal(SIGHUP, "SIGHUP", "reconfigure", childSignalHandler),
@@ -82,12 +92,14 @@ void Process::setSignalHandlers()
 
 void Process::start()
 {
+    TimerId id1 = m_pEventLoop->runEvery(1, boost::bind(&test_child_period_print));
+
     status = 1;
 
     while (status)
     {
         m_pSlave->work();
-        
+
         if (status_terminate || status_quit_softly || status_restart || status_reconfigure)
             status = 0;
     }

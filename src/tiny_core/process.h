@@ -39,7 +39,8 @@ extern int status_child_quit;  //CHLD
 typedef boost::function<void()> Fun;
 
 void test_child_MessageCallback(Connection *con, Buffer *buf, Time time);
-
+void test_child_CloseCallback(Connection *con);
+void test_child_period_print(void);
 class EventLoop;
 class Slave;
 

@@ -48,7 +48,7 @@ struct pair
 void test_parent_MessageCallback(Connection *con, Buffer *buf, Time time);
 void test_parent_CloseCallback(Connection *con);
 
-void period_print_test(void);
+void test_parent_period_print(void);
 
 class ProcessPool
 {

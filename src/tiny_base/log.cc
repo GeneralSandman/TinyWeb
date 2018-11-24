@@ -178,10 +178,8 @@ std::ostream &Logger::log(log_level level,
 
     //if the current log level is Info,so the LOG(Debug) do nothing
     return getStream(level) << "[" << tmpBuf << "]"
-                            << "(" << getpid() << ")"
-                            << "--"
-                            << "[" << level_string << "]"
-                            << "--"
+                            << "(pid:" << getpid() << ")"
+                            << "[" << level_string << "] "
                             << "function (" << function << ")"
                             << "line " << line << ":";
     // << std::flush;
