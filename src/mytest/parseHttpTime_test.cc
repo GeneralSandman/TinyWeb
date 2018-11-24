@@ -11,6 +11,7 @@
  *
  */
 
+#include <tiny_struct/sdstr_t.h>
 #include <tiny_http/http_time.h>
 
 #include <iostream>
@@ -144,6 +145,19 @@ bool testTime(testHttpTime *t)
     return sameStr && sameTimet;
 }
 
+bool testTime2(testHttpTime *t)
+{
+    sdstr tmp;
+    sdsnewempty(&tmp, 32);
+    formateHttpTime(t->time, &tmp);
+    bool res = false;
+    if (0 == strncmp(t->str, tmp.data, tmp.len))
+        res = true;
+    destory(&tmp);
+    return res;
+}
+
+
 void testPraseHttpTime()
 {
     int alltest = 0;
@@ -156,11 +170,15 @@ void testPraseHttpTime()
         std::cout << i << ")" << std::endl;
         alltest++;
 
-        bool res = testTime(times+i);
+        bool res = testTime2(times+i);
 
         if (res)
         {
             passtest++;
+        }
+        else
+        {
+            std::cout << "no pass test" << std::endl;
         }
     }
 

@@ -192,7 +192,7 @@ void testResponser()
 
     int len = sizeof(bodys) / sizeof(bodys[0]);
 
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 1; i++)
     {
         std::cout << i << ")" << std::endl;
         alltest++;

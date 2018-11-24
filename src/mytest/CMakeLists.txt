@@ -28,6 +28,24 @@ add_subdirectory("${SOURCE_DIR}/tiny_http" tiny_http.out)
 add_subdirectory("${SOURCE_DIR}/tiny_struct" tiny_struct.out)
 
 
+# modelFile_test
+add_executable(all_test
+    all_test.cc
+    )
+
+target_link_libraries(modelFile_test
+    tiny_http_model
+    )
+
+# modelFile_test
+add_executable(modelFile_test
+    modelFile_test.cc
+    )
+
+target_link_libraries(modelFile_test
+    tiny_http_model
+    )
+
 # parseBody
 add_executable(parseBody
     parseBody_test.cc
@@ -62,6 +80,15 @@ add_executable(parseHost
 
 target_link_libraries(parseHost
     tiny_http_model
+    )
+
+# parseHttpTime_test
+add_executable(parseHttpTime_test
+    parseHttpTime_test.cc
+    )
+
+target_link_libraries(parseHttpTime_test
+    tiny_struct_model
     )
 
 # parseRequestLine
@@ -101,23 +128,4 @@ target_link_libraries(responser_test
     tiny_struct_model
     tiny_base_model
     )
-
-# model_file_test
-add_executable(model_file_test
-    model_file_test.cc
-    )
-
-target_link_libraries(model_file_test
-    tiny_http_model
-    )
-
-# parseHttpTime_test
-add_executable(parseHttpTime_test
-    parseHttpTime_test.cc
-    )
-
-target_link_libraries(parseHttpTime_test
-    )
-
-
 

@@ -3,7 +3,7 @@
 cmake_minimum_required(VERSION 2.8)
 project (TinyWeb)
 
-set (TINYWEB_VERSION "\"0.0.10\"")
+set (TINYWEB_VERSION "\"TnyWeb/0.0.10\"")
 
 # configure a header file to pass some of the CMake settings
 # to the source code

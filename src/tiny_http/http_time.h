@@ -11,55 +11,28 @@
  *
  */
 
-#include <iostream>
+#ifndef HTTP_TIME_H
+#define HTTP_TIME_H
 
-inline int parseTime(const char *time)
-{
+#include <tiny_struct/sdstr_t.h>
 
-    return 0;
-}
-
-inline void convertTime2Gmt(const time_t *src, bool isLocal, struct tm *gmt)
-{
-    struct tm *tmp;
-    if (isLocal)
-        tmp = localtime(src);
-    else
-        tmp = gmtime(src);
-    *gmt = *tmp;
-}
-
-inline void convertTm2Time(struct tm * gmt, bool isLocal, time_t *time)
-{
-    if (!isLocal)
-        gmt->tm_hour += 8;
-    *time = mktime(gmt);
-}
+#include <time.h>
 
 typedef struct formatTime
 {
     std::string fmt;
     std::string str;
-}formatTime;
+} formatTime;
 
-inline void formate(const struct tm *gmt, formatTime *time)
-{
-    char buf[2048];
-    int len = strftime(buf, 2048, time->fmt.c_str() , gmt);
-    if (len == 0)
-    {
-        std::cout << "formate time error" << std::endl;
-        return ;
-    }
-    std::string tmp(buf, len);
-    time->str = tmp;
-}
+int parseTime(const char *time);
 
-inline void deformate(const formatTime *time, struct tm * gmt)
-{
-    strptime(time->str.c_str(), time->fmt.c_str(), gmt);
-}
+void convertTime2Gmt(const time_t *src, bool isLocal, struct tm *gmt);
+void convertTm2Time(struct tm *gmt, bool isLocal, time_t *time);
 
+void formate(const struct tm *gmt, formatTime *time);
+void formateHttpTime(const time_t time, sdstr *str);
+void formateCookieTime(const time_t time, sdstr *str);
 
+void deformate(const formatTime *time, struct tm *gmt);
 
-
+#endif // !HTTP_TIME_H
