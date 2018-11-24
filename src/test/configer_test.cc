@@ -12,9 +12,9 @@
 */
 
 
-#include "../log.h"
-#include "../api.h"
-#include "../configer.h"
+#include <tiny_base/api.h>
+#include <tiny_base/log.h>
+#include <tiny_base/configer.h>
 
 #include <iostream>
 
@@ -22,17 +22,15 @@ using namespace std;
 
 void test1()
 {
-    std::string a = "../TinyWeb.conf";
+    std::string file;
+    std::cin >> file;
     Configer &configer = Configer::getConfigerInstance();
+    configer.setConfigerFile(file);
 
-    configer.setConfigerFile(a);
-
-    if (configer.loadConfig())
+    if (0 == configer.loadConfig())
         std::cout << "load config successfull\n";
     else
         std::cout << "load config failed\n";
-    configer.test();
-    cout << configer.getConfigValue("loglevel");
 }
 
 void test2()
@@ -43,30 +41,14 @@ void test2()
         std::cout << "load config successfull\n";
     else
         std::cout << "load config failed\n";
-    Configer::getConfigerInstance().test();
-    cout << getConfigValue("loglevel") << endl;
 
-    std::string loglevel = getConfigValue("loglevel");
-    std::string logpath = getConfigValue("logpath");
-    std::string debugfile = logpath + getConfigValue("debugfile");
-    std::string infofile = logpath + getConfigValue("infofile");
-    std::string warnfile = logpath + getConfigValue("warnfile");
-    std::string errorfile = logpath + getConfigValue("errorfile");
-    std::string fatalfile = logpath + getConfigValue("fatalfile");
-
-    std::cout << debugfile << std::endl;
-    std::cout << infofile << std::endl;
-    std::cout << warnfile << std::endl;
-    std::cout << errorfile << std::endl;
-    std::cout << fatalfile << std::endl;
-
-    initLogger(debugfile,
-               infofile,
-               warnfile,
-               errorfile,
-               fatalfile,
-               convertStringToLoglevel(loglevel)); //error used
-    //FIXME:
+    // initLogger(debugfile,
+    //            infofile,
+    //            warnfile,
+    //            errorfile,
+    //            fatalfile,
+    //            convertStringToLoglevel(loglevel)); //error used
+    // //FIXME:
     LOG(Debug) << endl;
     LOG(Info) << endl;
     LOG(Warn) << endl;
@@ -88,6 +70,6 @@ void test2()
 
 int main()
 {
-    test2();
+    test1();
     return 0;
 }

@@ -56,6 +56,15 @@ add_executable(gzip_test
 target_link_libraries(gzip_test
     )
 
+# configer_test
+add_executable(configer_test
+    configer_test.cc
+    )
+
+target_link_libraries(configer_test
+    tiny_base_model
+    )
+
 # main_test
 add_executable(main_test
     main_test.cc

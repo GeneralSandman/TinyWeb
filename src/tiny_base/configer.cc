@@ -34,14 +34,14 @@ void setConfigerFile(const std::string &file)
     Configer::getConfigerInstance().setConfigerFile(file);
 }
 
-bool loadConfig()
+int loadConfig(bool debug)
 {
-    return Configer::getConfigerInstance().loadConfig();
+    return Configer::getConfigerInstance().loadConfig(debug);
 }
 
 Configer::Configer()
 {
-    // LOG(Debug) << "class Configer constructor\n";
+    LOG(Debug) << "class Configer constructor\n";
 }
 
 void Configer::setConfigerFile(const std::string &file)
@@ -49,13 +49,13 @@ void Configer::setConfigerFile(const std::string &file)
     m_nFile = file;
 }
 
-bool Configer::loadConfig()
+int Configer::loadConfig(bool debug)
 {
     boost::property_tree::ptree root;
 	boost::property_tree::ptree items;
-	boost::property_tree::read_json<boost::property_tree::ptree>(m_nFi1,root);
+	boost::property_tree::read_json<boost::property_tree::ptree>(m_nFile, root);
 
-	items=root.get_child("product");
+	items = debug?root.get_child("develop"):root.get_child("product");
 	boost::property_tree::ptree basic = items.get_child("basic");
 	boost::property_tree::ptree server = items.get_child("server");
 	boost::property_tree::ptree log = items.get_child("log");
@@ -151,9 +151,10 @@ bool Configer::loadConfig()
     std::cout << errorfile << std::endl;
     std::cout << fatalfile << std::endl;
 
+    return 0;
 }
 
 Configer::~Configer()
 {
-    // LOG(Debug) << "class Configer destructor\n";
+    LOG(Debug) << "class Configer destructor\n";
 }

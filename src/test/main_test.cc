@@ -12,6 +12,7 @@
  */
 
 #include <tiny_base/api.h>
+#include <tiny_base/configer.h>
 #include <tiny_core/processpool.h>
 #include <tiny_http/http_model_file.h>
 #include <TinyWebConfig.h>
@@ -137,6 +138,7 @@ int getNamebyPid(pid_t pid, std::string &name)
     if (read_d == -1)
     {
         std::cout << "no content" << std::endl;
+        return 1;
     }
     buf[read_d] = '\0';
 
@@ -146,6 +148,7 @@ int getNamebyPid(pid_t pid, std::string &name)
     name = std::string(name_s);
 
     close(fd);
+    return 0;
 }
 
 bool daemaonStillRun(std::string &name, pid_t prepid)
@@ -153,23 +156,64 @@ bool daemaonStillRun(std::string &name, pid_t prepid)
     if (name == "")
         name = "TinyWeb";
     std::string oldname;
-    getNamebyPid(prepid, oldname);
+    if (0 != getNamebyPid(prepid, oldname))
+        return false;
     if (oldname == name)
         return true;
     else
         return false;
 }
 
-int main()
+pid_t daemonPrePid()
 {
-    pid_t pid = getpid();
-    std::string name;
-    getNamebyPid(pid, name);
-    std::cout << "proc name:" << name << std::endl;
+    // pid = get pid from pid file
+    std::string pidfile = "/var/run/TinyWeb.pid";
+    int fd;
+    char readbuf[1024];
+
+    if ((fd = open(pidfile.c_str(), FLAGS, MODE)) == -1)
+    {
+        printf("open pidfile(%s) error\n", pidfile.c_str());
+        return 0;
+    }
+    memset((void *)readbuf, 0, 1024);
+    ssize_t read_d = read(fd, (void *)readbuf, 1024);
+    if (read_d == -1)
+        std::cout << "no content" << std::endl;
+    readbuf[read_d] = '\0';
+    pid_t prepid = 0;
+    prepid = atoi(readbuf);
+
+    std::string name = "main_test";
+    bool stillRun = daemaonStillRun(name, prepid);
+    if (!stillRun)
+    {
+        prepid = 0;
+    }
+    close(fd);
+    return prepid;
+}
+
+int storeCurPid(pid_t curpid)
+{
+    std::string pidfile = "/var/run/TinyWeb.pid";
+    int fd;
+    if ((fd = open(pidfile.c_str(), FLAGS, MODE)) == -1)
+    {
+        printf("open pidfile(%s) error\n", pidfile.c_str());
+        return 0;
+    }
+    int return_val = ftruncate(fd, 0);
+    if (0 != return_val)
+        std::cout << "ftruncate error" << std::endl;
+    lseek(fd, 0, SEEK_SET);
+    std::string writebuf = std::to_string(curpid);
+    ssize_t write_d = write(fd, (void *)(writebuf.c_str()), writebuf.size());
+    close(fd);
     return 0;
 }
 
-int _main(int argc, char **argv)
+int main(int argc, char **argv)
 {
 
     std::map<char, std::string> opt;
@@ -178,57 +222,28 @@ int _main(int argc, char **argv)
         return 1;
     }
 
-    if (opt.end() != opt.find('c'))
-        std::cout << "[Debug] configfile:" << opt['c'] << std::endl;
+    // if (opt.end() != opt.find('c'))
+    //     std::cout << "[Debug] configfile:" << opt['c'] << std::endl;
 
-    if (opt.end() != opt.find('o'))
-        std::cout << "[Debug] order:" << opt['o'] << std::endl;
+    // if (opt.end() != opt.find('o'))
+    //     std::cout << "[Debug] order:" << opt['o'] << std::endl;
 
-    if (opt.end() != opt.find('t'))
-        std::cout << "[Debug] testconfigfile:" << opt['t'] << std::endl;
+    // if (opt.end() != opt.find('t'))
+    //     std::cout << "[Debug] testconfigfile:" << opt['t'] << std::endl;
 
-    if (opt.end() != opt.find('d'))
-        std::cout << "[Debug] run as debug" << std::endl;
+    // if (opt.end() != opt.find('d'))
+    //     std::cout << "[Debug] run as debug" << std::endl;
 
-    if (opt.end() != opt.find('v'))
-        std::cout << "[Debug] TinyWeb ersion: " << TINYWEB_VERSION << std::endl;
+    // if (opt.end() != opt.find('v'))
+    //     std::cout << "[Debug] TinyWeb ersion: " << TINYWEB_VERSION << std::endl;
 
-    // pid = get pid from pid file
-    std::string pidfile = "/var/run/TinyWeb.pid";
-    int fd;
-    char buf[1024];
-
-    if ((fd = open(pidfile.c_str(), FLAGS, MODE)) == -1)
-    {
-        printf("open pidfile(%s) error\n", pidfile.c_str());
-        return 0;
-    }
-    memset((void *)buf, 0, 1024);
-    ssize_t read_d = read(fd, (void *)buf, 1024);
-    if (read_d == -1)
-    {
-        std::cout << "no content" << std::endl;
-    }
-    buf[read_d] = '\0';
-    pid_t prepid = atoi(buf);
+    pid_t prepid = daemonPrePid();
     std::cout << "pre pid:" << prepid << std::endl;
-
     if (0 == prepid)
     {
+        std::cout << "new daemon process" << std::endl;
         pid_t curpid = m_fSwitchtoDaemon();
-
-        // clear pid file
-        ssize_t write_d;
-        int return_val = ftruncate(fd, 0);
-        if (0 == return_val)
-        {
-            std::cout << "ftruncate success" << std::endl;
-        }
-        lseek(fd, 0, SEEK_SET);
-        // write to pid file
-        std::string writebuf = std::to_string(curpid);
-        write_d = write(fd, (void *)(writebuf.c_str()), writebuf.size());
-        close(fd);
+        storeCurPid(curpid);
         while (1)
         {
             // sleep(5);
@@ -240,7 +255,7 @@ int _main(int argc, char **argv)
     }
     else
     {
-        std::cout << "no need create new processpool" << std::endl;
+        std::cout << "just a order process" << std::endl;
         if (opt.end() != opt.find('o'))
         {
             std::string order = opt['o'];
@@ -248,23 +263,23 @@ int _main(int argc, char **argv)
 
             if (order == "stop")
             {
-                std::cout << "stop TinyWeb" << std::endl;
+                std::cout << "stop TinyWeb(" << prepid << ")" << std::endl;
                 kill(prepid, SIGQUIT);
             }
             else if (order == "term")
             {
-                std::cout << "term TinyWeb" << std::endl;
+                std::cout << "term TinyWeb(" << prepid << ")" << std::endl;
                 kill(prepid, SIGTERM);
                 // kill(prepid, SIGINT);
             }
             else if (order == "restart")
             {
-                std::cout << "restart TinyWeb" << std::endl;
+                std::cout << "restart TinyWeb(" << prepid << ")" << std::endl;
                 kill(prepid, SIGUSR1);
             }
             else if (order == "reload")
             {
-                std::cout << "reload TinyWeb" << std::endl;
+                std::cout << "reload TinyWeb(" << prepid << ")" << std::endl;
                 kill(prepid, SIGUSR2);
             }
             else

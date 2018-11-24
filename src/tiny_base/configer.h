@@ -20,23 +20,28 @@
 #include <iostream>
 
 void setConfigerFile(const std::string &file);
-bool loadConfig();
+int loadConfig(bool debug);
 
 class Configer
 {
     class Basic
     {
-        int processpool;
+        int wroker;
+        std::string pidfile;
         bool sendfile;
         std::string mimetype;
+        bool chunked;
         bool gzip;
+        int gzip_level;
+        int gzip_buffers_4k;
+        int gzip_min_len;
     };
 
     class Server
     {
         int listen;
-        std::list<std::string> servername;
         std::string www;
+        std::list<std::string> servername;
         std::list<std::string> indexpage;
         std::list<std::string> errorpage;
     };
@@ -59,6 +64,10 @@ class Configer
         {
         }
 
+        Basic basicConf;
+        Server serverConf;
+        Log logConf;
+
     public:
         static Configer &getConfigerInstance()
         {
@@ -66,7 +75,7 @@ class Configer
             return ConfigerInstance;
         }
         void setConfigerFile(const std::string &file);
-        bool loadConfig();
+        int loadConfig(bool debug = false);
         ~Configer();
 };
 
