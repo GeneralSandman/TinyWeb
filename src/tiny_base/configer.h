@@ -15,7 +15,6 @@
 #ifndef CONFIGER_H
 #define CONFIGER_H
 
-#include <map>
 #include <string>
 #include <list>
 #include <iostream>

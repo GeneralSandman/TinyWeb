@@ -18,66 +18,93 @@
 #include <boost/property_tree/json_parser.hpp>
 
 using namespace std;
-
-std::string file_path = "tinyweb.json";
-
-void generate_user()
-{
-	boost::property_tree::ptree root;
-	boost::property_tree::ptree items;
-
-	boost::property_tree::ptree item1;
-	item1.put("ID","1");
-	item1.put("Name","wang");
-	items.push_back(std::make_pair("1",item1));
-
-	boost::property_tree::ptree item2;
-	item2.put("ID","2");
-	item2.put("Name","zhang");
-	items.push_back(std::make_pair("2",item2));
-
-	boost::property_tree::ptree item3;
-	item3.put("ID","3");
-	item3.put("Name","li");
-	items.push_back(std::make_pair("3",item3));
-
-	root.put_child("user",items);
-	boost::property_tree::write_json(file_path,root);
-}
-
 using namespace boost::property_tree;
 
-void read_user()
+typedef boost::property_tree::ptree ptree;
+typedef boost::property_tree::ptree::iterator piterator;
+
+void read_user(const std::string & file_path)
 {
 	boost::property_tree::ptree root;
 	boost::property_tree::ptree items;
 	boost::property_tree::read_json<boost::property_tree::ptree>(file_path,root);
 
-	items=root.get_child("develop");
+	items=root.get_child("product");
 	boost::property_tree::ptree basic = items.get_child("basic");
 	boost::property_tree::ptree server = items.get_child("server");
 	boost::property_tree::ptree log = items.get_child("log");
 
     // basic-config
-    int processpool = basic.get<int>("processpool", 10);
-    int sendfile = basic.get<int>("sendfile", 1);
-    std::cout << processpool << std::endl;
+    std::cout << "<basic-config>" << std::endl;
+    int worker = basic.get<int>("worker", 8);
+    std::string pidfile = basic.get<std::string>("pid", "/var/run/TinyWeb.pid");
+    bool sendfile = basic.get<bool>("sendfile", true);
+    std::string mimetype = basic.get<std::string>("mimetype", "mime.types");
+    bool chunked = basic.get<bool>("chunked", true);
+    bool gzip = basic.get<bool>("gzip", true);
+    int gzip_level = basic.get<int>("gzip_level", 3);
+    int gzip_buffers_4k = basic.get<int>("gzip_buffers_4k", 4);
+    int gzip_min_len = basic.get<int>("gzip_min_len", 1024);
+
+    std::cout << "worker: " << worker << std::endl;
+    std::cout << pidfile << std::endl;
     std::cout << sendfile << std::endl;
+    std::cout << mimetype << std::endl;
+    std::cout << chunked << std::endl;
+    std::cout << gzip << std::endl;
+    std::cout << gzip_level << std::endl;
+    std::cout << gzip_buffers_4k << std::endl;
+    std::cout << gzip_min_len << std::endl;
+    ptree gzip_http_version = basic.get_child("gzip_http_version");
+    for(auto it=gzip_http_version.begin(); it!=gzip_http_version.end(); it++)
+    {
+        std::cout << "gzip_http_version: " << it->second.get_value<std::string>() << std::endl;
+    }
+    ptree gzip_mime_type = basic.get_child("gzip_mime_type");
+    for(auto it=gzip_mime_type.begin(); it!=gzip_mime_type.end(); it++)
+    {
+        std::cout << "gzip_mime_type: " << it->second.get_value<std::string>() << std::endl;
+    }
 
     // server-config
-	for (boost::property_tree::ptree::iterator it=server.begin();it!=server.end();++it)
+    std::cout << "<server-config>" << std::endl;
+	for (piterator it=server.begin(); it!=server.end(); ++it)
 	{
         int listen = it->second.get<int>("listen", 80);
-        std::string servername = it->second.get<std::string>("servername", "");
-        std::string www = it->second.get<std::string>("www", "");
-        std::string indexpage = it->second.get<std::string>("indexpage", "");
-        std::string errorpage = it->second.get<std::string>("errorpage", "");
+	    ptree servername = it->second.get_child("servername");
+        std::cout << "servername:";
+        for(piterator a=servername.begin(); a!=servername.end(); a++)
+        {
+            std::cout << a->second.get_value<std::string>() << " ";
+        }
+        std::cout << std::endl;
 
-        std::cout << listen << std::endl;
-        std::cout << servername << std::endl;
-        std::cout << www << std::endl;
-        std::cout << indexpage << std::endl;
-        std::cout << errorpage << std::endl;
+        ptree indexpage = it->second.get_child("indexpage");
+        std::cout << "indexpage:";
+        for(piterator a=indexpage.begin(); a!=indexpage.end(); a++)
+        {
+            std::cout << a->second.get_value<std::string>() << " ";
+        }
+        std::cout << std::endl;
+
+        ptree errorpage = it->second.get_child("errorpage");
+        for(piterator a=errorpage.begin(); a!=errorpage.end(); a++)
+        {
+            ptree code = a->second.get_child("code");
+            std::cout << "code:";
+            for(auto b=code.begin(); b!=code.end(); b++)
+            {
+                std::cout << b->second.get_value<int>() << " ";
+            }
+            std::cout << std::endl;
+            std::cout << "path:" << a->second.get<std::string> ("path", "") << std::endl;
+            std::cout << "file:" << a->second.get<std::string> ("file", "") << std::endl;
+
+        }
+        std::string www = it->second.get<std::string>("www", "");
+
+        std::cout << "listen:" << listen << std::endl;
+        std::cout << "www:" << www << std::endl;
 	}
 
     // log-config
@@ -89,6 +116,7 @@ void read_user()
     std::string errorfile = log.get<std::string>("errorfile", "");
     std::string fatalfile = log.get<std::string>("fatalfile", "");
 
+    std::cout << "<log-config>" << std::endl;
     std::cout << level << std::endl;
     std::cout << path << std::endl;
     std::cout << debugfile << std::endl;
@@ -101,6 +129,7 @@ void read_user()
 int main()
 {
     //generate_user();
-    read_user();
+    std::string file = "/home/dell/TinyWeb//src//TinyWeb.conf";
+    read_user(file);
     return 0;
 }

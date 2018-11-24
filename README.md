@@ -34,14 +34,65 @@ sudo cp TinyWeb.conf /
 vim /TinyWeb.conf
 ```
 
-Each line is a comment line which begin with #.
+```
+{
+    "develop": {
 
-|name|meaning|
-|-|-|
-|***Basic-configure***|
-|listen|listen-port|
-|***Log-configure***|
-|LogLevel|log level|
+        "basic": {
+            "worker": 2,
+            "pid": "/var/run/TinyWeb.pid",
+            "sendfile": true,
+            "mimetype": "mime.types",
+            "chunked": true,
+            "gzip": true,
+            "gzip_level" : 2,
+            "gzip_buffers_4k" : 4,
+            "gzip_min_len": 1024,
+            "gzip_http_version": ["1.0", "1.1"],
+            "gzip_mime_type": ["text/html", "text/css"]
+        },
+
+        "server": [
+            {
+                "listen": 9090,
+                "servername": [
+                    "127.0.0.1",
+                    "www.dissigil.cn"
+                ],
+                "www": "/home/dell/TinyWeb/www",
+                "indexpage": [
+                    "index.html",
+                    "index.htm",
+                    "index.php"
+                ],
+                "errorpage": [
+                    {
+                        "code" : [404],
+                        "path" : "/home/dell/TinyWeb/www",
+                        "file" : "404.html"
+                    },
+                    {
+                        "code" : [500,502,503,504],
+                        "path" : "/home/dell/TinyWeb/www",
+                        "file" : "50x.html"
+                    }
+                ]
+            }
+        ],
+
+        "log": {
+            "level": "Debug",
+            "path": "/home/dell/TinyWeb/log",
+            "debugfile": "debug.log",
+            "infofile": "info.log",
+            "warnfile": "warn.log",
+            "errorfile": "error.log",
+            "fatalfile": "fatal.log"
+        }
+    }
+}
+
+```
 
 
 ### Start Server

@@ -31,13 +31,74 @@
 
 //定义flags:只写，文件不存在那么就创建，文件长度戳为0
 #define FLAGS O_RDWR | O_CREAT
-#define FLAGS1 O_WRONLY | O_CREAT | O_TRUNC
-//创建文件的权限，用户读、写、执行、组读、执行、其他用户读、执行
 #define MODE S_IRWXU | S_IXGRP | S_IROTH | S_IXOTH
 
-int main(int argc, char **argv)
+pid_t m_fSwitchtoDaemon()
 {
-    std::map<char, std::string> opt;
+    //how to create daemon process
+    //https://en.wikipedia.org/wiki/Daemon_(computing)
+    pid_t pid;
+
+    //First step:fork and end parent process
+    pid = fork();
+    if (pid > 0)
+    {
+        exit(0);
+    }
+    else if (pid < 0)
+        handle_error("fork error\n");
+
+    //Secode step:
+    //create a new session and
+    //becoming the session leader of that new session and
+    //becoming the process group leader
+    setsid();
+
+    //Third step:
+    //dissociating form the controlling tty
+    //this means that it is no longer a session leader
+    pid = fork();
+    if (pid > 0)
+    {
+        exit(0);
+    }
+    else if (pid < 0)
+        handle_error("fork error\n");
+
+    pid_t daemon_pid = getpid();
+    std::cout << "daemon pid:" << daemon_pid << std::endl;
+
+    //Forth step:
+    //setting the root directory
+    chdir("/");
+
+    //Fifth step:
+    //changing the umask to 0
+    umask(0);
+
+    //Sixth step:
+    //close all file descriptors which inhert from parent(not include stardard streams)
+    int Max = getdtablesize();
+    for (int i = 3; i <= Max; i++)
+        close(i);
+
+    //Seventh step:
+    //redirecting the standard streams to /dev/null
+    int fd = open("/dev/null", O_RDWR, 0);
+    if (fd == -1)
+    {
+        handle_error("redirect standard streams error");
+    }
+    dup2(fd, STDIN_FILENO);
+    dup2(fd, STDOUT_FILENO);
+    dup2(fd, STDERR_FILENO);
+    close(fd);
+
+    return daemon_pid;
+}
+
+int getTinyWebOpt(int argc, char **argv, std::map<char, std::string> &opt)
+{
     struct option longopts[] = {
         {"configfile", required_argument, NULL, 'c'},
         {"order", required_argument, NULL, 'o'},
@@ -51,35 +112,97 @@ int main(int argc, char **argv)
     opt = getOption(argc, argv, longopts, short_options);
     if (opt.size() == 0)
     {
-        std::cout << "argv error\n";
-        exit(-1);
+        std::cout << "tinyweb command-line argv error\n";
+        return 1;
+    }
+    return 0;
+}
+
+int getNamebyPid(pid_t pid, std::string &name)
+{
+    char file[1024];
+    sprintf(file, "/proc/%d/status", pid);
+
+    // pid = get pid from pid file
+    int fd;
+    char buf[64];
+    memset((void *)buf, 0, 64);
+    if ((fd = open(file, O_RDONLY, MODE)) == -1)
+    {
+        printf("open process-status file(%s) error\n", file);
+        name = "";
+        return 1;
+    }
+    ssize_t read_d = read(fd, (void *)buf, 64);
+    if (read_d == -1)
+    {
+        std::cout << "no content" << std::endl;
+    }
+    buf[read_d] = '\0';
+
+    char pre[32];
+    char name_s[32];
+    int return_val = sscanf(buf, "%s\t%s", pre, name_s);
+    name = std::string(name_s);
+
+    close(fd);
+}
+
+bool daemaonStillRun(std::string &name, pid_t prepid)
+{
+    if (name == "")
+        name = "TinyWeb";
+    std::string oldname;
+    getNamebyPid(prepid, oldname);
+    if (oldname == name)
+        return true;
+    else
+        return false;
+}
+
+int main()
+{
+    pid_t pid = getpid();
+    std::string name;
+    getNamebyPid(pid, name);
+    std::cout << "proc name:" << name << std::endl;
+    return 0;
+}
+
+int _main(int argc, char **argv)
+{
+
+    std::map<char, std::string> opt;
+    if (0 != getTinyWebOpt(argc, argv, opt))
+    {
+        return 1;
     }
 
     if (opt.end() != opt.find('c'))
-        std::cout << "configfile:" << opt['c'] << std::endl;
+        std::cout << "[Debug] configfile:" << opt['c'] << std::endl;
 
     if (opt.end() != opt.find('o'))
-        std::cout << "order:" << opt['o'] << std::endl;
+        std::cout << "[Debug] order:" << opt['o'] << std::endl;
 
     if (opt.end() != opt.find('t'))
-        std::cout << "testconfigfile:" << opt['t'] << std::endl;
+        std::cout << "[Debug] testconfigfile:" << opt['t'] << std::endl;
 
     if (opt.end() != opt.find('d'))
-        std::cout << "run as debug" << std::endl;
+        std::cout << "[Debug] run as debug" << std::endl;
+
     if (opt.end() != opt.find('v'))
-        std::cout << "TinyWeb ersion: " << TINYWEB_VERSION << std::endl;
+        std::cout << "[Debug] TinyWeb ersion: " << TINYWEB_VERSION << std::endl;
 
     // pid = get pid from pid file
     std::string pidfile = "/var/run/TinyWeb.pid";
     int fd;
+    char buf[1024];
+
     if ((fd = open(pidfile.c_str(), FLAGS, MODE)) == -1)
     {
-        printf("open pidfile error\n");
+        printf("open pidfile(%s) error\n", pidfile.c_str());
         return 0;
     }
-
-    std::cout << "current pid:" << getpid() << std::endl;
-    char buf[1024];
     memset((void *)buf, 0, 1024);
     ssize_t read_d = read(fd, (void *)buf, 1024);
     if (read_d == -1)
@@ -90,59 +213,23 @@ int main(int argc, char **argv)
     pid_t prepid = atoi(buf);
     std::cout << "pre pid:" << prepid << std::endl;
 
-    // clear pid file
-    ssize_t write_d;
-    int return_val = ftruncate(fd, 0);
-    if (0 == return_val)
-    {
-        std::cout << "ftruncate success" << std::endl;
-    }
-    lseek(fd, 0, SEEK_SET);
-
-    // write to pid file
-    std::string writebuf = std::to_string(getpid());
-    write_d = write(fd, (void *)(writebuf.c_str()), writebuf.size());
-    if (-1 == write_d)
-    {
-        std::cout << "write pid to pidfile error" << std::endl;
-    }
-    close(fd);
-
-    if (opt.end() != opt.find('o') && prepid != 0)
-    {
-        std::string order = opt['o'];
-        std::cout << "order:" << order << std::endl;
-
-        if (order == "stop")
-        {
-            std::cout << "stop TinyWeb" << std::endl;
-            kill(prepid, SIGQUIT);
-        }
-        else if (order == "term")
-        {
-            std::cout << "term TinyWeb" << std::endl;
-            kill(prepid, SIGTERM);
-            // kill(prepid, SIGINT);
-        }
-        else if (order == "restart")
-        {
-            std::cout << "restart TinyWeb" << std::endl;
-            kill(prepid, SIGUSR1);
-        }
-        else if (order == "reload")
-        {
-            std::cout << "reload TinyWeb" << std::endl;
-            kill(prepid, SIGUSR2);
-        }
-        else
-        {
-            std::cout << "unknow order" << std::endl;
-        }
-    }
-
     if (0 == prepid)
     {
-        while(1)
+        pid_t curpid = m_fSwitchtoDaemon();
+
+        // clear pid file
+        ssize_t write_d;
+        int return_val = ftruncate(fd, 0);
+        if (0 == return_val)
+        {
+            std::cout << "ftruncate success" << std::endl;
+        }
+        lseek(fd, 0, SEEK_SET);
+        // write to pid file
+        std::string writebuf = std::to_string(curpid);
+        write_d = write(fd, (void *)(writebuf.c_str()), writebuf.size());
+        close(fd);
+        while (1)
         {
             // sleep(5);
         }
@@ -154,9 +241,37 @@ int main(int argc, char **argv)
     else
     {
         std::cout << "no need create new processpool" << std::endl;
+        if (opt.end() != opt.find('o'))
+        {
+            std::string order = opt['o'];
+            std::cout << "order:" << order << std::endl;
+
+            if (order == "stop")
+            {
+                std::cout << "stop TinyWeb" << std::endl;
+                kill(prepid, SIGQUIT);
+            }
+            else if (order == "term")
+            {
+                std::cout << "term TinyWeb" << std::endl;
+                kill(prepid, SIGTERM);
+                // kill(prepid, SIGINT);
+            }
+            else if (order == "restart")
+            {
+                std::cout << "restart TinyWeb" << std::endl;
+                kill(prepid, SIGUSR1);
+            }
+            else if (order == "reload")
+            {
+                std::cout << "reload TinyWeb" << std::endl;
+                kill(prepid, SIGUSR2);
+            }
+            else
+            {
+                std::cout << "unknow order" << std::endl;
+            }
+        }
     }
-
-    //clear pid file
-
     return 0;
 }
