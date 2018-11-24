@@ -30,26 +30,27 @@ void test_child_MessageCallback(Connection *con, Buffer *buf, Time time)
 {
     pid_t pid = getpid();
     std::cout << "[child] (" << pid << ") get message:"
-        << buf->getAll() << std::endl;
+              << buf->getAll() << std::endl;
 }
 
 void test_child_CloseCallback(Connection *con)
 {
     pid_t pid = getpid();
-    std::cout << "[child] (" << pid << ") connection with parent close" 
-        << std::endl;
+    std::cout << "[child] (" << pid << ") connection with parent close"
+              << std::endl;
 }
 
 Process::Process(const std::string &name,
-        int number,
-        int sockfd[2])
+                 int number,
+                 int sockfd[2])
     : m_pEventLoop(new EventLoop()),
-    m_pSlave(new Slave(m_pEventLoop, number, name)),
-    m_nName(name),
-    m_nNumber(number),
-    m_nPid(getpid()),
-    m_nPipe(SocketPair(m_pEventLoop, sockfd))
+      m_pSlave(new Slave(m_pEventLoop, number, name)),
+      m_nName(name),
+      m_nNumber(number),
+      m_nPid(getpid()),
+      m_nPipe(SocketPair(m_pEventLoop, sockfd))
 {
+    m_pProcessInstance = this;
     LOG(Debug) << "class Process constructor\n";
 }
 
@@ -81,7 +82,15 @@ void Process::setSignalHandlers()
 
 void Process::start()
 {
-    m_pSlave->work();
+    status = 1;
+
+    while (status)
+    {
+        m_pSlave->work();
+        
+        if (status_terminate || status_quit_softly || status_restart || status_reconfigure)
+            status = 0;
+    }
 }
 
 pid_t Process::getPid()

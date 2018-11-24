@@ -57,15 +57,15 @@ void Master::work()
         m_pEventLoop->loop();
         if (status_terminate || status_quit_softly)
         {
-            LOG(Debug) << "[master]:I will kill all chilern\n";
+            LOG(Debug) << "[master]:(term/stop)I will kill all chilern\n";
             m_pProcessPool->killAll();
             status = 0;
         }
-        if (status_reconfigure)
+        if (status_restart || status_reconfigure)
         {
-            LOG(Debug) << "[master]:reconfigure ,recreate new process\n";
+            LOG(Debug) << "[master]:(restart/reload)quit and create new processpool\n";
             m_pProcessPool->killAll();
-            m_pProcessPool->createProcess(m_pProcessPool->processNum());
+            status = 0;
         }
 
     }

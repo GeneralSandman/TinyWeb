@@ -57,7 +57,7 @@ void Slave::work()
         m_pEventLoop->loop();
         // reconfig
 
-        if (status_terminate || status_quit_softly || status_reconfigure)
+        if (status_terminate || status_quit_softly || status_restart || status_reconfigure)
             status = 0;
     }
 }

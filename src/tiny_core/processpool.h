@@ -66,6 +66,8 @@ class ProcessPool
         int m_nListenSocketFd;
         SignalManager m_nSignalManager;
 
+        int status;
+
         static ProcessPool* m_pPoolInstance;
 
         static void parentSignalHandler(int sign)
@@ -86,7 +88,7 @@ class ProcessPool
                 case SIGINT:
                 case SIGTERM:
                     status_terminate = 1;
-                    LOG(Debug) << "[parent] parent will terminate all slave process\n";
+                    LOG(Debug) << "[parent] will terminate all slave process\n";
                     break;
                 case SIGQUIT:
                     status_quit_softly = 1;
@@ -97,7 +99,6 @@ class ProcessPool
                     LOG(Debug) << "[parent] collect information from child(" << pid << ")\n";
                     pool->m_fDestoryProcess(pid);
                     break;
-                    //invoke waitpid() to collect the resource of child
                     // case SIGHUP:
                     //   status_reconfigure = 1;
                     //   std::cout << "[parent]:reconfigure\n";
@@ -106,10 +107,12 @@ class ProcessPool
                 case SIGPIPE:
                     break;
                 case SIGUSR1:
-                    // restart
+                    status_restart = 1;
+                    LOG(Debug) << "[parent] restart \n";
                     break;
                 case SIGUSR2:
-                    // reload config
+                    status_reconfigure = 1;
+                    LOG(Debug) << "[parent] reload config\n";
                     break;
                 default:
                     break;

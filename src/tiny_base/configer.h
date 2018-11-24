@@ -75,6 +75,7 @@ class Configer
             return ConfigerInstance;
         }
         void setConfigerFile(const std::string &file);
+        int checkConfigerFile(const std::string &file);
         int loadConfig(bool debug = false);
         ~Configer();
 };

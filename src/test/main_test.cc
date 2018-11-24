@@ -222,45 +222,61 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    // if (opt.end() != opt.find('c'))
-    //     std::cout << "[Debug] configfile:" << opt['c'] << std::endl;
-
     // if (opt.end() != opt.find('o'))
     //     std::cout << "[Debug] order:" << opt['o'] << std::endl;
-
-    // if (opt.end() != opt.find('t'))
-    //     std::cout << "[Debug] testconfigfile:" << opt['t'] << std::endl;
 
     // if (opt.end() != opt.find('d'))
     //     std::cout << "[Debug] run as debug" << std::endl;
 
-    // if (opt.end() != opt.find('v'))
-    //     std::cout << "[Debug] TinyWeb ersion: " << TINYWEB_VERSION << std::endl;
-
     pid_t prepid = daemonPrePid();
     std::cout << "pre pid:" << prepid << std::endl;
-    if (0 == prepid)
+    if (0 == prepid &&
+        opt.end() == opt.find('t') &&
+        opt.end() == opt.find('v') &&
+        opt.end() == opt.find('o'))
     {
         std::cout << "new daemon process" << std::endl;
         pid_t curpid = m_fSwitchtoDaemon();
         storeCurPid(curpid);
+
+        if (opt.end() != opt.find('c'))
+            std::cout << "configfile:" << opt['c'] << std::endl;
+
         while (1)
         {
             // sleep(5);
         }
-        // std::cout << "[Process Pool Test]" << std::endl;
-        // ProcessPool pool;
-        // pool.init();
-        // pool.createProcess(2);
+        ProcessPool pool;
+        pool.init();
+        pool.createProcess(2);
     }
     else
     {
-        std::cout << "just a order process" << std::endl;
-        if (opt.end() != opt.find('o'))
+        std::cout << "just a order process(" << getpid() << ")\n";
+        if (opt.end() != opt.find('c') ||
+            opt.end() != opt.find('d'))
+        {
+            std::cout << "TinyWeb already running\n";
+            return 0;
+        }
+        if (opt.end() != opt.find('t'))
+        {
+            std::cout << "[Debug] test configfile:" << opt['t'] << std::endl;
+            Configer &configer = Configer::getConfigerInstance();
+            if (0 == configer.checkConfigerFile(opt['t']))
+            {
+                std::cout << "TinyWeb configure file(" << opt['t'] << ") is valid" << std::endl;
+            }
+            else
+            {
+                std::cout << "TinyWeb configure file(" << opt['t'] << ") is invalid" << std::endl;
+            }
+        }
+        else if (opt.end() != opt.find('v'))
+            std::cout << "TinyWeb version: " << TINYWEB_VERSION << std::endl;
+        else if (opt.end() != opt.find('o') && prepid != 0)
         {
             std::string order = opt['o'];
-            std::cout << "order:" << order << std::endl;
-
             if (order == "stop")
             {
                 std::cout << "stop TinyWeb(" << prepid << ")" << std::endl;
