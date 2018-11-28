@@ -18,8 +18,6 @@
 #include <tiny_base/log.h>
 #include <tiny_core/protocol.h>
 
-/*--------WebProtocol-----------*/
-
 class WebProtocol : public Protocol
 {
 private:
@@ -34,4 +32,3 @@ public:
 };
 
 #endif // !HTTP_PROTOCOL_H
-

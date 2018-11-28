@@ -28,12 +28,12 @@ add_subdirectory("${SOURCE_DIR}/tiny_http" tiny_http.out)
 add_subdirectory("${SOURCE_DIR}/tiny_struct" tiny_struct.out)
 
 
-# modelFile_test
+# all_test
 add_executable(all_test
     all_test.cc
     )
 
-target_link_libraries(modelFile_test
+target_link_libraries(all_test
     tiny_http_model
     )
 
@@ -44,6 +44,7 @@ add_executable(modelFile_test
 
 target_link_libraries(modelFile_test
     tiny_http_model
+    tiny_base_model
     )
 
 # parseBody

@@ -159,7 +159,6 @@ class HttpResponser
             int return_val = initFile(inputFile, fname);
             if(return_val < 0)
             {
-                std::cout << return_val << std::endl;
                 return ;
             }
 

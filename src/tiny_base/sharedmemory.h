@@ -2,7 +2,7 @@
 *Author:GeneralSandman
 *Code:https://github.com/GeneralSandman/TinyWeb
 *E-mail:generalsandman@163.com
-*Web:www.generalsandman.cn
+*Web:www.dissigil.cn
 */
 
 /*---XXX---
@@ -17,7 +17,7 @@
 #include <tiny_base/semaphore.h>
 // #include <tiny_base/log.h>
 #include <tiny_base/api.h>
-#include <tiny_struct/string_t.h>
+#include <tiny_struct/sdstr_t.h>
 
 #include <iostream>
 #include <deque>
@@ -28,7 +28,7 @@ class SharedMemory
 private:
   void *m_pSharedData;
   size_t m_nSize;
-  String m_nName;
+  sdstr m_nName;
 
 public:
   SharedMemory(int size);

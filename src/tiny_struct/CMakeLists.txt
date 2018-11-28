@@ -8,6 +8,5 @@ add_library(tiny_struct_model STATIC
     dict_t.cc
     list_t.cc
     rbtree_t.cc
-    string_t.cc
     sdstr_t.cc
 )

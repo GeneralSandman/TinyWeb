@@ -76,3 +76,15 @@ target_link_libraries(main_test
     tiny_base_model
     )
 
+# daemon_test
+add_executable(daemon_test
+    daemon_test.cc
+    )
+
+target_link_libraries(daemon_test
+    tiny_core_model
+    tiny_http_model
+    tiny_struct_model
+    tiny_base_model
+    )
+

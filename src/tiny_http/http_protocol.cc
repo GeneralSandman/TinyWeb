@@ -14,9 +14,8 @@
 #include <tiny_base/log.h>
 #include <tiny_core/protocol.h>
 #include <tiny_http/http_protocol.h>
-
-
-//--------WebProtocol api-------------//
+#include <tiny_http/http_parser.h>
+#include <tiny_http/http_responser.h>
 
 WebProtocol::WebProtocol()
     : m_nKeepAlive(false)
@@ -31,6 +30,24 @@ void WebProtocol::connectionMade()
 
 void WebProtocol::dataReceived(const std::string &data)
 {
+    LOG(Info) << "get data\n";
+    HttpParserSettings settings;
+    int begin = 0;
+    HttpParser parser(&settings);
+    parser.setType(HTTP_TYPE_REQUEST);
+    HttpRequest *result = new HttpRequest;
+    int tmp = parser.execute(data.c_str(),
+                             begin,
+                             data.size(),
+                             result);
+    bool res = (tmp == -1) ? false : true;
+    if (res)
+    {
+        HttpResponser responser;
+        responser.response(result);
+    }
+
+    delete result;
 }
 
 void WebProtocol::connectionLost()
@@ -44,5 +61,3 @@ WebProtocol::~WebProtocol()
 }
 
 RegistProtocol(WebProtocol);
-
-//--------end-WebProtocol api-------------//

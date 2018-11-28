@@ -19,7 +19,6 @@ using namespace std;
 
 void testFile()
 {
-
     std::cout << "input file =";
     std::string fname;
     std::cin >> fname;
@@ -67,8 +66,8 @@ void testFile2()
 
 int main()
 {
-    
-    testFile2();
+    testFile();
+    // testFile2();
 
     return 0;
 }
