@@ -89,6 +89,7 @@ add_executable(parseHttpTime_test
     )
 
 target_link_libraries(parseHttpTime_test
+    tiny_http_model
     tiny_struct_model
     )
 

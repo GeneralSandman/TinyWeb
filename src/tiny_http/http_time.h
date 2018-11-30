@@ -18,21 +18,16 @@
 
 #include <time.h>
 
-typedef struct formatTime
-{
-    std::string fmt;
-    std::string str;
-} formatTime;
 
 int parseTime(const char *time);
 
 void convertTime2Gmt(const time_t *src, bool isLocal, struct tm *gmt);
-void convertTm2Time(struct tm *gmt, bool isLocal, time_t *time);
+void convertTm2Time(const struct tm *gmt, bool isLocal, time_t *time);
 
-void formate(const struct tm *gmt, formatTime *time);
-void formateHttpTime(const time_t time, sdstr *str);
-void formateCookieTime(const time_t time, sdstr *str);
+void formatHttpTime(const time_t time, sdstr *str);
+void deformatHttpTime(const sdstr *str, time_t *time);
 
-void deformate(const formatTime *time, struct tm *gmt);
+void formatCookieTime(const time_t time, sdstr *str);
+void deformatCookieTime(const sdstr *str, time_t *time);
 
 #endif // !HTTP_TIME_H

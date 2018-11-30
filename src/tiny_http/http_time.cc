@@ -16,6 +16,10 @@
 
 #include <time.h>
 
+static const char * httpTimeFormat1 = "%a, %d %b %Y %H:%M:%S %Z";
+static const char * httpTimeFormat2 = "%A, %d-%b-%y %H:%M:%S %Z";
+static const char * httpTimeFormat3 = "%a %b %e %H:%M:%S %Y";
+
 
 int parseTime(const char *time)
 {
@@ -32,45 +36,53 @@ void convertTime2Gmt(const time_t *src, bool isLocal, struct tm *gmt)
     *gmt = *tmp;
 }
 
-void convertTm2Time(struct tm *gmt, bool isLocal, time_t *time)
+void convertTm2Time(const struct tm *gmt, bool isLocal, time_t *time)
 {
+    struct tm gmt_tmp = *gmt;
     if (!isLocal)
-        gmt->tm_hour += 8;
-    *time = mktime(gmt);
+        gmt_tmp.tm_hour += 8;
+    *time = mktime(&gmt_tmp);
 }
 
-void formate(const struct tm *gmt, formatTime *time)
-{
-    char buf[128];
-    int len = strftime(buf, 128, time->fmt.c_str(), gmt);
-    std::string tmp(buf, len);
-    time->str = tmp;
-}
 
-void formateHttpTime(const time_t time, sdstr *str)
+void formatHttpTime(const time_t time, sdstr *str)
 {
     struct tm gmt;
     memset((void *)&gmt, 0, sizeof(struct tm));
 
     convertTime2Gmt(&time, false, &gmt);
     char buf[64];
-    int len = strftime(buf, 64, "%a, %d %b %Y %H:%M:%S %Z", &gmt);
+    int len = strftime(buf, 64, httpTimeFormat1, &gmt);
     sdsncat(str, buf, len);
 }
 
-void formateCookieTime(const time_t time, sdstr *str)
+void deformatHttpTime(const sdstr *str, time_t *time)
+{
+    struct tm gmt;
+    memset((void *)&gmt, 0, sizeof(struct tm));
+
+    strptime(str->data, httpTimeFormat1, &gmt);
+    convertTm2Time(&gmt, false, time);
+}
+
+
+void formatCookieTime(const time_t time, sdstr *str)
 {
     struct tm gmt;
     memset((void *)&gmt, 0, sizeof(struct tm));
 
     convertTime2Gmt(&time, false, &gmt);
     char buf[64];
-    int len = strftime(buf, 64, "%A, %d-%b-%y %H:%M:%S %Z", &gmt);
+    int len = strftime(buf, 64, httpTimeFormat2, &gmt);
     sdsncat(str, buf, len);
 }
 
-void deformate(const formatTime *time, struct tm *gmt)
+void deformatCookieTime(const sdstr *str, time_t *time)
 {
-    strptime(time->str.c_str(), time->fmt.c_str(), gmt);
+    struct tm gmt;
+    memset((void *)&gmt, 0, sizeof(struct tm));
+
+    strptime(str->data, httpTimeFormat2, &gmt);
+    convertTm2Time(&gmt, false, time);
 }
 
