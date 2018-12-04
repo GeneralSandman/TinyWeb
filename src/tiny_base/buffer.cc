@@ -1,15 +1,15 @@
 /*
-*Author:GeneralSandman
-*Code:https://github.com/GeneralSandman/TinyWeb
-*E-mail:generalsandman@163.com
-*Web:www.generalsandman.cn
-*/
+ *Author:GeneralSandman
+ *Code:https://github.com/GeneralSandman/TinyWeb
+ *E-mail:generalsandman@163.com
+ *Web:www.dissigil.cn
+ */
 
 /*---XXX---
-*
-****************************************
-*
-*/
+ *
+ ****************************************
+ *
+ */
 
 #include <tiny_base/buffer.h>
 #include <tiny_base/log.h>
@@ -86,8 +86,8 @@ inline void Buffer::m_fMakeSpace(size_t len)
     {
         size_t read = m_fReadableBytes();
         std::copy(m_fReadableBegin(),
-                  m_fWriteableBegin(),
-                  m_fBegin() + K_Buffer_Prepend);
+                m_fWriteableBegin(),
+                m_fBegin() + K_Buffer_Prepend);
         m_nReadIndex = K_Buffer_Prepend;
         m_nWriteIndex = m_nReadIndex + read;
     }
@@ -101,8 +101,8 @@ void Buffer::m_fClearAll()
 
 Buffer::Buffer()
     : m_nDatas(K_Buffer_Prepend + K_Buffer_Size),
-      m_nReadIndex(K_Buffer_Prepend),
-      m_nWriteIndex(K_Buffer_Prepend)
+    m_nReadIndex(K_Buffer_Prepend),
+    m_nWriteIndex(K_Buffer_Prepend)
 {
     LOG(Debug) << "class Buffer constructor\n";
 }
@@ -185,16 +185,16 @@ void Buffer::prepend(const void * /*restrict*/ data, size_t len)
 const char *Buffer::findCRLF() const
 {
     const char *crlf = std::search(m_fReadableBegin(),
-                                   m_fWriteableBegin(),
-                                   kCRLF, kCRLF + 2);
+            m_fWriteableBegin(),
+            kCRLF, kCRLF + 2);
     return crlf == m_fWriteableBegin() ? NULL : crlf;
 }
 
 const char *Buffer::findCRLF(const char *start) const
 {
     const char *crlf = std::search(start,
-                                   m_fWriteableBegin(),
-                                   kCRLF, kCRLF + 2);
+            m_fWriteableBegin(),
+            kCRLF, kCRLF + 2);
     return crlf == m_fWriteableBegin() ? NULL : crlf;
 }
 

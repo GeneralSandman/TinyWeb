@@ -48,19 +48,18 @@ void *MemoryPool::m_fFillFreeList(size_t s)
     int chunk_num = 6;
     char *p_chunk = m_fAllocChunk(s, chunk_num);
 
+    LOG(Debug) << "alloc chunks(" << chunk_num << "),size(" << s << ")\n";
     if (1 == chunk_num)
     {
-        LOG(Debug) << "alloc chunk number is 1\n";
         result = (obj *)p_chunk;
     }
-    else //chunk_num >= 2
+    else
     {
-        LOG(Debug) << "alloc chunks(" << chunk_num << "),size(" << s << ")\n";
         //add chunk_num-1 chunk to free list.
         obj **list = m_nFreeList + FREELIST_INDEX(s);
 
-        obj *current_chunk = nullptr,
-            *next_chunk = nullptr;
+        obj *current_chunk = nullptr;
+        obj *next_chunk = nullptr;
         //return first chunk
         result = (obj *)p_chunk;
 
@@ -82,7 +81,6 @@ void *MemoryPool::m_fFillFreeList(size_t s)
 
 char *MemoryPool::m_fAllocChunk(size_t s, int &chunk_num)
 {
-    //alloc chunk from self heap or alloc()
     char *result = nullptr;
     size_t request_size = s * chunk_num;
     size_t left_size = m_pHeapEnd - m_pHeapBegin;
@@ -113,8 +111,8 @@ char *MemoryPool::m_fAllocChunk(size_t s, int &chunk_num)
 
         if (left_size > 0)
         {
-            //Reuse the last heap space
-            //Add it to free list
+            //Reuse the last heap space.
+            //Add it to free list.
             obj **list = m_nFreeList + FREELIST_INDEX(left_size);
             ((obj *)m_pHeapBegin)->p_next = *list;
             *list = (obj *)m_pHeapBegin;
@@ -123,8 +121,9 @@ char *MemoryPool::m_fAllocChunk(size_t s, int &chunk_num)
         }
 
         //We have to set malloc_size carefully.
-        size_t malloc_size = 2 * request_size; //malloc_size%8==0
+        size_t malloc_size = 2 * request_size;
         m_pHeapBegin = (char *)malloc(malloc_size);
+        LOG(Info) << "malloc" << std::endl;
         m_nAllSpace += malloc_size;
 
         //Update cleanHandlers
@@ -134,7 +133,6 @@ char *MemoryPool::m_fAllocChunk(size_t s, int &chunk_num)
         newCleanHandler->next = m_pCleanHandlers;
         m_pCleanHandlers = newCleanHandler;
 
-        LOG(Debug) << "malloc memory directly by system call\n";
         if (nullptr == m_pHeapBegin)
         {
             //Malloc error
@@ -166,23 +164,22 @@ char *MemoryPool::m_fAllocChunk(size_t s, int &chunk_num)
 void *MemoryPool::allocate(size_t s)
 {
     m_nAllocatedSpace += ROUND_UP(s);
-    //if size > MAXSPACE : invoke BasicAllocator::allocate,
-    //else :find a free block in free list.
     obj *result = nullptr;
     if (s > MAXSPACE)
     {
-        LOG(Debug) << "MemoeyPool allocate by BasicAllocator\n";
+        // Get space by BasicAllocator
+        LOG(Debug) << "[MemoryPool allocate] by BasicAllocator\n";
         return BasicAllocator::allocate(s);
     }
     else
     {
-        LOG(Debug) << "MemoeyPool get space from list:size(" << ROUND_UP(s)
+        // Get free block from free list
+        LOG(Debug) << "[MemoryPool allocate] get space from list:size(" << ROUND_UP(s)
                     << "),list-index(" << FREELIST_INDEX(s) << ")\n";
         obj **list = m_nFreeList + FREELIST_INDEX(s);
         result = *list;
         if (result == nullptr)
         {
-            //This is a empty list,fill list
             return m_fFillFreeList(ROUND_UP(s));
         }
         *list = result->p_next;
@@ -196,12 +193,12 @@ void MemoryPool::deallocate(void *p, size_t s)
     //else :add it to free list
     if (s > MAXSPACE)
     {
-        LOG(Debug) << "MemoeyPool deallocate by BasicAllocator\n";
+        LOG(Debug) << "[MemoryPool deallocate] by BasicAllocator\n";
         BasicAllocator::deallocate(p, s);
     }
     else
     {
-        LOG(Debug) << "MemoeyPool place this space to free list\n";
+        LOG(Debug) << "[MemoryPool deallocate] place this space to free list\n";
         obj **list = m_nFreeList + FREELIST_INDEX(s);
         obj *newlist = (obj *)p;
         newlist->p_next = *list;
@@ -244,9 +241,9 @@ MemoryPool::~MemoryPool()
     {
         struct cleanup *cur = m_pCleanHandlers;
         m_pCleanHandlers = cur->next;
+        LOG(Info) << "free space" << std::endl;
         free(cur->data);
         free(cur);
-        LOG(Debug) << "free\n";
     }
 
     LOG(Debug) << "class MemoryPool destructor\n";

@@ -137,8 +137,7 @@ struct cleanup
     struct cleanup *next;
 };
 
-    inline size_t
-ROUND_UP(size_t n)
+inline size_t ROUND_UP(size_t n)
 {
     return (((n) + ALIGN - 1) & ~(ALIGN - 1));
 }

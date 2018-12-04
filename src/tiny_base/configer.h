@@ -17,17 +17,15 @@
 
 #include <string>
 #include <list>
+#include <vector>
+#include <algorithm>
 #include <iostream>
 
-void setConfigerFile(const std::string &file);
-int loadConfig(bool debug);
-
-class Configer
+class BasicConfig
 {
-    class Basic
-    {
-        int wroker;
-        std::string pidfile;
+    public:
+        int worker;
+        std::string pid;
         bool sendfile;
         std::string mimetype;
         bool chunked;
@@ -35,19 +33,30 @@ class Configer
         int gzip_level;
         int gzip_buffers_4k;
         int gzip_min_len;
-    };
+        std::vector<int> gzip_http_version;
+        std::vector<std::string> gzip_mime_type;
+};
 
-    class Server
-    {
+typedef struct errorpage
+{
+    unsigned int code;
+    std::string path;
+    std::string file;
+}errorpage;
+
+class ServerConfig
+{
+    public:
         int listen;
         std::string www;
-        std::list<std::string> servername;
-        std::list<std::string> indexpage;
-        std::list<std::string> errorpage;
-    };
+        std::vector<std::string> servername;
+        std::vector<std::string> indexpage;
+        std::vector<errorpage> errorpages;
+};
 
-    class Log
-    {
+class LogConfig
+{
+    public:
         std::string level; 
         std::string path;
         std::string debugfile;
@@ -55,18 +64,29 @@ class Configer
         std::string warnfile;
         std::string errorfile;
         std::string fatalfile;
-    };
+};
 
+void setConfigerFile(const std::string &file);
+int loadConfig(bool debug);
+
+class Configer
+{
     private:
         static std::string m_nFile;
-        Configer();
-        Configer(const Configer &c) //disable
-        {
-        }
+        BasicConfig basicConf;
+        std::vector<ServerConfig> serverConf;
+        LogConfig logConf;
 
-        Basic basicConf;
-        Server serverConf;
-        Log logConf;
+        Configer();
+        Configer(const Configer &c) {}
+
+        bool haveServerName(const ServerConfig &conf, const std::string &servername)
+        {
+            auto it = find(std::begin(conf.servername), 
+                    std::end(conf.servername), 
+                    servername);
+            return (it != std::end(conf.servername));
+        }
 
     public:
         static Configer &getConfigerInstance()
@@ -77,6 +97,10 @@ class Configer
         void setConfigerFile(const std::string &file);
         int checkConfigerFile(const std::string &file);
         int loadConfig(bool debug = false);
+
+        const BasicConfig & getBasicConfig();
+        const ServerConfig & getServerConfig(const std::string &servername);
+        const LogConfig & getLogConfig();
         ~Configer();
 };
 

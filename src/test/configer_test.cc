@@ -1,15 +1,15 @@
 /*
-*Author:GeneralSandman
-*Code:https://github.com/GeneralSandman/TinyWeb
-*E-mail:generalsandman@163.com
-*Web:www.generalsandman.cn
-*/
+ *Author:GeneralSandman
+ *Code:https://github.com/GeneralSandman/TinyWeb
+ *E-mail:generalsandman@163.com
+ *Web:www.dissigil.cn
+ */
 
 /*---XXX---
-*
-****************************************
-*
-*/
+ *
+ ****************************************
+ *
+ */
 
 
 #include <tiny_base/api.h>
@@ -27,17 +27,44 @@ void test1()
     Configer &configer = Configer::getConfigerInstance();
     configer.setConfigerFile(file);
 
-    if (0 == configer.loadConfig())
+    bool debug = true;
+    if (0 == configer.loadConfig(debug))
         std::cout << "load config successfull\n";
     else
         std::cout << "load config failed\n";
 }
 
 void test2()
+{
+    std::string file = "../../TinyWeb.conf";
+    Configer &configer = Configer::getConfigerInstance();
+    configer.setConfigerFile(file);
+
+    bool debug = true;
+    if (0 == configer.loadConfig(debug))
+        std::cout << "load config successfull\n";
+    else
+        std::cout << "load config failed\n";
+
+
+    std::string servername = "dissigil.cn";
+    BasicConfig basic = configer.getBasicConfig();
+    ServerConfig server = configer.getServerConfig(servername);
+    LogConfig log = configer.getLogConfig();
+
+    std::cout << "worker:" << basic.worker << std::endl;
+    std::cout << "listen:" << server.listen << std::endl;
+    std::cout << "www:" << server.www << std::endl;
+    std::cout << "log-level:" << log.level << std::endl;
+    std::cout << "log-path:" << log.path << std::endl;
+
+}
+
+void test3()
 { //
     std::string a = "../TinyWeb.conf";
     setConfigerFile(a);
-    if (loadConfig())
+    if (loadConfig(true))
         std::cout << "load config successfull\n";
     else
         std::cout << "load config failed\n";
@@ -70,6 +97,7 @@ void test2()
 
 int main()
 {
-    test1();
+   // test1();
+    test2();
     return 0;
 }
