@@ -56,6 +56,7 @@
 - Connection和Connector的Channel不同，也就决定了监听对象的不同，Connector监听的是连接建立的时候的事件，而Connection要对连接成功之后的事件进行负责。注意事件范围。
 - ConnectSocket 和已经建立连接后的Connection中的socket是相同的
 如何处理两者都关闭file descriptor 出错的问题。
+- new buffer_t & new chain_t design 配合gzip和chunk模块的使用。
 
 
 > # TinyWeb特点
@@ -158,3 +159,32 @@ ngx_shmtx_t锁是可以在共享内存上使用的,它是Nginx中最常见的锁
 ||单进程+epoll+非阻塞IO|
 ||进程池+epoll+非阻塞IO|
 ||单进程多线程+epoll+非阻塞IO|
+
+
+
+
+打开文件及处理index页面的问题，
+
+File读取配置文件，
+
+先读取文件的stat
+1. 路径不存在 ->　返回特殊页面
+2. 路径存在： 是目录 -> 通过配置将路径补全为index页面
+            是正常文件 -> 读取
+
+
+sendfile 和 connection 中outputBuffer的逻辑交互如何处理
+什么时候该处理sendfile中的文件。。
+如何client收到的消息会出现这样的情况：file内容与outputBuffer中的内容交织。。。
+
+为outputBuffer设置输出标志位，当某标志为到达队列前面，则调用相应sendfile。
+
+
+outputBuffer
+
+|-------------------|--------------|--------|-----|
+file1               file2           file3   file3  file4
+
+
+设置sendfile Queue，到达outputBuffer消息边界时，触发相应的writeFileCallback
+

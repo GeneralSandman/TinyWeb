@@ -131,3 +131,12 @@ target_link_libraries(responser_test
     tiny_base_model
     )
 
+# chain_test
+add_executable(chain_test
+    chain_test.cc
+    )
+
+target_link_libraries(chain_test
+    tiny_http_model
+    )
+

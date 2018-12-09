@@ -11,14 +11,14 @@
  *
  */
 
+#include <tiny_base/api.h>
+#include <tiny_base/log.h>
 #include <tiny_core/connection.h>
 #include <tiny_core/netaddress.h>
 #include <tiny_core/eventloop.h>
 #include <tiny_core/socket.h>
 #include <tiny_core/channel.h>
 #include <tiny_core/time.h>
-#include <tiny_base/api.h>
-#include <tiny_base/log.h>
 
 #include <boost/bind.hpp>
 #include <iostream>
@@ -70,7 +70,7 @@ void Connection::m_fHandleWrite()
 
         else
         {
-            //FIXME:we need handle error.
+            //FIXME:need handle error.
         }
     }
     else
@@ -155,6 +155,12 @@ void Connection::send(const std::string &message)
         if (!m_pChannel->isWriting())
             m_pChannel->enableWrite();
     }
+}
+
+void Connection::sendfile(int inputFd, off_t *offset, size_t count)
+{
+    // TODO: how to identify boundary with outputBuffer.
+
 }
 
 void Connection::establishConnection()
