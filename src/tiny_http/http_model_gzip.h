@@ -36,8 +36,14 @@ typedef struct gzip_context_t
 {
     z_stream stream;
     int flush;
+
     http_chain_t *in;
     http_chain_t *out;
+
+    http_chain_t *curr_in;
+    http_chain_t *curr_out;
+
+    unsigned int level;
 }gzip_context_t;
 
 
@@ -52,9 +58,9 @@ enum gzip_status
 
 void get_zip_config(gzip_config_t *conf);
 
-void gzip_context_init(gzip_context_t *context);
+void gzip_context_init(gzip_config_t *conf, gzip_context_t *context);
 gzip_status gzip_deflate_init(gzip_context_t *context);
-gzip_status gzip_deflate(gzip_context_t *context, http_buffer *buffer);
+gzip_status gzip_deflate(gzip_context_t *context, http_buffer_t *buffer);
 gzip_status gzip_deflate_end(gzip_context_t *context);
 
 gzip_status gzip_body(gzip_context_t *context);

@@ -38,6 +38,16 @@ target_link_libraries(memorypool_test
     tiny_base_model
     )
 
+# new_memorypool_test
+add_executable(new_memorypool_test
+    new_memorypool_test.cc
+    )
+
+target_link_libraries(new_memorypool_test
+    tiny_http_model
+    tiny_base_model
+    )
+
 # sdstr_test
 add_executable(sdstr_test
     sdstr_test.cc

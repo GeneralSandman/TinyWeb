@@ -57,7 +57,18 @@
 - ConnectSocket 和已经建立连接后的Connection中的socket是相同的
 如何处理两者都关闭file descriptor 出错的问题。
 - new buffer_t & new chain_t design 配合gzip和chunk模块的使用。
+- 先设计gzip模块，确定newmemorypool需要的功能
+- build new memory-pool
+    - getNewBuffer (size > 1024)
 
+- chain 获取第一个buffer并且初始化给gzip-model。
+- chain 可以持续不断的从pool中获得。
+- 如何高效得拷贝内存
+
+- 高效地从内存池中获取。
+- 高效地拷贝chain
+- 
+- chain 只是方便内存的使用，不参与内存的管理
 
 > # TinyWeb特点
 1. 性能
