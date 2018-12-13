@@ -11,13 +11,13 @@
  *
  */
 
-#ifndef HTTP_BUFFER_H
-#define HTTP_BUFFER_H
+#ifndef BUFFER_T_H
+#define BUFFER_T_H
 
-typedef struct http_buffer_t
+typedef struct buffer_t
 {
     unsigned char *begin;
     unsigned char *end;
-}http_buffer_t;
+}buffer_t;
 
 #endif

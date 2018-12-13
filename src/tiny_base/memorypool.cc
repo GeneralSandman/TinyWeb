@@ -20,6 +20,8 @@
 
 #include <tiny_base/memorypool.h>
 #include <tiny_base/log.h>
+#include <tiny_struct/buffer_t.h>
+#include <tiny_struct/chain_t.h>
 
 OomHandler BasicAllocator::m_nHandler;
 
@@ -28,7 +30,10 @@ MemoryPool::MemoryPool()
     m_nAllSpace(0),
     m_pCleanHandlers(nullptr),
     m_pHeapBegin(nullptr),
-    m_pHeapEnd(nullptr)
+    m_pHeapEnd(nullptr),
+    blocks(nullptr),
+    free_blocks(nullptr),
+    m_nAllocatedLargeSpace(0)
 {
     for (int i = 0; i < LIST_SIZE; i++)
         m_nFreeList[i] = nullptr;
@@ -175,7 +180,7 @@ void *MemoryPool::allocate(size_t s)
     {
         // Get free block from free list
         LOG(Debug) << "[MemoryPool allocate] get space from list:size(" << ROUND_UP(s)
-                    << "),list-index(" << FREELIST_INDEX(s) << ")\n";
+            << "),list-index(" << FREELIST_INDEX(s) << ")\n";
         obj **list = m_nFreeList + FREELIST_INDEX(s);
         result = *list;
         if (result == nullptr)
@@ -214,6 +219,88 @@ void *MemoryPool::reallocate(void *p, size_t oldsize, size_t newsize)
     return allocate(newsize);
 }
 
+
+chain_t* MemoryPool::getNewChain(size_t num)
+{
+    chain_t *new_chain = nullptr;
+    chain_t *tmp = nullptr;
+
+    while (num--)
+    {
+        new_chain = (chain_t *) allocate(sizeof(chain_t));
+        new_chain->buffer = nullptr;
+
+        new_chain->next = tmp;
+        tmp = new_chain;
+    }
+
+    return new_chain;
+}
+
+int MemoryPool::catChain(chain_t *dest,
+        chain_t *src,
+        unsigned int size)
+{
+    chain_t * pos;
+    chain_t * new_chain;
+
+    for(dest; dest->next!=nullptr; dest=dest->next)
+    {
+    }
+
+    if (!size)
+        size = countChain(src);
+    std::cout << "copy size(" << size << ")" << std::endl;
+    new_chain = getNewChain(size);
+    if (nullptr == new_chain)
+    {
+        std::cout << "get new chain error" << std::endl;
+    }
+
+    dest->next = new_chain;
+    pos = new_chain;
+
+    while (size--)
+    {
+        pos->buffer = src->buffer;
+
+        pos = pos->next;
+        src = src->next;
+    }
+
+    return 0;
+}
+
+inline void * MemoryPool::mallocLargeSpace(size_t size)
+{
+    void * res = nullptr;
+    res = malloc(size);
+
+    m_nAllocatedLargeSpace += size;
+
+    block_t * new_block = (block_t *)allocate(sizeof(block_t));
+    new_block->data = res;
+    new_block->len = size;
+    new_block->next = blocks;
+    blocks = new_block;
+
+    return res;
+}
+
+
+void MemoryPool::mallocSpace(chain_t *chain, size_t size)
+{
+    void * new_mem = nullptr;
+    while (nullptr != chain)
+    {
+        new_mem = mallocLargeSpace(size);
+        chain->buffer = (buffer_t *) allocate(sizeof(buffer_t));
+        chain->buffer->begin = (unsigned char *) new_mem;
+        chain->buffer->end = (unsigned char *) new_mem + size;
+        chain = chain->next;
+    }
+}
+
 MemoryPool::~MemoryPool()
 {
     size_t all = 0;
@@ -232,7 +319,7 @@ MemoryPool::~MemoryPool()
             << "),nums(" << num << ")\n";
     }
 
-    LOG(Debug) << "[Summary]all space size(" << m_nAllSpace
+    LOG(Debug) << "[SmallBlock-Summary]all space size(" << m_nAllSpace
         << "),heap size(" << m_pHeapEnd - m_pHeapBegin
         << "),free list size(" << all
         << "),allocate to user size(" << m_nAllocatedSpace
@@ -245,6 +332,21 @@ MemoryPool::~MemoryPool()
         free(cur->data);
         free(cur);
     }
+
+    // Free Large block
+    size_t num = 0;
+    size_t size = 0;
+    void * tmp = nullptr;
+    while (nullptr != blocks)
+    {
+        num++;
+        size += blocks->len;
+
+        tmp = (void *)blocks->data;
+        blocks = blocks->next;
+        free(tmp);
+    }
+    LOG(Debug) << "[LargeBlock-Summary]block num(" << num << "),all-size(" << size << ")" << std::endl;
 
     LOG(Debug) << "class MemoryPool destructor\n";
 }

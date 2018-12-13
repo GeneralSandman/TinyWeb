@@ -11,6 +11,7 @@ add_library(tiny_http_model STATIC
   proxyer.cc
   http.cc
   http_model_file.cc
+  http_model_chunk.cc
   http_parser.cc
   http_responser.cc
   http_time.cc

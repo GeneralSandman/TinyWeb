@@ -11,4 +11,4 @@
  *
  */
 
-#include <tiny_http/http_buffer.h>
+#include <tiny_struct/buffer_t.h>

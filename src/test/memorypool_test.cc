@@ -12,12 +12,22 @@
  */
 
 #include <tiny_base/memorypool.h>
+#include <tiny_struct/chain_t.h>
+#include <tiny_struct/buffer_t.h>
 
 #include <iostream>
 #include <string>
 #include <vector>
 
 using namespace std;
+
+void basicShow()
+{
+    std::cout << "chain_t size:" << sizeof(chain_t) << std::endl;
+    std::cout << "buffer_t size:" << sizeof(buffer_t) << std::endl;
+    std::cout << "block_t size:" << sizeof(block_t) << std::endl;
+
+}
 
 void test1()
 {
@@ -51,7 +61,34 @@ void test1()
     cout << "allocatedSpace:" << pool.allocatedSpace() << endl;
 }
 
+void test2()
+{
+    MemoryPool pool;
+
+    chain_t *chain1 = nullptr;
+    chain_t *chain2 = nullptr;
+
+    chain1 = pool.getNewChain(8);
+    chain2 = pool.getNewChain(8);
+
+    pool.mallocSpace(chain1, 1024);
+    pool.mallocSpace(chain2, 1024);
+
+    std::cout << "chain1 size:" << countChain(chain1) << std::endl;
+    std::cout << "chain2 size:" << countChain(chain2) << std::endl;
+
+
+    pool.catChain(chain1, chain2);
+    std::cout << "chain1 size:" << countChain(chain1) << std::endl;
+
+    cout << "allocatedSpace:" << pool.allocatedSpace() << endl;
+    cout << "allocatedLargeSpace:" << pool.allocatedLargeSpace() << endl;
+
+}
+
 int main()
 {
-    test1();
+    basicShow();
+    // test1();
+    test2();
 }

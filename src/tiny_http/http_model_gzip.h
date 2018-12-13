@@ -15,8 +15,8 @@
 #define HTTP_MODEL_GZIP_H
 
 
-#include <tiny_http/http_buffer.h>
-#include <tiny_http/http_chain.h>
+#include <tiny_struct/buffer_t.h>
+#include <tiny_struct/chain_t.h>
 
 #include <zlib.h>
 

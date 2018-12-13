@@ -11,17 +11,29 @@
  *
  */
 
-#ifndef HTTP_CHAIN_H
-#define HTTP_CHAIN_H
+#ifndef CHAIN_T_H
+#define CHAIN_T_H
 
-#include <tiny_http/http_buffer.h>
+#include <tiny_struct/buffer_t.h>
 
-typedef struct http_chain_t
+typedef struct chain_t
 {
-    http_buffer_t *buffer;
-    http_chain_t *next;
-}http_chain_t;
+    buffer_t *buffer;
+    chain_t *next;
+}chain_t;
 
+inline unsigned int countChain(chain_t * chain)
+{
+    unsigned int num = 0;
+
+    while (nullptr != chain)
+    {
+        num++;
+        chain = chain->next;
+    }
+
+    return num;
+}
 
 
 #endif
