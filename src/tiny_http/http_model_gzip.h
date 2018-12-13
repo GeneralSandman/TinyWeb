@@ -30,6 +30,7 @@ typedef struct gzip_config_t
     unsigned int min_len;
     unsigned int wbits;
     unsigned int memlevel;
+}gzip_config_t;
 
 
 typedef struct gzip_context_t
@@ -42,6 +43,9 @@ typedef struct gzip_context_t
 
     http_chain_t *curr_in;
     http_chain_t *curr_out;
+
+    http_chain_t *last_in;
+    http_chain_t *last_out;
 
     unsigned int level;
 }gzip_context_t;
@@ -63,6 +67,7 @@ gzip_status gzip_deflate_init(gzip_context_t *context);
 gzip_status gzip_deflate(gzip_context_t *context, http_buffer_t *buffer);
 gzip_status gzip_deflate_end(gzip_context_t *context);
 
-gzip_status gzip_body(gzip_context_t *context);
+gzip_status gzip_body(gzip_context_t *context,
+        const std::string &data);
 
 #endif

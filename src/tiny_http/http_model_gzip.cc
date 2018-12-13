@@ -98,6 +98,10 @@ gzip_status gzip_deflate(gzip_context_t *context,
         // update the data of gzip_context_t
     }
 
+    printf("deflate: next_in(%p),avail_in(%ud),next_out(%p),avail_out(%ud)\n",
+            context->stream.next_in, context->stream.avail_int, 
+            context->stream.next_out, context->stream.avail_out);
+
     if (Z_STREAM_END == res)
     {
         res = gzip_deflate_end(context);

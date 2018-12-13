@@ -1,5 +1,5 @@
 ![](TinyWeb_logo.png)
-z
+
 
 ----------------
 
@@ -33,6 +33,9 @@ cmake ../ && make
 sudo cp TinyWeb.conf /
 vim /TinyWeb.conf
 ```
+
+```config file：```
+There are two parts in config-file, ```develop``` and ```product```. Those have same formate. One for debug, another for product eventment.
 
 ```
 {
@@ -119,7 +122,7 @@ sudo ./TinyWeb -d -c /home/li/TinyWeb.conf
 ```
 sudo ./TinyWeb -o stop
 
-cat /var/run/TinyWeb.conf
+cat /var/run/TinyWeb.pid
 sudo kill -s SIGQUIT <master-pid> 
 ```
 
@@ -127,7 +130,7 @@ sudo kill -s SIGQUIT <master-pid>
 ```
 sudo ./TinyWeb -o stop
 
-cat /var/run/TinyWeb.conf
+cat /var/run/TinyWeb.pid
 sudo kill -s SIGTERM <master-pid> 
 sudo kill -s SIGINT <master-pid> 
 ```
@@ -136,7 +139,7 @@ sudo kill -s SIGINT <master-pid>
 ```
 sudo ./TinyWeb -o restart
 
-cat /var/run/TinyWeb.conf
+cat /var/run/TinyWeb.pid
 sudo kill -s SIGUSR1 <master-pid> 
 ```
 
@@ -144,13 +147,13 @@ sudo kill -s SIGUSR1 <master-pid>
 ```
 sudo ./TinyWeb -o reload [-c <config-file>]
 
-cat /var/run/TinyWeb.conf
+cat /var/run/TinyWeb.pid
 sudo kill -s SIGUSR2 <master-pid> 
 ```
 
 - Test configure file is vliad or not
 ```
-sudo ./TinyWeb --tcf /path/path/configfil
+sudo ./TinyWeb --tcf /path/path/configfile
 ```
 
 - Get version
@@ -165,6 +168,13 @@ sudo ./TinyWeb -v
 
 
 --------------
+
+## Develop Idea & Challenge & Plan
+[Idea](http://github.com/GeneralSandman/docs/Idea.md)
+
+---------------
+
+## 
 
 
 ## Reference：
