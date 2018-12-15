@@ -54,6 +54,7 @@ add_executable(gzip_test
     )
 
 target_link_libraries(gzip_test
+    z
     )
 
 # configer_test

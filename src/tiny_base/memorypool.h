@@ -149,6 +149,9 @@ typedef struct buffer_t {
     unsigned char* end;
 
     unsigned char* used;
+    unsigned char* deal;
+
+    bool islast;
 } buffer_t;
 
 typedef struct chain_t {
