@@ -15,9 +15,9 @@
 #include <tiny_struct/sdstr_t.h>
 
 #include <iostream>
-#include <string>
-#include <stdio.h>
 #include <stdarg.h>
+#include <stdio.h>
+#include <string>
 
 using namespace std;
 
@@ -147,7 +147,6 @@ void test2()
 
     destory(&sds);
     destory(&sds2);
-
 }
 
 void test3()
@@ -371,19 +370,18 @@ void test4()
         printf(&tmp);
         destory(&tmp);
     }
-
 }
 
 void test5()
 {
     {
         std::string str;
-        for(int i=0;i<2024;i++)
-            str += char('0'+i%10);
+        for (int i = 0; i < 2024; i++)
+            str += char('0' + i % 10);
         std::cout << str.size() << std::endl;
         sdstr tmp;
         sdsnewempty(&tmp);
-        sdscatsprintf(&tmp,"a=%d,b=%d,s=%s",101,101,str.c_str());
+        sdscatsprintf(&tmp, "a=%d,b=%d,s=%s", 101, 101, str.c_str());
         printf(&tmp);
         destory(&tmp);
     }
@@ -395,8 +393,7 @@ void test6()
         sdstr tmp;
         sdsnewempty(&tmp);
 
-        for (int i=0; i<1024; i++)
-        {
+        for (int i = 0; i < 1024; i++) {
             sdsncat(&tmp, "1", 1);
             printf(&tmp);
         }
@@ -408,8 +405,7 @@ void test6()
         sdstr tmp;
         sdsnewempty(&tmp, 1024);
 
-        for (int i=0; i<1024; i++)
-        {
+        for (int i = 0; i < 1024; i++) {
             sdsncat(&tmp, "1", 1);
             printf(&tmp);
         }
@@ -427,11 +423,9 @@ void test7()
     unsigned int seplen = sep.size();
 
     sdstr sdss[100];
-    for (int i=0; i<100; i++)
-    {
-        sdsnew(sdss+i, str.c_str());
+    for (int i = 0; i < 100; i++) {
+        sdsnew(sdss + i, str.c_str());
     }
-
 
     sdstr result;
     sdsnewempty(&result);
@@ -439,10 +433,8 @@ void test7()
     printf(&result);
     destory(&result);
 
-
-    for (int i=0; i<100; i++)
-    {
-        destory(sdss+i);
+    for (int i = 0; i < 100; i++) {
+        destory(sdss + i);
     }
 }
 
@@ -451,22 +443,19 @@ void test8()
     std::string str = "helloworld";
     unsigned int len = str.size();
 
-    const char * sdss[100];
-    for (int i=0; i<100; i++)
-    {
-        *(sdss+i) = str.c_str();
+    const char* sdss[100];
+    for (int i = 0; i < 100; i++) {
+        *(sdss + i) = str.c_str();
     }
 
     std::string sep = ".";
     unsigned int seplen = sep.size();
-
 
     sdstr result;
     sdsnewempty(&result);
     sdsjoinstr(&result, sdss, 100, sep.c_str(), seplen);
     printf(&result);
     destory(&result);
-
 }
 
 void errtest()
@@ -481,14 +470,14 @@ void errtest()
     }
     {
         sdstr tmp;
-        const char *str = "helloworld";
+        const char* str = "helloworld";
         sdsnnew(&tmp, str, strlen(str));
         printf(&tmp);
         destory(&tmp);
     }
     {
         sdstr tmp;
-        char *str = "helloworld";
+        char* str = "helloworld";
         sdsnnew(&tmp, str, strlen(str));
         printf(&tmp);
         destory(&tmp);
@@ -508,7 +497,34 @@ void errtest()
     }
 }
 
-int main(int argc, char *argv[])
+void chunked_test()
+{
+    {
+        sdstr tmp;
+        sdsnewempty(&tmp);
+        sdscatsprintf(&tmp, "%x\r\n", 65535);
+        printf(&tmp);
+        destory(&tmp);
+    }
+    {
+        sdstr tmp;
+        sdsnewempty(&tmp);
+        sdscatsprintf(&tmp, "\r\n0\r\n\r\n");
+        printf(&tmp);
+        destory(&tmp);
+    }
+    {
+        sdstr tmp;
+        sdsnewempty(&tmp);
+        sdscatsprintf(&tmp, "\r\n");
+        printf(&tmp);
+        destory(&tmp);
+    }
+
+    return 0;
+}
+
+int main(int argc, char* argv[])
 {
     test1();
     test2();
@@ -519,4 +535,5 @@ int main(int argc, char *argv[])
     test7();
     test8();
     errtest();
+    chunked_test();
 }

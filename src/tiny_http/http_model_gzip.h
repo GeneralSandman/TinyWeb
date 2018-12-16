@@ -40,7 +40,6 @@ typedef struct gzip_context_t {
     chain_t* curr_out;
 
     chain_t* last_in;
-    chain_t* last_out;
 
     unsigned int level;
 } gzip_context_t;
@@ -52,21 +51,20 @@ enum gzip_status {
     gzip_done
 };
 
-void get_zip_config(gzip_config_t* conf);
+void get_gzip_config(gzip_config_t* conf);
 
 void gzip_context_init(MemoryPool* pool, gzip_config_t* conf, gzip_context_t* context);
 gzip_status gzip_deflate_init(gzip_config_t* conf,
     gzip_context_t* context);
-gzip_status gzip_deflate(gzip_context_t* context, buffer_t* buffer);
+gzip_status gzip_deflate(gzip_context_t* context);
 gzip_status gzip_deflate_end(gzip_context_t* context);
 
 gzip_status gzip_add_data(gzip_context_t* context,
     const char* data,
     unsigned int len);
 gzip_status gzip_body(MemoryPool* pool,
-    gzip_context_t* context,
-    const char* data,
-    unsigned int len);
+    gzip_config_t* conf,
+    gzip_context_t* context);
 
 gzip_status gzip_out(gzip_context_t* context,
     const std::string& file);

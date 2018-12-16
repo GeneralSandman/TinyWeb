@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-void get_zip_config(gzip_config_t* gzip_conf)
+void get_gzip_config(gzip_config_t* gzip_conf)
 {
     if (nullptr == gzip_conf) {
         return;
@@ -61,21 +61,21 @@ void gzip_context_init(MemoryPool* pool,
 
     context->flush = Z_NO_FLUSH;
 
-    conf->buffers_4k = 1;
     context->in = pool->getNewChain(conf->buffers_4k);
     context->out = pool->getNewChain(conf->buffers_4k);
 
-    LOG(Debug) << "in chain size:" << countChain(context->in) << std::endl;
-    LOG(Debug) << "out chain size:" << countChain(context->out) << std::endl;
-
-    pool->mallocSpace(context->in, 1 * 1024);
-    pool->mallocSpace(context->out, 1 * 1024);
+    unsigned int prealloc_size = 4 * 1024;
+    pool->mallocSpace(context->in, prealloc_size);
+    pool->mallocSpace(context->out, prealloc_size);
+    LOG(Debug) << "in-chain:num(" << conf->buffers_4k << "),size("
+               << prealloc_size << ")\n";
+    LOG(Debug) << "out-chain:num(" << conf->buffers_4k << "),size("
+               << prealloc_size << ")\n";
 
     context->curr_in = context->in;
     context->curr_out = context->out;
 
     context->last_in = context->in;
-    context->last_out = context->out;
 
     context->level = conf->level;
 }
@@ -103,11 +103,11 @@ gzip_status gzip_deflate_init(gzip_config_t* conf,
     return gzip_ok;
 }
 
-gzip_status gzip_deflate(gzip_context_t* context,
-    buffer_t* buffer)
+gzip_status gzip_deflate(gzip_context_t* context)
 {
     unsigned int before_gzip_size = 0;
     unsigned int after_gzip_size = 0;
+
     if (context->curr_in == nullptr || context->curr_out == nullptr) {
         LOG(Debug) << "curr_in or curr_out is null\n";
         return gzip_done;
@@ -128,13 +128,12 @@ gzip_status gzip_deflate(gzip_context_t* context,
         before_gzip_size, after_gzip_size,
         stream->next_in, stream->avail_in,
         stream->next_out, stream->avail_out);
+
     context->flush = in->islast ? Z_FINISH : Z_NO_FLUSH;
     int res = deflate(stream, context->flush);
 
     after_gzip_size = out->end - out->begin - stream->avail_out;
     out->used = out->begin + after_gzip_size;
-
-    printf("compress data:%.*s\n", after_gzip_size, out->begin);
 
     printf("deflate: before_gzip_size(%u),after_gzip_size(%u),next_in(%p),avail_in(%u),next_out(%p),avail_out(%u)\n",
         before_gzip_size, after_gzip_size,
@@ -162,6 +161,7 @@ gzip_status gzip_deflate(gzip_context_t* context,
     }
 
     if (Z_STREAM_END == res) {
+        LOG(Info) << "stream end\n";
         res = gzip_deflate_end(context);
         return (gzip_ok == res) ? gzip_ok : gzip_error;
     }
@@ -180,60 +180,67 @@ gzip_status gzip_add_data(gzip_context_t* context,
     const char* data,
     unsigned int len)
 {
-    chain_t* chain = context->curr_in;
+    chain_t* chain = context->last_in;
     buffer_t* buffer;
     unsigned int buff_size;
+    unsigned int predata_size;
+    unsigned int empty_size;
 
     const char* pos = data;
     unsigned int left = len;
     unsigned int to_write = 0;
-    unsigned int has_write = 0;
 
-    LOG(Debug) << "write size:" << left << std::endl;
+    LOG(Debug) << "all-write size:" << left << std::endl;
 
     while (left && nullptr != chain) {
         buffer = chain->buffer;
         buff_size = buffer->end - buffer->begin;
+        predata_size = buffer->used - buffer->begin;
+        empty_size = buff_size - predata_size;
 
-        to_write = (left > buff_size) ? buff_size : left;
+        to_write = (left > empty_size) ? empty_size : left;
 
-        memcpy((void*)buffer->begin, (const void*)pos, to_write);
-        LOG(Debug) << "write to buffer size(" << to_write << ")" << std::endl;
+        if (buffer->used == buffer->end) { 
+            buffer->islast = false;
+            chain = chain->next;
+            continue;
+        } 
+
+        memcpy((void*)buffer->used, (const void*)pos, to_write);
+        LOG(Debug) << "buffer:all-size(" << buff_size
+                   << "),predata-size(" << predata_size
+                   << "),postdata-size(" << predata_size + to_write << ")\n";
+
+        buffer->used = buffer->used + to_write;
+
+        buffer->islast = true;
 
         left -= to_write;
         pos += buff_size;
-        has_write += to_write;
 
-        buffer->used = buffer->begin + to_write;
-        buffer->islast = left ? false : true;
-
-        chain = chain->next;
+        if (left) {
+            buffer->islast = false;
+            chain = chain->next;
+        }
     }
+
+    context->last_in = chain;
+
+    LOG(Debug) << "last_in size:" << countChain(context->last_in) << std::endl;
 
     return gzip_ok;
 }
 
 gzip_status gzip_body(MemoryPool* pool,
-    gzip_context_t* context,
-    const char* data,
-    unsigned int len)
+    gzip_config_t* conf,
+    gzip_context_t* context)
 {
-    gzip_config_t conf;
-
-    get_zip_config(&conf);
-    gzip_context_init(pool, &conf, context);
-
-    gzip_add_data(context, data, len);
-
-    gzip_deflate_init(&conf, context);
+    gzip_deflate_init(conf, context);
 
     gzip_status res;
-    buffer_t* buffer = nullptr;
 
     do {
-
-        res = gzip_deflate(context, buffer);
-
+        res = gzip_deflate(context);
     } while (res == gzip_continue);
 
     gzip_deflate_end(context);
@@ -247,6 +254,9 @@ gzip_status gzip_out(gzip_context_t* context,
     unsigned int size;
     int outputfd;
 
+    chain_t* in_chain;
+    buffer_t* in_buffer;
+
     //open output file
     outputfd = open(outputfile.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0666);
     if (-1 == outputfd) {
@@ -255,6 +265,7 @@ gzip_status gzip_out(gzip_context_t* context,
     }
 
     chain = context->out;
+    in_chain = context->in;
     LOG(Debug) << "out size:" << countChain(chain) << std::endl;
     while (chain) {
         buffer = chain->buffer;
@@ -264,6 +275,11 @@ gzip_status gzip_out(gzip_context_t* context,
         printf("comperss-data[%p,%u](%.*s)\n", buffer->begin, size, size, buffer->begin);
 
         chain = chain->next;
+
+        if (in_chain->buffer->islast) {
+            break;
+        }
+        in_chain = in_chain->next;
     }
 
     close(outputfd);
