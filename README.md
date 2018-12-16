@@ -1,11 +1,13 @@
 ![](TinyWeb_logo.png)
 
 
-[![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/MIT)
 
 ----------------
 
-## TinyWeb is a High-Performance Web Server which is based on C++11.
+## High-Performance Web Server which is based on C++11.
+
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/MIT)
+
 
 - ### TinyWeb utilizes what's called an event-driven programming model.
 - ### The implementation method is epoll+no-blocking I/O.
@@ -317,6 +319,16 @@ sudo ./TinyWeb --tcf /path/path/configfile
 sudo ./TinyWeb -v
 ```
 
+
+---------------------
+
+# Version Information
+
+| Version | Improvements |
+| --------|--------------|
+|||
+|||
+
 ---------------------
 
 # Guide
@@ -327,7 +339,7 @@ sudo ./TinyWeb -v
 
 --------------
 
-# [Develop Idea & Challenge & Plan](http://github.com/GeneralSandman/docs/Idea.md)
+# [Develop Idea & Challenge](http://github.com/GeneralSandman/docs/Idea.md)
 
 ---------------
 
