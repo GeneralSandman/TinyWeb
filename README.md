@@ -1,6 +1,8 @@
 ![](TinyWeb_logo.png)
 
 
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/MIT)
+
 ----------------
 
 ## TinyWeb is a High-Performance Web Server which is based on C++11.
@@ -33,7 +35,7 @@ sudo cp TinyWeb.conf /
 vim /TinyWeb.conf
 ```
 
-### ```config file```
+### configure-file :
 
 There are two parts in config-file, ```develop``` and ```product```.
 
@@ -42,7 +44,7 @@ Those have same formate.
 ```develop``` for debug, ```product``` for product environment.
 
 
-### ```Example```:
+### Example :
 
 
 ```
@@ -106,7 +108,7 @@ Those have same formate.
 
 ```
 
-### Configure Explaination
+### Configure Explaination :
 
 
  <table>
@@ -255,7 +257,7 @@ Those have same formate.
 sudo ./TinyWeb
 ```
 
-- Get master's pid
+- Get master's pid.
 ```
 cat <pid-file>
 ```
