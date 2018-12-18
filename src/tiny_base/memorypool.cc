@@ -21,7 +21,6 @@
 #include <tiny_base/log.h>
 #include <tiny_base/memorypool.h>
 
-
 OomHandler BasicAllocator::m_nHandler;
 
 MemoryPool::MemoryPool()
@@ -126,6 +125,9 @@ char* MemoryPool::m_fAllocChunk(size_t s, int& chunk_num)
         newCleanHandler->next = m_pCleanHandlers;
         m_pCleanHandlers = newCleanHandler;
 
+        // if (!newCleanHandler || !m_pHeapBegin)
+            // LOG(Debug) << "alloc error---\n";
+
         if (nullptr == m_pHeapBegin) {
             //Malloc error
             //Reuse free list which size > s
@@ -151,9 +153,9 @@ char* MemoryPool::m_fAllocChunk(size_t s, int& chunk_num)
     }
 }
 
-
 void* MemoryPool::m_fMallocLargeSpace(size_t size)
 {
+    LOG(Debug) << "malloc large space:" << size << std::endl;
     void* res = nullptr;
     res = malloc(size);
     if (nullptr == res) {
@@ -173,7 +175,6 @@ void* MemoryPool::m_fMallocLargeSpace(size_t size)
 
     return res;
 }
-
 
 void* MemoryPool::allocate(size_t s)
 {
@@ -268,7 +269,6 @@ int MemoryPool::catChain(chain_t* dest,
     return 0;
 }
 
-
 void MemoryPool::mallocSpace(chain_t* chain, size_t size)
 {
     void* new_mem = nullptr;
@@ -277,6 +277,9 @@ void MemoryPool::mallocSpace(chain_t* chain, size_t size)
         chain->buffer = (buffer_t*)allocate(sizeof(buffer_t));
         chain->buffer->begin = (unsigned char*)new_mem;
         chain->buffer->end = (unsigned char*)new_mem + size;
+        chain->buffer->used = chain->buffer->begin;
+        chain->buffer->deal = chain->buffer->begin;
+        chain->buffer->islast = false;
         chain = chain->next;
     }
 }
@@ -293,8 +296,10 @@ MemoryPool::~MemoryPool()
             tmp = tmp->p_next;
         }
         all += num * size;
-        LOG(Debug) << "size(" << size
-                   << "),nums(" << num << ")\n";
+        if (size) {
+            LOG(Debug) << "size(" << size
+                       << "),nums(" << num << ")\n";
+        }
     }
 
     LOG(Debug) << "[SmallBlock-Summary]all space size(" << m_nAllSpace
@@ -304,8 +309,7 @@ MemoryPool::~MemoryPool()
                << ")\n";
     while (m_pCleanHandlers != nullptr) {
         struct cleanup* cur = m_pCleanHandlers;
-        m_pCleanHandlers = cur->next;
-        LOG(Info) << "free space" << std::endl;
+        m_pCleanHandlers = m_pCleanHandlers->next;
         free(cur->data);
         free(cur);
     }

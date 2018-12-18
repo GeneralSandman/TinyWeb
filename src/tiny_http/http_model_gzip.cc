@@ -11,16 +11,14 @@
  *
  */
 
-#include <tiny_base/configer.h>
 #include <tiny_base/log.h>
+#include <tiny_base/configer.h>
 #include <tiny_base/memorypool.h>
 #include <tiny_http/http_model_gzip.h>
 
-#include <assert.h>
 #include <string.h>
 #include <zlib.h>
 
-#include <assert.h>
 #include <dirent.h>
 #include <fcntl.h>
 #include <stdlib.h>
@@ -33,8 +31,6 @@ void get_gzip_config(gzip_config_t* gzip_conf)
     }
 
     Configer& configer = Configer::getConfigerInstance();
-    configer.setConfigerFile("../../TinyWeb.conf");
-    configer.loadConfig(true);
     BasicConfig basicConf = configer.getBasicConfig();
 
     gzip_conf->enable = basicConf.gzip;
@@ -53,6 +49,8 @@ void gzip_context_init(MemoryPool* pool,
         return;
     }
 
+    context->conf = conf;
+
     z_stream* stream_tmp = &(context->stream);
 
     stream_tmp->zalloc = nullptr;
@@ -67,9 +65,9 @@ void gzip_context_init(MemoryPool* pool,
     unsigned int prealloc_size = 4 * 1024;
     pool->mallocSpace(context->in, prealloc_size);
     pool->mallocSpace(context->out, prealloc_size);
-    LOG(Debug) << "in-chain:num(" << conf->buffers_4k << "),size("
+    LOG(Debug) << "prealloc in-chain:num(" << conf->buffers_4k << "),size("
                << prealloc_size << ")\n";
-    LOG(Debug) << "out-chain:num(" << conf->buffers_4k << "),size("
+    LOG(Debug) << "prealloc out-chain:num(" << conf->buffers_4k << "),size("
                << prealloc_size << ")\n";
 
     context->curr_in = context->in;
@@ -80,11 +78,76 @@ void gzip_context_init(MemoryPool* pool,
     context->level = conf->level;
 }
 
-gzip_status gzip_deflate_init(gzip_config_t* conf,
-    gzip_context_t* context)
+gzip_status gzip_add_data(gzip_context_t* context,
+    const char* data,
+    unsigned int len)
 {
+    chain_t* chain;
+    buffer_t* buffer;
+    unsigned int buff_size;
+    unsigned int predata_size;
+    unsigned int empty_size;
+
+    const char* pos = data;
+    unsigned int left = len;
+    unsigned int to_write = 0;
+
+    LOG(Debug) << "all-write size:" << left << std::endl;
+
+    chain = context->last_in;
+    while (left && nullptr != chain) {
+        buffer = chain->buffer;
+        buff_size = buffer->end - buffer->begin;
+        predata_size = buffer->used - buffer->begin;
+        empty_size = buff_size - predata_size;
+
+        if (!empty_size) {
+            // This chain is full, change to next chain.
+            buffer->islast = false;
+            chain = chain->next;
+            continue;
+        }
+
+        to_write = (left > empty_size) ? empty_size : left;
+        memcpy((void*)buffer->used, (const void*)pos, to_write);
+        LOG(Debug) << "buffer:all-size(" << buff_size
+                   << "),predata-size(" << predata_size
+                   << "),postdata-size(" << predata_size + to_write << ")\n";
+
+        buffer->used = buffer->used + to_write;
+        buffer->islast = true;
+
+        left -= to_write;
+        pos += to_write;
+
+        if (left) {
+            // This chain is full, change to next chain.
+            buffer->islast = false;
+            chain = chain->next;
+        }
+    }
+
+    context->last_in = chain;
+
+    // unsigned int l = countChain(context->last_in);
+    // LOG(Debug) << "last_in size:" << l << std::endl;
+    // for (auto t = context->in; t != nullptr; t = t->next) {
+        // if (t->buffer->islast) {
+            // std::cout << "-";
+        // } else {
+            // std::cout << "+";
+        // }
+    // }
+
+    return gzip_ok;
+}
+
+gzip_status gzip_deflate_init(gzip_context_t* context)
+{
+    gzip_config_t* conf = context->conf;
     z_stream* stream_tmp = &(context->stream);
 
+    // TODO:FIXME:
     int res = deflateInit2(stream_tmp,
         //int(conf->level),
         Z_DEFAULT_COMPRESSION,
@@ -117,53 +180,74 @@ gzip_status gzip_deflate(gzip_context_t* context)
     buffer_t* in = context->curr_in->buffer;
     buffer_t* out = context->curr_out->buffer;
 
-    before_gzip_size = in->used - in->begin;
-    stream->next_in = in->begin;
+    before_gzip_size = in->used - in->deal;
+    stream->next_in = in->deal;
     stream->avail_in = before_gzip_size;
-
-    stream->next_out = out->begin;
-    stream->avail_out = out->end - out->begin;
-
-    printf("deflate: before_gzip_size(%u),after_gzip_size(%u),next_in(%p),avail_in(%u),next_out(%p),avail_out(%u)\n",
-        before_gzip_size, after_gzip_size,
-        stream->next_in, stream->avail_in,
-        stream->next_out, stream->avail_out);
-
-    context->flush = in->islast ? Z_FINISH : Z_NO_FLUSH;
-    int res = deflate(stream, context->flush);
-
-    after_gzip_size = out->end - out->begin - stream->avail_out;
-    out->used = out->begin + after_gzip_size;
-
-    printf("deflate: before_gzip_size(%u),after_gzip_size(%u),next_in(%p),avail_in(%u),next_out(%p),avail_out(%u)\n",
-        before_gzip_size, after_gzip_size,
-        stream->next_in, stream->avail_in,
-        stream->next_out, stream->avail_out);
-
     context->curr_in = context->curr_in->next;
-    context->curr_out = context->curr_out->next;
 
-    if (Z_OK != res && Z_STREAM_END != res) {
-        LOG(Debug) << "deflate() error\n";
-        return gzip_error;
+    context->flush = Z_NO_FLUSH;
+    int res;
+    do {
+        before_gzip_size = in->used - in->deal;
+
+        if (in->islast) {
+            std::cout << "set flush as Z_FINISH\n";
+            context->flush = Z_FINISH;
+        }
+
+        if (out->used == out->end) {
+            // FIXME: when out isn't enough.
+            context->curr_out = context->curr_out->next;
+            out = context->curr_out->buffer;
+        }
+
+        stream->next_out = out->used;
+        stream->avail_out = out->end - out->used;
+
+        printf("[before deflate]: before_gzip_size(%u),after_gzip_size(%u),next_in(%p),avail_in(%u),next_out(%p),avail_out(%u)\n",
+            before_gzip_size, after_gzip_size,
+            stream->next_in, stream->avail_in,
+            stream->next_out, stream->avail_out);
+        res = deflate(stream, context->flush);
+        after_gzip_size = out->end - out->used - stream->avail_out;
+
+        printf("[after deflate]: before_gzip_size(%u),after_gzip_size(%u),next_in(%p),avail_in(%u),next_out(%p),avail_out(%u)\n",
+            before_gzip_size, after_gzip_size,
+            stream->next_in, stream->avail_in,
+            stream->next_out, stream->avail_out);
+
+        if (Z_NO_FLUSH == context->flush && Z_OK != res) {
+            LOG(Debug) << "deflate() error1\n";
+            return gzip_error;
+        }
+
+        if (Z_FINISH == context->flush && Z_STREAM_END != res) {
+            LOG(Debug) << "deflate() error2\n";
+            // return gzip_error;
+        }
+
+        in->deal += before_gzip_size;
+        out->used = out->used + after_gzip_size;
+
+    } while (0 == stream->avail_out && in->islast);
+
+    if (in->islast) {
+        context->curr_out->buffer->islast = true;
     }
 
     if (0 == stream->avail_out) {
-        LOG(Debug) << "more date to compress\n";
-        // TODO:get a buffer from memory-pool and
-        // update the data of gzip_context_t
+        LOG(Debug) << "maybe more date to compress\n";
         return gzip_continue;
     }
 
     if (0 != stream->avail_in) {
-        LOG(Info) << "compress error(compress incomplite)" << std::endl;
+        LOG(Info) << "compress error(compress incomplite)\n";
         return gzip_error;
     }
 
     if (Z_STREAM_END == res) {
         LOG(Info) << "stream end\n";
-        res = gzip_deflate_end(context);
-        return (gzip_ok == res) ? gzip_ok : gzip_error;
+        return gzip_done;
     }
 
     return gzip_continue;
@@ -173,69 +257,12 @@ gzip_status gzip_deflate_end(gzip_context_t* context)
 {
     deflateEnd(&context->stream);
     LOG(Debug) << "gzip_deflate_end\n";
-    return gzip_done;
-}
-
-gzip_status gzip_add_data(gzip_context_t* context,
-    const char* data,
-    unsigned int len)
-{
-    chain_t* chain = context->last_in;
-    buffer_t* buffer;
-    unsigned int buff_size;
-    unsigned int predata_size;
-    unsigned int empty_size;
-
-    const char* pos = data;
-    unsigned int left = len;
-    unsigned int to_write = 0;
-
-    LOG(Debug) << "all-write size:" << left << std::endl;
-
-    while (left && nullptr != chain) {
-        buffer = chain->buffer;
-        buff_size = buffer->end - buffer->begin;
-        predata_size = buffer->used - buffer->begin;
-        empty_size = buff_size - predata_size;
-
-        to_write = (left > empty_size) ? empty_size : left;
-
-        if (buffer->used == buffer->end) { 
-            buffer->islast = false;
-            chain = chain->next;
-            continue;
-        } 
-
-        memcpy((void*)buffer->used, (const void*)pos, to_write);
-        LOG(Debug) << "buffer:all-size(" << buff_size
-                   << "),predata-size(" << predata_size
-                   << "),postdata-size(" << predata_size + to_write << ")\n";
-
-        buffer->used = buffer->used + to_write;
-
-        buffer->islast = true;
-
-        left -= to_write;
-        pos += buff_size;
-
-        if (left) {
-            buffer->islast = false;
-            chain = chain->next;
-        }
-    }
-
-    context->last_in = chain;
-
-    LOG(Debug) << "last_in size:" << countChain(context->last_in) << std::endl;
-
     return gzip_ok;
 }
 
-gzip_status gzip_body(MemoryPool* pool,
-    gzip_config_t* conf,
-    gzip_context_t* context)
+gzip_status gzip_body(gzip_context_t* context)
 {
-    gzip_deflate_init(conf, context);
+    gzip_deflate_init(context);
 
     gzip_status res;
 
@@ -244,6 +271,8 @@ gzip_status gzip_body(MemoryPool* pool,
     } while (res == gzip_continue);
 
     gzip_deflate_end(context);
+
+    return gzip_ok;
 }
 
 gzip_status gzip_out(gzip_context_t* context,
@@ -265,21 +294,29 @@ gzip_status gzip_out(gzip_context_t* context,
     }
 
     chain = context->out;
-    in_chain = context->in;
-    LOG(Debug) << "out size:" << countChain(chain) << std::endl;
+    // LOG(Debug) << "out size:" << countChain(chain) << std::endl;
+    // for (auto t = context->out; t != nullptr; t = t->next) {
+        // if (t->buffer->islast) {
+            // std::cout << "-";
+        // } else {
+            // std::cout << "+";
+        // }
+    // }
     while (chain) {
         buffer = chain->buffer;
         size = buffer->used - buffer->begin;
 
+        if (!size) {
+            break;
+        }
+
         write(outputfd, (char*)buffer->begin, size);
         printf("comperss-data[%p,%u](%.*s)\n", buffer->begin, size, size, buffer->begin);
 
-        chain = chain->next;
-
-        if (in_chain->buffer->islast) {
+        if (buffer->islast) {
             break;
         }
-        in_chain = in_chain->next;
+        chain = chain->next;
     }
 
     close(outputfd);
