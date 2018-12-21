@@ -37,12 +37,29 @@ class BasicConfig
         std::vector<std::string> gzip_mime_type;
 };
 
+class FcgiConfig
+{
+    public:
+        bool enable;
+        unsigned int connect_timeout;
+        unsigned int send_timeout;
+        unsigned int read_timeout;
+};
+
 typedef struct errorpage
 {
     unsigned int code;
     std::string path;
     std::string file;
 }errorpage;
+
+typedef struct fcgi_t
+{
+    std::string pattern;
+    std::string path;
+    std::vector<std::string> indexpage;
+    std::string listen;
+};
 
 class ServerConfig
 {
@@ -52,6 +69,7 @@ class ServerConfig
         std::vector<std::string> servername;
         std::vector<std::string> indexpage;
         std::vector<errorpage> errorpages;
+        std::vector<fcgi_t> fcgis;
 };
 
 class LogConfig
@@ -74,6 +92,7 @@ class Configer
     private:
         static std::string m_nFile;
         BasicConfig basicConf;
+        FcgiConfig fcgiConf;
         std::vector<ServerConfig> serverConf;
         LogConfig logConf;
 

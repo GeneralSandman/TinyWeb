@@ -11,9 +11,9 @@
  *
  */
 
-#include <tiny_base/configer.h>
-#include <tiny_base/api.h>
 #include <tiny_base/log.h>
+#include <tiny_base/api.h>
+#include <tiny_base/configer.h>
 
 #include <algorithm>
 #include <string>
@@ -138,6 +138,7 @@ int Configer::loadConfig(bool debug)
 
     items = debug ? root.get_child("develop") : root.get_child("product");
     boost::property_tree::ptree basic = items.get_child("basic");
+    boost::property_tree::ptree fcgi = items.get_child("fcgi");
     boost::property_tree::ptree server = items.get_child("server");
     boost::property_tree::ptree log = items.get_child("log");
 
@@ -175,6 +176,13 @@ int Configer::loadConfig(bool debug)
         basicConf.gzip_mime_type.push_back(mime_type);
     }
 
+    // fcgi-config
+    fcgiConf.enable = fcgi.get<bool>("enable", false);
+    fcgiConf.connect_timeout = fcgi.get<unsigned int>("connect_timeout", 1000);
+    fcgiConf.send_timeout = fcgi.get<unsigned int>("send_timeout", 1000);
+    fcgiConf.read_timeout = fcgi.get<unsigned int>("read_timeout", 1000);
+    
+
     // server-config
     for (piterator it = server.begin(); it != server.end(); ++it)
     {
@@ -208,6 +216,24 @@ int Configer::loadConfig(bool debug)
                 server.errorpages.push_back(page);
             }
         }
+
+        ptree fcgi_ptree = it->second.get_child("fcgi");
+        for (piterator a = fcgi_ptree.begin(); a != fcgi_ptree.end(); a++)
+        {
+            fcgi_t f;
+            f.pattern= a->second.get<std::string>("pattern", "");
+            f.path = a->second.get<std::string>("path", "");
+            f.listen = a->second.get<std::string>("listen", "");
+
+            ptree indexpage = a->second.get_child("indexpage");
+            for (auto b = indexpage.begin(); b != indexpage.end(); b++)
+            {
+                std::string page = b->second.get_value<std::string>();
+                f.indexpage.push_back(page);
+            }
+            server.fcgis.push_back(f);
+        }
+
         serverConf.push_back(server);
     }
 
