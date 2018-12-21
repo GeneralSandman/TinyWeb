@@ -9,10 +9,9 @@
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/MIT)
 
 
-- ### TinyWeb utilizes what's called an event-driven programming model.
-- ### The implementation method is epoll+no-blocking I/O.
-- ### The gobals of this application are high-performance,stability,simple configuration,and low resource consumption.
-- ### Module design is a efficient approach to design this system.
+- ### Event-driven Epoll + Asynchronous I/O.
+- ### High-performance, Stable, Sample Configuration.
+- ### Modularization programming.
 
 ---------------------
 
@@ -37,17 +36,15 @@ sudo cp TinyWeb.conf /
 vim /TinyWeb.conf
 ```
 
-### configure-file :
+### Configure-file :
 
-There are two parts in config-file, ```develop``` and ```product```.
+- ```json``` formate
+- Two parts in Configure-file:
+    - ```develop``` for debug
+    - ```product``` for product environment
 
-Those have same formate. 
 
-```develop``` for debug, ```product``` for product environment.
-
-
-### Example :
-
+### Configure-file Example :
 
 ```
 {
@@ -61,10 +58,18 @@ Those have same formate.
             "chunked": true,
             "gzip": true,
             "gzip_level" : 2,
-            "gzip_buffers_4k" : 4,
+            "gzip_buffers_4k" : 16,
             "gzip_min_len": 1024,
             "gzip_http_version": ["1.0", "1.1"],
             "gzip_mime_type": ["text/html", "text/css"]
+        },
+
+        "fcgi": {
+            "enable": true,
+            "connect_timeout": 300,
+            "send_timeout": 300,
+            "read_timeout": 300,
+            "keep_connect": true
         },
 
         "server": [
@@ -72,7 +77,7 @@ Those have same formate.
                 "listen": 9090,
                 "servername": [
                     "127.0.0.1",
-                    "www.dissigil.cn"
+                    "dissigil.cn"
                 ],
                 "www": "/home/dell/TinyWeb/www",
                 "indexpage": [
@@ -91,6 +96,20 @@ Those have same formate.
                         "path" : "/home/dell/TinyWeb/www",
                         "file" : "50x.html"
                     }
+                ],
+                "fcgi": [
+                    {
+                        "pattern": "*.php",
+                        "path" : "/path/",
+                        "indexpage": ["index.php", "index2.php"],
+                        "listen": "127.0.0.1:9090"
+                    },
+                    {
+                        "pattern": "*.cgi",
+                        "path" : "/path/",
+                        "indexpage": ["index.cgi", "index2.cgi"],
+                        "listen": "127.0.0.1:9091"
+                    }
                 ]
             }
         ],
@@ -105,8 +124,8 @@ Those have same formate.
             "fatalfile": "fatal.log"
         }
     }
-}
 
+}
 
 ```
 
@@ -177,7 +196,33 @@ Those have same formate.
         <td>string list</td>
     </tr>
     <tr>
-        <td rowspan="5">server (type is list)</td> 
+        <td rowspan="5">fcgi</td> 
+        <td>enable</td> 
+        <td>turn on/off</td> 
+        <td>bool</td>
+    </tr>
+    <tr>
+        <td>connect_timeout</td> 
+        <td>connect timeout</td> 
+        <td>int</td>
+    </tr>
+    <tr>
+        <td>send_timeout</td> 
+        <td>send timeout</td> 
+        <td>int</td>
+    </tr>
+    <tr>
+        <td>read_timeout</td> 
+        <td>read timeout</td> 
+        <td>int</td>
+    </tr>
+    <tr>
+        <td>keep_connect</td> 
+        <td>keep connect</td> 
+        <td>bool</td>
+    </tr>
+    <tr>
+        <td rowspan="6">server (type is list)</td> 
         <td>listen</td> 
         <td>list port</td> 
         <td>int</td>
@@ -199,8 +244,13 @@ Those have same formate.
     </tr>
     <tr>
         <td>errorpage</td> 
-        <td>meaning</td> 
-        <td>errorpage struct list</td>
+        <td>default error page</td> 
+        <td>errorpage-struct list</td>
+    </tr>
+    <tr>
+        <td>fcgi</td> 
+        <td>fcgi config</td> 
+        <td>fcgi-struct list</td>
     </tr>
     <tr>
         <td rowspan="7">log</td> 
@@ -248,6 +298,15 @@ Those have same formate.
 |path|error page path|string|
 |file|error page file|string|
 
+
+### ```fcgi``` struct :
+
+|name|meaning|type|
+|----|----|----|
+|indexpage|index page|string list|
+|pattern|fcgi pattern|string|
+|path|fcgi file path|string|
+|listen|fcgi server address|string|
 
 
 
@@ -353,8 +412,8 @@ sudo ./TinyWeb -v
 
 3. ## [UNIX Network Programming](https://en.wikipedia.org/wiki/UNIX_Network_Programming)
 
-5. ## [Linux 多线程服务端编程：使用 muduo C++ 网络库](https://github.com/chenshuo/documents)
+4. ## [Linux 多线程服务端编程：使用 muduo C++ 网络库](https://github.com/chenshuo/documents)
 
-6. ## [C++ Reference](http://en.cppreference.com/w/cpp)
+5. ## [C++ Reference](http://en.cppreference.com/w/cpp)
 
-7. ## [高性能服务器编程](http://blog.csdn.net/column/details/high-perf-network.html)
+6. ## [高性能服务器编程](http://blog.csdn.net/column/details/high-perf-network.html)
