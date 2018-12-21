@@ -12,7 +12,7 @@ add_library(tiny_http_model STATIC
   http.cc
   http_model_file.cc
   http_model_gzip.cc
-  http_model_chunk.cc
+  http_model_fcgi.cc
   http_parser.cc
   http_responser.cc
   http_time.cc

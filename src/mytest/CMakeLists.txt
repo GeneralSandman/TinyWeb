@@ -69,6 +69,17 @@ target_link_libraries(modelGzip_test
     tiny_base_model
     )
 
+# modelFcgi_test
+add_executable(modelFcgi_test
+    modelFcgi_test.cc
+    )
+
+target_link_libraries(modelFcgi_test
+    tiny_http_model
+    tiny_base_model
+    tiny_struct_model
+    )
+
 # parseBody
 add_executable(parseBody
     parseBody_test.cc
