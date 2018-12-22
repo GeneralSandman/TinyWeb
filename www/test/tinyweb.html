@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>dissigil</title>
+</head>
+<body>
+    <h1>Welcome tinyweb test website</h1>
+
+    <h2>Basic test</h2>
+    <p>signle html</p>
+    <p>signle image</p>
+    <p>html & image & js & css</p>
+
+    <h2>Special test</h2>
+    <p>304 response</p>
+    <p>404 response</p>
+
+    <h2>Dynamic test</h2>
+    <h3>Fcgi Get method test, handle by dynamic_get.php</h3>
+    <form action="dynamic_get.php" method="get">
+    name: <input type="text" name="name"><br>
+    age: <input type="text" name="age"><br>
+    <input type="submit" value="提交">
+    </form>
+
+
+    <h3>Fcgi Post method test, handle by dynamic_post.php</h3>
+    <form action="dynamic_post.php" method="post">
+    name: <input type="text" name="name"><br>
+    email: <input type="text" name="email"><br>
+    <input type="submit" value="提交">
+    </form>
+
+    <h3>Upload file test, handle by dynamic_post.php</h3>
+    <form action="dynamic_post.php" method="post">
+    name: <input type="text" name="name"><br>
+    email: <input type="text" name="email"><br>
+    <input type="submit" value="提交">
+    </form>
+
+</body>
+</html>

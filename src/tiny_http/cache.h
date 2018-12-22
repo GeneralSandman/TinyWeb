@@ -11,8 +11,8 @@
  *
  */
 
-#ifndef MEMORY_POOL_H
-#define MEMORY_POOL_H
+#ifndef HTTP_CACHE_H
+#define HTTP_CACHE_H
 
 class Cache
 {

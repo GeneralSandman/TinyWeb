@@ -11,20 +11,20 @@
  *
  */
 
-#include <tiny_base/log.h>
 #include <tiny_base/api.h>
-#include <tiny_struct/sdstr_t.h>
+#include <tiny_base/log.h>
 #include <tiny_http/http_model_fcgi.h>
+#include <tiny_struct/sdstr_t.h>
 
-#include <string>
-#include <iostream>
 #include <arpa/inet.h>
 #include <ctype.h>
 #include <fcntl.h>
+#include <iostream>
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <string>
 #include <sys/mman.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
@@ -38,7 +38,7 @@ void makeHeader(
     int contentLength,
     int paddingLength)
 {
-    header->version = 1;
+    header->version = FCGI_VERSION_1;
     header->type = (unsigned char)type;
     header->request_id_hi = (unsigned char)((requestId >> 8) & 0xff);
     header->request_id_lo = (unsigned char)((requestId)&0xff);
@@ -65,7 +65,7 @@ int sendBeginRequestRecord(int sockfd, int requestId)
     fcgi_begin_request_t r;
 
     makeHeader(&r.header, FCGI_BEGIN_REQUEST, requestId, sizeof(r.body), 0);
-    makeBeginRequestBody(&r.body, FCGI_RESPONDER, 0);
+    makeBeginRequestBody(&r.body, FCGI_RESPONDER, FCGI_CLOSE);
     ret = write(sockfd, &r, sizeof(r));
 
     if (ret == sizeof(r)) {
@@ -84,31 +84,39 @@ int sendParamsRecord(
     int vlen)
 {
     unsigned char *buf, *old;
-    int ret, pl, cl = nlen + vlen;
-    cl = (nlen < 128) ? ++cl : cl + 4;
-    cl = (vlen < 128) ? ++cl : cl + 4;
+    int ret, pl, cl, buffer_size;
 
-    // 计算填充数据长度
-    pl = (cl % 8) == 0 ? 0 : 8 - (cl % 8);
-    old = buf = (unsigned char*)malloc(FCGI_HEADER_LEN + cl + pl);
+    // Count content length.
+    cl = nlen + vlen;
+    cl = (nlen < 128) ? (cl + 1) : (cl + 4);
+    cl = (vlen < 128) ? (cl + 1) : (cl + 4);
 
-    fcgi_header_t nvHeader;
-    makeHeader(&nvHeader, FCGI_PARAMS, requestId, cl, pl);
-    memcpy(buf, (char*)&nvHeader, FCGI_HEADER_LEN);
-    buf = buf + FCGI_HEADER_LEN;
+    // Count padding length. Round up 8.
+    pl = (cl % 8) == 0 ? 0 : (8 - cl % 8);
+    buffer_size = FCGI_HEADER_LEN + cl + pl;
+    old = buf = (unsigned char*)malloc(buffer_size);
 
-    if (nlen < 128) { // name长度小于128字节，用一个字节保存长度
+    fcgi_header_t header;
+    makeHeader(&header, FCGI_PARAMS, requestId, cl, pl);
+    memcpy(buf, (char*)&header, FCGI_HEADER_LEN);
+    buf += FCGI_HEADER_LEN;
+
+    if (nlen < 128) {
+        // Store nlen with one byte.
         *buf++ = (unsigned char)nlen;
-    } else { // 大于等于128用4个字节保存长度
+    } else {
+        // Store nlen with four byte.
         *buf++ = (unsigned char)((nlen >> 24) | 0x80);
         *buf++ = (unsigned char)(nlen >> 16);
         *buf++ = (unsigned char)(nlen >> 8);
         *buf++ = (unsigned char)nlen;
     }
 
-    if (vlen < 128) { // value长度小于128字节，用一个字节保存长度
+    if (vlen < 128) {
+        // Store nlen with one byte.
         *buf++ = (unsigned char)vlen;
-    } else { // 大于等于128用4个字节保存长度
+    } else {
+        // Store nlen with four byte.
         *buf++ = (unsigned char)((vlen >> 24) | 0x80);
         *buf++ = (unsigned char)(vlen >> 16);
         *buf++ = (unsigned char)(vlen >> 8);
@@ -119,11 +127,11 @@ int sendParamsRecord(
     buf = buf + nlen;
     memcpy(buf, value, vlen);
 
-    ret = write(sockfd, old, FCGI_HEADER_LEN + cl + pl);
+    ret = write(sockfd, old, buffer_size);
 
-    free(old);
+    free((void*)old);
 
-    if (ret == (FCGI_HEADER_LEN + cl + pl)) {
+    if (ret == buffer_size) {
         return 0;
     } else {
         return -1;
@@ -151,33 +159,34 @@ int sendStdinRecord(
     char* data,
     int len)
 {
-    LOG(Debug) << std::endl;
     int cl = len, pl, ret;
-    char buf[8] = { 0 };
+    char padding_buf[8] = { 0 };
 
     while (len > 0) {
-        // 判断STDIN数据是否大于传输最大值FCGI_MAX_LENGTH
+
         if (len > FCGI_MAX_LENGTH) {
             cl = FCGI_MAX_LENGTH;
         }
 
-        // 计算填充数据长度
+        // Count padding length.
         pl = (cl % 8) == 0 ? 0 : 8 - (cl % 8);
 
-        fcgi_header_t sinHeader;
-        makeHeader(&sinHeader, FCGI_STDIN, requestId, cl, pl);
-        ret = write(sockfd, (char*)&sinHeader, FCGI_HEADER_LEN); // 发送协议头部
+        fcgi_header_t header;
+        makeHeader(&header, FCGI_STDIN, requestId, cl, pl);
+        ret = write(sockfd, (char*)&header, FCGI_HEADER_LEN);
         if (ret != FCGI_HEADER_LEN) {
             return -1;
         }
 
-        ret = write(sockfd, data, cl); // 发送stdin数据
+        // Send stdin data.
+        ret = write(sockfd, data, cl);
         if (ret != cl) {
             return -1;
         }
 
+        // Send padding content data.
         if (pl > 0) {
-            ret = write(sockfd, buf, pl); // 发送填充数据
+            ret = write(sockfd, padding_buf, pl);
             if (ret != pl) {
                 return -1;
             }
@@ -210,11 +219,12 @@ int recvRecord(
     int fd,
     int requestId)
 {
-    fcgi_header_t responHeader;
+    fcgi_header_t header;
     fcgi_end_request_body_t endr;
 
-    char *conBuf = NULL, *errBuf = NULL;
-    int buf[8];
+    char *con_buf = nullptr, *err_buf = nullptr;
+    unsigned int con_len = 0, err_len = 0;
+    int padding_buf[8] = { 0 };
     int ret;
 
     unsigned char type;
@@ -222,13 +232,12 @@ int recvRecord(
     unsigned int content_length;
     unsigned char padding_length;
 
-    unsigned int outlen = 0, errlen = 0;
+    while (rr(fd, &header, sizeof(header)) > 0) {
 
-    while (rr(fd, &responHeader, sizeof(responHeader)) > 0) {
-        type = responHeader.type;
-        request_id = (unsigned int)(responHeader.request_id_hi << 8) + (unsigned int)(responHeader.request_id_lo);
-        content_length = (unsigned int)(responHeader.content_length_hi << 8) + (unsigned int)(responHeader.content_length_lo);
-        padding_length = responHeader.padding_length;
+        type = header.type;
+        request_id = (unsigned int)(header.request_id_hi << 8) + (unsigned int)(header.request_id_lo);
+        content_length = (unsigned int)(header.content_length_hi << 8) + (unsigned int)(header.content_length_lo);
+        padding_length = header.padding_length;
 
         printf("type:%d,requestId:%d,contentLength:%d,paddingLength:%d\n",
             type, request_id, content_length, padding_length);
@@ -239,68 +248,73 @@ int recvRecord(
         }
 
         if (type == FCGI_STDOUT) {
-            outlen += content_length;
 
-            if (conBuf != NULL) {
-                conBuf = (char*)realloc((void*)conBuf, outlen);
+            con_len += content_length;
+
+            if (con_buf != nullptr) {
+                con_buf = (char*)realloc((void*)con_buf, con_len);
             } else {
-                conBuf = (char*)malloc(content_length);
+                con_buf = (char*)malloc(content_length);
             }
 
-            ret = rr(fd, conBuf, content_length);
+            // FIXME: store date begin last used index.
+            ret = rr(fd, con_buf, content_length);
             if (ret == -1 || ret != content_length) {
                 printf("read fcgi_stdout record error\n");
                 return -1;
             }
 
-            printf("1zhenhuli out:%.*s\n", content_length, conBuf);
+            printf("1zhenhuli out:%.*s\n", content_length, con_buf);
 
             if (padding_length > 0) {
-                ret = rr(fd, buf, padding_length);
+                ret = rr(fd, padding_buf, padding_length);
                 if (ret == -1 || ret != padding_length) {
                     printf("read fcgi_stdout padding error\n");
                     return -1;
                 }
-                printf("1zhenhuli padding:%.*s\n", padding_length, buf);
+                printf("1zhenhuli padding:%.*s\n", padding_length, padding_buf);
             }
 
         } else if (type == FCGI_STDERR) {
-            errlen += content_length;
 
-            if (errBuf != NULL) {
-                errBuf = (char*)realloc((void*)errBuf, errlen);
+            err_len += content_length;
+
+            if (err_buf != NULL) {
+                err_buf = (char*)realloc((void*)err_buf, err_len);
             } else {
-                errBuf = (char*)malloc(content_length);
+                err_buf = (char*)malloc(content_length);
             }
 
-            ret = rr(fd, errBuf, content_length);
+            // FIXME: store date begin last used index.
+            ret = rr(fd, err_buf, content_length);
             if (ret == -1 || ret != content_length) {
                 return -1;
             }
 
-            printf("2zhenhuli err:%.*s\n", content_length, errBuf);
+            printf("2zhenhuli err:%.*s\n", content_length, err_buf);
 
             if (padding_length > 0) {
-                ret = rr(fd, buf, padding_length);
+                ret = rr(fd, padding_buf, padding_length);
                 if (ret == -1 || ret != padding_length) {
                     printf("read fcgi_stderr padding error\n");
                     return -1;
                 }
-                printf("2zhenhuli padding:%.*s\n", padding_length, buf);
+                printf("2zhenhuli padding:%.*s\n", padding_length, padding_buf);
             }
 
         } else if (type == FCGI_END_REQUEST) {
+
             ret = rr(fd, &endr, sizeof(endr));
 
             if (ret == -1 || ret != sizeof(endr)) {
-                free(conBuf);
-                free(errBuf);
+                free(con_buf);
+                free(err_buf);
                 return -1;
             }
 
             printf("3zhenhuli end\n");
-            free(conBuf);
-            free(errBuf);
+            free(con_buf);
+            free(err_buf);
             return 0;
         }
     }
@@ -309,7 +323,6 @@ int recvRecord(
 
 int send_fcgi(http_header* hp, int sock)
 {
-    LOG(Debug) << std::endl;
     int requestId, i, l;
     char* buf;
 
@@ -342,15 +355,16 @@ int send_fcgi(http_header* hp, int sock)
 
     l = sizeof(paoffset) / sizeof(paoffset[0]);
     for (i = 0; i < l; i++) {
-        // params参数的值不为空才发送
+
         char* tmp = (char*)((char*)hp + paoffset[i]);
         int len = strlen(tmp);
-        printf("len:%d,data:%.*s\n", strlen(paname[i]), strlen(paname[i]), paname[i]);
-        printf("offset:%d,len:%d,data:%.*s\n", paoffset[i], len, len, tmp);
+        printf("paname:%.*s,offset:%d,len:%d,data:%.*s\n",
+            strlen(paname[i]), paname[i], paoffset[i], len, len, tmp);
         if (len > 0) {
-            if (sendParamsRecord(sock, requestId, paname[i], strlen(paname[i]),
-                    tmp,
-                    len)
+
+            if (sendParamsRecord(sock, requestId,
+                    paname[i], strlen(paname[i]),
+                    tmp, len)
                 < 0) {
                 printf("sendParamsRecord error\n");
                 return -1;
@@ -364,7 +378,7 @@ int send_fcgi(http_header* hp, int sock)
     }
 
     l = atoi(hp->conlength);
-    if (l > 0) { // 请求体大小大于0
+    if (l > 0) {
         buf = (char*)malloc(l + 1);
         memset(buf, '\0', l);
         // if (rio_readnb(rp, buf, l) < 0) {

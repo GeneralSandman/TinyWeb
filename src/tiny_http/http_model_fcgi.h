@@ -62,9 +62,7 @@ inline ssize_t rio_readn(int fd, void* usrbuf, size_t n)
 
 #define FCGI_HEADER_LEN 8 // 协议包头长度
 
-/*
- * 可用于FCGI_Header的type组件的值
- */
+// FCGI type
 #define FCGI_BEGIN_REQUEST 1 // 请求开始记录类型
 #define FCGI_ABORT_REQUEST 2
 #define FCGI_END_REQUEST 3 // 响应结束记录类型
@@ -74,11 +72,13 @@ inline ssize_t rio_readn(int fd, void* usrbuf, size_t n)
 #define FCGI_STDERR 7      // php-fpm错误输出
 #define FCGI_DATA 8
 
+// FCGI role
 #define FCGI_RESPONDER 1
 #define FCGI_AUTHORIZER 2
 #define FCGI_FILTER 3
 
 // 为1，表示php-fpm响应结束不会关闭该请求连接
+#define FCGI_CLOSE 0
 #define FCGI_KEEP_CONN 1
 
 #define FCGI_REQUEST_COMPLETE 1 // 正常结束
@@ -132,10 +132,10 @@ typedef struct fcgi_end_request_t {
 } fcgi_end_request_t;
 
 typedef struct http_header {
-    char uri[256];      
+    char uri[256];
     char method[16];
-    char version[16];   
-    char filename[256]; 
+    char version[16];
+    char filename[256];
     char name[256];
     char cgiargs[256];
     char contype[256];
@@ -157,7 +157,7 @@ void makeBeginRequestBody(
     int keepConn);
 
 int sendBeginRequestRecord(
-    int sockfd, 
+    int sockfd,
     int requestId);
 
 int sendParamsRecord(
@@ -169,7 +169,7 @@ int sendParamsRecord(
     int vlen);
 
 int sendEmptyParamsRecord(
-    int sockfd, 
+    int sockfd,
     int requestId);
 
 int sendStdinRecord(
@@ -179,9 +179,8 @@ int sendStdinRecord(
     int len);
 
 int sendEmptyStdinRecord(
-    int sockfd, 
+    int sockfd,
     int requestId);
-
 
 int recvRecord(
     read_record rr,
