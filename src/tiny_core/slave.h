@@ -23,27 +23,26 @@ class Protocol;
 class Factory;
 class Server;
 
-class Slave
-{
-    protected:
-        EventLoop *m_pEventLoop;
-        int m_nNumber;
-        std::string m_nName;
+class Slave {
+protected:
+    EventLoop* m_pEventLoop;
+    int m_nNumber;
+    std::string m_nName;
 
-        Protocol *m_pProtocol;
-        Factory *m_pFactory;
+    Protocol* m_pProtocol;
+    Factory* m_pFactory;
 
-        NetAddress m_nListenAddress;
-        int m_nListenSocketFd;
-        Server *m_pServer;
+    NetAddress m_nListenAddress;
+    int m_nListenSocketFd;
+    Server* m_pServer;
 
-        int status;
+    int status;
 
-    public:
-        Slave(EventLoop *, int, const std::string &);
-        void createListenServer(int listenSocket);
-        void work();
-        ~Slave();
+public:
+    Slave(EventLoop*, int, const std::string&);
+    void createListenServer(int listenSocket);
+    void work();
+    ~Slave();
 };
 
 #endif //!SLAVE_H

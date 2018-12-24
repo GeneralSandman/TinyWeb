@@ -11,30 +11,30 @@
  *
  */
 
+#include <tiny_base/api.h>
+#include <tiny_base/log.h>
+#include <tiny_core/eventloop.h>
 #include <tiny_core/process.h>
 #include <tiny_core/processpool.h>
 #include <tiny_core/slave.h>
-#include <tiny_core/eventloop.h>
 #include <tiny_core/timerid.h>
-#include <tiny_base/api.h>
-#include <tiny_base/log.h>
 
+#include <boost/bind.hpp>
 #include <iostream>
 #include <string>
 #include <sys/types.h>
 #include <unistd.h>
-#include <boost/bind.hpp>
 
 // void Process::childSignalHandler(int);
 #include <tiny_base/buffer.h>
-void test_child_MessageCallback(Connection *con, Buffer *buf, Time time)
+void test_child_MessageCallback(Connection* con, Buffer* buf, Time time)
 {
     pid_t pid = getpid();
     LOG(Debug) << "[child] (" << pid << ") get message:"
                << buf->getAll() << std::endl;
 }
 
-void test_child_CloseCallback(Connection *con)
+void test_child_CloseCallback(Connection* con)
 {
     pid_t pid = getpid();
     LOG(Debug) << "[child] (" << pid << ") connection with parent close"
@@ -46,17 +46,17 @@ void test_child_period_print(void)
     LOG(Debug) << "[child] print every second\n";
 }
 
-Process *Process::m_pProcessInstance = nullptr;
+Process* Process::m_pProcessInstance = nullptr;
 
-Process::Process(const std::string &name,
-                 int number,
-                 int sockfd[2])
-    : m_pEventLoop(new EventLoop()),
-      m_pSlave(new Slave(m_pEventLoop, number, name)),
-      m_nName(name),
-      m_nNumber(number),
-      m_nPid(getpid()),
-      m_nPipe(SocketPair(m_pEventLoop, sockfd))
+Process::Process(const std::string& name,
+    int number,
+    int sockfd[2])
+    : m_pEventLoop(new EventLoop())
+    , m_pSlave(new Slave(m_pEventLoop, number, name))
+    , m_nName(name)
+    , m_nNumber(number)
+    , m_nPid(getpid())
+    , m_nPipe(SocketPair(m_pEventLoop, sockfd))
 {
     m_pProcessInstance = this;
     LOG(Debug) << "class Process constructor\n";
@@ -96,8 +96,7 @@ void Process::start()
 
     status = 1;
 
-    while (status)
-    {
+    while (status) {
         m_pSlave->work();
 
         if (status_terminate || status_quit_softly || status_restart || status_reconfigure)

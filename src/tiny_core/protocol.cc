@@ -11,15 +11,15 @@
  *
  */
 
-#include <tiny_core/protocol.h>
-#include <tiny_core/factory.h>
-#include <tiny_core/connection.h>
 #include <tiny_base/log.h>
+#include <tiny_core/connection.h>
+#include <tiny_core/factory.h>
+#include <tiny_core/protocol.h>
 
 #include <vector>
 
-    std::string
-getName(const Protocol *p)
+std::string
+getName(const Protocol* p)
 {
     std::stringstream s;
     s << typeid(*p).name();
@@ -35,7 +35,7 @@ getName(const Protocol *p)
 //----------Reflect api----------//
 std::map<std::string, createProtocol> Reflect::m_nProts;
 
-Protocol *getInstanceByPointer(const Protocol *p)
+Protocol* getInstanceByPointer(const Protocol* p)
 {
     return Reflect::getReflectInstance().getProtocolByName(getName(p));
 }
@@ -54,7 +54,7 @@ void Protocol::makeConnection()
     connectionMade();
 }
 
-void Protocol::getMessage(const std::string &data)
+void Protocol::getMessage(const std::string& data)
 {
     //It is used by Factory
     //user can't change this function.
@@ -75,7 +75,7 @@ void Protocol::loseConnection()
     connectionLost();
 }
 
-void Protocol::sendMessage(const std::string &data)
+void Protocol::sendMessage(const std::string& data)
 {
     m_pConnection->send(data);
 }
@@ -95,7 +95,7 @@ void Protocol::connectionMade()
     //It can be override user.
 }
 
-void Protocol::dataReceived(const std::string &data)
+void Protocol::dataReceived(const std::string& data)
 {
     //It can be override by user.
 }

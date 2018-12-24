@@ -11,30 +11,30 @@
  *
  */
 
-#include <tiny_core/processpool.h>
-#include <tiny_core/process.h>
+#include <tiny_base/buffer.h>
+#include <tiny_base/log.h>
+#include <tiny_base/signalmanager.h>
 #include <tiny_core/eventloop.h>
 #include <tiny_core/master.h>
+#include <tiny_core/process.h>
+#include <tiny_core/processpool.h>
 #include <tiny_core/timerid.h>
-#include <tiny_base/buffer.h>
-#include <tiny_base/signalmanager.h>
-#include <tiny_base/log.h>
 
-#include <unistd.h>
-#include <sys/types.h>
-#include <signal.h>
-#include <map>
-#include <string>
-#include <memory>
 #include <boost/bind.hpp>
+#include <map>
+#include <memory>
+#include <signal.h>
+#include <string>
+#include <sys/types.h>
+#include <unistd.h>
 
-void test_parent_MessageCallback(Connection *con, Buffer *buf, Time time)
+void test_parent_MessageCallback(Connection* con, Buffer* buf, Time time)
 {
     LOG(Debug) << "[parent] get message:"
-              << buf->getAll() << std::endl;
+               << buf->getAll() << std::endl;
 }
 
-void test_parent_CloseCallback(Connection *con)
+void test_parent_CloseCallback(Connection* con)
 {
     LOG(Debug) << "[parent] one connection close" << std::endl;
 }
@@ -44,13 +44,13 @@ void test_parent_period_print(void)
     LOG(Debug) << "[parent] print every second\n";
 }
 
-ProcessPool *ProcessPool::m_pPoolInstance = nullptr;
+ProcessPool* ProcessPool::m_pPoolInstance = nullptr;
 
 ProcessPool::ProcessPool()
-    : m_pEventLoop(new EventLoop()),
-      m_pMaster(new Master(this, m_pEventLoop.get(), 0, "master")),
-      m_pProcess(nullptr),
-      m_nListenSocketFd(-1)
+    : m_pEventLoop(new EventLoop())
+    , m_pMaster(new Master(this, m_pEventLoop.get(), 0, "master"))
+    , m_pProcess(nullptr)
+    , m_nListenSocketFd(-1)
 {
     m_nPid = getpid();
     m_pPoolInstance = this;
@@ -71,41 +71,35 @@ void ProcessPool::createProcess(int nums)
     pids_tmp.reserve(nums);
 
     //first-step:create nums process
-    for (int i = 0; i < nums; i++)
-    {
+    for (int i = 0; i < nums; i++) {
         int socketpairFds[2];
         int res = socketpair(AF_UNIX, SOCK_STREAM, 0, socketpairFds);
         if (res == -1)
             handle_error("[processpool] socketpair error:");
 
         pid_t pid = fork();
-        if (pid < 0)
-        {
+        if (pid < 0) {
             LOG(Debug) << "[processpool] fork error\n";
-        }
-        else if (pid == 0)
-        {
+        } else if (pid == 0) {
             //Child process:
             //1.establish channel with Parent;
             //2.set signal handlers
             //3.create listen server
             m_pProcess = std::make_shared<Process>(std::to_string(i),
-                                                   i, socketpairFds);
+                i, socketpairFds);
             m_pProcess->setAsChild(int(getpid()));
             m_pProcess->setSignalHandlers();
             m_pProcess->createListenServer(m_nListenSocketFd);
             goto WAIT;
-        }
-        else
-        {
+        } else {
             //Parent process:
             //Store information of process.
             //And set something after forking.
             //1.push socketpair
             //2.push pid
             LOG(Debug) << "[processpool] create process(" << pid << ")\n";
-            pair_tmp.push_back({socketpairFds[0],
-                                socketpairFds[1]});
+            pair_tmp.push_back({ socketpairFds[0],
+                socketpairFds[1] });
             pids_tmp.push_back(pid);
         }
     }
@@ -113,8 +107,7 @@ void ProcessPool::createProcess(int nums)
     //Parent process second-step:build pipe with every child process
     for (auto t : pids_tmp)
         m_nPids.push_back(t);
-    for (unsigned int i = 0; i < pair_tmp.size(); i++)
-    {
+    for (unsigned int i = 0; i < pair_tmp.size(); i++) {
         int pair[2];
         pair[0] = pair_tmp[i].d1;
         pair[1] = pair_tmp[i].d2;
@@ -152,38 +145,31 @@ void ProcessPool::setSignalHandlers()
 
 void ProcessPool::start()
 {
-    if (!m_pProcess)
-    {
+    if (!m_pProcess) {
         //Parent process
         assert(m_nPipes.size() == m_nPids.size());
 
-        for (unsigned int index = 0; index < m_nPipes.size(); index++)
-        {
+        for (unsigned int index = 0; index < m_nPipes.size(); index++) {
             LOG(Debug) << "[parent] I will send to child(" << m_nPids[index]
-                      << ") message every one seconds\n";
+                       << ") message every one seconds\n";
 
             m_pEventLoop->runEvery(1, boost::bind(&test_parent_period_print));
         }
         status = 1;
-        while (status)
-        {
+        while (status) {
             m_pMaster->work();
-            if (status_reconfigure || status_reconfigure)
-            {
+            if (status_reconfigure || status_reconfigure) {
                 LOG(Debug) << "[processpool] create new pool\n";
                 //reload config-file
                 //create new processpool
                 // createProcess(2);
             }
-            if (status_terminate || status_quit_softly)
-            {
+            if (status_terminate || status_quit_softly) {
                 LOG(Debug) << "[processpool] end\n";
                 status = 0;
             }
         }
-    }
-    else
-    {
+    } else {
         //Child process
         m_pProcess->start();
     }
@@ -193,12 +179,10 @@ void ProcessPool::killAll()
 {
     //This function will be invoked by master.
     LOG(Debug) << "[parent] kill " << m_nPids.size() << " chilern\n";
-    for (auto t : m_nPids)
-    {
+    for (auto t : m_nPids) {
         LOG(Debug) << "[parent] kill child(" << t << ")\n";
         int res = kill(t, SIGTERM);
-        if (res == 0)
-        {
+        if (res == 0) {
             LOG(Debug) << "[parent] kill child (" << t << ") successfully\n";
             m_fDestoryProcess(t);
         }
