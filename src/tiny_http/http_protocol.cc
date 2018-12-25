@@ -31,15 +31,19 @@ void WebProtocol::connectionMade()
 void WebProtocol::dataReceived(const std::string &data)
 {
     LOG(Info) << "get data\n";
+
     HttpParserSettings settings;
+    HttpRequest *result = new HttpRequest;
     int begin = 0;
+
     HttpParser parser(&settings);
     parser.setType(HTTP_TYPE_REQUEST);
-    HttpRequest *result = new HttpRequest;
+
     int tmp = parser.execute(data.c_str(),
                              begin,
                              data.size(),
                              result);
+
     bool res = (tmp == -1) ? false : true;
     if (res)
     {

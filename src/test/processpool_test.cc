@@ -1,15 +1,15 @@
 /*
-*Author:GeneralSandman
-*Code:https://github.com/GeneralSandman/TinyWeb
-*E-mail:generalsandman@163.com
-*Web:www.dissigil.cn
-*/
+ *Author:GeneralSandman
+ *Code:https://github.com/GeneralSandman/TinyWeb
+ *E-mail:generalsandman@163.com
+ *Web:www.dissigil.cn
+ */
 
 /*---XXX---
-*
-****************************************
-*
-*/
+ *
+ ****************************************
+ *
+ */
 
 #include <tiny_core/processpool.h>
 
@@ -28,11 +28,11 @@ int main()
         std::string errorfile = logpath + "error.log";
         std::string fatalfile = logpath + "fatal.log";
         initLogger(debugfile,
-                   infofile,
-                   warnfile,
-                   errorfile,
-                   fatalfile,
-                   convertStringToLoglevel(loglevel)); //error used
+            infofile,
+            warnfile,
+            errorfile,
+            fatalfile,
+            convertStringToLoglevel(loglevel)); //error used
         setLogLevel(Debug);
 
         std::cout << "[Process Pool Test]" << std::endl;

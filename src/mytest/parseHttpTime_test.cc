@@ -103,11 +103,14 @@ bool testTime1(testHttpTime *t)
 {
     sdstr tmp;
     sdsnewempty(&tmp, 32);
+
+    // Test http formate.
     formatHttpTime(t->time, &tmp);
     bool sameHttpTime = false;
     if (0 == strncmp(t->httpTimeStr, tmp.data, tmp.len))
         sameHttpTime = true;
 
+    // Test deformate.
     time_t time_tmp;
     deformatHttpTime(&tmp, &time_tmp);
     bool sameTimet = false;
@@ -123,11 +126,14 @@ bool testTime2(testHttpTime *t)
 {
     sdstr tmp;
     sdsnewempty(&tmp, 32);
+
+    // Test cookie formate.
     formatCookieTime(t->time, &tmp);
     bool sameCookieTime = false;
     if (0 == strncmp(t->cookieTimeStr, tmp.data, tmp.len))
         sameCookieTime = true;
 
+    // Test deformate.
     time_t time_tmp;
     deformatCookieTime(&tmp, &time_tmp);
     bool sameTimet = false;

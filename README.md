@@ -72,6 +72,23 @@ vim /TinyWeb.conf
             "keep_connect": true
         },
 
+        "cache": [
+            {
+                "name": "cache_test",
+                "server_address": "127.0.0.1:7979",
+                "path": "/home/dell/TinyWeb/cache_files",
+                "space_max_size": "4194304",
+                "expires": "3600"
+            },
+            {
+                "name": "cache_test2",
+                "server_address": "127.0.0.1:7973",
+                "path": "/home/dell/TinyWeb/cache_files",
+                "space_max_size": "4194304",
+                "expires": "3600"
+            }
+        ],
+
         "server": [
             {
                 "listen": 9090,
@@ -100,17 +117,19 @@ vim /TinyWeb.conf
                 "fcgi": [
                     {
                         "pattern": "*.php",
-                        "path" : "/path/",
+                        "path" : "/home/dell/TinyWeb/www/test",
                         "indexpage": ["index.php", "index2.php"],
                         "listen": "127.0.0.1:9090"
                     },
                     {
                         "pattern": "*.cgi",
-                        "path" : "/path/",
+                        "path" : "/home/dell/TinyWeb/www/test",
+                        "indexpage": ["index.php", "index2.php"],
                         "indexpage": ["index.cgi", "index2.cgi"],
                         "listen": "127.0.0.1:9091"
                     }
-                ]
+                ],
+                "cache": "cache_test"
             }
         ],
 
@@ -124,7 +143,6 @@ vim /TinyWeb.conf
             "fatalfile": "fatal.log"
         }
     }
-
 }
 
 ```
@@ -222,7 +240,33 @@ vim /TinyWeb.conf
         <td>bool</td>
     </tr>
     <tr>
-        <td rowspan="6">server (type is list)</td> 
+        <td rowspan="5">cache (type cache-struct list)</td> 
+        <td>name</td> 
+        <td>cache name</td> 
+        <td>string</td>
+    </tr>
+    <tr>
+        <td>server_address</td> 
+        <td>source server address</td> 
+        <td>string</td>
+    </tr>
+    <tr>
+        <td>path</td> 
+        <td>path of stroe cache file</td> 
+        <td>string</td>
+    </tr>
+    <tr>
+        <td>space_max_size</td> 
+        <td>max size of cache(kB)</td> 
+        <td>int</td>
+    </tr>
+    <tr>
+        <td>expires</td> 
+        <td>expires time (second)</td> 
+        <td>int</td>
+    </tr>
+    <tr>
+        <td rowspan="7">server (type is list)</td> 
         <td>listen</td> 
         <td>list port</td> 
         <td>int</td>
@@ -251,6 +295,11 @@ vim /TinyWeb.conf
         <td>fcgi</td> 
         <td>fcgi config</td> 
         <td>fcgi-struct list</td>
+    </tr>
+    <tr>
+        <td>cache</td> 
+        <td>cache name in cache struct</td> 
+        <td>name</td>
     </tr>
     <tr>
         <td rowspan="7">log</td> 

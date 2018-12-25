@@ -12,9 +12,7 @@
     - 考虑造成的内存碎片
     - 效率
 - 增加异步读磁盘
-- 提升程序为demon进程（demon程序标准输入输出如何处理?）
 - Semphore,SharedMemory,Cache
-- 如何处理url中包含```../```的问题
 - 思考mime.type的设计，如何配置 include /home/li/TinyWeb/mime.type
 - 为Connection添加close()功能来作为对shutdownWrite()的补充
 - 如何支持中文url??????
@@ -27,14 +25,9 @@
 - 每个Process均有一个EventLoop，不过监听的event不同
     - master监听网络事件
     - slaver监听master的通信事件，和每个Connection的定时器事件
-- 残留的Connection应该由Server释放
-- 残留的Protocol应该由Factory释放
-- Connection不知道Protocol的存在，Server不知道Factory的存在
-- processpoll和process通过底层的信号控制
 - 进程间通信用信号和共享内存
     - 信号控制进程的工作，停止
     - 共享内存更偏重于业务逻辑
-- 优化创建进程的方式：通过vfork和exec
 - master和worker实际上是对processpoll和process的高层封装
     - 通过对他们的信号进行控制，进而实现对master对worker的控制，
         - 如：平滑启动，强制关闭所有进程，重启的一系列高层决策，
@@ -43,11 +36,7 @@
 就会进入睡眠状态,这会导致其他请求“饿死”。
 - master进程不需要处理网络事件,它不负责业务的执行,只会通过管理worker等子进程
 来实现重启服务、平滑升级、更换日志文件、配置文件实时生效等功能。
-- 计划完成Client，Connector，Proxy,memorypool类。
-- 重读代码，配置各个模块的日志结构。
 - 为Factory添加writeCompleteCallback
-- Accepter 只有一个，负责所有到来的连接
-- Connector 与Accepter不同，只负责一个Connection，
 - 因为listen-Socket是可以复用的，而已经创建起连接的Socket是不可复用的，下一个新连接必定要使用新的connect-Socket,他们决定了Accepter和Connector在细节上略有不同。
 - 三种工作状态：Server和Proxy
 - 为Protocol添加makeConnection()功能，作为客户端使用
@@ -56,31 +45,9 @@
 - Connection和Connector的Channel不同，也就决定了监听对象的不同，Connector监听的是连接建立的时候的事件，而Connection要对连接成功之后的事件进行负责。注意事件范围。
 - ConnectSocket 和已经建立连接后的Connection中的socket是相同的
 如何处理两者都关闭file descriptor 出错的问题。
-- new buffer_t & new chain_t design 配合gzip和chunk模块的使用。
-- 先设计gzip模块，确定newmemorypool需要的功能
-- build new memory-pool
-    - getNewBuffer (size > 1024)
-
-- chain 获取第一个buffer并且初始化给gzip-model。
-- chain 可以持续不断的从pool中获得。
-- 如何高效得拷贝内存
-
-- 高效地从内存池中获取。
-- 高效地拷贝chain
-- 
-- chain 只是方便内存的使用，不参与内存的管理
-
-> # TinyWeb特点
-1. 性能
-    - 网络性能：能否处理高并发连接
-    - 单次请求延迟：在高并发的情况下维持较低的请求延迟
-    - 网络效率：如长连接相比与短连接减少握手次数，提高网络效率
-2. 可配置性
-3. 可见性：某些关键组件可以被监控
 
 > # 在宏观上需要改进的意向
 
-- defer
 - 进程池机制（平滑启动）
 - cache
 - proxyer
@@ -122,31 +89,6 @@ ngx_shmtx_t锁是可以在共享内存上使用的,它是Nginx中最常见的锁
 睡眠的锁。
 
 
-> # 更新进度（2.7-2.11）
-- 对进程间通信的基本类进行设计
-    - 信号量
-    - 文件锁
-    - 共享内存
-- 对进程池进行重新设计，利用IPC基本类进行通信，控制
-
-> # 更新进度
-
-
-> # TinyWeb全线改为智能指针
-
-> # 需要处理的信号：
-- SIGCHLD 子进程终止通知父进程
-- SIGPIPE 管道异常
-- SIGINT Ctrl-c
-- SIGTERM 强制关闭
-- SIGQUIT 软关闭　
-- SIGHUP 终端退出信号，重新加载配置文件 
-
-> # 如何方便的控制TinyWeb：
-- kill -QUIT PID :softly close
-- kill -TERM PID :close quickly
-- kill -INT PID :close quickly
-
 各种类模块的说明：
 - Protocol & Connection
     - Protocol 用来处理用户逻辑，简单的维护用户上下文，不负责数据传输，
@@ -159,24 +101,7 @@ ngx_shmtx_t锁是可以在共享内存上使用的,它是Nginx中最常见的锁
 - EventLoop 管理SignalManager，在loop()中根据信号处理函数设置的全局变量去进行状态控制。
 
 
-> # test目录下相关测试的说明
 
-> # multiwebserver目录下web服务器各种版本的说明。
-|目录|版本|
-|-|-|
-||单进程+阻塞IO|
-||多进程+阻塞IO|
-||单进程多线程+阻塞IO|
-||单进程+epoll+非阻塞IO|
-||进程池+epoll+非阻塞IO|
-||单进程多线程+epoll+非阻塞IO|
-
-
-
-
-打开文件及处理index页面的问题，
-
-File读取配置文件，
 
 先读取文件的stat
 1. 路径不存在 ->　返回特殊页面
@@ -198,4 +123,45 @@ file1               file2           file3   file3  file4
 
 
 设置sendfile Queue，到达outputBuffer消息边界时，触发相应的writeFileCallback
+
+
+    proxy_connect_timeout 10;
+    proxy_read_timeout 180;
+    proxy_send_timeout 5;
+    proxy_buffer_size 16k;
+    proxy_buffers 4 32k;
+    proxy_busy_buffers_size 96k;
+    proxy_temp_file_write_size 96k;
+    proxy_temp_path /tmp/temp_dir;
+    proxy_cache_path /tmp/cache levels=1:2 keys_zone=cache_one:100m inactive=1d max_size=10g;
+
+proxy_connect_timeout 服务器连接的超时时间
+proxy_read_timeout 连接成功后,等候后端服务器响应时间
+proxy_send_timeout 后端服务器数据回传时间
+proxy_buffer_size 缓冲区的大小
+proxy_buffers 每个连接设置缓冲区的数量为number，每块缓冲区的大小为size
+proxy_busy_buffers_size 开启缓冲响应的功能以后，在没有读到全部响应的情况下，写缓冲到达一定大小时，nginx一定会向客户端发送响应，直到缓冲小于此值。
+proxy_temp_file_write_size 设置nginx每次写数据到临时文件的size(大小)限制
+proxy_temp_path 从后端服务器接收的临时文件的存放路径
+proxy_cache_path 设置缓存的路径和其他参数。被缓存的数据如果在inactive参数（当前为1天）指定的时间内未被访问，就会被从缓存中移除
+
+
+        location ~ .*\.(gif|jpg|png|css|js)(.*) {
+                proxy_pass http://ip地址:90;
+                proxy_redirect off;
+                proxy_set_header Host $host;
+                proxy_cache cache_one;
+                proxy_cache_valid 200 302 24h;
+                proxy_cache_valid 301 30d;
+                proxy_cache_valid any 5m;
+                expires 90d;
+                add_header wall  "hey!guys!give me a star.";
+        }
+
+proxy_pass nginx缓存里拿不到资源，向该地址转发请求，拿到新的资源，并进行缓存
+proxy_redirect 设置后端服务器“Location”响应头和“Refresh”响应头的替换文本
+proxy_set_header 允许重新定义或者添加发往后端服务器的请求头
+proxy_cache 指定用于页面缓存的共享内存，对应http层设置的keys_zone
+proxy_cache_valid 为不同的响应状态码设置不同的缓存时间
+expires 缓存时间
 

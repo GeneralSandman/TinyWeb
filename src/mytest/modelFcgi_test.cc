@@ -47,11 +47,11 @@ int main()
     // header.cgiargs = cgiargs;
     // header.contype = contype;
     // header.conlength = conlength;
-    strcpy(header.uri, "http://127.0.0.1/dynamic/test.php?name=zhenhuli");
+    strcpy(header.uri, "");
     strcpy(header.method, "GET");
     strcpy(header.version, "HTTP/1.1");
-    strcpy(header.filename, "/var/www/html/dynamic/test.php");
-    strcpy(header.name, "/dynamic/test.php");
+    strcpy(header.filename, "/var/www/html/test/dynamic_get.php");
+    strcpy(header.name, "");
     strcpy(header.cgiargs, "name=zhenhuli");
     strcpy(header.contype, "");
     strcpy(header.conlength, "0");

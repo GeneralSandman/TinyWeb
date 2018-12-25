@@ -20,5 +20,8 @@ int main()
     std::cout << v2.size() << std::endl;
     std::cout << v2.capacity() << std::endl;
 
+    int size;
+    std::cout << r << std::endl;
+
     return 0;
 }

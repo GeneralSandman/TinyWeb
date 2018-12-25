@@ -26,6 +26,18 @@ target_link_libraries(processpool_test
     tiny_base_model
     )
 
+# process_test
+add_executable(process_test
+    process_test.cc
+    )
+
+target_link_libraries(process_test
+    tiny_core_model
+    tiny_http_model
+    tiny_struct_model
+    tiny_base_model
+    )
+
 # memorypool_test
 add_executable(memorypool_test
     memorypool_test.cc

@@ -18,12 +18,10 @@
 #include <string>
 #include <sys/stat.h>
 
+std::string getType(const std::string& f);
+std::string getMimeType(const std::string& type);
 
-std::string getType(const std::string &f);
-std::string getMimeType(const std::string &type);
-
-typedef struct File
-{
+typedef struct File {
     std::string name;
     std::string type;
     std::string mime_type;
@@ -33,8 +31,8 @@ typedef struct File
     off_t offset;
 } File;
 
-int initFile(File * file, const std::string & fname);
-void destoryFile(File *file);
+int initFile(File* file, const std::string& fname);
+void destoryFile(File* file);
 
 int sendfile(int outFd, File* file);
 
