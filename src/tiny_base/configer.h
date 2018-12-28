@@ -39,6 +39,7 @@ public:
 class FcgiConfig {
 public:
     bool enable;
+    bool keep_connect;
     unsigned int connect_timeout;
     unsigned int send_timeout;
     unsigned int read_timeout;
@@ -95,12 +96,22 @@ private:
     static std::string m_nFile;
     BasicConfig basicConf;
     FcgiConfig fcgiConf;
+    std::vector<CacheConfig> cacheConf;
     std::vector<ServerConfig> serverConf;
     LogConfig logConf;
 
     Configer();
     Configer(const Configer& c) {}
 
+    bool haveCacheName(const CacheConfig& conf, const std::string& cachename)
+    {
+        return (conf.name == cachename);
+        // auto it = find(std::begin(conf.name),
+            // std::end(conf.name),
+            // cachename);
+        // return (it != std::end(conf.name));
+    }
+    
     bool haveServerName(const ServerConfig& conf, const std::string& servername)
     {
         auto it = find(std::begin(conf.servername),
@@ -120,6 +131,8 @@ public:
     int loadConfig(bool debug = false);
 
     const BasicConfig& getBasicConfig();
+    const FcgiConfig& getFcgiConfig();
+    const CacheConfig& getCacheConfig(const std::string& cachename);
     const ServerConfig& getServerConfig(const std::string& servername);
     const LogConfig& getLogConfig();
     ~Configer();

@@ -11,15 +11,15 @@
  *
  */
 
-#include <tiny_base/log.h>
 #include <tiny_base/api.h>
 #include <tiny_base/configer.h>
+#include <tiny_base/log.h>
 
 #include <algorithm>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/property_tree/ptree.hpp>
 #include <string>
 #include <vector>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
 
 using namespace boost::property_tree;
 
@@ -29,7 +29,7 @@ typedef boost::property_tree::ptree::iterator piterator;
 //default configuration file.
 std::string Configer::m_nFile = "./TinyWeb.conf";
 
-void setConfigerFile(const std::string &file)
+void setConfigerFile(const std::string& file)
 {
     Configer::getConfigerInstance().setConfigerFile(file);
 }
@@ -44,12 +44,12 @@ Configer::Configer()
     LOG(Debug) << "class Configer constructor\n";
 }
 
-void Configer::setConfigerFile(const std::string &file)
+void Configer::setConfigerFile(const std::string& file)
 {
     m_nFile = file;
 }
 
-int Configer::checkConfigerFile(const std::string &file)
+int Configer::checkConfigerFile(const std::string& file)
 {
     //TODO:
     boost::property_tree::ptree root;
@@ -74,42 +74,35 @@ int Configer::checkConfigerFile(const std::string &file)
     int gzip_min_len = basic.get<int>("gzip_min_len", 1024);
 
     ptree gzip_http_version = basic.get_child("gzip_http_version");
-    for (auto it = gzip_http_version.begin(); it != gzip_http_version.end(); it++)
-    {
+    for (auto it = gzip_http_version.begin(); it != gzip_http_version.end(); it++) {
         std::cout << "gzip_http_version: " << it->second.get_value<std::string>() << std::endl;
     }
     ptree gzip_mime_type = basic.get_child("gzip_mime_type");
-    for (auto it = gzip_mime_type.begin(); it != gzip_mime_type.end(); it++)
-    {
+    for (auto it = gzip_mime_type.begin(); it != gzip_mime_type.end(); it++) {
         std::cout << "gzip_mime_type: " << it->second.get_value<std::string>() << std::endl;
     }
 
     // server-config
     std::cout << "<server-config>" << std::endl;
-    for (piterator it = server.begin(); it != server.end(); ++it)
-    {
+    for (piterator it = server.begin(); it != server.end(); ++it) {
         int listen = it->second.get<int>("listen", 80);
         ptree servername = it->second.get_child("servername");
         std::cout << "servername:";
-        for (piterator a = servername.begin(); a != servername.end(); a++)
-        {
+        for (piterator a = servername.begin(); a != servername.end(); a++) {
             std::cout << a->second.get_value<std::string>() << " ";
         }
         std::cout << std::endl;
 
         ptree indexpage = it->second.get_child("indexpage");
-        for (piterator a = indexpage.begin(); a != indexpage.end(); a++)
-        {
+        for (piterator a = indexpage.begin(); a != indexpage.end(); a++) {
             std::cout << a->second.get_value<std::string>() << " ";
         }
 
         ptree errorpage = it->second.get_child("errorpage");
-        for (piterator a = errorpage.begin(); a != errorpage.end(); a++)
-        {
+        for (piterator a = errorpage.begin(); a != errorpage.end(); a++) {
             ptree code = a->second.get_child("code");
             std::cout << "code:";
-            for (auto b = code.begin(); b != code.end(); b++)
-            {
+            for (auto b = code.begin(); b != code.end(); b++) {
                 std::cout << b->second.get_value<int>() << " ";
             }
             std::cout << std::endl;
@@ -139,6 +132,7 @@ int Configer::loadConfig(bool debug)
     items = debug ? root.get_child("develop") : root.get_child("product");
     boost::property_tree::ptree basic = items.get_child("basic");
     boost::property_tree::ptree fcgi = items.get_child("fcgi");
+    boost::property_tree::ptree cache = items.get_child("cache");
     boost::property_tree::ptree server = items.get_child("server");
     boost::property_tree::ptree log = items.get_child("log");
 
@@ -154,14 +148,11 @@ int Configer::loadConfig(bool debug)
     basicConf.gzip_min_len = basic.get<int>("gzip_min_len", 2048);
 
     ptree gzip_http_version = basic.get_child("gzip_http_version");
-    for (auto it = gzip_http_version.begin(); it != gzip_http_version.end(); it++)
-    {
+    for (auto it = gzip_http_version.begin(); it != gzip_http_version.end(); it++) {
         std::string str = it->second.get_value<std::string>();
         int vers = 0;
-        for (auto t:str)
-        {
-            if ('0'<=t && t<='9')
-            {
+        for (auto t : str) {
+            if ('0' <= t && t <= '9') {
                 vers *= 10;
                 vers += int(t - '0');
             }
@@ -170,64 +161,68 @@ int Configer::loadConfig(bool debug)
     }
 
     ptree gzip_mime_type = basic.get_child("gzip_mime_type");
-    for (auto it = gzip_mime_type.begin(); it != gzip_mime_type.end(); it++)
-    {
+    for (auto it = gzip_mime_type.begin(); it != gzip_mime_type.end(); it++) {
         std::string mime_type = it->second.get_value<std::string>();
         basicConf.gzip_mime_type.push_back(mime_type);
     }
 
     // fcgi-config
     fcgiConf.enable = fcgi.get<bool>("enable", false);
+    fcgiConf.keep_connect = fcgi.get<bool>("keep_connect", false);
     fcgiConf.connect_timeout = fcgi.get<unsigned int>("connect_timeout", 1000);
     fcgiConf.send_timeout = fcgi.get<unsigned int>("send_timeout", 1000);
     fcgiConf.read_timeout = fcgi.get<unsigned int>("read_timeout", 1000);
-    
+
+    // cache-config
+    for (piterator it = cache.begin(); it != cache.end(); ++it) {
+        CacheConfig cache;
+        cache.name = it->second.get<std::string>("name", "");
+        cache.server_address = it->second.get<std::string>("server_address", "");
+        cache.path = it->second.get<std::string>("path", "");
+        cache.space_max_size = it->second.get<unsigned long long>("space_max_size", 0);
+        cache.expires = it->second.get<unsigned long long>("expires", 0);
+
+        cacheConf.push_back(cache);
+    }
 
     // server-config
-    for (piterator it = server.begin(); it != server.end(); ++it)
-    {
+    for (piterator it = server.begin(); it != server.end(); ++it) {
         ServerConfig server;
         server.listen = it->second.get<int>("listen", 80);
         server.www = it->second.get<std::string>("www", "");
 
         ptree servername = it->second.get_child("servername");
-        for (piterator a = servername.begin(); a != servername.end(); a++)
-        {
+        for (piterator a = servername.begin(); a != servername.end(); a++) {
             server.servername.push_back(a->second.get_value<std::string>());
         }
 
         ptree indexpage = it->second.get_child("indexpage");
-        for (piterator a = indexpage.begin(); a != indexpage.end(); a++)
-        {
+        for (piterator a = indexpage.begin(); a != indexpage.end(); a++) {
             server.indexpage.push_back(a->second.get_value<std::string>());
         }
 
         ptree errorpage_ptree = it->second.get_child("errorpage");
-        for (piterator a = errorpage_ptree.begin(); a != errorpage_ptree.end(); a++)
-        {
+        for (piterator a = errorpage_ptree.begin(); a != errorpage_ptree.end(); a++) {
             errorpage page;
             page.path = a->second.get<std::string>("path", "");
             page.file = a->second.get<std::string>("file", "");
 
             ptree code = a->second.get_child("code");
-            for (auto b = code.begin(); b != code.end(); b++)
-            {
+            for (auto b = code.begin(); b != code.end(); b++) {
                 page.code = b->second.get_value<int>();
                 server.errorpages.push_back(page);
             }
         }
 
         ptree fcgi_ptree = it->second.get_child("fcgi");
-        for (piterator a = fcgi_ptree.begin(); a != fcgi_ptree.end(); a++)
-        {
+        for (piterator a = fcgi_ptree.begin(); a != fcgi_ptree.end(); a++) {
             fcgi_t f;
-            f.pattern= a->second.get<std::string>("pattern", "");
+            f.pattern = a->second.get<std::string>("pattern", "");
             f.path = a->second.get<std::string>("path", "");
             f.listen = a->second.get<std::string>("listen", "");
 
             ptree indexpage = a->second.get_child("indexpage");
-            for (auto b = indexpage.begin(); b != indexpage.end(); b++)
-            {
+            for (auto b = indexpage.begin(); b != indexpage.end(); b++) {
                 std::string page = b->second.get_value<std::string>();
                 f.indexpage.push_back(page);
             }
@@ -248,29 +243,47 @@ int Configer::loadConfig(bool debug)
     return 0;
 }
 
-const BasicConfig & Configer::getBasicConfig()
+const BasicConfig& Configer::getBasicConfig()
 {
     return basicConf;
 }
 
-const ServerConfig & Configer::getServerConfig(const std::string &servername)
+const FcgiConfig& Configer::getFcgiConfig()
+{
+    return fcgiConf;
+}
+
+const CacheConfig& Configer::getCacheConfig(const std::string& cachename)
 {
     int index = 0;
-    for (; index<serverConf.size(); index++)
-    {
+    for (; index < cacheConf.size(); index++) {
+        if (haveCacheName(cacheConf[index], cachename))
+            break;
+    }
+
+    if (index == cacheConf.size()) {
+        std::cout << "not this cachename(" << cachename << ") config";
+        index = 0;
+    }
+    return cacheConf[index];
+}
+
+const ServerConfig& Configer::getServerConfig(const std::string& servername)
+{
+    int index = 0;
+    for (; index < serverConf.size(); index++) {
         if (haveServerName(serverConf[index], servername))
             break;
     }
 
-    if (index == serverConf.size())
-    {
-        std::cout << "not this servername(" << servername <<") config";
+    if (index == serverConf.size()) {
+        std::cout << "not this servername(" << servername << ") config";
         index = 0;
     }
     return serverConf[index];
 }
 
-const LogConfig & Configer::getLogConfig()
+const LogConfig& Configer::getLogConfig()
 {
     return logConf;
 }
