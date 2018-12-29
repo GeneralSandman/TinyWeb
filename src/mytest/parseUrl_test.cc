@@ -14,23 +14,23 @@
 #include <tiny_http/http_parser.h>
 
 #include <iostream>
-#include <vector>
 #include <string>
+#include <vector>
 
 using namespace std;
 
-typedef struct testUrl
-{
-    const char *url;
+typedef struct testUrl {
+    const char* url;
     bool valid;
-    const char *host;
-    const char *port;
-    const char *path;
+    const char* host;
+    const char* port;
+    const char* path;
 } testUrl;
 
 testUrl urls[] = {
 
-    {   // 0
+    {
+        // 0
         .url = "http://127.0.0.1:9090/index.html",
         .valid = true,
         .host = "127.0.0.1",
@@ -38,7 +38,7 @@ testUrl urls[] = {
         .path = "/index.html",
     },
 
-    {   
+    {
         .url = "https://www.dissigil.cn",
         .valid = true,
         .host = "www.dissigil.cn",
@@ -78,7 +78,7 @@ testUrl urls[] = {
         .path = "/",
     },
 
-    {   
+    {
         .url = "http://www.dissigil.cn:8080/index/index.html",
         .valid = true,
         .host = "www.dissigil.cn",
@@ -86,7 +86,7 @@ testUrl urls[] = {
         .path = "/index/index.html",
     },
 
-    {   
+    {
         .url = "www.dissigil.cn",
         .valid = false,
         .host = "",
@@ -94,14 +94,14 @@ testUrl urls[] = {
         .path = "",
     },
 
-    {   
-        .url = "www.dissigil.cn/index.html",
+    { .url = "www.dissigil.cn/index.html",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {//index : 9
+    {
+        //index : 9
         .url = "www.dissigil.cn:80",
         .valid = false,
         .host = "",
@@ -125,448 +125,395 @@ testUrl urls[] = {
         .path = "",
     },
 
-    {
-        .url = "http/www.dissigil.cn",
+    { .url = "http/www.dissigil.cn",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "http//www.dissigil.cn",
+    { .url = "http//www.dissigil.cn",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "http:www.dissigil.cn",
+    { .url = "http:www.dissigil.cn",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "http:/www.dissigil.cn",
+    { .url = "http:/www.dissigil.cn",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "http:://www.dissigil.cn",
+    { .url = "http:://www.dissigil.cn",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "/index.html",
+    { .url = "/index.html",
         .valid = true,
         .host = "",
         .port = "",
-        .path = "/index.html"},
+        .path = "/index.html" },
 
-    {
-        .url = "http://127.0.0.1:9999/",
+    { .url = "http://127.0.0.1:9999/",
         .valid = true,
         .host = "127.0.0.1",
         .port = "9999",
-        .path = "/"},
+        .path = "/" },
 
-    {   // 19
+    { // 19
         .url = "http://127.0.0.1/",
         .valid = true,
         .host = "127.0.0.1",
         .port = "",
-        .path = "/"},
+        .path = "/" },
 
-    {
-        .url = "/asdf/adsd/sdf.html",
+    { .url = "/asdf/adsd/sdf.html",
         .valid = true,
         .host = "",
         .port = "",
-        .path = "/asdf/adsd/sdf.html"},
+        .path = "/asdf/adsd/sdf.html" },
 
-    {   //userinfo
+    { //userinfo
         .url = "http://a:b@host.com:8080/p/a/t/h?query=string#hash",
         .valid = true,
         .host = "host.com",
         .port = "8080",
-        .path = "/p/a/t/h"},
+        .path = "/p/a/t/h" },
 
-    {
-        .url = "http://hostname:80/home?query=li#head",
+    { .url = "http://hostname:80/home?query=li#head",
         .valid = true,
         .host = "hostname",
         .port = "80",
-        .path = "/home"},
+        .path = "/home" },
 
-    {
-        .url = "http://hostname:80/home#?query=li#head",
+    { .url = "http://hostname:80/home#?query=li#head",
         .valid = true,
         .host = "hostname",
         .port = "80",
-        .path = "/home"},
+        .path = "/home" },
 
-    {
-        .url = "http://hostname:80/home??query=li##head",
+    { .url = "http://hostname:80/home??query=li##head",
         .valid = true,
         .host = "hostname",
         .port = "80",
-        .path = "/home"},
+        .path = "/home" },
 
-    {
-        .url = "http://hostname:80/home?abcd=abcd?query=li##head",
+    { .url = "http://hostname:80/home?abcd=abcd?query=li##head",
         .valid = true,
         .host = "hostname",
         .port = "80",
-        .path = "/home"},
+        .path = "/home" },
 
-    {
-        .url = "http://hostname:80/hom#e?query=li#head",
+    { .url = "http://hostname:80/hom#e?query=li#head",
         .valid = true,
         .host = "hostname",
         .port = "80",
-        .path = "/hom"},
+        .path = "/hom" },
 
-    {
-        .url = "/home/index.html", //false
+    { .url = "/home/index.html", //false
         .valid = true,
         .host = "",
         .port = "",
-        .path = "/home/index.html"},
+        .path = "/home/index.html" },
 
-    {
-        .url = "http://foo boar/",
+    { .url = "http://foo boar/",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {   // 29
+    { // 29
         .url = "http://foo\nboar/",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "http://foo\rboar/",
+    { .url = "http://foo\rboar/",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "http://hostname/",
+    { .url = "http://hostname/",
         .valid = true,
         .host = "hostname",
         .port = "",
-        .path = "/"},
+        .path = "/" },
 
-    {
-        .url = "http://hostname:444/",
+    { .url = "http://hostname:444/",
         .valid = true,
         .host = "hostname",
         .port = "444",
-        .path = "/"},
+        .path = "/" },
 
-    {   
-        .url = "hostname:443",
+    { .url = "hostname:443",
         .valid = false,
         .host = "hostname",
         .port = "443",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "http://[1:2::3:4]/",
+    { .url = "http://[1:2::3:4]/",
         .valid = true,
         .host = "1:2::3:4",
         .port = "",
-        .path = "/"},
+        .path = "/" },
 
-    {   // 35
+    { // 35
         .url = "http://[1:2::3:4]:67/",
         .valid = true,
         .host = "1:2::3:4",
         .port = "67",
-        .path = "/"},
+        .path = "/" },
 
-    {   // 36
+    { // 36
         .url = "http://[1:2::3:4]:67/index/hom#e?query=li#head",
         .valid = true,
         .host = "1:2::3:4",
         .port = "67",
-        .path = "/index/hom"},
+        .path = "/index/hom" },
 
-    {   // 37
+    { // 37
         .url = "http://[2001:0000:0000:0000:0000:0000:1.9.1.1]/",
         .valid = true,
         .host = "2001:0000:0000:0000:0000:0000:1.9.1.1",
         .port = "",
-        .path = "/"},
+        .path = "/" },
 
-    {
-        .url = "http://a.tbcdn.cn/p/fp/2010c/??fp-header-min.css,fp-base-min.css,"
-            "fp-channel-min.css,fp-product-min.css,fp-mall-min.css,fp-category-min.css,"
-            "fp-sub-min.css,fp-gdp4p-min.css,fp-css3-min.css,fp-misc-min.css?t=20101022.css",
+    { .url = "http://a.tbcdn.cn/p/fp/2010c/??fp-header-min.css,fp-base-min.css,"
+             "fp-channel-min.css,fp-product-min.css,fp-mall-min.css,fp-category-min.css,"
+             "fp-sub-min.css,fp-gdp4p-min.css,fp-css3-min.css,fp-misc-min.css?t=20101022.css",
         .valid = true,
         .host = "a.tbcdn.cn",
         .port = "",
-        .path = "/p/fp/2010c/"},
+        .path = "/p/fp/2010c/" },
 
-    {   // 39
+    { // 39
         .url = "/toto.html?toto=a%20b",
         .valid = true,
         .host = "",
         .port = "",
-        .path = "/toto.html"},
+        .path = "/toto.html" },
 
-    {
-        .url = "/toto.html#titi",
+    { .url = "/toto.html#titi",
         .valid = true,
         .host = "",
         .port = "",
-        .path = "/toto.html"},
+        .path = "/toto.html" },
 
-    {
-        .url = "http://www.webmasterworld.com/r.cgi?f=21&d=8405&url=",
+    { .url = "http://www.webmasterworld.com/r.cgi?f=21&d=8405&url=",
         .valid = true,
         .host = "www.webmasterworld.com",
         .port = "",
-        .path = "/r.cgi"},
+        .path = "/r.cgi" },
 
-    {
-        .url = "http://host.com:8080/p/a/t/h?query=string#hash",
+    { .url = "http://host.com:8080/p/a/t/h?query=string#hash",
         .valid = true,
         .host = "host.com",
         .port = "8080",
-        .path = "/p/a/t/h"},
+        .path = "/p/a/t/h" },
 
-    {
-        .url = "http://a:b@host.com:8080/p/a/t/h?query=string#hash",
+    { .url = "http://a:b@host.com:8080/p/a/t/h?query=string#hash",
         .valid = true,
         .host = "host.com",
         .port = "8080",
-        .path = "/p/a/t/h"},
+        .path = "/p/a/t/h" },
 
-    {
-        .url = "http://a:b@@hostname:443/",
+    { .url = "http://a:b@@hostname:443/",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "http://:443/",
+    { .url = "http://:443/",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "http://hostname:/",
+    { .url = "http://hostname:/",
         .valid = false, //FIXME:
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "a:b@hostname:443",
+    { .url = "a:b@hostname:443",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = ":443",
+    { .url = ":443",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {   //49
+    { //49
         .url = "hostname:",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {   
-        .url = "hostname:443/",
+    { .url = "hostname:443/",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "/foo bar/",
+    { .url = "/foo bar/",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "http://a%20:b@host.com/",
+    { .url = "http://a%20:b@host.com/",
         .valid = true,
         .host = "host.com",
         .port = "",
-        .path = "/"},
+        .path = "/" },
 
-    {
-        .url = "/foo\rbar/",
+    { .url = "/foo\rbar/",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "http://hostname::443/",
+    { .url = "http://hostname::443/",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "http://a::b@host.com/",
+    { .url = "http://a::b@host.com/",
         .valid = true,
         .host = "host.com",
         .port = "",
-        .path = "/"},
+        .path = "/" },
 
-    {
-        .url = "/foo\nbar/",
+    { .url = "/foo\nbar/",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "http://@hostname/fo",
+    { .url = "http://@hostname/fo",
         .valid = true, //FIXME:
         .host = "hostname",
         .port = "",
-        .path = "/fo"},
+        .path = "/fo" },
 
-    {
-        .url = "http://host\name/fo",
+    { .url = "http://host\name/fo",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {   // 59
+    { // 59
         .url = "http://host%name/fo",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {   
-        .url = "http://host;ame/fo",
+    { .url = "http://host;ame/fo",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "http://a!;-_!=+$@host.com/",
+    { .url = "http://a!;-_!=+$@host.com/",
         .valid = true,
         .host = "host.com",
         .port = "",
-        .path = "/"},
+        .path = "/" },
 
-    {
-        .url = "http://@/fo",
+    { .url = "http://@/fo",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "http://@jljljl/fo",
+    { .url = "http://@jljljl/fo",
         .valid = true,
         .host = "jljljl",
         .port = "",
-        .path = "/fo"},
+        .path = "/fo" },
 
-    {
-        .url = "http://toto@/fo",
+    { .url = "http://toto@/fo",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "http:///fo",
+    { .url = "http:///fo",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "http://host=ame/fo",
+    { .url = "http://host=ame/fo",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "http://[fe80::a%25eth0]/",
+    { .url = "http://[fe80::a%25eth0]/",
         .valid = true,
         .host = "fe80::a%25eth0",
         .port = "",
-        .path = "/"},
+        .path = "/" },
 
-    {
-        .url = "http://[fe80::a%eth0]/",
+    { .url = "http://[fe80::a%eth0]/",
         .valid = true,
         .host = "fe80::a%eth0",
         .port = "",
-        .path = "/"},
+        .path = "/" },
 
-    {   // 69
+    { // 69
         .url = "http://[fe80::a%]/",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "http://[fe80::a%$HOME]/",
+    { .url = "http://[fe80::a%$HOME]/",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "http://[%eth0]/",
+    { .url = "http://[%eth0]/",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "/foo\tbar/",
+    { .url = "/foo\tbar/",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "/foo\fbar/",
+    { .url = "/foo\fbar/",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "https://www.dissigil.cn/home#sd#qu?query=li",
+    { .url = "https://www.dissigil.cn/home#sd#qu?query=li",
         .valid = true,
         .host = "www.dissigil.cn",
         .port = "",
-        .path = "/home"},
+        .path = "/home" },
 
     {
         .url = "http://#fragment/",
@@ -576,178 +523,158 @@ testUrl urls[] = {
         .path = "",
     },
 
-    {
-        .url = "http://?queurystring/",
+    { .url = "http://?queurystring/",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {   // 77
+    { // 77
         .url = "http://@hostname/",
         .valid = true,
         .host = "hostname",
         .port = "",
-        .path = "/"},
+        .path = "/" },
 
-    {
-        .url = "http:///",
+    { .url = "http:///",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {   // 79
+    { // 79
         .url = "http://ABC.com/%7esmith/home.html",
         .valid = true,
         .host = "ABC.com",
         .port = "",
-        .path = "/%7esmith/home.html"},
+        .path = "/%7esmith/home.html" },
 
-    {
-        .url = "http://ABC.com/%7Esmith/home.html",
+    { .url = "http://ABC.com/%7Esmith/home.html",
         .valid = true,
         .host = "ABC.com",
         .port = "",
-        .path = "/%7Esmith/home.html"},
+        .path = "/%7Esmith/home.html" },
 
-    {
-        .url = "http://abc.com:80/~smith/home.html",
+    { .url = "http://abc.com:80/~smith/home.html",
         .valid = true,
         .host = "abc.com",
         .port = "80",
-        .path = "/~smith/home.html"},
+        .path = "/~smith/home.html" },
 
-    {   //82
+    { //82
         .url = "https://did.cn/../dsf",
         .valid = true, //FIXME: not sure valid or invalid
         .host = "did.cn",
         .port = "",
-        .path = "/../dsf"},
+        .path = "/../dsf" },
 
-    {
-        .url = "https://dsjfll.cb.cb//",
+    { .url = "https://dsjfll.cb.cb//",
         .valid = true, //FIXME: not sure valid or invalid
         .host = "dsjfll.cb.cb",
         .port = "",
-        .path = "//"},
+        .path = "//" },
 
-    {
-        .url = "https:///ksdjf.cn/",
+    { .url = "https:///ksdjf.cn/",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "https://did.cn/../dsf",
+    { .url = "https://did.cn/../dsf",
         .valid = true, //FIXME: not sure valid or invalid
         .host = "did.cn",
         .port = "",
-        .path = "/../dsf"},
+        .path = "/../dsf" },
 
-    {
-        .url = "https://pingtas.qq.com/webview/pingd?"
-            "dm=join.qq.com&pvi=3220461568&si=s2709209088&"
-            "url=/apply.php&arg=&ty=1&rdm=&rurl=&rarg=&adt="
-            "&r2=49873873&r3=-1&r4=1&fl=&scr=1366x768&scl=24-"
-            "bit&lg=zh-cn&jv=&tz=-8&ct=&ext=adid=&pf=&random=1528878932585",
+    { .url = "https://pingtas.qq.com/webview/pingd?"
+             "dm=join.qq.com&pvi=3220461568&si=s2709209088&"
+             "url=/apply.php&arg=&ty=1&rdm=&rurl=&rarg=&adt="
+             "&r2=49873873&r3=-1&r4=1&fl=&scr=1366x768&scl=24-"
+             "bit&lg=zh-cn&jv=&tz=-8&ct=&ext=adid=&pf=&random=1528878932585",
         .valid = true,
         .host = "pingtas.qq.com",
         .port = "",
-        .path = "/webview/pingd"},
+        .path = "/webview/pingd" },
 
-    {
-        .url = "http://www.baidu.com/link?url=-xBr1W_69PMdd5rdglCQljN1Rm5jA-7umx885_TZEZS",
+    { .url = "http://www.baidu.com/link?url=-xBr1W_69PMdd5rdglCQljN1Rm5jA-7umx885_TZEZS",
         .valid = true,
         .host = "www.baidu.com",
         .port = "",
-        .path = "/link"},
+        .path = "/link" },
 
-    {
-        .url = "http://host%name/fo",
+    { .url = "http://host%name/fo",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {   // 89
+    { // 89
         .url = "http://host;ame/fo",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "http://hos'name/fo",
+    { .url = "http://hos'name/fo",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "http://host\"ame/fo",
+    { .url = "http://host\"ame/fo",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "http://host=ame/fo",
+    { .url = "http://host=ame/fo",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "http://host>ame/fo",
+    { .url = "http://host>ame/fo",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "http://host<ame/fo",
+    { .url = "http://host<ame/fo",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "http://host,ame/fo",
+    { .url = "http://host,ame/fo",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "http://host%name/fo",
+    { .url = "http://host%name/fo",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {
-        .url = "http://host/toto.html?toto=a%20b",
+    { .url = "http://host/toto.html?toto=a%20b",
         .valid = true,
         .host = "host",
         .port = "",
-        .path = "/toto.html"},
+        .path = "/toto.html" },
 
-    {
-        .url = "http://[]/",
+    { .url = "http://[]/",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""},
+        .path = "" },
 
-    {   // 99
+    { // 99
         .url = "http://[%eth]/",
         .valid = false,
         .host = "",
         .port = "",
-        .path = ""
-    }
+        .path = "" }
 
 };
 
@@ -764,51 +691,38 @@ void testParseUrl()
     HttpParser parser(&settings);
     parser.setType(HTTP_TYPE_REQUEST);
 
-    for (int i = 0; i < len; i++)
-    {
+    for (int i = 0; i < len; i++) {
         alltest++;
 
-        Url *result = new Url;
+        Url* result = new Url;
         // std::cout << i << "):" << std::endl;
         int tmp = parser.parseUrl(urls[i].url,
-                strlen(urls[i].url),
-                result);
+            strlen(urls[i].url),
+            result);
 
         bool res = (tmp == -1) ? false : true;
-        if (res == urls[i].valid)
-        {
-            if (res)
-            {
-                bool sameHost = (0==strncmp(urls[i].host, result->data + result->fields[HTTP_UF_HOST].offset, result->fields[HTTP_UF_HOST].len));
-                bool samePort = (0==strncmp(urls[i].port, result->data + result->fields[HTTP_UF_PORT].offset, result->fields[HTTP_UF_PORT].len));
-                bool samePath = (0==strncmp(urls[i].path, result->data + result->fields[HTTP_UF_PATH].offset, result->fields[HTTP_UF_PATH].len));
+        if (res == urls[i].valid) {
+            if (res) {
+                bool sameHost = (0 == strncmp(urls[i].host, result->data + result->fields[HTTP_UF_HOST].offset, result->fields[HTTP_UF_HOST].len));
+                bool samePort = (0 == strncmp(urls[i].port, result->data + result->fields[HTTP_UF_PORT].offset, result->fields[HTTP_UF_PORT].len));
+                bool samePath = (0 == strncmp(urls[i].path, result->data + result->fields[HTTP_UF_PATH].offset, result->fields[HTTP_UF_PATH].len));
 
-                if(sameHost && samePath && samePort)
-                {
+                if (sameHost && samePath && samePort) {
                     passtest++;
-                }
-                else
-                {
+                } else {
                     notPass.push_back(i);
                 }
 
-            }
-            else
-            {
+            } else {
                 passtest++;
             }
-        }
-        else
-        {
+        } else {
             notPass.push_back(i);
         }
 
-        if (res)
-        {
+        if (res) {
             //printUrl(result);
-        }
-        else
-        {
+        } else {
             //std::cout << "url invalid\n";
         }
 
@@ -817,11 +731,10 @@ void testParseUrl()
 
     std::cout << "[Parse Url Test] pass/all = " << passtest << "/" << alltest << std::endl;
 
-    if (!notPass.empty())
-    {
-        cout << "not pass url index:\n";
+    if (!notPass.empty()) {
+        cout << "not pass url index:\t";
         for (auto t : notPass)
-            std::cout<< t << " ";
+            std::cout << t << " ";
         std::cout << std::endl;
     }
     //We can't judge this urls is valid or invalid,

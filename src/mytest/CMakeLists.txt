@@ -142,6 +142,7 @@ add_executable(parseResponseLine
 
 target_link_libraries(parseResponseLine
     tiny_http_model
+    tiny_base_model
     )
 
 # parseUrl

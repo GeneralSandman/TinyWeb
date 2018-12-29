@@ -1,45 +1,42 @@
 /*
-*Author:GeneralSandman
-*Code:https://github.com/GeneralSandman/TinyWeb
-*E-mail:generalsandman@163.com
-*Web:www.dissigil.cn
-*/
+ *Author:GeneralSandman
+ *Code:https://github.com/GeneralSandman/TinyWeb
+ *E-mail:generalsandman@163.com
+ *Web:www.dissigil.cn
+ */
 
 /*---XXX---
-*
-****************************************
-*
-*/
+ *
+ ****************************************
+ *
+ */
 
 #include <tiny_http/http_parser.h>
 
-
 #include <iostream>
-#include <vector>
-#include <string>
 #include <list>
+#include <string>
+#include <vector>
 
 using namespace std;
 
-typedef struct testHeader
-{
+typedef struct testHeader {
     string key;
     string value;
 } testHeader;
 
-bool compare(const testHeader &a, const testHeader &b)
+bool compare(const testHeader& a, const testHeader& b)
 {
     return (a.key == b.key) && (a.value == b.value);
 }
 
 #define maxHeaders 23 * 2
 
-typedef struct testHeaders
-{
-    const char *str;
+typedef struct testHeaders {
+    const char* str;
     bool valid;
     int headerNum;
-    char *headers[maxHeaders][2];
+    char* headers[maxHeaders][2];
 } testHeaders;
 
 testHeaders headers[] = {
@@ -57,15 +54,15 @@ testHeaders headers[] = {
         .valid = true,
         .headerNum = 9,
         .headers = {
-            {"Host", "127.0.0.1:9999"},
-            {"Connection", "close"},
-            {"Content-Type", "text/xml; charset=utf-8"},
-            {"Accept-Encoding", "compress, gzip"},
-            {"Cookie", "$Version=1; Skin=new;"},
-            {"If-Modified-Since", "Sat, 29 Oct 2010 19:43:31 GMT"},
-            {"Referer", "http://www.zcmhi.com/archives/71.html"},
-            {"Content-Length", "348"},
-            {"Last-Modified", "Fri, 20 Apr 2018 08:12:56 GMT"},
+            { "Host", "127.0.0.1:9999" },
+            { "Connection", "close" },
+            { "Content-Type", "text/xml; charset=utf-8" },
+            { "Accept-Encoding", "compress, gzip" },
+            { "Cookie", "$Version=1; Skin=new;" },
+            { "If-Modified-Since", "Sat, 29 Oct 2010 19:43:31 GMT" },
+            { "Referer", "http://www.zcmhi.com/archives/71.html" },
+            { "Content-Length", "348" },
+            { "Last-Modified", "Fri, 20 Apr 2018 08:12:56 GMT" },
         },
     },
 
@@ -76,8 +73,8 @@ testHeaders headers[] = {
         .valid = true,
         .headerNum = 2,
         .headers = {
-            {"Host", "127.0.0.1:9999"},
-            {"Connection", "close"},
+            { "Host", "127.0.0.1:9999" },
+            { "Connection", "close" },
         },
     },
 
@@ -87,7 +84,7 @@ testHeaders headers[] = {
         .valid = true,
         .headerNum = 1,
         .headers = {
-            {"Connection", "close"},
+            { "Connection", "close" },
         },
     },
 
@@ -97,7 +94,7 @@ testHeaders headers[] = {
         .valid = true,
         .headerNum = 1,
         .headers = {
-            {"Content-Type", "text/xml; charset=utf-8"},
+            { "Content-Type", "text/xml; charset=utf-8" },
         },
     },
 
@@ -107,7 +104,7 @@ testHeaders headers[] = {
         .valid = true,
         .headerNum = 1,
         .headers = {
-            {"Accept-Encoding", "compress, gzip"},
+            { "Accept-Encoding", "compress, gzip" },
         },
     },
 
@@ -117,7 +114,7 @@ testHeaders headers[] = {
         .valid = true,
         .headerNum = 1,
         .headers = {
-            {"Cookie", "$Version=1; Skin=new;"},
+            { "Cookie", "$Version=1; Skin=new;" },
         },
     },
 
@@ -127,7 +124,7 @@ testHeaders headers[] = {
         .valid = true,
         .headerNum = 1,
         .headers = {
-            {"If-Modified-Since", "Sat, 29 Oct 2010 19:43:31 GMT"},
+            { "If-Modified-Since", "Sat, 29 Oct 2010 19:43:31 GMT" },
         },
     },
 
@@ -137,7 +134,7 @@ testHeaders headers[] = {
         .valid = true,
         .headerNum = 1,
         .headers = {
-            {"Referer", "http://www.zcmhi.com/archives/71.html"},
+            { "Referer", "http://www.zcmhi.com/archives/71.html" },
         },
     },
 
@@ -147,7 +144,7 @@ testHeaders headers[] = {
         .valid = true,
         .headerNum = 1,
         .headers = {
-            {"Content-Length", "348"},
+            { "Content-Length", "348" },
         },
     },
 
@@ -157,7 +154,7 @@ testHeaders headers[] = {
         .valid = true,
         .headerNum = 1,
         .headers = {
-            {"Last-Modified", "Fri, 20 Apr 2018 08:12:56 GMT"},
+            { "Last-Modified", "Fri, 20 Apr 2018 08:12:56 GMT" },
         },
     },
 
@@ -167,7 +164,7 @@ testHeaders headers[] = {
         .valid = true,
         .headerNum = 1,
         .headers = {
-            {"Transfer-Encoding", "chunked"},
+            { "Transfer-Encoding", "chunked" },
         },
     },
 
@@ -190,21 +187,20 @@ testHeaders headers[] = {
         .valid = true,
         .headerNum = 5,
         .headers = {
-            {"Date", "Tue, 04 Aug 2009 07:59:32 GMT"},
-            {"Server", "Apache"},
-            {"X-Powered-By", "Servlet/2.5 JSP/2.1"},
-            {"Content-Type", "text/xml; charset=utf-8"},
-            {"Connection", "close"},
+            { "Date", "Tue, 04 Aug 2009 07:59:32 GMT" },
+            { "Server", "Apache" },
+            { "X-Powered-By", "Servlet/2.5 JSP/2.1" },
+            { "Content-Type", "text/xml; charset=utf-8" },
+            { "Connection", "close" },
         },
     },
 
-    {
-        .str = "Content-MD5: DheThrvjUs/c+FtbVv7Sbw\r\n"
-               "\r\n",
+    { .str = "Content-MD5: DheThrvjUs/c+FtbVv7Sbw\r\n"
+             "\r\n",
         .valid = true,
         .headerNum = 1,
         .headers = {
-            {"Content-MD5", "DheThrvjUs/c+FtbVv7Sbw"},
+            { "Content-MD5", "DheThrvjUs/c+FtbVv7Sbw" },
         }
 
     },
@@ -229,21 +225,21 @@ testHeaders headers[] = {
         .valid = true,
         .headerNum = 15,
         .headers = {
-            {"Server", "Tengine"},
-            {"Date", "Mon, 11 Jun 2018 07:18:14 GMT"},
-            {"Content-Type", "text/html; charset=utf-8"},
-            {"Connection", "keep-alive"},
-            {"Vary", "Ali-Detector-Type"},
-            {"Cache-Control", "max-age=60, s-maxage=300"},
-            {"X-Snapshot-Age", "1"},
-            {"Content-MD5", "DheThrvjUs/c+FtbVv7Sbw=="},
-            {"ETag", "W/\"29d7-163e38938b3\""},
-            {"Via", "cache9.l2cm12-1[0,304-0,H], cache48.l2cm12-1[0,0], cache6.cn295[0,304-0,H], cache6.cn295[1,0]"},
-            {"Age", "121"},
-            {"X-Cache", "HIT TCP_IMS_HIT dirn:6:453356086 mlen:-1"},
-            {"Timing-Allow-Origin", "*"},
-            {"EagleId", "7ceee81815287014946507756e"},
-            {"Strict-Transport-Security", "max-age=31536000"},
+            { "Server", "Tengine" },
+            { "Date", "Mon, 11 Jun 2018 07:18:14 GMT" },
+            { "Content-Type", "text/html; charset=utf-8" },
+            { "Connection", "keep-alive" },
+            { "Vary", "Ali-Detector-Type" },
+            { "Cache-Control", "max-age=60, s-maxage=300" },
+            { "X-Snapshot-Age", "1" },
+            { "Content-MD5", "DheThrvjUs/c+FtbVv7Sbw==" },
+            { "ETag", "W/\"29d7-163e38938b3\"" },
+            { "Via", "cache9.l2cm12-1[0,304-0,H], cache48.l2cm12-1[0,0], cache6.cn295[0,304-0,H], cache6.cn295[1,0]" },
+            { "Age", "121" },
+            { "X-Cache", "HIT TCP_IMS_HIT dirn:6:453356086 mlen:-1" },
+            { "Timing-Allow-Origin", "*" },
+            { "EagleId", "7ceee81815287014946507756e" },
+            { "Strict-Transport-Security", "max-age=31536000" },
         },
     },
 
@@ -254,8 +250,8 @@ testHeaders headers[] = {
         .valid = true,
         .headerNum = 2,
         .headers = {
-            {"Host", "127.0.0.1:9999"},
-            {"Connection", "keep-alive"},
+            { "Host", "127.0.0.1:9999" },
+            { "Connection", "keep-alive" },
         },
     },
 
@@ -272,14 +268,14 @@ testHeaders headers[] = {
         .valid = true,
         .headerNum = 8,
         .headers = {
-            {"Host", "www.dissigil.cn"},
-            {"Connection", "keep-alive"},
-            {"Pragma", "no-cache"},
-            {"Cache-Control", "no-cache"},
-            {"Upgrade-Insecure-Requests", "1"},
-            {"Accept-Encoding", "gzip, deflate"},
-            {"Accept-Language", "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"},
-            {"Cookie", "_ga=GA1.2.2068106829.1526513886; _gid=GA1.2.1899421896.1528880409"},
+            { "Host", "www.dissigil.cn" },
+            { "Connection", "keep-alive" },
+            { "Pragma", "no-cache" },
+            { "Cache-Control", "no-cache" },
+            { "Upgrade-Insecure-Requests", "1" },
+            { "Accept-Encoding", "gzip, deflate" },
+            { "Accept-Language", "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7" },
+            { "Cookie", "_ga=GA1.2.2068106829.1526513886; _gid=GA1.2.1899421896.1528880409" },
         },
     },
 
@@ -304,21 +300,21 @@ testHeaders headers[] = {
         .valid = true,
         .headerNum = 15,
         .headers = {
-            {"Accept", "text/plain, text/html"},
-            {"Accept-Charset", "iso-8859-5"},
-            {"Accept-Encoding", "compress, gzip"},
-            {"Accept-Language", "en,zh"},
-            {"Accept-Ranges", "bytes"},
-            {"Authorization", "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="},
-            {"Cache-Control", "no-cache"},
-            {"Connection", "close"},
-            {"Cookie", "$Version=1; Skin=new;"},
-            {"Content-Length", "348"},
-            {"Content-Type", "application/x-www-form-urlencoded"},
-            {"Date", "Tue, 15 Nov&nbsp;2010 08:12:31 GMT"},
-            {"Expect", "100-continue"},
-            {"From", "user@email.com"},
-            {"Host", "www.zcmhi.com"},
+            { "Accept", "text/plain, text/html" },
+            { "Accept-Charset", "iso-8859-5" },
+            { "Accept-Encoding", "compress, gzip" },
+            { "Accept-Language", "en,zh" },
+            { "Accept-Ranges", "bytes" },
+            { "Authorization", "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==" },
+            { "Cache-Control", "no-cache" },
+            { "Connection", "close" },
+            { "Cookie", "$Version=1; Skin=new;" },
+            { "Content-Length", "348" },
+            { "Content-Type", "application/x-www-form-urlencoded" },
+            { "Date", "Tue, 15 Nov&nbsp;2010 08:12:31 GMT" },
+            { "Expect", "100-continue" },
+            { "From", "user@email.com" },
+            { "Host", "www.zcmhi.com" },
         },
     },
 };
@@ -333,23 +329,21 @@ void testParseHeaderMeaning()
 
     int len = sizeof(headers) / sizeof(headers[0]);
 
-    for (int i = 0; i < len; i++)
-    {
-        alltest ++;
+    for (int i = 0; i < len; i++) {
+        alltest++;
 
         HttpParser parser(&settings);
         parser.setType(HTTP_TYPE_REQUEST);
 
         int begin = 0;
-        HttpHeaders *result = new HttpHeaders;
+        HttpHeaders* result = new HttpHeaders;
         int tmp = parser.parseHeaders(headers[i].str,
-                                     begin,
-                                     strlen(headers[i].str),
-                                     result);
+            begin,
+            strlen(headers[i].str),
+            result);
 
         bool res = (tmp == -1) ? false : true;
-        if (res == headers[i].valid)
-        {
+        if (res == headers[i].valid) {
             parser.parseHeadersMeaning(result);
             //printHttpHeaders(result);
             passtest++;
@@ -361,14 +355,12 @@ void testParseHeaderMeaning()
 
     std::cout << "[Parse HeaderMeaning Test] pass/all = " << passtest << "/" << alltest << std::endl;
 
-    if (!notPass.empty())
-    {
-        cout << "not pass url index:\n";
+    if (!notPass.empty()) {
+        cout << "not pass url index:\t";
         for (auto t : notPass)
-            std::cout<< t << " ";
+            std::cout << t << " ";
         std::cout << std::endl;
     }
-
 };
 
 int main()

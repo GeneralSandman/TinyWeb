@@ -14,24 +14,24 @@
 #include <tiny_http/http_parser.h>
 
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
-typedef struct testRequestLine
-{
-    const char * str;
+typedef struct testRequestLine {
+    const char* str;
     const bool valid;
     enum http_method method;
-    const char * url;
+    const char* url;
     const int httpVersion;
-}testRequestLine;
+} testRequestLine;
 
-bool sameUrl(const Url * url, const char * str)
+bool sameUrl(const Url* url, const char* str)
 {
-    return (0 == strncmp(url->data,str,url->len));
+    return (0 == strncmp(url->data, str, url->len));
 }
 
-testRequestLine requestLines[] ={
+testRequestLine requestLines[] = {
     {
         .str = "GET http://dissigil.cn/resume.pdf HTTP/1.1\r\n",
         .valid = true,
@@ -46,6 +46,14 @@ testRequestLine requestLines[] ={
         .method = HTTP_METHOD_GET,
         .url = "http://dissigil.cn/resume.pdf",
         .httpVersion = 10,
+    },
+
+    {
+        .str = "GET /resume.pdf HTTP/1.1\r\n",
+        .valid = true,
+        .method = HTTP_METHOD_GET,
+        .url = "/resume.pdf",
+        .httpVersion = 11,
     },
 
     {
@@ -84,8 +92,7 @@ void testParseRequestLine()
 
     int len = sizeof(requestLines) / sizeof(requestLines[0]);
 
-    for (int i = 0; i < len; i++)
-    {
+    for (int i = 0; i < len; i++) {
         alltest++;
 
         HttpParser parser(&settings);
@@ -93,47 +100,39 @@ void testParseRequestLine()
 
         int begin = 0;
         int str_len = strlen(requestLines[i].str);
-        HttpRequest *request = new HttpRequest;
+        HttpRequest* request = new HttpRequest;
 
         int tmp = parser.execute(requestLines[i].str, begin, str_len, request);
 
         bool res = (tmp == -1) ? false : true;
-        if (res == requestLines[i].valid)
-        {
-            if(res)
-            {
-                int version = request->http_version_major*10 + request->http_version_minor;
+        if (res == requestLines[i].valid) {
+
+            if (res) {
+
+                int version = request->http_version_major * 10 + request->http_version_minor;
                 bool sameversion = (version == requestLines[i].httpVersion);
                 bool sameurl = sameUrl(request->url, requestLines[i].url);
                 bool samemethod = (request->method == requestLines[i].method);
 
-                if (sameversion && sameurl && samemethod)
-                {
+                if (sameversion && sameurl && samemethod) {
                     passtest++;
-                }
-                else
-                {
+                } else {
                     notPass.push_back(i);
                 }
-            }
-            else
-            {
+            } else {
                 passtest++;
             }
-        }
-        else
-        {
+        } else {
             notPass.push_back(i);
         }
 
         delete request;
     }
 
-    std::cout << "[Parse ReqLine Test] pass/all = " << passtest << "/" << alltest << std::endl;
+    std::cout << "[Parse RequestLine Test] pass/all = " << passtest << "/" << alltest << std::endl;
 
-    if (!notPass.empty())
-    {
-        cout << "not pass req-line index:\n";
+    if (!notPass.empty()) {
+        cout << "not pass request-line index:\t";
         for (auto t : notPass)
             std::cout << t << " ";
         std::cout << std::endl;

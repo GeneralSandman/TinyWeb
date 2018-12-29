@@ -11,34 +11,35 @@
  *
  */
 
+#include <tiny_base/log.h> 
 #include <tiny_http/http_parser.h>
 
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
-typedef struct testResponseLine
-{
-    const char * str;
+typedef struct testResponseLine {
+    const char* str;
     const bool valid;
     const bool isResponse;
     const int httpVersion;
-    const char * statusCode;
-    const char * statusPhrase;
-}testResponseLine;
+    const unsigned int statusCode;
+    const char* statusPhrase;
+} testResponseLine;
 
-bool sameUrl(const Url * url, const char * str)
+bool sameUrl(const Url* url, const char* str)
 {
     return (0 == strncmp(url->data, str, url->len));
 }
 
-testResponseLine responseLines[] ={
+testResponseLine responseLines[] = {
     {
         .str = "HTTP/1.1 200 OK\r\n",
         .valid = true,
         .isResponse = true,
         .httpVersion = 11,
-        .statusCode = "200",
+        .statusCode = 200,
         .statusPhrase = "OK",
     },
 
@@ -47,7 +48,7 @@ testResponseLine responseLines[] ={
         .valid = true,
         .isResponse = true,
         .httpVersion = 10,
-        .statusCode = "304",
+        .statusCode = 304,
         .statusPhrase = "Not Modified",
     },
 
@@ -56,7 +57,7 @@ testResponseLine responseLines[] ={
         .valid = true,
         .isResponse = true,
         .httpVersion = 11,
-        .statusCode = "100",
+        .statusCode = 100,
         .statusPhrase = "Continue",
     },
 
@@ -65,7 +66,7 @@ testResponseLine responseLines[] ={
         .valid = true,
         .isResponse = true,
         .httpVersion = 11,
-        .statusCode = "201",
+        .statusCode = 201,
         .statusPhrase = "Created",
     },
 
@@ -74,7 +75,7 @@ testResponseLine responseLines[] ={
         .valid = true,
         .isResponse = true,
         .httpVersion = 10,
-        .statusCode = "202",
+        .statusCode = 202,
         .statusPhrase = "Accepted",
     },
 };
@@ -90,9 +91,8 @@ void testParseResponseLine()
 
     int len = sizeof(responseLines) / sizeof(responseLines[0]);
 
-    for (int i = 0; i < len; i++)
-    {
-        std::cout << i << ")" << std::endl;
+    for (int i = 0; i < len; i++) {
+        // std::cout << i << ")" << std::endl;
         alltest++;
 
         HttpParser parser(&settings);
@@ -100,57 +100,46 @@ void testParseResponseLine()
 
         int begin = 0;
         int len = strlen(responseLines[i].str);
-        HttpRequest *request = new HttpRequest;
+        HttpRequest* request = new HttpRequest;
 
         int tmp = parser.execute(responseLines[i].str, begin, len, request);
 
         bool res = (tmp == -1) ? false : true;
-        if (res == responseLines[i].valid)
-        {
-            if(res)
-            {
-                int version = request->http_version_major*10 + request->http_version_minor;
+        if (res == responseLines[i].valid) {
+
+            if (res) {
+
+                int version = request->http_version_major * 10 + request->http_version_minor;
                 bool sameversion = (version == responseLines[i].httpVersion);
 
-                int codelen = strlen(responseLines[i].statusCode);
+                unsigned int code = request->statusCode;
+                bool sameCode = (code == responseLines[i].statusCode);
+
                 int phraselen = strlen(responseLines[i].statusPhrase);
+                bool samePhrase = (0 == strncmp(responseLines[i].statusPhrase, request->statusPhrase.c_str(), phraselen));
 
-                std::cout<<"codelen:"<<codelen<<" pharselen:"<<phraselen<<std::endl;
-
-                bool sameCode = (0 == strncmp(responseLines[i].statusCode, request->statusCode.data, codelen));
-                bool samePhrase = (0 == strncmp(responseLines[i].statusPhrase, request->statusPhrase.data, phraselen));
-                
-                if (sameversion && sameCode && samePhrase)
-                {
-                    std::cout<<"++pass test"<<std::endl;
+                if (sameversion && sameCode ) {
                     passtest++;
-                }
-                else
-                {
+                } else {
                     notPass.push_back(i);
                 }
-            }
-            else
-            {
-                std::cout<<"pass test"<<std::endl;
+            } else {
                 passtest++;
             }
-        }
-        else
-        {
+        } else {
             notPass.push_back(i);
-            std::cout<<"no match"<<std::endl;
         }
 
         delete request;
     }
 
-    std::cout << passtest << "/" << alltest << std::endl;
+    std::cout << "[Parse ResponseLine Test] pass/all = " << passtest << "/" << alltest << std::endl;
 
-    if (!notPass.empty())
-    {
+    if (!notPass.empty()) {
+        cout << "not pass response-line index:\t";
         for (auto t : notPass)
-            std::cout << responseLines[t].str << " " << std::endl;
+            std::cout << t << " ";
+        std::cout << std::endl;
     }
 };
 

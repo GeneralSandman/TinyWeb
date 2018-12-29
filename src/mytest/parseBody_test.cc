@@ -69,6 +69,7 @@ testBody bodys[]=
         .str = 
             "GET http://127.0.0.1:9999/index.html HTTP/1.1\r\n"
             "Transfer-Encoding: chunked\r\n"
+            "\r\n"
             "25\r\n"
             "This is the data in the first chunk\r\n"
             "\r\n"
@@ -85,6 +86,7 @@ testBody bodys[]=
         .str = 
             "GET http://127.0.0.1:9999/index.html HTTP/1.1\r\n"
             "Transfer-Encoding: chunked\r\n"
+            "\r\n"
             "25\r\n"
             "This is the data in the first chunk\r\n"
             "\r\n"
@@ -101,6 +103,7 @@ testBody bodys[]=
         .str = 
             "GET http://127.0.0.1:9999/index.html HTTP/1.1\r\n"
             "Transfer-Encoding: chunked\r\n"
+            "\r\n"
             "25\r\n"
             "This is the data in the first chunk\r\n"
             "\r\n"
@@ -117,6 +120,7 @@ testBody bodys[]=
         .str = 
             "GET http://127.0.0.1:9999/index.html HTTP/1.1\r\n"
             "Transfer-Encoding: chunked\r\n"
+            "\r\n"
             "2\r\n"
             "OK\r\n"
             "0\r\n"
@@ -129,6 +133,7 @@ testBody bodys[]=
         .str = 
             "GET http://127.0.0.1:9999/index.html HTTP/1.1\r\n"
             "Transfer-Encoding: chunked\r\n"
+            "\r\n"
             "25\r\n"
             "This is the data in the first chunk78\r\n"
             "1C\r\n"
