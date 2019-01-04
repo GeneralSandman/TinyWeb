@@ -16,17 +16,19 @@
 
 #include <tiny_base/log.h>
 #include <tiny_http/http.h>
-#include <tiny_struct/sdstr_t.h>
 #include <tiny_http/str_t.h>
+#include <tiny_struct/sdstr_t.h>
 
-#include <iostream>
-#include <stdio.h>
-#include <map>
-#include <list>
 #include <boost/function.hpp>
+#include <iostream>
+#include <list>
+#include <map>
+#include <memory>
+#include <stdio.h>
 
 #define CR '\r'
 #define LF '\n'
+
 #define isNum(c) (('0' <= (c) && (c) <= '9'))
 #define isAlpha(c) (('a' <= (c) && (c) <= 'z') || ('A' <= (c) && (c) <= 'Z'))
 #define isAlphaNum(c) (isNum(c) || isAlpha(c))
@@ -35,16 +37,12 @@
 #define isUpper(c) (('A' <= (c) && (c) <= 'Z'))
 
 #define toLower(c) (isUpper(c) ? (unsigned char)((c) | 0x20) : (c))
-#define toUpper(c) (isLower(c) ? (unsigned char)((c) & 0xdf) : (c))
+#define toUpper(c) (isLower(c) ? (unsigned char)((c)&0xdf) : (c))
 
 #define isHexChar(c) (isNum(c) || ('a' <= toLower(c) && toLower(c) <= 'f'))
 
-#define isMarkChar(c) ((c) == '-' || (c) == '_' || (c) == '.' ||                              \
-        (c) == '!' || (c) == '~' || (c) == '*' || (c) == '\'' || (c) == '(' || \
-        (c) == ')')
-#define isUserInfoChar(c) (isAlphaNum(c) || isMarkChar(c) || (c) == '%' ||                       \
-        (c) == ';' || (c) == ':' || (c) == '&' || (c) == '=' || (c) == '+' || \
-        (c) == '$' || (c) == ',')
+#define isMarkChar(c) ((c) == '-' || (c) == '_' || (c) == '.' || (c) == '!' || (c) == '~' || (c) == '*' || (c) == '\'' || (c) == '(' || (c) == ')')
+#define isUserInfoChar(c) (isAlphaNum(c) || isMarkChar(c) || (c) == '%' || (c) == ';' || (c) == ':' || (c) == '&' || (c) == '=' || (c) == '+' || (c) == '$' || (c) == ',')
 
 #define isHostChar(c) (isAlphaNum(c) || (c) == '.' || (c) == '-' || (c) == '_')
 
@@ -52,8 +50,9 @@
 #define isIpv6Char(c) (isHexChar(c) || (c) == ':' || (c) == '.')
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
 
-//is only used by http method:method only have lower , upper or '-' char.
+//It is only used by http method:method only have lower , upper or '-' char.
 #define getLetterHashNoCase(c) ((isUpper(c) || isLower(c)) ? (toUpper(c) - 'A') : 26)
 //It is only used by http method;
 #define getHash(hash, c) ((unsigned long long)((hash)*27 + getLetterHashNoCase(c)))
@@ -69,21 +68,25 @@ inline short int getHex(char c)
     return -1;
 }
 
-
-enum httpUrlField
+inline int strncasecmp__(const char* s1, const char* s2, int len)
 {
-    HTTP_UF_SCHEMA = 0,
-    HTTP_UF_HOST = 1,
-    HTTP_UF_PORT = 2,
-    HTTP_UF_PATH = 3,
-    HTTP_UF_QUERY = 4,
-    HTTP_UF_FRAGMENT = 5,
-    HTTP_UF_USERINFO = 6,
-    HTTP_UF_MAX = 7
-};
+    char c1, c2;
+    while (len--) {
+        c1 = toLower(*s1);
+        c2 = toLower(*s2);
+        s1++;
+        s2++;
+        if (c1 == c2) {
+            if (c1)
+                continue;
+            return 0;
+        }
+        return c1 - c2;
+    }
+    return 0;
+}
 
-enum state
-{
+enum state {
     s_error = 1,
 
     s_start_resp_or_requ,
@@ -149,8 +152,7 @@ enum state
 
 };
 
-enum http_host_state
-{
+enum http_host_state {
     s_http_host_error = 1,
     s_http_userinfo_start,
     s_http_userinfo,
@@ -165,8 +167,7 @@ enum http_host_state
     s_http_host_port
 };
 
-enum http_header_state
-{
+enum http_header_state {
     s_http_header_error = 1,
 
     s_http_header_start,
@@ -182,8 +183,7 @@ enum http_header_state
     s_http_headers_done,
 };
 
-enum http_body_type
-{
+enum http_body_type {
     t_http_body_type_init = 1,
     t_http_body_end_by_length,
     t_http_body_end_by_eof,
@@ -191,8 +191,7 @@ enum http_body_type
     t_http_body_skip,
 };
 
-enum http_body_state
-{
+enum http_body_state {
     s_http_body_error = 1,
 
     s_http_body_identify_by_length,
@@ -209,9 +208,19 @@ enum http_body_state
     s_http_body_chunks_done
 };
 
-typedef struct Url
-{
-    char *data;
+enum httpUrlField {
+    HTTP_UF_SCHEMA = 0,
+    HTTP_UF_HOST = 1,
+    HTTP_UF_PORT = 2,
+    HTTP_UF_PATH = 3,
+    HTTP_UF_QUERY = 4,
+    HTTP_UF_FRAGMENT = 5,
+    HTTP_UF_USERINFO = 6,
+    HTTP_UF_MAX = 7
+};
+
+typedef struct Url {
+    char* data;
     unsigned int len;
 
     unsigned int port : 16;
@@ -225,68 +234,60 @@ typedef struct Url
 
 } Url;
 
-inline void urlInit(Url *url)
+inline void urlInit(Url* url)
 {
-    memset(url,0,sizeof(Url));
-    url->data=nullptr;
+    memset(url, 0, sizeof(Url));
+    url->data = nullptr;
 }
 
-enum httpHeaderField
-{
-    HTTP_HF__SCHEMA = 0,
-    HTTP_HF__HOST = 1,
+enum httpHeaderField {
+    HTTP_HF_SCHEMA = 0,
+    HTTP_HF_HOST = 1,
     HTTP_HF_KEEP_CONNECTION = 2,
     HTTP_HF_CONTENT_LENGTH = 3,
     HTTP_HF_UPGRADE = 4,
     HTTP_HF_TRANSFER_ENCODING_CHUNKED = 5,
-    HTTP_HF__USERINFO = 6,
-    HTTP_HF__MAX = 7
+    HTTP_HF_USERINFO = 6,
+    HTTP_HF_MAX = 7
 };
 
-typedef struct HttpHeader
-{
+typedef struct HttpHeader {
     unsigned int keyHash;
+    // TODO: update to sdstr_t
     Str key;
     Str value;
 } HttpHeader;
 
-inline void httpHeaderInit(HttpHeader *header){
-    header->keyHash=0;
+inline void httpHeaderInit(HttpHeader* header)
+{
+    header->keyHash = 0;
     setStrNull(&(header->key));
     setStrNull(&(header->value));
 }
 
-enum HttpHeaderIndex
-{
-    HTTP_HEADER_HOST = 0,
-    HTTP_HEADER_,
+typedef struct HttpHeaders {
+    HttpHeader* host;
+    HttpHeader* connection;
+    HttpHeader* if_modified_since;
+    HttpHeader* if_unmodified_since;
+    HttpHeader* user_agent;
+    HttpHeader* referer;
 
-};
+    HttpHeader* content_length;
+    HttpHeader* content_type;
+    HttpHeader* transfer_encoding;
+    HttpHeader* accept_encoding;
 
-typedef struct HttpHeaders
-{
-    HttpHeader *host;
-    HttpHeader *connection;
-    HttpHeader *if_modified_since;
-    HttpHeader *if_unmodified_since;
-    HttpHeader *user_agent;
-    HttpHeader *referer;
+    HttpHeader* upgrade;
+    HttpHeader* expect;
 
-    HttpHeader *content_length;
-    HttpHeader *content_type;
-    HttpHeader *transfer_encoding;
-    HttpHeader *accept_encoding;
+    HttpHeader* cookie;
+    HttpHeader* last_modified;
 
-    HttpHeader *upgrade;
-    HttpHeader *expect;
+    std::list<HttpHeader*> generals; //TODO:take place in list_t
 
-    HttpHeader *cookie;
-    HttpHeader *last_modified;
-
-    std::list<HttpHeader *> generals; //TODO:take place in list_t
-
-    char *data;
-    unsigned int offset;	
+    char* data;
+    unsigned int offset;
     unsigned int len;
 
     unsigned int content_length_n;
@@ -310,8 +311,9 @@ typedef struct HttpHeaders
     //TODO:more information
 } HttpHeaders;
 
-inline void httpHeadersInit(HttpHeaders * headers){
-    memset(headers,0,sizeof(HttpHeaders));
+inline void httpHeadersInit(HttpHeaders* headers)
+{
+    memset(headers, 0, sizeof(HttpHeaders));
     httpHeaderInit(headers->host);
     httpHeaderInit(headers->connection);
     httpHeaderInit(headers->if_modified_since);
@@ -327,37 +329,32 @@ inline void httpHeadersInit(HttpHeaders * headers){
     httpHeaderInit(headers->cookie);
     httpHeaderInit(headers->last_modified);
 
-    headers->data=nullptr;
-
+    headers->data = nullptr;
 }
 
-void pushHeader(HttpHeaders *headers,
-        HttpHeader *header,
-        unsigned int key_hash);
+void pushHeader(HttpHeaders* headers,
+    HttpHeader* header,
+    unsigned int key_hash);
 
-typedef struct HttpBody
-{
-    void *data;
+typedef struct HttpBody {
+    void* data;
     unsigned int offset;
     unsigned int len;
 } HttpBody;
 
-void printHttpHeaders(const HttpHeaders *headers);
+void printHttpHeaders(const HttpHeaders* headers);
 
-void printUrl(const Url *url);
+void printUrl(const Url* url);
 
-void printBody(const HttpBody *body);
+void printBody(const HttpBody* body);
 
-#include <memory>
-enum HttpContentType
-{
+enum HttpContentType {
     HTTP_TYPE_BOTH,
     HTTP_TYPE_REQUEST,
     HTTP_TYPE_RESPONSE,
 };
 
-typedef struct HttpRequest
-{
+typedef struct HttpRequest {
     HttpContentType type;
 
     unsigned short method : 8;
@@ -365,28 +362,23 @@ typedef struct HttpRequest
     unsigned short http_version_minor : 8;
 
     unsigned int statusCode;
-    Str statusPhrase;
+    std::string statusPhrase;
 
     std::string method_s;
 
     unsigned short headerNum;
 
-    // std::unique_ptr<Url> url;
-    // std::shared_ptr<HttpHeaders> headers;
-    // std::shared_ptr<HttpBody> body;
-    //FIXME:There is great possiblility of memory lacking.
-    Url *url;
-    HttpHeaders *headers;
-    HttpBody *body;
+    Url* url;
+    HttpHeaders* headers;
+    HttpBody* body;
 
 } HttpRequest;
 
-inline bool endMessageByEof(const HttpRequest *request)
+inline bool endMessageByEof(const HttpRequest* request)
 {
-    HttpHeaders *hs = request->headers;
+    HttpHeaders* hs = request->headers;
 
-    if (hs->valid_content_length ||
-            hs->chunked)
+    if (hs->valid_content_length || hs->chunked)
         return false; //Don't need eof
 
     /* See RFC 2616 section 4.4 */
@@ -400,16 +392,13 @@ inline bool endMessageByEof(const HttpRequest *request)
     return true;
 }
 
-inline bool shouldKeepAlive(const HttpRequest *request)
+inline bool shouldKeepAlive(const HttpRequest* request)
 {
-    if (request->http_version_major >= 1 && request->http_version_minor >= 1)
-    {
+    if (request->http_version_major >= 1 && request->http_version_minor >= 1) {
         //HTTP/1.1
         if (request->headers->connection_close)
             return false;
-    }
-    else
-    {
+    } else {
         if (request->headers->connection_keep_alive)
             return true;
     }
@@ -421,255 +410,224 @@ inline bool shouldKeepAlive(const HttpRequest *request)
 typedef boost::function<int()> HttpCallback;
 typedef boost::function<int()> HttpDataCallback;
 
-class HttpParserSettings
-{
-    private:
-        std::map<std::string, HttpCallback> m_nReflection;
+class HttpParserSettings {
+private:
+    std::map<std::string, HttpCallback> m_nReflection;
 
-        HttpCallback m_fGetMessage;
-        HttpCallback m_fGetUrl;
-        HttpCallback m_fGetStatus;
-        HttpCallback m_fGetRequestLine;
+    HttpCallback m_fGetMessage;
+    HttpCallback m_fGetUrl;
+    HttpCallback m_fGetStatus;
+    HttpCallback m_fGetRequestLine;
 
-        HttpCallback m_fGetHeader;
-        HttpCallback m_fHeaderKey;
-        HttpCallback m_fHeaderValue;
+    HttpCallback m_fGetHeader;
+    HttpCallback m_fHeaderKey;
+    HttpCallback m_fHeaderValue;
 
-        HttpCallback m_fGetBody;
-        HttpCallback m_fEndMessage;
+    HttpCallback m_fGetBody;
+    HttpCallback m_fEndMessage;
 
-        HttpCallback m_fGetChunk;
-        HttpCallback m_fEndChunk;
+    HttpCallback m_fGetChunk;
+    HttpCallback m_fEndChunk;
 
-    public:
-        HttpParserSettings()
-        {
-            // std::cout << "class HttpParserSettings constructor\n";
-        }
+public:
+    HttpParserSettings()
+    {
+        // std::cout << "class HttpParserSettings constructor\n";
+    }
 
-        void setGetMessageCallback(const HttpCallback &c)
-        {
-            m_fGetMessage = c;
-            m_nReflection["getMessage"] = c;
-        }
+    void setGetMessageCallback(const HttpCallback& c)
+    {
+        m_fGetMessage = c;
+        m_nReflection["getMessage"] = c;
+    }
 
-        void setGetRequestLineCallback(const HttpCallback &c)
-        {
-            m_fGetRequestLine = c;
-            m_nReflection["getRequestLine"] = c;
-        }
+    void setGetRequestLineCallback(const HttpCallback& c)
+    {
+        m_fGetRequestLine = c;
+        m_nReflection["getRequestLine"] = c;
+    }
 
-        void setGetHeaderCallback(const HttpCallback &c)
-        {
-            m_fGetHeader = c;
-            m_nReflection["getHeader"] = c;
-        }
+    void setGetHeaderCallback(const HttpCallback& c)
+    {
+        m_fGetHeader = c;
+        m_nReflection["getHeader"] = c;
+    }
 
-        void setGetBodyCallback(const HttpCallback &c)
-        {
-            m_fGetBody = c;
-            m_nReflection["getBody"] = c;
-        }
+    void setGetBodyCallback(const HttpCallback& c)
+    {
+        m_fGetBody = c;
+        m_nReflection["getBody"] = c;
+    }
 
-        void setGetEndMessageCallback(const HttpCallback &c)
-        {
-            m_fEndMessage = c;
-            m_nReflection["endMessage"] = c;
-        }
+    void setGetEndMessageCallback(const HttpCallback& c)
+    {
+        m_fEndMessage = c;
+        m_nReflection["endMessage"] = c;
+    }
 
-        HttpCallback getMethodByName(const std::string &fname)
-        {
-            //auto p = m_nReflection.find(fname);
-            // if (p == m_nReflection.end())
-            // 	return nullptr;
-            // else
-            return m_nReflection[fname];
-            //FIXME:
-        }
+    HttpCallback getMethodByName(const std::string& fname)
+    {
+        //auto p = m_nReflection.find(fname);
+        // if (p == m_nReflection.end())
+        // 	return nullptr;
+        // else
+        return m_nReflection[fname];
+        //FIXME:
+    }
 
-        ~HttpParserSettings()
-        {
-            // std::cout << "class HttpParserSettings destructor\n";
-        }
+    ~HttpParserSettings()
+    {
+        // std::cout << "class HttpParserSettings destructor\n";
+    }
 
-        friend class HttpParser;
+    friend class HttpParser;
 };
 
-class HttpParser
-{
-    private:
-        HttpParserSettings *m_pSettings;
+class HttpParser {
+private:
+    HttpParserSettings* m_pSettings;
 
-        unsigned int m_nType : 2; //Http request or response
-        unsigned int m_nFlags : 8;
-        unsigned int m_nState;
-        unsigned int m_nHeaderState;
+    unsigned int m_nType : 2; //Http request or response
+    unsigned int m_nFlags : 8;
+    unsigned int m_nState;
+    unsigned int m_nHeaderState;
 
-        unsigned long long m_nRead;
-        unsigned long long m_nContentLength;
+    unsigned long long m_nRead;
+    unsigned long long m_nContentLength;
 
-        unsigned short m_nHttpVersionMajor;
-        unsigned short m_nHttpVersionMinor;
-        unsigned int m_nStatusCode : 16;
-        unsigned int m_nMethod : 8;
-        unsigned int m_nErrno : 7;
-        unsigned int m_nIsUpgrade : 1;
+    unsigned short m_nHttpVersionMajor;
+    unsigned short m_nHttpVersionMinor;
+    unsigned int m_nStatusCode : 16;
+    unsigned int m_nMethod : 8;
+    unsigned int m_nErrno : 7;
+    unsigned int m_nIsUpgrade : 1;
 
-        void *m_pData;
+    void* m_pData;
 
-    public:
-        HttpParser(HttpParserSettings *set = nullptr)
-            : m_pSettings(set),
-            m_nType(0), //FIXME:
-            m_nFlags(0),
-            m_nState(0),
-            m_nHeaderState(0),
-            m_nRead(0),
-            m_nContentLength(0),
-            m_nHttpVersionMajor(0),
-            m_nHttpVersionMinor(0),
-            m_nStatusCode(0),
-            m_nMethod(0),
-            m_nErrno(0),
-            m_nIsUpgrade(0),
-            m_pData(nullptr)
+public:
+    HttpParser(HttpParserSettings* set = nullptr)
+        : m_pSettings(set)
+        , m_nType(0)
+        , //FIXME:
+        m_nFlags(0)
+        , m_nState(0)
+        , m_nHeaderState(0)
+        , m_nRead(0)
+        , m_nContentLength(0)
+        , m_nHttpVersionMajor(0)
+        , m_nHttpVersionMinor(0)
+        , m_nStatusCode(0)
+        , m_nMethod(0)
+        , m_nErrno(0)
+        , m_nIsUpgrade(0)
+        , m_pData(nullptr)
     {
         // std::cout << "class HttpParser constructor\n";
     }
 
-        void setType(enum HttpContentType type);
+    void setType(enum HttpContentType type);
 
-        enum http_errno getErrno()
-        {
-            return (enum http_errno)m_nErrno;
-        }
+    enum http_errno getErrno()
+    {
+        return (enum http_errno)m_nErrno;
+    }
 
-        int invokeByName(const char *funName,
-                const char *data,
-                unsigned int len);
+    int invokeByName(const char* funName,
+        const char* data,
+        unsigned int len);
 
-        //parse host
-        enum http_host_state parseHostChar(const char ch,
-                enum http_host_state s);
-        int parseHost(const char *stream,
-                unsigned int at,
-                unsigned int len,
-                Url *&result,
-                bool has_at_char);
+    //parse host
+    enum http_host_state parseHostChar(const char ch,
+        enum http_host_state s);
+    int parseHost(const char* stream,
+        unsigned int at,
+        unsigned int len,
+        Url*& result,
+        bool has_at_char);
 
-        //parse url
-        enum state parseUrlChar(const char ch,
-                enum state s);
-        int parseUrl(const char *stream,
-                unsigned int len,
-                Url *result);
+    //parse url
+    enum state parseUrlChar(const char ch,
+        enum state s);
+    int parseUrl(const char* stream,
+        unsigned int len,
+        Url* result);
 
-        //parse header
-        enum http_header_state parseHeaderChar(const char ch,
-                enum http_header_state s);
-        int parseHeader(const char *stream,
-                unsigned int &at,
-                unsigned int len,
-                HttpHeader *result);
-        int parseHeaders(const char *stream,
-                unsigned int at,
-                unsigned int len,
-                HttpHeaders *result);
+    //parse header
+    enum http_header_state parseHeaderChar(const char ch,
+        enum http_header_state s);
+    int parseHeader(const char* stream,
+        unsigned int& at,
+        unsigned int len,
+        HttpHeader* result);
+    int parseHeaders(const char* stream,
+        unsigned int at,
+        unsigned int len,
+        HttpHeaders* result);
 
-        int parseHeadersMeaning(HttpHeaders *headers);
+    int parseHeadersMeaning(HttpHeaders* headers);
 
-        //parse body
-        int parseBody(const char *stream,
-                unsigned int at,
-                unsigned int len,
-                enum http_body_type body_type,
-                unsigned int content_length_n);
+    //parse body
+    int parseBody(const char* stream,
+        unsigned int at,
+        unsigned int len,
+        enum http_body_type body_type,
+        unsigned int content_length_n);
 
-        int execute(const char *stream,
-                unsigned int at,
-                unsigned int len,
-                HttpRequest *request);
+    int execute(const char* stream,
+        unsigned int at,
+        unsigned int len,
+        HttpRequest* request);
 
-        ~HttpParser()
-        {
-            // std::cout << "class HttpParser destructor\n";
-        }
+    ~HttpParser()
+    {
+        // std::cout << "class HttpParser destructor\n";
+    }
 };
 
-inline int strncasecmp__(const char *s1, const char *s2, int len)
-{
-    char c1, c2;
-    while (len--)
-    {
-        c1 = toLower(*s1);
-        c2 = toLower(*s2);
-        s1++;
-        s2++;
-        if (c1 == c2)
-        {
-            if (c1)
-                continue;
-            return 0;
-        }
-        return c1 - c2;
-    }
-    return 0;
-}
+typedef boost::function<int(const Str*, HttpHeaders* const)> headerFun;
+typedef boost::function<int(const std::string&, HttpHeaders* const)> deheaderFun;
 
-#include <boost/function.hpp>
-typedef boost::function<int(const Str *, HttpHeaders *const)> headerFun;
-typedef boost::function<int(const std::string &, HttpHeaders *const)> deheaderFun;
-
-inline int parseHostValue(const Str *s, HttpHeaders *const headers)
+inline int parseHostValue(const Str* s, HttpHeaders* const headers)
 {
     // std::cout << "[parse headerMeaning callback]get host value and parse\n";
-    //ignore the valid of host field
-    //TODO: to test the host field
+    // ignore the valid of host field
+    // TODO: to test the host field
     headers->valid_host = 1;
     return 0;
 }
 
-inline int builtHostValue(const std::string &s, HttpHeaders *const headers)
+inline int builtHostValue(const std::string& s, HttpHeaders* const headers)
 {
 
     return 0;
 }
 
-inline int parseConnectionValue(const Str *s, HttpHeaders *const headers)
+inline int parseConnectionValue(const Str* s, HttpHeaders* const headers)
 {
     // std::cout << "[parse headerMeaning callback]get connetion field:\n";
-    if (0 == strncasecmp__(s->data, "keep-alive", s->len))
-    {
+    if (0 == strncasecmp__(s->data, "keep-alive", s->len)) {
         headers->connection_keep_alive = 1;
         // std::cout << "connection keep alive\n";
-    }
-    else if (0 == strncasecmp__(s->data, "close", s->len))
-    {
+    } else if (0 == strncasecmp__(s->data, "close", s->len)) {
         headers->connection_close = 1;
         // std::cout << "connection close\n";
-    }
-    else if (0 == strncasecmp__(s->data, "upgrade", s->len))
-    {
+    } else if (0 == strncasecmp__(s->data, "upgrade", s->len)) {
         headers->connection_upgrade = 1;
         // std::cout << "connection upgrade\n";
-    }
-    else
-    {
+    } else {
         std::cout << "connection field is other value\n";
     }
     return 0;
 }
 
-inline int parseContentLength(const Str *s, HttpHeaders *const headers)
+inline int parseContentLength(const Str* s, HttpHeaders* const headers)
 {
     // std::cout << "[parse headerMeaning callback]get content-length field:\n";
     unsigned int res = 0;
-    char *p = s->data;
-    for (unsigned int i = 0; i < s->len; i++)
-    {
+    char* p = s->data;
+    for (unsigned int i = 0; i < s->len; i++) {
         char ch = *(p + i);
-        if (!isNum(ch))
-        {
+        if (!isNum(ch)) {
             std::cout << "Content-Length value invalid\n";
             return -1;
         }
@@ -685,7 +643,7 @@ inline int parseContentLength(const Str *s, HttpHeaders *const headers)
     return 0;
 }
 
-inline int parseUserAgent(const Str *s, HttpHeaders *const headers)
+inline int parseUserAgent(const Str* s, HttpHeaders* const headers)
 {
     // std::cout << "[parse headerMeaning callback]get useragent:\n";
     headers->chrome = 1;
@@ -693,51 +651,47 @@ inline int parseUserAgent(const Str *s, HttpHeaders *const headers)
     return 0;
 }
 
-inline int parseRefer(const Str *s, HttpHeaders *const headers)
+inline int parseRefer(const Str* s, HttpHeaders* const headers)
 {
     // std::cout << "[parse headerMeaning callback]get refer:\n";
     headers->valid_referer = 1;
     return 0;
 }
 
-inline int parseTransferEncoding(const Str *s, HttpHeaders *const headers)
+inline int parseTransferEncoding(const Str* s, HttpHeaders* const headers)
 {
     // std::cout << "[parse headerMeaning callback]get transfer-encoding:\n";
-    if (0 == strncasecmp__(s->data, "chunked", s->len))
-    {
+    if (0 == strncasecmp__(s->data, "chunked", s->len)) {
         headers->chunked = 1;
         // std::cout << "chunked\n";
         return 0;
-    }
-    else
-    {
+    } else {
         return -1;
     }
 }
 
-inline int parseCookie(const Str *s, HttpHeaders *const headers)
+inline int parseCookie(const Str* s, HttpHeaders* const headers)
 {
     // std::cout << "[parse headerMeaning callback]get cookie:\n";
     // printf("get value:%.*s\n", s->len, s->data);
     return 0;
 }
 
-inline int parseValue(const Str *s, HttpHeaders *const headers)
+inline int parseValue(const Str* s, HttpHeaders* const headers)
 {
     // std::cout << "[parse headerMeaning callback]get value:\n";
     // printf("get value:%.*s\n", s->len, s->data);
     return 0;
 }
 
-typedef struct header
-{
+typedef struct headerCallback {
     Str name;
     size_t offset;
     headerFun fun;
-} header;
+} headerCallback;
 
 //It is used by header key
-inline unsigned int JSHash(const char *str, int len)
+inline unsigned int JSHash(const char* str, int len)
 {
     unsigned int hash = 1315423911;
     // nearly a prime - 1315423911 = 3 * 438474637
@@ -747,8 +701,8 @@ inline unsigned int JSHash(const char *str, int len)
 };
 
 #include <unordered_map>
-extern header headers_in[];
-extern std::unordered_map<unsigned int, header> headerKeyHash;
+extern headerCallback headers_in[];
+extern std::unordered_map<unsigned int, headerCallback> headerKeyHash;
 
 void headerMeaningInit();
 

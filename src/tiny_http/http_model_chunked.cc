@@ -32,9 +32,9 @@ int chunked_body(MemoryPool* pool, chunked_context_t* context)
         in = in->next;
     }
 
-    const char *str = "0000000000000000\r\n";
-    if (size) { 
-       tmp = pool->getNewChain(1); 
-       pool->mallocSpace(tmp, strlen(str));
-    } 
+    const char* str = "0000000000000000\r\n";
+    if (size) {
+        tmp = pool->getNewChain(1);
+        pool->mallocSpace(tmp, strlen(str));
+    }
 }

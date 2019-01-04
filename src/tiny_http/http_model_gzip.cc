@@ -11,8 +11,8 @@
  *
  */
 
-#include <tiny_base/log.h>
 #include <tiny_base/configer.h>
+#include <tiny_base/log.h>
 #include <tiny_base/memorypool.h>
 #include <tiny_http/http_model_gzip.h>
 
@@ -132,11 +132,11 @@ gzip_status gzip_add_data(gzip_context_t* context,
     // unsigned int l = countChain(context->last_in);
     // LOG(Debug) << "last_in size:" << l << std::endl;
     // for (auto t = context->in; t != nullptr; t = t->next) {
-        // if (t->buffer->islast) {
-            // std::cout << "-";
-        // } else {
-            // std::cout << "+";
-        // }
+    // if (t->buffer->islast) {
+    // std::cout << "-";
+    // } else {
+    // std::cout << "+";
+    // }
     // }
 
     return gzip_ok;
@@ -296,11 +296,11 @@ gzip_status gzip_out(gzip_context_t* context,
     chain = context->out;
     // LOG(Debug) << "out size:" << countChain(chain) << std::endl;
     // for (auto t = context->out; t != nullptr; t = t->next) {
-        // if (t->buffer->islast) {
-            // std::cout << "-";
-        // } else {
-            // std::cout << "+";
-        // }
+    // if (t->buffer->islast) {
+    // std::cout << "-";
+    // } else {
+    // std::cout << "+";
+    // }
     // }
     while (chain) {
         buffer = chain->buffer;

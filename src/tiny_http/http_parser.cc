@@ -14,11 +14,13 @@
 #include <tiny_http/http.h>
 #include <tiny_http/http_parser.h>
 
-#include <string.h>
-#include <stdio.h>
 #include <memory>
+#include <stdio.h>
+#include <boost/bind.hpp>
+#include <unordered_map>
+#include <string.h>
 
-void printHttpHeaders(const HttpHeaders *headers)
+void printHttpHeaders(const HttpHeaders* headers)
 {
     std::cout << "<++++++++++[Debug]-HttpHeaders Information++++++++++>" << std::endl;
 
@@ -32,79 +34,64 @@ void printHttpHeaders(const HttpHeaders *headers)
     printf("chunked:%d\n", headers->chunked);
 
     std::cout << "++++special header+++\n";
-    if (headers->host != nullptr)
-    {
+    if (headers->host != nullptr) {
         printStr(&(headers->host->key));
         printStr(&(headers->host->value));
     }
-    if (headers->connection != nullptr)
-    {
+    if (headers->connection != nullptr) {
         printStr(&(headers->connection->key));
         printStr(&(headers->connection->value));
     }
-    if (headers->if_modified_since != nullptr)
-    {
+    if (headers->if_modified_since != nullptr) {
         printStr(&(headers->if_modified_since->key));
         printStr(&(headers->if_modified_since->value));
     }
-    if (headers->if_unmodified_since != nullptr)
-    {
+    if (headers->if_unmodified_since != nullptr) {
         printStr(&(headers->if_unmodified_since->key));
         printStr(&(headers->if_unmodified_since->value));
     }
-    if (headers->user_agent != nullptr)
-    {
+    if (headers->user_agent != nullptr) {
         printStr(&(headers->user_agent->key));
         printStr(&(headers->user_agent->value));
     }
-    if (headers->referer != nullptr)
-    {
+    if (headers->referer != nullptr) {
         printStr(&(headers->referer->key));
         printStr(&(headers->referer->value));
     }
-    if (headers->content_length != nullptr)
-    {
+    if (headers->content_length != nullptr) {
         printStr(&(headers->content_length->key));
         printStr(&(headers->content_length->value));
     }
-    if (headers->content_type != nullptr)
-    {
+    if (headers->content_type != nullptr) {
         printStr(&(headers->content_type->key));
         printStr(&(headers->content_type->value));
     }
-    if (headers->transfer_encoding != nullptr)
-    {
+    if (headers->transfer_encoding != nullptr) {
         printStr(&(headers->transfer_encoding->key));
         printStr(&(headers->transfer_encoding->value));
     }
-    if (headers->accept_encoding != nullptr)
-    {
+    if (headers->accept_encoding != nullptr) {
         printStr(&(headers->accept_encoding->key));
         printStr(&(headers->accept_encoding->value));
     }
-    if (headers->upgrade != nullptr)
-    {
+    if (headers->upgrade != nullptr) {
         printStr(&(headers->upgrade->key));
         printStr(&(headers->upgrade->value));
     }
-    if (headers->expect != nullptr)
-    {
+    if (headers->expect != nullptr) {
         printStr(&(headers->expect->key));
         printStr(&(headers->expect->value));
     }
-    if (headers->cookie != nullptr)
-    {
+    if (headers->cookie != nullptr) {
         printStr(&(headers->cookie->key));
         printStr(&(headers->cookie->value));
     }
-    if (headers->last_modified != nullptr)
-    {
+    if (headers->last_modified != nullptr) {
         printStr(&(headers->last_modified->key));
         printStr(&(headers->last_modified->value));
     }
     std::cout << "+++++generals+++++\n";
-    for (auto t : headers->generals)
-    {
+    for (auto t : headers->generals) {
 
         printStr(&(t->key));
         printStr(&(t->value));
@@ -112,48 +99,41 @@ void printHttpHeaders(const HttpHeaders *headers)
     std::cout << "<+++++++++++++++++++++++++++++++++++++++++++++++++++>" << std::endl;
 }
 
-void printUrl(const Url *url)
+void printUrl(const Url* url)
 {
     std::cout << "<++++++++++[Debug]-Url Information++++++++++>" << std::endl;
 
-    if (url->field_set & (1 << HTTP_UF_SCHEMA))
-    {
+    if (url->field_set & (1 << HTTP_UF_SCHEMA)) {
         int off = url->fields[HTTP_UF_SCHEMA].offset;
         int len = url->fields[HTTP_UF_SCHEMA].len;
         printf("schema:%.*s\n", len, url->data + off);
     }
-    if (url->field_set & (1 << HTTP_UF_HOST))
-    {
+    if (url->field_set & (1 << HTTP_UF_HOST)) {
         int off = url->fields[HTTP_UF_HOST].offset;
         int len = url->fields[HTTP_UF_HOST].len;
-        printf("host:%.*s\n", len, (const char *)url->data + off);
+        printf("host:%.*s\n", len, (const char*)url->data + off);
     }
-    if (url->field_set & (1 << HTTP_UF_PORT))
-    {
+    if (url->field_set & (1 << HTTP_UF_PORT)) {
         int off = url->fields[HTTP_UF_PORT].offset;
         int len = url->fields[HTTP_UF_PORT].len;
         printf("port:%.*s\n", len, url->data + off);
     }
-    if (url->field_set & (1 << HTTP_UF_PATH))
-    {
+    if (url->field_set & (1 << HTTP_UF_PATH)) {
         int off = url->fields[HTTP_UF_PATH].offset;
         int len = url->fields[HTTP_UF_PATH].len;
         printf("path:%.*s\n", len, url->data + off);
     }
-    if (url->field_set & (1 << HTTP_UF_QUERY))
-    {
+    if (url->field_set & (1 << HTTP_UF_QUERY)) {
         int off = url->fields[HTTP_UF_QUERY].offset;
         int len = url->fields[HTTP_UF_QUERY].len;
         printf("query:%.*s\n", len, url->data + off);
     }
-    if (url->field_set & (1 << HTTP_UF_FRAGMENT))
-    {
+    if (url->field_set & (1 << HTTP_UF_FRAGMENT)) {
         int off = url->fields[HTTP_UF_FRAGMENT].offset;
         int len = url->fields[HTTP_UF_FRAGMENT].len;
         printf("fragment:%.*s\n", len, url->data + off);
     }
-    if (url->field_set & (1 << HTTP_UF_USERINFO))
-    {
+    if (url->field_set & (1 << HTTP_UF_USERINFO)) {
         int off = url->fields[HTTP_UF_USERINFO].offset;
         int len = url->fields[HTTP_UF_USERINFO].len;
         printf("userinfo:%.*s\n", len, url->data + off);
@@ -161,7 +141,7 @@ void printUrl(const Url *url)
     std::cout << "<+++++++++++++++++++++++++++++++++++++++++++>" << std::endl;
 }
 
-void printBody(const HttpBody *body)
+void printBody(const HttpBody* body)
 {
     std::cout << "<++++++++++[Debug]-body Information+++++++++>" << std::endl;
 
@@ -169,13 +149,111 @@ void printBody(const HttpBody *body)
 }
 
 #define checkOrGoError(con) \
-    do                      \
-    {                       \
-        if (!con)           \
-        {                   \
+    do {                    \
+        if (!con) {         \
             goto error;     \
         }                   \
     } while (0);
+
+
+#define offsetof__(s, m) (size_t) & (((s*)0)->m)
+
+headerCallback headers_in[] = {
+    {
+        .name = Str("host"),
+        .offset = offsetof__(HttpHeaders, host),
+        .fun = boost::bind(parseHostValue, _1, _2),
+    },
+
+    {
+        .name = Str("connection"),
+        .offset = offsetof__(HttpHeaders, connection),
+        .fun = boost::bind(parseConnectionValue, _1, _2),
+    },
+
+    {
+        .name = Str("content-length"),
+        .offset = offsetof__(HttpHeaders, content_length),
+        .fun = boost::bind(parseContentLength, _1, _2),
+    },
+
+    {
+        .name = Str("if-modified-since"),
+        .offset = offsetof__(HttpHeaders, if_modified_since),
+        .fun = boost::bind(parseValue, _1, _2),
+    },
+
+    {
+        .name = Str("if-unmodified-since"),
+        .offset = offsetof__(HttpHeaders, if_unmodified_since),
+        .fun = boost::bind(parseValue, _1, _2),
+    },
+
+    {
+        .name = Str("user-agent"),
+        .offset = offsetof__(HttpHeaders, user_agent),
+        .fun = boost::bind(parseUserAgent, _1, _2),
+    },
+
+    {
+        .name = Str("referer"),
+        .offset = offsetof__(HttpHeaders, referer),
+        .fun = boost::bind(parseRefer, _1, _2),
+    },
+
+    {
+        .name = Str("transfer-encoding"),
+        .offset = offsetof__(HttpHeaders, transfer_encoding),
+        .fun = boost::bind(parseTransferEncoding, _1, _2),
+    },
+
+    {
+        .name = Str("cookie"),
+        .offset = offsetof__(HttpHeaders, cookie),
+        .fun = boost::bind(parseCookie, _1, _2),
+    },
+
+    {
+        .name = Str("content-type"),
+        .offset = offsetof__(HttpHeaders, content_type),
+        .fun = boost::bind(parseValue, _1, _2),
+    },
+
+    {
+        .name = Str("accept-encoding"),
+        .offset = offsetof__(HttpHeaders, accept_encoding),
+        .fun = boost::bind(parseValue, _1, _2),
+    },
+
+    {
+        .name = Str("upgrade"),
+        .offset = offsetof__(HttpHeaders, upgrade),
+        .fun = boost::bind(parseValue, _1, _2),
+    },
+
+    {
+        .name = Str("expect"),
+        .offset = offsetof__(HttpHeaders, expect),
+        .fun = boost::bind(parseValue, _1, _2),
+    },
+
+    {
+        .name = Str("last-modified"),
+        .offset = offsetof__(HttpHeaders, last_modified),
+        .fun = boost::bind(parseValue, _1, _2),
+    },
+};
+
+std::unordered_map<unsigned int, headerCallback> headerKeyHash;
+
+void headerMeaningInit()
+{
+    int len = ARRAY_SIZE(headers_in);
+    for (int i = 0; i < len; i++) {
+        unsigned int hash = JSHash(headers_in[i].name.data, headers_in[i].name.len);
+        headerKeyHash[hash] = headers_in[i];
+    }
+}
 
 void HttpParser::setType(enum HttpContentType type)
 {
@@ -186,11 +264,10 @@ void HttpParser::setType(enum HttpContentType type)
                                                     : s_start_resp_or_requ));
 }
 
-int HttpParser::invokeByName(const char *funName,
-                             const char *data,
-                             unsigned int len)
+int HttpParser::invokeByName(const char* funName,
+    const char* data,
+    unsigned int len)
 {
-    std::cout << "[Debug]invoke function by name:" << funName << std::endl;
     if (m_pSettings == nullptr)
         return -1;
     std::string fname(funName);
@@ -202,10 +279,9 @@ int HttpParser::invokeByName(const char *funName,
 }
 
 enum http_host_state HttpParser::parseHostChar(const char ch,
-                                               enum http_host_state stat)
+    enum http_host_state stat)
 {
-    switch (ch)
-    {
+    switch (ch) {
     //invaild char in url
     case '\r':
     case '\n':
@@ -220,8 +296,7 @@ enum http_host_state HttpParser::parseHostChar(const char ch,
         break;
     }
 
-    switch (stat)
-    {
+    switch (stat) {
     case s_http_userinfo_start: //http://@hostname/ is vaild
     case s_http_userinfo:
         if (ch == '@')
@@ -270,12 +345,7 @@ enum http_host_state HttpParser::parseHostChar(const char ch,
         break;
 
     case s_http_host_v6_zone_start:
-        if (isAlphaNum(ch) ||
-            ch == '%' ||
-            ch == '.' ||
-            ch == '-' ||
-            ch == '_' ||
-            ch == '~')
+        if (isAlphaNum(ch) || ch == '%' || ch == '.' || ch == '-' || ch == '_' || ch == '~')
             return s_http_host_v6_zone;
         break;
 
@@ -287,12 +357,7 @@ enum http_host_state HttpParser::parseHostChar(const char ch,
         //          ch =='')
         //     return s_http_host_error;
 
-        else if (isAlphaNum(ch) ||
-                 ch == '%' ||
-                 ch == '.' ||
-                 ch == '-' ||
-                 ch == '_' ||
-                 ch == '~')
+        else if (isAlphaNum(ch) || ch == '%' || ch == '.' || ch == '-' || ch == '_' || ch == '~')
             return s_http_host_v6_zone;
         break;
 
@@ -309,35 +374,33 @@ enum http_host_state HttpParser::parseHostChar(const char ch,
     return s_http_host_error;
 }
 
-int HttpParser::parseHost(const char *stream,
-                          unsigned int at,
-                          unsigned int len,
-                          Url *&result,
-                          bool has_at_char)
+int HttpParser::parseHost(const char* stream,
+    unsigned int at,
+    unsigned int len,
+    Url*& result,
+    bool has_at_char)
 {
     //The example of data: dissigil.cn.
     //You MUST guarentee data just a fragment of host in url.
     //TODO: todo comments
 
-    assert(stream == result->data);
-    assert(result->field_set & (1 << HTTP_UF_HOST));
-    assert(len == result->fields[HTTP_UF_HOST].len);
-    assert(at == result->fields[HTTP_UF_HOST].offset);
+    // assert(stream == result->data);
+    // assert(result->field_set & (1 << HTTP_UF_HOST));
+    // assert(len == result->fields[HTTP_UF_HOST].len);
+    // assert(at == result->fields[HTTP_UF_HOST].offset);
 
-    char *begin = (char *)stream + at;
+    char* begin = (char*)stream + at;
     enum http_host_state prestat = has_at_char
-                                       ? s_http_userinfo_start
-                                       : s_http_host_start;
+        ? s_http_userinfo_start
+        : s_http_host_start;
     enum http_host_state stat;
-    for (unsigned int i = 0; i < len; i++)
-    {
+    for (unsigned int i = 0; i < len; i++) {
         char ch = *(begin + i);
         // std::cout << ch << (unsigned int)prestat << std::endl;
 
         stat = parseHostChar(ch, prestat);
 
-        switch (stat)
-        {
+        switch (stat) {
         case s_http_host_error:
             return -1;
             break;
@@ -348,13 +411,11 @@ int HttpParser::parseHost(const char *stream,
             break;
 
         case s_http_userinfo:
-            if (prestat != stat)
-            {
+            if (prestat != stat) {
                 result->fields[HTTP_UF_USERINFO].offset = at + i;
                 result->fields[HTTP_UF_USERINFO].len = 1;
                 result->field_set |= (1 << HTTP_UF_USERINFO);
-            }
-            else
+            } else
                 result->fields[HTTP_UF_USERINFO].len++;
             break;
 
@@ -367,22 +428,18 @@ int HttpParser::parseHost(const char *stream,
             break;
 
         case s_http_host_v4:
-            if (prestat != stat)
-            {
+            if (prestat != stat) {
                 result->fields[HTTP_UF_HOST].offset = at + i;
                 result->fields[HTTP_UF_HOST].len = 1;
-            }
-            else
+            } else
                 result->fields[HTTP_UF_HOST].len++;
             break;
 
         case s_http_host_v6:
-            if (prestat != stat)
-            {
+            if (prestat != stat) {
                 result->fields[HTTP_UF_HOST].offset = at + i;
                 result->fields[HTTP_UF_HOST].len = 1;
-            }
-            else
+            } else
                 result->fields[HTTP_UF_HOST].len++;
             break;
 
@@ -403,13 +460,11 @@ int HttpParser::parseHost(const char *stream,
             break;
 
         case s_http_host_port:
-            if (prestat != stat)
-            {
+            if (prestat != stat) {
                 result->fields[HTTP_UF_PORT].offset = at + i;
                 result->fields[HTTP_UF_PORT].len = 1;
                 result->field_set |= (1 << HTTP_UF_PORT);
-            }
-            else
+            } else
                 result->fields[HTTP_UF_PORT].len++;
             break;
         }
@@ -417,8 +472,7 @@ int HttpParser::parseHost(const char *stream,
         prestat = stat;
     }
 
-    switch (stat)
-    {
+    switch (stat) {
     case s_http_host_error:
     case s_http_userinfo_start:
     case s_http_userinfo:
@@ -441,10 +495,9 @@ int HttpParser::parseHost(const char *stream,
 }
 
 enum state HttpParser::parseUrlChar(const char ch,
-                                    enum state stat)
+    enum state stat)
 {
-    switch (ch)
-    {
+    switch (ch) {
     case '\r':
     case '\n':
     case '\t':
@@ -458,8 +511,7 @@ enum state HttpParser::parseUrlChar(const char ch,
         break;
     }
 
-    switch (stat)
-    {
+    switch (stat) {
     case s_requ_url_begin:
         if (ch == '/')          //or ch=='*' :method CONNECT
             return s_requ_path; // /index.html
@@ -514,9 +566,7 @@ enum state HttpParser::parseUrlChar(const char ch,
             return s_requ_query_string_start;
         else if (ch == '#')
             return s_requ_fragment_start;
-        else if (isUserInfoChar(ch) ||
-                 ch == '[' ||
-                 ch == ']') //Ipv6 or userInfochar
+        else if (isUserInfoChar(ch) || ch == '[' || ch == ']') //Ipv6 or userInfochar
             return s_requ_server;
         break;
 
@@ -541,32 +591,22 @@ enum state HttpParser::parseUrlChar(const char ch,
         break;
 
     case s_requ_query_string_start: //finished
-        if (isUrlChar(ch))
-        {
+        if (isUrlChar(ch)) {
             return s_requ_query_string;
-        }
-        else if (ch == '?')
-        {
+        } else if (ch == '?') {
             return s_requ_query_string;
-        }
-        else if (ch == '#')
-        {
+        } else if (ch == '#') {
             return s_requ_fragment_start;
         }
         break;
 
     case s_requ_query_string: //finished
         //FIXME:
-        if (isUrlChar(ch))
-        {
+        if (isUrlChar(ch)) {
             return s_requ_query_string;
-        }
-        else if (ch == '?')
-        {
+        } else if (ch == '?') {
             return s_requ_query_string;
-        }
-        else if (ch == '#')
-        {
+        } else if (ch == '#') {
             return s_requ_fragment_start;
         }
         break;
@@ -579,16 +619,11 @@ enum state HttpParser::parseUrlChar(const char ch,
         break;
 
     case s_requ_fragment: //finished
-        if (isUrlChar(ch))
-        {
+        if (isUrlChar(ch)) {
             return s_requ_fragment;
-        }
-        else if (ch == '?')
-        {
+        } else if (ch == '?') {
             return s_requ_fragment;
-        }
-        else if (ch == '#')
-        {
+        } else if (ch == '#') {
             return s_requ_fragment;
         }
         break;
@@ -601,15 +636,15 @@ enum state HttpParser::parseUrlChar(const char ch,
     return s_error;
 }
 
-int HttpParser::parseUrl(const char *stream,
-                         unsigned int len,
-                         Url *result)
+int HttpParser::parseUrl(const char* stream,
+    unsigned int len,
+    Url* result)
 {
     memset(result, 0, sizeof(Url));
 
     //assert something
 
-    char *begin = (char *)stream;
+    char* begin = (char*)stream;
     result->data = begin;
     result->len = len;
 
@@ -621,8 +656,7 @@ int HttpParser::parseUrl(const char *stream,
 
     bool has_at_char = false;
 
-    for (unsigned int i = 0; i < len; i++)
-    {
+    for (unsigned int i = 0; i < len; i++) {
         char ch = *(begin + i);
         // std::cout << "[Debug]" << ch << (unsigned int)prestat << std::endl;
         stat = parseUrlChar(ch, prestat);
@@ -630,8 +664,7 @@ int HttpParser::parseUrl(const char *stream,
         if (ch == '@')
             has_at_char = true;
 
-        switch (stat)
-        {
+        switch (stat) {
         case s_error: //finished
             return -1;
             break;
@@ -676,12 +709,9 @@ int HttpParser::parseUrl(const char *stream,
 
         // std::cout << int(field) << std::endl;
 
-        if (field == prefield)
-        {
+        if (field == prefield) {
             result->fields[field].len++;
-        }
-        else
-        {
+        } else {
             result->fields[field].offset = i;
             result->fields[field].len = 1;
 
@@ -692,25 +722,21 @@ int HttpParser::parseUrl(const char *stream,
         prestat = stat;
     }
 
-    if (result->field_set & (1 << HTTP_UF_HOST))
-    {
+    if (result->field_set & (1 << HTTP_UF_HOST)) {
         unsigned int offset = result->fields[HTTP_UF_HOST].offset;
         unsigned int len = result->fields[HTTP_UF_HOST].len;
         std::string host(begin + offset, len);
         // std::cout << "[parseUrl]::host:" << len << ":" << host << std::endl;
         if (-1 == parseHost(stream, offset, len, result, has_at_char))
             return -1;
-    }
-    else if (result->field_set & (1 << HTTP_UF_SCHEMA)) // http:///index.html is invaild
+    } else if (result->field_set & (1 << HTTP_UF_SCHEMA)) // http:///index.html is invaild
         return -1;
 
-    if (result->field_set & (1 << HTTP_UF_PORT))
-    {
+    if (result->field_set & (1 << HTTP_UF_PORT)) {
         unsigned int offset = result->fields[HTTP_UF_PORT].offset;
         unsigned int len = result->fields[HTTP_UF_PORT].len;
         unsigned int port = 0;
-        for (unsigned int i = 0; i < len; i++)
-        {
+        for (unsigned int i = 0; i < len; i++) {
             port *= 10;
             port += *(begin + offset + i) - '0';
             if (port > 65535)
@@ -723,10 +749,9 @@ int HttpParser::parseUrl(const char *stream,
 }
 
 enum http_header_state HttpParser::parseHeaderChar(const char ch,
-                                                   enum http_header_state stat)
+    enum http_header_state stat)
 {
-    switch (stat)
-    {
+    switch (stat) {
     case s_http_header_error:
         //impossible
         return s_http_header_error;
@@ -821,13 +846,13 @@ enum http_header_state HttpParser::parseHeaderChar(const char ch,
     return s_http_header_error;
 }
 
-int HttpParser::parseHeader(const char *stream,
-                            unsigned int &at,
-                            unsigned int len,
-                            HttpHeader *result)
+int HttpParser::parseHeader(const char* stream,
+    unsigned int& at,
+    unsigned int len,
+    HttpHeader* result)
 {
 
-    char *begin = (char *)stream;
+    char* begin = (char*)stream;
 
     enum http_header_state prestat = s_http_header_start;
     enum http_header_state stat;
@@ -838,13 +863,11 @@ int HttpParser::parseHeader(const char *stream,
     unsigned int valuebegin = 0;
     unsigned int valuelen = 0;
 
-    for (unsigned int i = 0; i < len; i++)
-    {
+    for (unsigned int i = 0; i < len; i++) {
         char ch = *(begin + at + i);
         stat = parseHeaderChar(ch, prestat);
 
-        switch (stat)
-        {
+        switch (stat) {
         case s_http_header_error:
             return -1;
             break;
@@ -920,30 +943,24 @@ int HttpParser::parseHeader(const char *stream,
     return 0;
 }
 
-int HttpParser::parseHeaders(const char *stream,
-                             unsigned int at,
-                             unsigned int len,
-                             HttpHeaders *result)
+int HttpParser::parseHeaders(const char* stream,
+    unsigned int at,
+    unsigned int len,
+    HttpHeaders* result)
 {
     int return_val = 0;
     unsigned int offset = at;
 
-    while (1)
-    {
-        HttpHeader *header = new HttpHeader;
+    while (1) {
+        HttpHeader* header = new HttpHeader;
         return_val = parseHeader(stream, offset, len, header);
-        if (return_val == -1)
-        {
+        if (return_val == -1) {
             std::cout << "parse header error\n";
             return -1;
             break;
-        }
-        else if (return_val == 0)
-        {
+        } else if (return_val == 0) {
             result->generals.push_back(header);
-        }
-        else if (return_val == 1)
-        {
+        } else if (return_val == 1) {
             //parse headers done
             break;
         }
@@ -957,121 +974,14 @@ int HttpParser::parseHeaders(const char *stream,
     return 0;
 }
 
-#define offsetof__(s, m) (size_t) & (((s *)0)->m)
-
-#include <boost/bind.hpp>
-header headers_in[] = {
-    {
-        .name = Str("host"),
-        .offset = offsetof__(HttpHeaders, host),
-        .fun = boost::bind(parseHostValue, _1, _2),
-    },
-
-    {
-        .name = Str("connection"),
-        .offset = offsetof__(HttpHeaders, connection),
-        .fun = boost::bind(parseConnectionValue, _1, _2),
-    },
-
-    {
-        .name = Str("content-length"),
-        .offset = offsetof__(HttpHeaders, content_length),
-        .fun = boost::bind(parseContentLength, _1, _2),
-    },
-
-    {
-        .name = Str("if-modified-since"),
-        .offset = offsetof__(HttpHeaders, if_modified_since),
-        .fun = boost::bind(parseValue, _1, _2),
-    },
-
-    {
-        .name = Str("if-unmodified-since"),
-        .offset = offsetof__(HttpHeaders, if_unmodified_since),
-        .fun = boost::bind(parseValue, _1, _2),
-    },
-
-    {
-        .name = Str("user-agent"),
-        .offset = offsetof__(HttpHeaders, user_agent),
-        .fun = boost::bind(parseUserAgent, _1, _2),
-    },
-
-    {
-        .name = Str("referer"),
-        .offset = offsetof__(HttpHeaders, referer),
-        .fun = boost::bind(parseRefer, _1, _2),
-    },
-
-    {
-        .name = Str("transfer-encoding"),
-        .offset = offsetof__(HttpHeaders, transfer_encoding),
-        .fun = boost::bind(parseTransferEncoding, _1, _2),
-    },
-
-    {
-        .name = Str("cookie"),
-        .offset = offsetof__(HttpHeaders, cookie),
-        .fun = boost::bind(parseCookie, _1, _2),
-    },
-
-    {
-        .name = Str("content-type"),
-        .offset = offsetof__(HttpHeaders, content_type),
-        .fun = boost::bind(parseValue, _1, _2),
-    },
-
-    {
-        .name = Str("accept-encoding"),
-        .offset = offsetof__(HttpHeaders, accept_encoding),
-        .fun = boost::bind(parseValue, _1, _2),
-    },
-
-    {
-        .name = Str("upgrade"),
-        .offset = offsetof__(HttpHeaders, upgrade),
-        .fun = boost::bind(parseValue, _1, _2),
-    },
-
-    {
-        .name = Str("expect"),
-        .offset = offsetof__(HttpHeaders, expect),
-        .fun = boost::bind(parseValue, _1, _2),
-    },
-
-    {
-        .name = Str("last-modified"),
-        .offset = offsetof__(HttpHeaders, last_modified),
-        .fun = boost::bind(parseValue, _1, _2),
-    },
-};
-
-#include <unordered_map>
-std::unordered_map<unsigned int, header> headerKeyHash;
-
-void headerMeaningInit()
+int HttpParser::parseHeadersMeaning(HttpHeaders* headers)
 {
-    int len = ARRAY_SIZE(headers_in);
-    for (int i = 0; i < len; i++)
-    {
-        unsigned int hash = JSHash(headers_in[i].name.data, headers_in[i].name.len);
-        // std::cout << "[INIT]:(" << hash << "):" << std::string(headers_in[i].name.data, headers_in[i].name.len) << std::endl;
-        headerKeyHash[hash] = headers_in[i];
-    }
-}
-
-int HttpParser::parseHeadersMeaning(HttpHeaders *headers)
-{
-    for (auto t : headers->generals)
-    {
+    for (auto t : headers->generals) {
         auto p = headerKeyHash.find(t->keyHash);
-        if (p == headerKeyHash.end())
-        {
+        if (p == headerKeyHash.end()) {
             // std::cout << "general header" << std::endl;
-        }
-        else
-        {
-            HttpHeader **tmp = (HttpHeader **)((char *)headers + p->second.offset);
+        } else {
+            HttpHeader** tmp = (HttpHeader**)((char*)headers + p->second.offset);
             *tmp = t;
             p->second.fun(&(t->value), headers);
         }
@@ -1079,18 +989,17 @@ int HttpParser::parseHeadersMeaning(HttpHeaders *headers)
     return 0;
 }
 
-int HttpParser::parseBody(const char *stream,
-                          unsigned int at,
-                          unsigned int len,
-                          enum http_body_type body_type,
-                          unsigned int content_length_n)
+int HttpParser::parseBody(const char* stream,
+    unsigned int at,
+    unsigned int len,
+    enum http_body_type body_type,
+    unsigned int content_length_n)
 {
-    const char *begin = stream;
+    const char* begin = stream;
 
     enum http_body_state stat;
 
-    switch (body_type)
-    {
+    switch (body_type) {
     case t_http_body_type_init:
         break;
 
@@ -1112,78 +1021,64 @@ int HttpParser::parseBody(const char *stream,
 
     unsigned long long chunk_size = 0;
 
-    for (unsigned int i = 0; i < len; i++)
-    {
+    for (unsigned int i = 0; i < len; i++) {
         char ch = *(begin + at + i);
 
         // std::cout << i << " " << int(stat) << std::endl;
 
-        switch (stat)
-        {
+        switch (stat) {
         case s_http_body_error:
             return -1;
             break;
 
-        case s_http_body_identify_by_length:
-        {
+        case s_http_body_identify_by_length: {
             unsigned int to_read = MIN(content_length_n,
-                                       len - i);
+                len - i);
             //printf("content:%.*s\n", to_read, begin + at + i);
             i += to_read;
             return 0;
-        }
-        break;
+        } break;
 
         case s_http_body_identify_by_eof:
             //printf("content:%.*s\n", len - i, begin + at + i);
             i = len;
             break;
 
-        case s_http_body_chunk_size_start:
-        {
+        case s_http_body_chunk_size_start: {
             short int tmp = getHex(ch);
-            if (tmp == -1)
-            {
+            if (tmp == -1) {
                 std::cout << "chunk size invalid\n";
                 return -1;
             }
             chunk_size *= 16;
             chunk_size += tmp;
             stat = s_http_body_chunk_size;
-        }
-        break;
+        } break;
 
-        case s_http_body_chunk_size:
-        {
-            if (ch == CR)
-            {
+        case s_http_body_chunk_size: {
+            if (ch == CR) {
                 stat = s_http_body_chunk_size_almost_done;
                 break;
-            }
-            else if (ch == ' ')
-            {
+            } else if (ch == ' ') {
                 stat = s_http_body_chunk_size;
                 break;
             }
 
             short int tmp = getHex(ch);
-            if (tmp == -1)
-            {
+            if (tmp == -1) {
                 std::cout << "chunk size invalid\n";
                 return -1;
             }
             chunk_size *= 16;
             chunk_size += tmp;
-        }
-        break;
+        } break;
 
         case s_http_body_chunk_size_almost_done:
             checkOrGoError((ch == LF));
             std::cout << "chunk size:" << chunk_size << std::endl;
             if (chunk_size != 0)
                 stat = s_http_body_chunk_data;
-            else
-            {
+            else {
                 //is trailing;
             }
             stat = s_http_body_chunk_data;
@@ -1193,10 +1088,9 @@ int HttpParser::parseBody(const char *stream,
             //TODO:finish
             break;
 
-        case s_http_body_chunk_data:
-        {
+        case s_http_body_chunk_data: {
             unsigned long long to_read = MIN(chunk_size,
-                                             len - i);
+                len - i);
             std::string data(begin + at + i, to_read);
             //std::cout << "chunk data:" << data << std::endl;
             i += to_read - 1;
@@ -1212,13 +1106,10 @@ int HttpParser::parseBody(const char *stream,
 
         case s_http_body_chunk_data_done:
             checkOrGoError((ch == LF));
-            if (chunk_size == 0)
-            {
+            if (chunk_size == 0) {
                 std::cout << "It is traling chunk\n";
                 stat = s_http_body_chunks_done;
-            }
-            else
-            {
+            } else {
                 stat = s_http_body_chunk_size_start;
                 chunk_size = 0;
             }
@@ -1237,12 +1128,12 @@ error:
     return -1;
 }
 
-int HttpParser::execute(const char *stream,
-                        unsigned int at,
-                        unsigned int len,
-                        HttpRequest *request)
+int HttpParser::execute(const char* stream,
+    unsigned int at,
+    unsigned int len,
+    HttpRequest* request)
 {
-    char *begin = (char *)stream + at;
+    char* begin = (char*)stream + at;
 
     int return_val = 0;
     bool break_for = false;
@@ -1254,7 +1145,7 @@ int HttpParser::execute(const char *stream,
     unsigned int url_begin = 0;
     unsigned int url_len = 0;
 
-    // unsigned int status_phrase_begin = 0;
+    unsigned int status_phrase_begin = 0;
     unsigned int status_phrase_len = 0;
 
     unsigned int headers_begin = 0;
@@ -1271,38 +1162,31 @@ int HttpParser::execute(const char *stream,
     if (getErrno() != HPE_OK)
         return 0;
 
-    if (len == 0)
-    {
+    if (len == 0) {
         return 0;
     }
 
-    switch (m_nState)
-    {
+    switch (m_nState) {
     case s_resp_start:
         request->type = HTTP_TYPE_RESPONSE;
-        //std::cout << "[Debug] http response start\n";
         break;
 
     case s_requ_start:
         request->type = HTTP_TYPE_REQUEST;
-        //std::cout << "[Debug] http request start\n";
         break;
 
     case s_start_resp_or_requ:
         request->type = HTTP_TYPE_BOTH;
-        //std::cout << "[Debug] http content maybe http request or response start\n";
         break;
 
     default:
         break;
     }
 
-    for (unsigned int i = 0; i < len; i++)
-    {
+    for (unsigned int i = 0; i < len; i++) {
         char ch = *(begin + i);
 
-        switch (m_nState)
-        {
+        switch (m_nState) {
 
         case s_start_resp_or_requ:
             // need to fix FIXME:
@@ -1310,9 +1194,7 @@ int HttpParser::execute(const char *stream,
             {
                 m_nState = s_resp_H;
                 // invokeByName("getResponseMessage", nullptr, 0);TODO:
-            }
-            else
-            {
+            } else {
                 m_nState = s_requ_start;
                 // invokeByName("getRequestsMessage", nullptr, 0);TODO:
             }
@@ -1375,12 +1257,9 @@ int HttpParser::execute(const char *stream,
             break;
 
         case s_resp_status_code:
-            if (ch == ' ')
-            {
+            if (ch == ' ') {
                 m_nState = s_resp_status_phrase_start;
-            }
-            else
-            {
+            } else {
                 checkOrGoError(isNum(ch));
                 m_nStatusCode *= 10;
                 m_nStatusCode += ch - '0';
@@ -1389,24 +1268,17 @@ int HttpParser::execute(const char *stream,
 
         case s_resp_status_phrase_start:
             checkOrGoError(isAlpha(ch));
-            // status_phrase_begin = i;
+            status_phrase_begin = i;
             status_phrase_len = 1;
             m_nState = s_resp_status_phrase;
             break;
 
         case s_resp_status_phrase:
-            if (ch == '\r')
-            {
+            if (ch == '\r') {
                 m_nState = s_resp_line_almost_done;
-            }
-            else if (ch == '\n')
-            {
+            } else if (ch == '\n') {
                 m_nState = s_resp_line_done;
-            }
-            else if (isAlphaNum(ch) ||
-                     ch == ' ' ||
-                     ch == '-')
-            {
+            } else if (isAlphaNum(ch) || ch == ' ' || ch == '-') {
                 status_phrase_len++;
             }
             break;
@@ -1420,13 +1292,10 @@ int HttpParser::execute(const char *stream,
             break;
 
         case s_resp_line_done:
-            if (ch == '\r')
-            {
+            if (ch == '\r') {
                 m_nState = s_headers_almost_done;
                 break;
-            }
-            else if (ch == '\n')
-            {
+            } else if (ch == '\n') {
                 m_nState = s_headers_done;
                 break;
             }
@@ -1443,45 +1312,35 @@ int HttpParser::execute(const char *stream,
             break;
 
         case s_requ_method_start:
-            if (ch == ' ')
-            {
+            if (ch == ' ') {
             }
             checkOrGoError((isUpper(ch) || ch == '_'));
             method_len++;
             break;
 
         case s_requ_method:
-            if (ch == ' ')
-            {
+            if (ch == ' ') {
                 m_nState = s_requ_url_begin;
-            }
-            else if (isUpper(ch) || ch == '_')
-            {
+            } else if (isUpper(ch) || ch == '_') {
                 method_len++;
             }
             break;
 
         case s_requ_url_begin:
-            if (isUrlChar(ch))
-            {
+            if (isUrlChar(ch)) {
                 url_begin = i;
                 url_len = 1;
                 m_nState = s_requ_url;
-            }
-            else if (ch == ' ')
-            {
+            } else if (ch == ' ') {
                 m_nState = s_requ_url_begin;
             }
             break;
 
         case s_requ_url:
-            if (isUrlChar(ch))
-            {
+            if (isUrlChar(ch)) {
                 m_nState = s_requ_url;
                 url_len++;
-            }
-            else if (ch == ' ')
-            {
+            } else if (ch == ' ') {
                 m_nState = s_requ_HTTP_start;
             }
             break;
@@ -1551,13 +1410,10 @@ int HttpParser::execute(const char *stream,
             break;
 
         case s_requ_line_done:
-            if (ch == '\r')
-            {
+            if (ch == '\r') {
                 m_nState = s_headers_almost_done;
                 break;
-            }
-            else if (ch == '\n')
-            {
+            } else if (ch == '\n') {
                 m_nState = s_headers_done;
                 break;
             }
@@ -1579,8 +1435,7 @@ int HttpParser::execute(const char *stream,
                 m_nState = s_header_almost_done;
             else if (ch == '\n')
                 m_nState = s_header_done;
-            else if (isAlphaNum(ch) ||
-                     ch == ':')
+            else if (isAlphaNum(ch) || ch == ':')
                 m_nState = s_header;
             break;
 
@@ -1591,8 +1446,7 @@ int HttpParser::execute(const char *stream,
             break;
 
         case s_header_done:
-            if (isAlphaNum(ch) ||
-                ch == ':')
+            if (isAlphaNum(ch) || ch == ':')
                 m_nState = s_header_start;
             else if (ch == '\r')
                 m_nState = s_headers_almost_done;
@@ -1635,23 +1489,21 @@ int HttpParser::execute(const char *stream,
     //parse http content done
     //parse headers,content,
 
-    if (request->type == HTTP_TYPE_REQUEST)
-    {
+    if (request->type == HTTP_TYPE_REQUEST) {
         request->method = getMethod(begin + method_begin, method_len);
         request->method_s = std::string(begin + method_begin, method_len);
 
         request->url = new Url;
         return_val = parseUrl(begin + url_begin,
-                              url_len,
-                              request->url);
+            url_len,
+            request->url);
         if (return_val == -1)
             goto error;
         //change goto error command
-    }
-    else
-    {
+    } else {
         //HTTP_TYPE_RESPONSE
         request->statusCode = m_nStatusCode;
+        request->statusPhrase = std::string(status_phrase_begin, status_phrase_len);
     }
 
     request->http_version_major = m_nHttpVersionMajor;
@@ -1659,14 +1511,14 @@ int HttpParser::execute(const char *stream,
 
     //parse headers information.
     request->headers = new HttpHeaders;
-    request->headers->data = (char *)begin;
+    request->headers->data = (char*)begin;
     request->headers->offset = headers_begin;
     request->headers->len = headers_len;
 
     return_val = parseHeaders(begin,
-                              headers_begin,
-                              headers_len,
-                              request->headers);
+        headers_begin,
+        headers_len,
+        request->headers);
 
     if (return_val == -1)
         goto error;
@@ -1677,52 +1529,40 @@ int HttpParser::execute(const char *stream,
 
     //switch body type : chunk or end-by-eof or end-by-length
     { //must keep this "{}", because goto command
-        HttpHeaders *hs = request->headers;
-        if (hs->content_identify_length && hs->chunked)
-        {
+        HttpHeaders* hs = request->headers;
+        if (hs->content_identify_length && hs->chunked) {
             //std::cout << "[Debug] both have length and chunked error\n";
-        }
-        else if (hs->content_identify_length && !hs->chunked)
-        {
+        } else if (hs->content_identify_length && !hs->chunked) {
             //std::cout << "[Debug] identify body by length\n";
             body_type = t_http_body_end_by_length;
             content_length = hs->content_length_n;
-        }
-        else if (!hs->content_identify_length && hs->chunked)
-        {
+        } else if (!hs->content_identify_length && hs->chunked) {
             //std::cout << "[Debug] identify body by chunk\n";
             body_type = t_http_body_chunked;
-        }
-        else
-        {
+        } else {
             //std::cout << "[Debug] identify body by eof\n";
             body_type = t_http_body_end_by_eof;
         }
 
-        if (m_nHttpVersionMajor * 10 + m_nHttpVersionMinor <= 9)
-        {
+        if (m_nHttpVersionMajor * 10 + m_nHttpVersionMinor <= 9) {
             body_type = t_http_body_skip;
         }
 
-        if (request->method == HTTP_METHOD_HEAD)
-        {
+        if (request->method == HTTP_METHOD_HEAD) {
             body_type = t_http_body_skip;
         }
 
-        if (!hs->valid_host && m_nHttpVersionMajor * 10 + m_nHttpVersionMinor >= 11)
-        {
+        if (!hs->valid_host && m_nHttpVersionMajor * 10 + m_nHttpVersionMinor >= 11) {
             //printf("Must have host field in HTTP/%d.%d\n", m_nHttpVersionMajor, m_nHttpVersionMinor);
             //error
         }
 
-        if (request->method == HTTP_METHOD_PUT && !hs->valid_content_length)
-        {
+        if (request->method == HTTP_METHOD_PUT && !hs->valid_content_length) {
             //printf("Must have content in method PUT\n");
             //error
         }
 
-        if (request->method == HTTP_METHOD_TRACE)
-        {
+        if (request->method == HTTP_METHOD_TRACE) {
             //printf("Client request with method TRACE\n");
         }
 
@@ -1734,8 +1574,7 @@ int HttpParser::execute(const char *stream,
             //search google
         }
 
-        if (request->method == HTTP_METHOD_CONNECT && m_nHttpVersionMajor * 10 + m_nHttpVersionMinor <= 10)
-        {
+        if (request->method == HTTP_METHOD_CONNECT && m_nHttpVersionMajor * 10 + m_nHttpVersionMinor <= 10) {
             //https://blog.csdn.net/kobejayandy/article/details/24606521
         }
     }

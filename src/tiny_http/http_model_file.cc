@@ -12,6 +12,7 @@
  */
 
 #include <tiny_base/log.h>
+#include <tiny_base/memorypool.h> 
 #include <tiny_http/http_model_file.h>
 
 #include <errno.h>
@@ -24,6 +25,32 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <vector>
+
+int isRegularFile(const std::string& fname)
+{
+    struct stat info;
+    int return_val;
+
+    return_val = stat(fname.c_str(), &info);
+    if (return_val < 0) {
+        // std::cout << "[Debug] responser get file (" << fname << ") stat failed" << std::endl;
+        if (errno == ENOENT) {
+            // std::cout << "no such file or directory"
+            // << std::endl;
+        }
+        return -1;
+    }
+
+    if (S_ISDIR(info.st_mode)) {
+        return 1;
+    }
+
+    if (S_ISREG(info.st_mode)) {
+        return 0;
+    }
+
+    return return_val;
+}
 
 std::string getType(const std::string& f)
 {
@@ -69,85 +96,97 @@ std::string getMimeType(const std::string& type)
     return res;
 }
 
-int initFile(File* file, const std::string& fname)
+int HttpFile::setFile(const std::string& fname)
 {
-    file->name = fname;
-    file->offset = 0;
+    name = fname;
+    offset = 0;
+    valid = false;
 
-    int return_val = stat(file->name.c_str(), &(file->info));
+    int return_val = stat(name.c_str(), &info);
     if (return_val < 0) {
-        std::cout << "[Debug] responser get file (" << file->name << ") stat failed" << std::endl;
         if (errno == ENOENT) {
-            std::cout << "no such file or directory"
-                      << std::endl;
         }
         return -1;
     }
 
-    if (S_ISDIR(file->info.st_mode)) {
-        std::cout << "[Debug] responser file (" << file->name << ") is not regular file" << std::endl;
-        file->name = fname + "/index.html";
-
-        std::vector<std::string> indexpages;
-        indexpages.push_back("index.html");
-        indexpages.push_back("index.htm");
-        indexpages.push_back("index.php");
-
-        unsigned int i = 0;
-        for (i = 0; i < indexpages.size(); i++) {
-            file->name = fname + "/" + indexpages[i];
-            return_val = stat(file->name.c_str(), &(file->info));
-            if (0 == return_val) {
-                break;
-            }
+    return_val = open(name.c_str(), O_RDONLY);
+    if (return_val < 0) {
+        if (errno == EACCES) {
+            // std::cout << "owner hasn't read permission\n";
         }
+        return -1;
+    }
 
-        if (indexpages.size() == i) {
-            std::cout << "no file to match indexpage" << std::endl;
-            return -1;
-        } else {
+    type = getType(name);
+    mime_type = getMimeType(type);
+    valid = true;
+    fd = return_val;
+
+    LOG(Debug) << "response file:" << name << std::endl;
+    return 0;
+}
+
+int HttpFile::setPathWithDefault(const std::string& path, const std::vector<std::string>& pages)
+{
+    int return_val;
+    std::string tmp_file_name;
+
+    for (auto t : pages) {
+        tmp_file_name = path + "/" + t;
+
+        return_val = setFile(tmp_file_name);
+        if (!return_val) {
             return 0;
         }
     }
 
-    file->type = getType(file->name);
-    file->mime_type = getMimeType(file->type);
-
-    return_val = open(file->name.c_str(), O_RDONLY);
-    if (return_val < 0) {
-        std::cout << "[Debug] responser open file (" << file->name << ") failed" << std::endl;
-        if (errno == EACCES) {
-            std::cout << "owner hasn't read permission\n";
-        }
-        return -1;
-    }
-
-    file->valid = true;
-    file->fd = return_val;
-    return 0;
+    return -1;
 }
 
-void destoryFile(File* file)
+void putData(chain_t* chain)
 {
-    if (file->valid)
-        close(file->fd);
+    if (!valid || chain == nullptr) {
+        return;
+    }
+
+    unsigned int chain_size;
+    chain_t* tmp_chain;
+    buffer_t* tmp_buffer;
+
+    chain_size = 0;
+    tmp_chain = chain;
+    while(tmp_chain) {
+        tmp_buffer = tmp_chain->buffer;
+        chain_size += tmp_buffer->end - tmp_buffer->begin;
+
+        tmp_chain = tmp_chain->next;
+    }
+
+    LOG(Debug) << "file size(" << info.st_size << "),"
+               << "chain size(" << chain_size << ")\n";
 }
 
-int sendfile(int outFd, File* file)
+HttpFile::~HttpFile()
 {
-    if (outFd == 0) {
-        LOG(Debug) << "[model file] sendfile " << file->name << std::endl;
-        return 1;
-    }
-
-    // TODO: Change this code to tiny_core_model.
-    ssize_t res = sendfile(outFd, file->fd, &(file->offset), file->info.st_size);
-    if (res < 0) {
-        //print_error("open html file error");//TODO
-        std::cout << "[Debug] responser sendfile (" << file->name << ") failed" << std::endl;
-        printf("%s\n", strerror(errno));
-    }
-    //std::cout << "[Debug] responser sendfile size =" << res << std::endl;
-
-    return res;
+    if (valid)
+        close(fd);
 }
+
+// int sendfile(int outFd, HttpFile* file)
+// {
+//     if (outFd == 0) {
+//         LOG(Debug) << "[model file] sendfile " << file->name << std::endl;
+//         return 1;
+//     }
+
+//     // TODO: Change this code to tiny_core_model.
+//     ssize_t res = sendfile(outFd, file->fd, &(file->offset), file->info.st_size);
+//     if (res < 0) {
+//         //print_error("open html file error");//TODO
+//         std::cout << "[Debug] responser sendfile (" << file->name << ") failed" << std::endl;
+//         printf("%s\n", strerror(errno));
+//     }
+//     //std::cout << "[Debug] responser sendfile size =" << res << std::endl;
+
+//     return res;
+// }

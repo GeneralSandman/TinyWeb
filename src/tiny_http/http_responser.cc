@@ -11,14 +11,15 @@
  *
  */
 
+#include <TinyWebConfig.h>
+#include <tiny_base/log.h>
 #include <tiny_struct/sdstr_t.h>
 #include <tiny_http/http.h>
 #include <tiny_http/http_parser.h>
+#include <tiny_http/http_responser.h>
 
 #include <iostream>
 #include <string>
-
-#define TINYWEB_VERSION "TinyWeb/0.0.1"
 
 void specialResponseBody(enum http_status s, std::string& res)
 {
@@ -41,11 +42,13 @@ void specialResponseBody(enum http_status s, std::string& res)
     } else {
         res = param1 + tmp + param2 + tmp + param3;
     }
+
+    LOG(Debug) << "response special body\n";
 }
 
 HttpResponser::HttpResponser()
 {
-    std::cout << "class HttpResponser constructor\n";
+    LOG(Debug) << "class HttpResponser constructor\n";
 }
 
 void HttpResponser::responseLineToStr(const HttpResponseLine* line, sdstr* line_str)
@@ -62,6 +65,7 @@ void HttpResponser::responseHeadersToStr(HttpResponseHeaders* headers, sdstr* re
 {
     sdstr tmp;
     sdsnewempty(&tmp, 256); // more efficient
+
     if (headers->connection_keep_alive) {
         sdscat(&tmp, "Connection: keep-alive\r\n");
     } else if (headers->connection_close) {
@@ -94,8 +98,12 @@ void HttpResponser::responseHeadersToStr(HttpResponseHeaders* headers, sdstr* re
 void HttpResponser::buildResponse(const HttpRequest* req, HttpResponse* response)
 {
     Url* url = req->url;
+    sdstr host_name;
     sdstr wwwpath;
+
+    sdsnewempty(&host_name);
     sdsnewempty(&wwwpath);
+
     sdscat(&wwwpath, "/home/dell/TinyWeb/www");
     if (url->field_set & (1 << HTTP_UF_PATH)) {
         unsigned int off = url->fields[HTTP_UF_PATH].offset;
@@ -117,21 +125,22 @@ void HttpResponser::buildResponse(const HttpRequest* req, HttpResponse* response
     headers->chunked = 1;
     headers->server = 1;
 
-    File* inputFile = &(response->file);
-    std::string fname(wwwpath.data, wwwpath.len); // change to sdstr
-    int return_val = initFile(inputFile, fname);
-    if (return_val < 0) {
-        return;
-    }
+    // File* inputFile = &(response->file);
+    // std::string fname(wwwpath.data, wwwpath.len); // change to sdstr
+    // int return_val = initFile(inputFile, fname);
+    // if (return_val < 0) {
+    //     return;
+    // }
 
-    headers->file_type = response->file.mime_type;
-    headers->valid_content_length = 1;
-    headers->content_length_n = response->file.info.st_size;
+    // headers->file_type = response->file.mime_type;
+    // headers->valid_content_length = 1;
+    // headers->content_length_n = response->file.info.st_size;
 
+    destory(&host_name);
     destory(&wwwpath);
 }
 
-void HttpResponser::response(const HttpRequest* req)
+void HttpResponser::response(const HttpRequest* req, std::string& data)
 {
     HttpResponse* resp = new HttpResponse;
     buildResponse(req, resp);
@@ -142,14 +151,15 @@ void HttpResponser::response(const HttpRequest* req)
     responseLineToStr(&(resp->line), &result);
     responseHeadersToStr(&(resp->headers), &result);
 
-    printf(&result);
-    sendfile(0, &(resp->file));
+    // printf(&result);
+    // sendfile(0, &(resp->file));
+    data.assign((const char*)result.data, result.len);
 
     destory(&result);
-    destoryFile(&(resp->file));
+    // destoryFile(&(resp->file));
 }
 
 HttpResponser::~HttpResponser()
 {
-    std::cout << "class HttpResponser destructor\n";
+    LOG(Debug) << "class HttpResponser destructor\n";
 }

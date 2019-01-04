@@ -14,32 +14,29 @@
 #ifndef HTTP_RESPONSER_H
 #define HTTP_REsPONSER_H
 
+#include <TinyWebConfig.h>
 #include <tiny_http/http.h>
 #include <tiny_http/http_model_file.h>
 #include <tiny_http/http_parser.h>
-#include <TinyWebConfig.h>
 
 #include <iostream>
 #include <list>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
-void specialResponseBody(enum http_status s, std::string &res);
+void specialResponseBody(enum http_status s, std::string& res);
 
-
-typedef struct HttpResponseLine
-{
+typedef struct HttpResponseLine {
 
     unsigned int http_version_major : 8;
     unsigned int http_version_minor : 8;
 
     enum http_status status;
 
-}HttpResponseLine;
+} HttpResponseLine;
 
-typedef struct HttpResponseHeaders
-{
-    std::list<HttpHeader *> generals;
+typedef struct HttpResponseHeaders {
+    std::list<HttpHeader*> generals;
 
     std::string file_type;
 
@@ -54,30 +51,27 @@ typedef struct HttpResponseHeaders
     unsigned int server : 1;
 
     unsigned int content_length_n;
-}HttpResponseHeaders;
+} HttpResponseHeaders;
 
-typedef struct HttpResponse
-{
+typedef struct HttpResponse {
     HttpResponseLine line;
     HttpResponseHeaders headers;
-    File file;
+    HttpFile file;
 
-}HttpResponse;
+} HttpResponse;
 
+class HttpResponser {
 
-class HttpResponser
-{
+public:
+    HttpResponser();
 
-    public:
-        HttpResponser();
+    void responseLineToStr(const HttpResponseLine* line, sdstr* line_str);
+    void responseHeadersToStr(HttpResponseHeaders* headers, sdstr* res);
 
-        void responseLineToStr(const HttpResponseLine *line, sdstr *line_str);
-        void responseHeadersToStr(HttpResponseHeaders *headers, sdstr *res);
+    void buildResponse(const HttpRequest* req, HttpResponse* response);
+    void response(const HttpRequest* req, std::string& data);
 
-        void buildResponse(const HttpRequest *req, HttpResponse * response);
-        void response(const HttpRequest *req);
-
-        ~HttpResponser();
+    ~HttpResponser();
 };
 
 #endif

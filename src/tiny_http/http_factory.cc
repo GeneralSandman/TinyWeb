@@ -11,20 +11,17 @@
  *
  */
 
-
 #include <tiny_base/log.h>
 #include <tiny_core/factory.h>
 #include <tiny_http/http_factory.h>
 
-/*------------WebServerFactory-------------*/
-
-WebServerFactory::WebServerFactory(EventLoop *loop, Protocol *protocol)
+WebServerFactory::WebServerFactory(EventLoop* loop, Protocol* protocol)
     : Factory(loop, protocol)
 {
     LOG(Debug) << "class WebServerFactory constructor\n";
 }
 
-void WebServerFactory::buildProtocol(Protocol *newProt)
+void WebServerFactory::buildProtocol(Protocol* newProt)
 {
     //set member of Protocol.
 }
@@ -33,5 +30,3 @@ WebServerFactory::~WebServerFactory()
 {
     LOG(Debug) << "class WebServerFactory destructor\n";
 }
-
-/*------------WebServerFactory-------------*/

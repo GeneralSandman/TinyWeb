@@ -11,6 +11,7 @@
  *
  */
 
+#include <tiny_base/configer.h>
 #include <tiny_http/http_model_file.h>
 
 #include <iostream>
@@ -19,55 +20,78 @@ using namespace std;
 
 void testFile()
 {
-    std::cout << "input file =";
-    std::string fname;
-    std::cin >> fname;
+    std::string file = "../../TinyWeb.conf";
+    Configer& configer = Configer::getConfigerInstance();
+    configer.setConfigerFile(file);
 
-    File inputFile;
-    
-    int return_val = initFile(&inputFile, fname);
-    if(return_val < 0)
-    {
-        std::cout << return_val << std::endl;
-        return ;
+    bool debug = true;
+    if (0 == configer.loadConfig(debug))
+        std::cout << "++load config successfull\n";
+    else
+        std::cout << "--load config failed\n";
+    std::cout << std::endl;
+
+    std::string servername = "dissigil.cn";
+    std::string wwwpath;
+
+    ServerConfig server = configer.getServerConfig(servername);
+    wwwpath = server.www;
+
+    std::cout << "indexpage:";
+    for (auto t : server.indexpage) {
+        std::cout << t << " ";
     }
+    std::cout << std::endl;
 
-    sendfile(0, &inputFile);
+    vector<std::string> files;
+    files.push_back("/");
+    files.push_back("/index.html");
+    files.push_back("/index.htm");
+    files.push_back("/index.php");
+    files.push_back("/test/test.php");
+    files.push_back("/blog/");
+    files.push_back("/tests/");
+    files.push_back("/ajsldfaj.html");
 
-    destoryFile(&inputFile);
+    int file_type;
+    int return_val;
+
+    for (auto f : files) {
+
+        f = wwwpath + f;
+        std::cout << f << std::endl;
+
+        HttpFile file;
+        file_type = isRegularFile(f);
+        if (0 == file_type) {
+            std::cout << "file:\n";
+            return_val = file.setFile(f);
+        } else if (1 == file_type) {
+            std::cout << "path:\n";
+            return_val = file.setPathWithDefault(f, server.indexpage);
+            // TODO:if hasn't default index page in , go to sepical file
+        } else if (-1 == file_type) {
+            std::cout << "sepical file:\n";
+        }
+
+        if (!return_val) {
+            std::cout << "++file exit" << std::endl;
+        } else {
+            std::cout << "--file not exit" << std::endl;
+        }
+
+        std::cout << std::endl;
+    }
 }
 
 void testFile2()
 {
-
-    std::cout << "input file =";
-    std::string fname;
-    std::cin >> fname;
-
-    File inputFile;
-    
-    int return_val = initFile(&inputFile, fname);
-    if(return_val < 0)
-    {
-        std::cout << return_val << std::endl;
-        return ;
-    }
-
-    time_t t = inputFile.info.st_mtime;
-    char tmpBuf[156];
-    strftime(tmpBuf, 156, "%Y-%m-%d %H:%M:%S", localtime(&t)); //format date and time.
-
-    std::cout << "last modified time:" << tmpBuf << std::endl;
-    sendfile(2, &inputFile);
-
-    destoryFile(&inputFile);
-
 }
 
 int main()
 {
     testFile();
-    // testFile2();
+    testFile2();
 
     return 0;
 }

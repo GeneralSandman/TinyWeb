@@ -54,22 +54,22 @@ inline ssize_t rio_readn(int fd, void* usrbuf, size_t n)
     return (n - nleft); // 返回已经读取的字节数
 }
 
-#define FCGI_MAX_LENGTH 0xFFFF // 允许传输的最大数据长度65536
-#define FCGI_HOST "172.17.0.2" // php-fpm地址
-#define FCGI_PORT 9000         // php-fpm监听的端口地址
+#define FCGI_MAX_LENGTH 0xFFFF
+#define FCGI_HOST "172.17.0.2"
+#define FCGI_PORT 9000
 
-#define FCGI_VERSION_1 1 // fastcgi协议版本
+#define FCGI_VERSION_1 1
 
-#define FCGI_HEADER_LEN 8 // 协议包头长度
+#define FCGI_HEADER_LEN 8
 
 // FCGI type
-#define FCGI_BEGIN_REQUEST 1 // 请求开始记录类型
+#define FCGI_BEGIN_REQUEST 1
 #define FCGI_ABORT_REQUEST 2
-#define FCGI_END_REQUEST 3 // 响应结束记录类型
-#define FCGI_PARAMS 4      // 传输名值对数据
-#define FCGI_STDIN 5       // 传输输入数据，例如post数据
-#define FCGI_STDOUT 6      // php-fpm响应数据输出
-#define FCGI_STDERR 7      // php-fpm错误输出
+#define FCGI_END_REQUEST 3
+#define FCGI_PARAMS 4
+#define FCGI_STDIN 5
+#define FCGI_STDOUT 6
+#define FCGI_STDERR 7
 #define FCGI_DATA 8
 
 // FCGI role
@@ -77,7 +77,7 @@ inline ssize_t rio_readn(int fd, void* usrbuf, size_t n)
 #define FCGI_AUTHORIZER 2
 #define FCGI_FILTER 3
 
-// 为1，表示php-fpm响应结束不会关闭该请求连接
+// FCGI connection
 #define FCGI_CLOSE 0
 #define FCGI_KEEP_CONN 1
 

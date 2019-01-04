@@ -17,16 +17,12 @@
 #include <tiny_base/log.h>
 #include <tiny_core/factory.h>
 
-/*-------------WebServerFactory------------*/
-
-class WebServerFactory : public Factory
-{
-    private:
-    public:
-        WebServerFactory(EventLoop *, Protocol *);
-        virtual void buildProtocol(Protocol *newProt);
-        virtual ~WebServerFactory();
+class WebServerFactory : public Factory {
+private:
+public:
+    WebServerFactory(EventLoop*, Protocol*);
+    virtual void buildProtocol(Protocol* newProt);
+    virtual ~WebServerFactory();
 };
 
 #endif // !HTTP_FACTORY_H
-

@@ -30,7 +30,7 @@ void WebProtocol::connectionMade()
 
 void WebProtocol::dataReceived(const std::string &data)
 {
-    LOG(Info) << "get data\n";
+    LOG(Info) << "WebProtocol get data\n";
 
     HttpParserSettings settings;
     HttpRequest *result = new HttpRequest;
@@ -48,7 +48,9 @@ void WebProtocol::dataReceived(const std::string &data)
     if (res)
     {
         HttpResponser responser;
-        responser.response(result);
+        std::string data;
+
+        responser.response(result, data);
     }
 
     delete result;

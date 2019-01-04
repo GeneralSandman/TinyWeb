@@ -5,8 +5,8 @@
  *Web:www.dissigil.cn
  */
 
-/*---class Cache---
- *how to design this class??
+/*---XXX---
+ *
  ****************************************
  *
  */
@@ -14,12 +14,11 @@
 #ifndef HTTP_CACHE_H
 #define HTTP_CACHE_H
 
-class Cache
-{
-    private:
-    public:
-        Cache();
-        ~Cache();
+class Cache {
+private:
+public:
+    Cache();
+    ~Cache();
 };
 
 #endif // !MEMORY_POOL_H
