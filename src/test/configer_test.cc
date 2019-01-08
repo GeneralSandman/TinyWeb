@@ -86,6 +86,22 @@ void test2()
     std::cout << log.path << std::endl;
     std::cout << log.debugfile << std::endl;
     std::cout << log.fatalfile << std::endl;
+
+    std::cout << "======mimetype\n";
+    std::vector<std::string> filetypes;
+    filetypes.push_back("asdf");
+    filetypes.push_back("html");
+    filetypes.push_back("htm");
+    filetypes.push_back("shtml");
+    filetypes.push_back("jpg");
+    filetypes.push_back("jpeg");
+    filetypes.push_back("js");
+    filetypes.push_back("css");
+
+    for(auto t:filetypes) {
+        std::cout << t << " " << configer.getMimeType(t) << std::endl;
+    }
+
 }
 
 void test3()

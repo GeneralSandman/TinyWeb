@@ -20,6 +20,7 @@
 #include <list>
 #include <string>
 #include <vector>
+#include <unordered_map> 
 
 class BasicConfig {
 public:
@@ -99,6 +100,7 @@ private:
     std::vector<CacheConfig> cacheConf;
     std::vector<ServerConfig> serverConf;
     LogConfig logConf;
+    std::unordered_map<std::string,std::string> mimeTypes;
 
     Configer();
     Configer(const Configer& c) {}
@@ -107,11 +109,11 @@ private:
     {
         return (conf.name == cachename);
         // auto it = find(std::begin(conf.name),
-            // std::end(conf.name),
-            // cachename);
+        // std::end(conf.name),
+        // cachename);
         // return (it != std::end(conf.name));
     }
-    
+
     bool haveServerName(const ServerConfig& conf, const std::string& servername)
     {
         auto it = find(std::begin(conf.servername),
@@ -135,6 +137,8 @@ public:
     const CacheConfig& getCacheConfig(const std::string& cachename);
     const ServerConfig& getServerConfig(const std::string& servername);
     const LogConfig& getLogConfig();
+
+    std::string getMimeType(const std::string& file_type);
     ~Configer();
 };
 
