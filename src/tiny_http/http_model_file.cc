@@ -11,8 +11,9 @@
  *
  */
 
+#include <tiny_base/configer.h>
 #include <tiny_base/log.h>
-#include <tiny_base/memorypool.h> 
+#include <tiny_base/memorypool.h>
 #include <tiny_http/http_model_file.h>
 
 #include <errno.h>
@@ -70,32 +71,6 @@ std::string getType(const std::string& f)
     return res;
 }
 
-std::string getMimeType(const std::string& type)
-{
-    //TODO: change code
-    std::string res;
-
-    if ("html" == type) {
-        res = "text/html";
-    } else if ("htm" == type) {
-        res = "text/htm";
-    } else if ("css" == type) {
-        res = "text/css";
-    } else if ("js" == type) {
-        res = "application/javascript";
-    } else if ("bmp" == type) {
-        res = "image/bmp";
-    } else if ("gif" == type) {
-        res = "image/gif";
-    } else if ("jpeg" == type) {
-        res = "image/jpeg";
-    } else if ("png" == type) {
-        res = "image/png";
-    }
-
-    return res;
-}
-
 int HttpFile::setFile(const std::string& fname)
 {
     name = fname;
@@ -114,11 +89,13 @@ int HttpFile::setFile(const std::string& fname)
         if (errno == EACCES) {
             // std::cout << "owner hasn't read permission\n";
         }
-        return -1;
+        return -2;
     }
 
     type = getType(name);
-    mime_type = getMimeType(type);
+    Configer& configer = Configer::getConfigerInstance();
+    mime_type = configer.getMimeType(type);
+    std::cout << "type:" << type << ",mime_type:" << mime_type << std::endl;
     valid = true;
     fd = return_val;
 
@@ -135,7 +112,7 @@ int HttpFile::setPathWithDefault(const std::string& path, const std::vector<std:
         tmp_file_name = path + "/" + t;
 
         return_val = setFile(tmp_file_name);
-        if (!return_val) {
+        if (0 == return_val) {
             return 0;
         }
     }
@@ -143,7 +120,7 @@ int HttpFile::setPathWithDefault(const std::string& path, const std::vector<std:
     return -1;
 }
 
-void putData(chain_t* chain)
+void HttpFile::getData(chain_t* chain)
 {
     if (!valid || chain == nullptr) {
         return;
@@ -155,7 +132,7 @@ void putData(chain_t* chain)
 
     chain_size = 0;
     tmp_chain = chain;
-    while(tmp_chain) {
+    while (tmp_chain) {
         tmp_buffer = tmp_chain->buffer;
         chain_size += tmp_buffer->end - tmp_buffer->begin;
 

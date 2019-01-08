@@ -12,11 +12,13 @@
  */
 
 #include <TinyWebConfig.h>
+#include <tiny_base/configer.h>
 #include <tiny_base/log.h>
-#include <tiny_struct/sdstr_t.h>
+#include <tiny_base/memorypool.h>
 #include <tiny_http/http.h>
 #include <tiny_http/http_parser.h>
 #include <tiny_http/http_responser.h>
+#include <tiny_struct/sdstr_t.h>
 
 #include <iostream>
 #include <string>
@@ -37,6 +39,7 @@ void specialResponseBody(enum http_status s, std::string& res)
     std::string code(httpStatusCode(s));
     std::string phrase(httpStatusStr(s));
     std::string tmp = code + " " + phrase;
+
     if (code == "<invalid>") {
         res = "<invalid>";
     } else {
@@ -98,22 +101,47 @@ void HttpResponser::responseHeadersToStr(HttpResponseHeaders* headers, sdstr* re
 void HttpResponser::buildResponse(const HttpRequest* req, HttpResponse* response)
 {
     Url* url = req->url;
-    sdstr host_name;
-    sdstr wwwpath;
+    sdstr file_path;
+    HttpFile* file;
+    int file_type;
+    int return_val;
 
-    sdsnewempty(&host_name);
-    sdsnewempty(&wwwpath);
+    sdsnewempty(&file_path);
+    file = &response->file;
 
-    sdscat(&wwwpath, "/home/dell/TinyWeb/www");
+    // Get server-configer.
+    std::string server_name = "dissigil.cn";
+    Configer& configer = Configer::getConfigerInstance();
+    ServerConfig server = configer.getServerConfig(server_name);
+
+    sdsncat(&file_path, server.www.c_str(), server.www.size());
+
+    // Get request info and init response.
     if (url->field_set & (1 << HTTP_UF_PATH)) {
         unsigned int off = url->fields[HTTP_UF_PATH].offset;
         unsigned int len = url->fields[HTTP_UF_PATH].len;
-        sdsncat(&wwwpath, url->data + off, len);
-    } else {
-        sdscat(&wwwpath, "/index.html");
+        sdsncat(&file_path, url->data + off, len);
     }
-    std::cout << "file=";
-    printf(&wwwpath);
+
+    // Init HttpFile struct.
+    std::string f(file_path.data, file_path.len);
+    file_type = isRegularFile(f);
+    if (0 == file_type) {
+        // std::cout << "file:\n";
+        return_val = file->setFile(f);
+    } else if (1 == file_type) {
+        // std::cout << "path:\n";
+        return_val = file->setPathWithDefault(f, server.indexpage);
+        // TODO:if hasn't default index page in , go to sepical file
+    } else if (-1 == file_type) {
+        // std::cout << "sepical file:\n";
+    }
+
+    if (!return_val) {
+        std::cout << "++file exit" << std::endl;
+    } else {
+        std::cout << "--file not exit" << std::endl;
+    }
 
     HttpResponseLine* line = &(response->line);
     line->http_version_major = req->http_version_major;
@@ -121,29 +149,49 @@ void HttpResponser::buildResponse(const HttpRequest* req, HttpResponse* response
     line->status = HTTP_STATUS_OK;
 
     HttpResponseHeaders* headers = &(response->headers);
-    headers->connection_keep_alive = 1;
-    headers->chunked = 1;
+    headers->connection_keep_alive = 0;
+    headers->chunked = 0;
     headers->server = 1;
 
-    // File* inputFile = &(response->file);
-    // std::string fname(wwwpath.data, wwwpath.len); // change to sdstr
-    // int return_val = initFile(inputFile, fname);
-    // if (return_val < 0) {
-    //     return;
-    // }
+    headers->file_type = file->mime_type;
 
-    // headers->file_type = response->file.mime_type;
-    // headers->valid_content_length = 1;
-    // headers->content_length_n = response->file.info.st_size;
+    if (!return_val) {
+        headers->valid_content_length = 1;
+    }
 
-    destory(&host_name);
-    destory(&wwwpath);
+    if (headers->valid_content_length) {
+        headers->content_length_n = file->info.st_size;
+    }
+
+    destory(&file_path);
 }
 
 void HttpResponser::response(const HttpRequest* req, std::string& data)
 {
-    HttpResponse* resp = new HttpResponse;
+
+    MemoryPool pool;
+    chain_t* chain;
+    unsigned int buffer_size = 4*1024;
+    unsigned int buffer_num = 0;
+    unsigned int file_size = 0;
+    HttpResponse* resp;
+
+    resp = new HttpResponse;
+
     buildResponse(req, resp);
+
+    file_size = resp->file.getFileSize();
+    if (file_size % buffer_size) {
+        buffer_num = file_size / buffer_size + 1;
+    }
+    std::cout << "file-size:" << file_size
+              << ",buffer_size:" << buffer_size
+              << ",buffer_num:" << buffer_num
+              << std::endl;
+
+    chain = pool.getNewChain(buffer_num);
+    pool.mallocSpace(chain, buffer_size);
+    std::cout << "chain len:" << countChain(chain) << std::endl;
 
     sdstr result;
     sdsnewempty(&result);
@@ -151,12 +199,10 @@ void HttpResponser::response(const HttpRequest* req, std::string& data)
     responseLineToStr(&(resp->line), &result);
     responseHeadersToStr(&(resp->headers), &result);
 
-    // printf(&result);
-    // sendfile(0, &(resp->file));
+    // TODO: sendfile
     data.assign((const char*)result.data, result.len);
 
     destory(&result);
-    // destoryFile(&(resp->file));
 }
 
 HttpResponser::~HttpResponser()

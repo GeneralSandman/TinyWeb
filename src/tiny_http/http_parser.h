@@ -15,9 +15,9 @@
 #define HTTP_PARSER_H
 
 #include <tiny_base/log.h>
+#include <tiny_struct/sdstr_t.h>
 #include <tiny_http/http.h>
 #include <tiny_http/str_t.h>
-#include <tiny_struct/sdstr_t.h>
 
 #include <boost/function.hpp>
 #include <iostream>
@@ -52,9 +52,9 @@
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
-//It is only used by http method:method only have lower , upper or '-' char.
+// It is only used by http method:method only have lower , upper or '-' char.
 #define getLetterHashNoCase(c) ((isUpper(c) || isLower(c)) ? (toUpper(c) - 'A') : 26)
-//It is only used by http method;
+// It is only used by http method;
 #define getHash(hash, c) ((unsigned long long)((hash)*27 + getLetterHashNoCase(c)))
 
 inline short int getHex(char c)
@@ -86,6 +86,7 @@ inline int strncasecmp__(const char* s1, const char* s2, int len)
     return 0;
 }
 
+// Status of parse HTTP.
 enum state {
     s_error = 1,
 
@@ -111,7 +112,7 @@ enum state {
     s_requ_method_start,
     s_requ_method,
     s_requ_url_begin,
-    s_requ_url, //add
+    s_requ_url, // add
     s_requ_schema,
     s_requ_schema_slash,
     s_requ_schema_slash_slash,
@@ -136,7 +137,7 @@ enum state {
     s_requ_line_almost_done,
     s_requ_line_done,
 
-    //heaser statue
+    // heaser statue
     s_header_start,
     s_header,
     s_header_almost_done,
@@ -152,6 +153,7 @@ enum state {
 
 };
 
+// Status of parse host.
 enum http_host_state {
     s_http_host_error = 1,
     s_http_userinfo_start,
@@ -167,6 +169,7 @@ enum http_host_state {
     s_http_host_port
 };
 
+// Status of parse header.
 enum http_header_state {
     s_http_header_error = 1,
 
@@ -183,6 +186,7 @@ enum http_header_state {
     s_http_headers_done,
 };
 
+// Type of body.
 enum http_body_type {
     t_http_body_type_init = 1,
     t_http_body_end_by_length,
@@ -191,6 +195,7 @@ enum http_body_type {
     t_http_body_skip,
 };
 
+// Status of parse body.
 enum http_body_state {
     s_http_body_error = 1,
 
@@ -313,7 +318,6 @@ typedef struct HttpHeaders {
 
 inline void httpHeadersInit(HttpHeaders* headers)
 {
-    memset(headers, 0, sizeof(HttpHeaders));
     httpHeaderInit(headers->host);
     httpHeaderInit(headers->connection);
     httpHeaderInit(headers->if_modified_since);
@@ -542,7 +546,7 @@ public:
     int parseHost(const char* stream,
         unsigned int at,
         unsigned int len,
-        Url*& result,
+        Url* result,
         bool has_at_char);
 
     //parse url

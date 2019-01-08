@@ -14,7 +14,7 @@
 #ifndef HTTP_MODEL_FILE_H
 #define HTTP_MODEL_FILE_H
 
-#include <tiny_base/memory_pool.h>
+#include <tiny_base/memorypool.h>
 
 #include <iostream>
 #include <string.h>
@@ -48,7 +48,14 @@ public:
     int setFile(const std::string& fname);
     int setPathWithDefault(const std::string& path, const std::vector<std::string>& pages);
 
-    void putData(chain_t* chain);
+    unsigned int getFileSize()
+    {
+        if (valid) {
+            return info.st_size;
+        }
+        return 0;
+    }
+    void getData(chain_t* chain);
 
     ~HttpFile();
 };

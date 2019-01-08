@@ -14,11 +14,11 @@
 #include <tiny_http/http.h>
 #include <tiny_http/http_parser.h>
 
+#include <boost/bind.hpp>
 #include <memory>
 #include <stdio.h>
-#include <boost/bind.hpp>
-#include <unordered_map>
 #include <string.h>
+#include <unordered_map>
 
 void printHttpHeaders(const HttpHeaders* headers)
 {
@@ -155,7 +155,6 @@ void printBody(const HttpBody* body)
         }                   \
     } while (0);
 
-
 #define offsetof__(s, m) (size_t) & (((s*)0)->m)
 
 headerCallback headers_in[] = {
@@ -268,12 +267,17 @@ int HttpParser::invokeByName(const char* funName,
     const char* data,
     unsigned int len)
 {
-    if (m_pSettings == nullptr)
+    if (nullptr == m_pSettings) {
+        LOG(Warn) << "HttpParser have invalid HttpParserSettings\n";
         return -1;
+    }
+
     std::string fname(funName);
     HttpCallback fun = m_pSettings->getMethodByName(fname);
-    if (fun == nullptr)
+    if (fun == nullptr) {
+        LOG(Warn) << "HttpParser invoke invalid header-parse-callback\n";
         return -1;
+    }
 
     return fun();
 }
@@ -282,7 +286,7 @@ enum http_host_state HttpParser::parseHostChar(const char ch,
     enum http_host_state stat)
 {
     switch (ch) {
-    //invaild char in url
+    // Invalid char in url
     case '\r':
     case '\n':
     case '\t':
@@ -341,7 +345,7 @@ enum http_host_state HttpParser::parseHostChar(const char ch,
     case s_http_host_v6_end:
         if (ch == ':')
             return s_http_host_port_start;
-        //not finished
+        // FIXME:Not finished
         break;
 
     case s_http_host_v6_zone_start:
@@ -352,7 +356,7 @@ enum http_host_state HttpParser::parseHostChar(const char ch,
     case s_http_host_v6_zone:
         if (ch == ']')
             return s_http_host_v6_end;
-        //FIXME:RFC 6874
+        // FIXME:RFC 6874
         // else if (ch ==''||
         //          ch =='')
         //     return s_http_host_error;
@@ -377,7 +381,7 @@ enum http_host_state HttpParser::parseHostChar(const char ch,
 int HttpParser::parseHost(const char* stream,
     unsigned int at,
     unsigned int len,
-    Url*& result,
+    Url* result,
     bool has_at_char)
 {
     //The example of data: dissigil.cn.
@@ -503,7 +507,7 @@ enum state HttpParser::parseUrlChar(const char ch,
     case '\t':
     case '\a':
     case '\f':
-    case ' ': //invaild char in url
+    case ' ': //invalid char in url
         return s_error;
         break;
 
@@ -641,8 +645,6 @@ int HttpParser::parseUrl(const char* stream,
     Url* result)
 {
     memset(result, 0, sizeof(Url));
-
-    //assert something
 
     char* begin = (char*)stream;
     result->data = begin;
@@ -1137,7 +1139,7 @@ int HttpParser::execute(const char* stream,
 
     int return_val = 0;
     bool break_for = false;
-    int content_length = 0;
+    unsigned int content_length = 0;
 
     // enum http_method method;
     enum http_body_type body_type = t_http_body_type_init;
@@ -1588,5 +1590,6 @@ int HttpParser::execute(const char* stream,
 
 error:
     // std::cout << "parser error\n";
+    LOG(Debug) << "http request content is invalid\n";
     return -1;
 };
