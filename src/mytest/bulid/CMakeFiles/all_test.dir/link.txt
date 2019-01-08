@@ -1,1 +1,0 @@
-/usr/bin/c++    -rdynamic CMakeFiles/all_test.dir/all_test.cc.o  -o all_test tiny_http.out/libtiny_http_model.a 

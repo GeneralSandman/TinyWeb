@@ -1,1 +1,0 @@
-/usr/bin/c++    -rdynamic CMakeFiles/modelFcgi_test.dir/modelFcgi_test.cc.o  -o modelFcgi_test tiny_http.out/libtiny_http_model.a tiny_base.out/libtiny_base_model.a tiny_struct.out/libtiny_struct_model.a 

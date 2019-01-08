@@ -41,7 +41,7 @@ MemoryPool::MemoryPool()
 
 void* MemoryPool::m_fFillFreeList(size_t s)
 {
-    LOG(Debug) << "fill list\n";
+    // LOG(Debug) << "fill list\n";
     obj* result = nullptr;
 
     //We need to test the most effictive chunk_num.
@@ -51,7 +51,7 @@ void* MemoryPool::m_fFillFreeList(size_t s)
     int chunk_num = 6;
     char* p_chunk = m_fAllocChunk(s, chunk_num);
 
-    LOG(Debug) << "alloc chunks(" << chunk_num << "),size(" << s << ")\n";
+    // LOG(Debug) << "alloc chunks(" << chunk_num << "),size(" << s << ")\n";
     if (1 == chunk_num) {
         result = (obj*)p_chunk;
     } else {
@@ -72,7 +72,7 @@ void* MemoryPool::m_fFillFreeList(size_t s)
             current_chunk->p_next = next_chunk;
         }
         current_chunk->p_next = nullptr;
-        LOG(Debug) << "add chunks(" << chunk_num - 1 << ") to free list\n";
+        // LOG(Debug) << "add chunks(" << chunk_num - 1 << ") to free list\n";
     }
 
     return (void*)result;
@@ -86,7 +86,7 @@ char* MemoryPool::m_fAllocChunk(size_t s, int& chunk_num)
 
     if (left_size >= request_size) {
         //Heap has enough space for request.
-        LOG(Debug) << "get space from heap:size(" << request_size << ")\n";
+        // LOG(Debug) << "get space from heap:size(" << request_size << ")\n";
         //Heap can provie chunk_num chunks to free list.
         result = m_pHeapBegin;
         m_pHeapBegin += request_size;
@@ -95,7 +95,7 @@ char* MemoryPool::m_fAllocChunk(size_t s, int& chunk_num)
         //The number of heap provie is between 1 and chunk_num.
         chunk_num = left_size / s;
         request_size = s * chunk_num;
-        LOG(Debug) << "get space from heap:size(" << request_size << ")\n";
+        // LOG(Debug) << "get space from heap:size(" << request_size << ")\n";
         result = m_pHeapBegin;
         m_pHeapBegin += request_size;
         return result;
@@ -109,14 +109,14 @@ char* MemoryPool::m_fAllocChunk(size_t s, int& chunk_num)
             obj** list = m_nFreeList + FREELIST_INDEX(left_size);
             ((obj*)m_pHeapBegin)->p_next = *list;
             *list = (obj*)m_pHeapBegin;
-            LOG(Debug) << "add remaining heap-space to list:size(" << left_size
-                       << "),list-index(" << FREELIST_INDEX(left_size) << ")\n";
+            // LOG(Debug) << "add remaining heap-space to list:size(" << left_size
+                       // << "),list-index(" << FREELIST_INDEX(left_size) << ")\n";
         }
 
         //We have to set malloc_size carefully.
         size_t malloc_size = 2 * request_size;
         m_pHeapBegin = (char*)malloc(malloc_size);
-        LOG(Info) << "malloc" << std::endl;
+        // LOG(Info) << "malloc" << std::endl;
         m_nAllSpace += malloc_size;
 
         //Update cleanHandlers
@@ -155,7 +155,7 @@ char* MemoryPool::m_fAllocChunk(size_t s, int& chunk_num)
 
 void* MemoryPool::m_fMallocLargeSpace(size_t size)
 {
-    LOG(Debug) << "malloc large space:" << size << std::endl;
+    // LOG(Debug) << "malloc large space:" << size << std::endl;
     void* res = nullptr;
     res = malloc(size);
     if (nullptr == res) {
@@ -182,12 +182,12 @@ void* MemoryPool::allocate(size_t s)
     obj* result = nullptr;
     if (s > MAXSPACE) {
         // Get space by BasicAllocator
-        LOG(Debug) << "[MemoryPool allocate] by BasicAllocator\n";
+        // LOG(Debug) << "[MemoryPool allocate] by BasicAllocator\n";
         return BasicAllocator::allocate(s);
     } else {
         // Get free block from free list
-        LOG(Debug) << "[MemoryPool allocate] get space from list:size(" << ROUND_UP(s)
-                   << "),list-index(" << FREELIST_INDEX(s) << ")\n";
+        // LOG(Debug) << "[MemoryPool allocate] get space from list:size(" << ROUND_UP(s)
+                   // << "),list-index(" << FREELIST_INDEX(s) << ")\n";
         obj** list = m_nFreeList + FREELIST_INDEX(s);
         result = *list;
         if (result == nullptr) {
@@ -203,10 +203,10 @@ void MemoryPool::deallocate(void* p, size_t s)
     //if s > MAXSPACE :invoke free() directly,
     //else :add it to free list
     if (s > MAXSPACE) {
-        LOG(Debug) << "[MemoryPool deallocate] by BasicAllocator\n";
+        // LOG(Debug) << "[MemoryPool deallocate] by BasicAllocator\n";
         BasicAllocator::deallocate(p, s);
     } else {
-        LOG(Debug) << "[MemoryPool deallocate] place this space to free list\n";
+        // LOG(Debug) << "[MemoryPool deallocate] place this space to free list\n";
         obj** list = m_nFreeList + FREELIST_INDEX(s);
         obj* newlist = (obj*)p;
         newlist->p_next = *list;
@@ -217,7 +217,7 @@ void MemoryPool::deallocate(void* p, size_t s)
 
 void* MemoryPool::reallocate(void* p, size_t oldsize, size_t newsize)
 {
-    LOG(Debug) << "reallocate\n";
+    // LOG(Debug) << "reallocate\n";
     deallocate(p, oldsize);
     return allocate(newsize);
 }
@@ -250,7 +250,7 @@ int MemoryPool::catChain(chain_t* dest,
 
     if (!size)
         size = countChain(src);
-    std::cout << "copy size(" << size << ")" << std::endl;
+    // std::cout << "copy size(" << size << ")" << std::endl;
     new_chain = getNewChain(size);
     if (nullptr == new_chain) {
         std::cout << "get new chain error" << std::endl;
@@ -297,16 +297,18 @@ MemoryPool::~MemoryPool()
         }
         all += num * size;
         if (size) {
-            LOG(Debug) << "size(" << size
-                       << "),nums(" << num << ")\n";
+            // LOG(Debug) << "size(" << size
+                       // << "),nums(" << num << ")\n";
         }
     }
 
+    /*
     LOG(Debug) << "[SmallBlock-Summary]all space size(" << m_nAllSpace
                << "),heap size(" << m_pHeapEnd - m_pHeapBegin
                << "),free list size(" << all
                << "),allocate to user size(" << m_nAllocatedSpace
                << ")\n";
+    */
     while (m_pCleanHandlers != nullptr) {
         struct cleanup* cur = m_pCleanHandlers;
         m_pCleanHandlers = m_pCleanHandlers->next;
@@ -326,7 +328,7 @@ MemoryPool::~MemoryPool()
         blocks = blocks->next;
         free(tmp);
     }
-    LOG(Debug) << "[LargeBlock-Summary]block num(" << num << "),all-size(" << size << ")" << std::endl;
+    // LOG(Debug) << "[LargeBlock-Summary]block num(" << num << "),all-size(" << size << ")" << std::endl;
 
     LOG(Debug) << "class MemoryPool destructor\n";
 }

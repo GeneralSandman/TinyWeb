@@ -46,7 +46,7 @@ void sdsnnew(sdstr* str, const char* init, unsigned int len)
         return;
     }
 
-    std::cout << "[sds] malloc size(" << alloc << ")\n";
+    // std::cout << "[sds] malloc size(" << alloc << ")\n";
 
     memset(res, 0, alloc);
     if (nullptr != init && len) {
@@ -83,7 +83,8 @@ void sdsnewempty(sdstr* str, unsigned int alloc)
         std::cout << "[sds] malloc error\n";
         return;
     }
-    std::cout << "[sds] malloc size(" << alloc << ")\n";
+
+    // std::cout << "[sds] malloc size(" << alloc << ")\n";
     memset(res, 0, alloc);
     str->data = (char*)res;
     str->alloc = alloc;
@@ -116,7 +117,7 @@ void sdsMakeSpace(sdstr* str, unsigned int addlen)
         return;
     }
 
-    std::cout << "[sds] realloc size(" << newalloc << ")\n";
+    // std::cout << "[sds] realloc size(" << newalloc << ")\n";
 
     str->alloc = newalloc;
     str->data = (char*)tmp;

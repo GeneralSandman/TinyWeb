@@ -57,7 +57,7 @@
     "application/xspf+xml": ["xspf"],
     "application/zip": ["zip"],
 
-    "application/octet-stream": ["bin", "exe", "dll", "deb", "dmg", iso", "img", "msi", "msp", "msm"],
+    "application/octet-stream": ["bin", "exe", "dll", "deb", "dmg", "iso", "img", "msi", "msp", "msm"],
 
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ["docx"],
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ["xlsx"],
