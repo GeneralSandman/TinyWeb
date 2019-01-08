@@ -1,0 +1,1 @@
+/usr/bin/c++    -rdynamic CMakeFiles/parseUrl.dir/parseUrl_test.cc.o  -o parseUrl tiny_http.out/libtiny_http_model.a 

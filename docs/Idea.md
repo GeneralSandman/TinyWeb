@@ -124,6 +124,8 @@ file1               file2           file3   file3  file4
 
 设置sendfile Queue，到达outputBuffer消息边界时，触发相应的writeFileCallback
 
+将core中buffer的设计更改为 new-memorypool中buffer的设计，buffer 中有数据结构表示是否文件还是内存中的数据。
+
 
     proxy_connect_timeout 10;
     proxy_read_timeout 180;

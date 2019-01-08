@@ -1,0 +1,1 @@
+/usr/bin/c++    -rdynamic CMakeFiles/responser_test.dir/responser_test.cc.o  -o responser_test tiny_http.out/libtiny_http_model.a tiny_struct.out/libtiny_struct_model.a tiny_base.out/libtiny_base_model.a 

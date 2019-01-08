@@ -18,6 +18,11 @@
 
 using namespace std;
 
+void initConfige()
+{
+
+}
+
 void testFile()
 {
     std::string file = "../../TinyWeb.conf";
