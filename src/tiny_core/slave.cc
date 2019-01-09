@@ -35,9 +35,19 @@ Slave::Slave(EventLoop* loop, int num, const std::string& name)
 
 void Slave::createListenServer(int listenSocket)
 {
-    m_nListenSocketFd = listenSocket;
-    m_pServer = new Server(m_pEventLoop,
-        m_nListenAddress, listenSocket, m_pFactory);
+    // m_nListenSocketFd = listenSocket;
+    // m_pServer = new Server(m_pEventLoop,
+    // m_nListenAddress, listenSocket, m_pFactory);
+
+    // New Code
+    Protocol* protocol = new WebProtocol();
+    Factory* factory = new Factory(m_pEventLoop, protocol);
+    Server* server = new Server(m_pEventLoop, m_nListenAddress,
+        listenSocket, factory);
+    VritualMachine newMachine(protocol, factory,
+        listenSocket, server);
+
+    m_nMachines.push_back(newMachine);
 }
 
 #include <tiny_core/status.h>
@@ -49,7 +59,10 @@ extern int status_child_quit;  //CHLD
 
 void Slave::work()
 {
-    m_pServer->start();
+    // m_pServer->start();
+    for (auto t : m_nMachines) {
+        t.m_pServer->start();
+    }
     status = 1;
 
     while (status) {
@@ -63,5 +76,10 @@ void Slave::work()
 
 Slave::~Slave()
 {
+    for (auto t : m_nMachines) {
+        delete t.m_pProtocol;
+        delete t.m_pFactory;
+        delete t.m_pServer;
+    }
     LOG(Debug) << "class Slave destructor\n";
 }

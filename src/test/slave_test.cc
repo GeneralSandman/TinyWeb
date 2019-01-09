@@ -47,18 +47,35 @@ int main()
 
     int i = 0;
     std::string name = "slave";
-    int listen;
     Slave slave(loop,i,name);
 
-    Socket *socket = new Socket(createNoBlockSocket());
-    NetAddress address("172.17.0.2:9090");
-    socket->bindAddress(address);
-    listen = socket->getFd();
+    Socket *socket1,*socket2,*socket3;
+    int listen1,listen2,listen3;
+    NetAddress address1("172.17.0.2:9090");
+    NetAddress address2("172.17.0.2:9091");
+    NetAddress address3("172.17.0.2:9092");
 
-    slave.createListenServer(listen);
+    // Create server1
+    socket1 = new Socket(createNoBlockSocket());
+    socket1->bindAddress(address1);
+    listen1 = socket1->getFd();
+    slave.createListenServer(listen1);
+    // Create server2
+    socket2 = new Socket(createNoBlockSocket());
+    socket2->bindAddress(address2);
+    listen2 = socket2->getFd();
+    slave.createListenServer(listen2);
+    // Create server2
+    socket3 = new Socket(createNoBlockSocket());
+    socket3->bindAddress(address3);
+    listen3 = socket3->getFd();
+    slave.createListenServer(listen3);
+
+
     slave.work();
 
-    delete socket;
+    delete socket1;
+    delete socket2;
     delete loop;
     return 0;
 }
