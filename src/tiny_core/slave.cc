@@ -28,7 +28,7 @@ Slave::Slave(EventLoop* loop, int num, const std::string& name)
     , m_nName(name)
     , m_pProtocol(new WebProtocol())
     , m_pFactory(new Factory(m_pEventLoop, m_pProtocol))
-    , m_nListenAddress(NetAddress(int(getpid())))
+    , m_nListenAddress(NetAddress("172.17.0.2:9090"))
 {
     LOG(Debug) << "class Slave constuctor\n";
 }

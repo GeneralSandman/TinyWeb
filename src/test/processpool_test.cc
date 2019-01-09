@@ -11,17 +11,33 @@
  *
  */
 
+#include <tiny_base/configer.h> 
 #include <tiny_core/processpool.h>
 
 #include <iostream>
 
 using namespace std;
 
+void initConfiger()
+{
+    std::string file = "../../TinyWeb.conf";
+    Configer& configer = Configer::getConfigerInstance();
+    configer.setConfigerFile(file);
+
+    bool debug = true;
+    if (0 == configer.loadConfig(debug))
+        std::cout << "++load config successfull\n";
+    else
+        std::cout << "--load config failed\n";
+    std::cout << std::endl;
+}
+
 int main()
 {
+    initConfiger();
     {
         std::string loglevel = "Debug";
-        std::string logpath = "/home/dell/TinyWeb/log/";
+        std::string logpath = "/home/tinyweb/log/";
         std::string debugfile = logpath + "debug.log";
         std::string infofile = logpath + "info.log";
         std::string warnfile = logpath + "warn.log";
@@ -38,7 +54,7 @@ int main()
         std::cout << "[Process Pool Test]" << std::endl;
         ProcessPool pool;
         pool.init();
-        pool.createProcess(2);
+        pool.createProcess(1);
     }
 
     return 0;

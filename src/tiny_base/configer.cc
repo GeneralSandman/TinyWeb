@@ -203,7 +203,7 @@ const FcgiConfig& Configer::getFcgiConfig()
 
 const CacheConfig& Configer::getCacheConfig(const std::string& cachename)
 {
-    int index = 0;
+    unsigned int index = 0;
     for (; index < cacheConf.size(); index++) {
         if (haveCacheName(cacheConf[index], cachename))
             break;
@@ -218,7 +218,7 @@ const CacheConfig& Configer::getCacheConfig(const std::string& cachename)
 
 const ServerConfig& Configer::getServerConfig(const std::string& servername)
 {
-    int index = 0;
+    unsigned int index = 0;
     for (; index < serverConf.size(); index++) {
         if (haveServerName(serverConf[index], servername))
             break;

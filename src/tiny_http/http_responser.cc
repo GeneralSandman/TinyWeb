@@ -212,7 +212,7 @@ void HttpResponser::response(const HttpRequest* req, std::string& data)
         data_size = buffer->used - buffer->begin;
         chain_size += data_size;
         if (data_size) {
-            data.assign((const char*)buffer->begin, data_size);
+            data.append((const char*)buffer->begin, data_size);
         }
 
         tmp = tmp->next;

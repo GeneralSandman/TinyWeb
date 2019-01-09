@@ -13,12 +13,13 @@
 
 #include <tiny_base/log.h>
 #include <tiny_core/protocol.h>
-#include <tiny_http/http_protocol.h>
 #include <tiny_http/http_parser.h>
+#include <tiny_http/http_protocol.h>
 #include <tiny_http/http_responser.h>
 
 WebProtocol::WebProtocol()
-    : m_nKeepAlive(false)
+    : Protocol()
+    , m_nKeepAlive(false)
 {
     LOG(Debug) << "class WebProtocol constructor\n";
 }
@@ -28,29 +29,31 @@ void WebProtocol::connectionMade()
     LOG(Info) << "get a new connection\n";
 }
 
-void WebProtocol::dataReceived(const std::string &data)
+void WebProtocol::dataReceived(const std::string& data)
 {
     LOG(Info) << "WebProtocol get data\n";
 
     HttpParserSettings settings;
-    HttpRequest *result = new HttpRequest;
+    HttpRequest* result = new HttpRequest;
     int begin = 0;
 
     HttpParser parser(&settings);
     parser.setType(HTTP_TYPE_REQUEST);
 
     int tmp = parser.execute(data.c_str(),
-                             begin,
-                             data.size(),
-                             result);
+        begin,
+        data.size(),
+        result);
 
     bool res = (tmp == -1) ? false : true;
-    if (res)
-    {
+    if (res) {
         HttpResponser responser;
         std::string data;
 
         responser.response(result, data);
+
+        // Funciton of basic class.
+        sendMessage(data);
     }
 
     delete result;
