@@ -40,7 +40,7 @@ public:
     HttpFile()
         : valid(false)
         , fd(-1)
-        , offset(1)
+        , offset(0)
     {
         memset((void*)&info, 0, sizeof(info));
     }
@@ -55,6 +55,10 @@ public:
         }
         return 0;
     }
+    // appendData only used by getData(),
+    // It append data begin dest and
+    // Return the end of chain.
+    chain_t* appendData(chain_t* dest, const char* data, unsigned int len);
     void getData(chain_t* chain);
 
     ~HttpFile();

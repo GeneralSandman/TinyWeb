@@ -168,10 +168,9 @@ void HttpResponser::buildResponse(const HttpRequest* req, HttpResponse* response
 
 void HttpResponser::response(const HttpRequest* req, std::string& data)
 {
-
     MemoryPool pool;
     chain_t* chain;
-    unsigned int buffer_size = 4*1024;
+    unsigned int buffer_size = 4 * 1024;
     unsigned int buffer_num = 0;
     unsigned int file_size = 0;
     HttpResponse* resp;
@@ -181,17 +180,12 @@ void HttpResponser::response(const HttpRequest* req, std::string& data)
     buildResponse(req, resp);
 
     file_size = resp->file.getFileSize();
+    buffer_num = file_size / buffer_size;
     if (file_size % buffer_size) {
         buffer_num = file_size / buffer_size + 1;
     }
-    std::cout << "file-size:" << file_size
-              << ",buffer_size:" << buffer_size
-              << ",buffer_num:" << buffer_num
-              << std::endl;
-
     chain = pool.getNewChain(buffer_num);
     pool.mallocSpace(chain, buffer_size);
-    std::cout << "chain len:" << countChain(chain) << std::endl;
 
     sdstr result;
     sdsnewempty(&result);
@@ -199,8 +193,32 @@ void HttpResponser::response(const HttpRequest* req, std::string& data)
     responseLineToStr(&(resp->line), &result);
     responseHeadersToStr(&(resp->headers), &result);
 
-    // TODO: sendfile
+    // responseBodyToStr(&(resp->file), chain);
+    resp->file.getData(chain);
+
     data.assign((const char*)result.data, result.len);
+
+    // TODO: sendfile option
+    chain_t* tmp;
+    buffer_t* buffer;
+    unsigned int data_size;
+    unsigned int chain_size; // debug
+
+    tmp = chain;
+    chain_size = 0;
+    while (tmp) {
+        buffer = tmp->buffer;
+
+        data_size = buffer->used - buffer->begin;
+        chain_size += data_size;
+        if (data_size) {
+            data.assign((const char*)buffer->begin, data_size);
+        }
+
+        tmp = tmp->next;
+    }
+
+    LOG(Debug) << "file-size(" << file_size << "),chain-size(" << chain_size << ")\n";
 
     destory(&result);
 }
