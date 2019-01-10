@@ -11,6 +11,7 @@
  *
  */
 
+#include <tiny_base/configer.h>
 #include <tiny_base/log.h>
 #include <tiny_core/eventloop.h>
 #include <tiny_core/factory.h>
@@ -21,6 +22,7 @@
 #include <tiny_core/socket.h>
 
 #include <unistd.h>
+#include <vector>
 
 extern int status_terminate;
 extern int status_quit_softly;
@@ -31,20 +33,33 @@ Master::Master(ProcessPool* pool, EventLoop* loop, int num, const std::string& n
     , m_pEventLoop(loop)
     , m_nNumber(num)
     , m_nName(name)
-    , m_pListenSocket(new Socket(createNoBlockSocket()))
 {
     LOG(Debug) << "class Master constuctor\n";
 }
 
 void Master::init()
 {
-    NetAddress tmp("172.17.0.2:9090");
-    m_pListenSocket->bindAddress(tmp);
+    Configer& configer = Configer::getConfigerInstance();
+    std::vector<ServerConfig> serverConf = configer.getServerConfig();
+
+    for (auto t : serverConf) {
+        std::cout << "listen port:" << t.listen << std::endl;
+        NetAddress tmp("172.17.0.2", t.listen);
+        Socket* socket = new Socket(createNoBlockSocket());
+        socket->bindAddress(tmp);
+        m_pListenSockets.push_back(socket);
+        // FIXME:how to handle the problem of same listen-address.
+
+        LOG(Info) << "bind address(" << tmp.getIpPort() << ")\n";
+    }
 }
 
-int Master::getListenSocket()
+void Master::getListenSockets(std::vector<int>& result)
 {
-    return m_pListenSocket->getFd();
+    result.clear();
+    for (auto socket : m_pListenSockets) {
+        result.push_back(socket->getFd());
+    }
 }
 
 void Master::work()
@@ -69,5 +84,8 @@ void Master::work()
 
 Master::~Master()
 {
+    for (auto t : m_pListenSockets) {
+        delete t;
+    }
     LOG(Debug) << "class Master destuctor\n";
 }

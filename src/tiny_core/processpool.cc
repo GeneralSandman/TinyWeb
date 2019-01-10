@@ -50,7 +50,6 @@ ProcessPool::ProcessPool()
     : m_pEventLoop(new EventLoop())
     , m_pMaster(new Master(this, m_pEventLoop.get(), 0, "master"))
     , m_pProcess(nullptr)
-    , m_nListenSocketFd(-1)
 {
     m_nPid = getpid();
     m_pPoolInstance = this;
@@ -60,7 +59,7 @@ ProcessPool::ProcessPool()
 void ProcessPool::init()
 {
     m_pMaster->init();
-    m_nListenSocketFd = m_pMaster->getListenSocket();
+    m_pMaster->getListenSockets(m_nListenSocketFds);
 }
 
 void ProcessPool::createProcess(int nums)
@@ -89,7 +88,9 @@ void ProcessPool::createProcess(int nums)
                 i, socketpairFds);
             m_pProcess->setAsChild(int(getpid()));
             m_pProcess->setSignalHandlers();
-            m_pProcess->createListenServer(m_nListenSocketFd);
+            for (auto listenFd : m_nListenSocketFds) {
+                m_pProcess->createListenServer(listenFd);
+            }
             goto WAIT;
         } else {
             //Parent process:

@@ -65,7 +65,7 @@ int main()
     socket2->bindAddress(address2);
     listen2 = socket2->getFd();
     slave.createListenServer(listen2);
-    // Create server2
+    // Create server3
     socket3 = new Socket(createNoBlockSocket());
     socket3->bindAddress(address3);
     listen3 = socket3->getFd();
@@ -76,6 +76,7 @@ int main()
 
     delete socket1;
     delete socket2;
+    delete socket3;
     delete loop;
     return 0;
 }

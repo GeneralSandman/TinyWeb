@@ -14,7 +14,7 @@
 #ifndef SLAVE_H
 #define SLAVE_H
 
-#include <tiny_base/log.h> 
+#include <tiny_base/log.h>
 #include <tiny_core/netaddress.h>
 
 #include <string>
@@ -51,12 +51,7 @@ protected:
     int m_nNumber;
     std::string m_nName;
 
-    Protocol* m_pProtocol;
-    Factory* m_pFactory;
-
-    NetAddress m_nListenAddress;
-    int m_nListenSocketFd;
-    Server* m_pServer;
+    NetAddress m_nListenAddress; // TODO:delete
 
     std::vector<VritualMachine> m_nMachines;
 

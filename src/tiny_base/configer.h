@@ -19,8 +19,8 @@
 #include <iostream>
 #include <list>
 #include <string>
+#include <unordered_map>
 #include <vector>
-#include <unordered_map> 
 
 class BasicConfig {
 public:
@@ -100,7 +100,7 @@ private:
     std::vector<CacheConfig> cacheConf;
     std::vector<ServerConfig> serverConf;
     LogConfig logConf;
-    std::unordered_map<std::string,std::string> mimeTypes;
+    std::unordered_map<std::string, std::string> mimeTypes;
 
     Configer();
     Configer(const Configer& c) {}
@@ -136,6 +136,7 @@ public:
     const FcgiConfig& getFcgiConfig();
     const CacheConfig& getCacheConfig(const std::string& cachename);
     const ServerConfig& getServerConfig(const std::string& servername);
+    const std::vector<ServerConfig>& getServerConfig();
     const LogConfig& getLogConfig();
 
     std::string getMimeType(const std::string& file_type);

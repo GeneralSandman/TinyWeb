@@ -16,6 +16,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 class ProcessPool;
 class EventLoop;
@@ -27,14 +28,15 @@ protected:
     EventLoop* m_pEventLoop;
     int m_nNumber;
     std::string m_nName;
-    std::shared_ptr<Socket> m_pListenSocket;
+
+    std::vector<Socket*> m_pListenSockets;
 
     int status;
 
 public:
     Master(ProcessPool*, EventLoop*, int, const std::string&);
     void init();
-    int getListenSocket();
+    void getListenSockets(std::vector<int>& result);
     void work();
     ~Master();
 };

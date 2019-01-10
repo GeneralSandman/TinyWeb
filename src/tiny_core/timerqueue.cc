@@ -176,8 +176,8 @@ void TimerQueue::cancelTimer(TimerId &timerid)
     std::pair<Timer *, unsigned long long>
         cancelTimer_ = std::make_pair(timer, idnum);
 
-    std::set<std::pair<Time, Timer *>>::iterator
-        p = m_nTimers.find(cancelTimer);
+    // std::set<std::pair<Time, Timer *>>::iterator
+        // p = m_nTimers.find(cancelTimer);
     std::set<std::pair<Timer *, unsigned long long>>::iterator
         p_ = m_nActiveTimers.find(cancelTimer_);
 

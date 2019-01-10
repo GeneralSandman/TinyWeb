@@ -231,6 +231,11 @@ const ServerConfig& Configer::getServerConfig(const std::string& servername)
     return serverConf[index];
 }
 
+const std::vector<ServerConfig>& Configer::getServerConfig()
+{
+    return serverConf;
+}
+
 const LogConfig& Configer::getLogConfig()
 {
     return logConf;

@@ -60,7 +60,7 @@ private:
     std::vector<pid_t> m_nPids;
     int m_nProcessNum;
 
-    int m_nListenSocketFd;
+    std::vector<int> m_nListenSocketFds;
     SignalManager m_nSignalManager;
 
     int status;
