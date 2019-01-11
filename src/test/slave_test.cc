@@ -21,6 +21,7 @@
 #include <tiny_core/processpool.h>
 #include <tiny_core/socket.h>
 #include <tiny_core/netaddress.h>
+#include <tiny_http/http_parser.h> 
 
 
 #include <iostream> 
@@ -40,9 +41,32 @@ void initConfiger()
     std::cout << std::endl;
 }
 
-int main()
+void test1()
 {
-    initConfiger();
+    EventLoop *loop = new EventLoop();
+
+    int i = 0;
+    std::string name = "slave";
+    Slave slave(loop,i,name);
+
+    Socket *socket1,*socket2,*socket3;
+    int listen1,listen2,listen3;
+    NetAddress address1("172.17.0.2:9090");
+
+    // Create server1
+    socket1 = new Socket(createNoBlockSocket());
+    socket1->bindAddress(address1);
+    listen1 = socket1->getFd();
+    slave.createListenServer(listen1);
+
+    slave.work();
+
+    delete socket1;
+    delete loop;
+}
+
+void test2()
+{
     EventLoop *loop = new EventLoop();
 
     int i = 0;
@@ -78,5 +102,13 @@ int main()
     delete socket2;
     delete socket3;
     delete loop;
+}
+
+int main()
+{
+    initConfiger();
+    headerMeaningInit();
+    test1();
+    // test2();
     return 0;
 }

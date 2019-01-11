@@ -372,6 +372,8 @@ typedef struct HttpRequest {
 
     unsigned short headerNum;
 
+    enum http_body_type body_type;
+
     Url* url;
     HttpHeaders* headers;
     HttpBody* body;
@@ -381,17 +383,20 @@ typedef struct HttpRequest {
 inline bool endMessageByEof(const HttpRequest* request)
 {
     HttpHeaders* hs = request->headers;
+    unsigned int status_code = request->statusCode;
+    enum http_body_type body_type = request->body_type;
 
     if (hs->valid_content_length || hs->chunked)
         return false; //Don't need eof
 
     /* See RFC 2616 section 4.4 */
-    //   if (parser->status_code / 100 == 1 || /* 1xx e.g. Continue */
-    //       parser->status_code == 204 ||     /* No Content */
-    //       parser->status_code == 304 ||     /* Not Modified */
-    //       parser->flags & F_SKIPBODY) {     /* response to a HEAD request */
-    //     return 0;
-    //   }
+      if (status_code / 100 == 1 || /* 1xx e.g. Continue */
+          status_code == 204 ||     /* No Content */
+          status_code == 304 ||     /* Not Modified */
+          body_type == t_http_body_skip) {     /* response to a HEAD request */
+          // No body message.
+        return false;
+      }
 
     return true;
 }
@@ -569,6 +574,7 @@ public:
         HttpHeaders* result);
 
     int parseHeadersMeaning(HttpHeaders* headers);
+    int semanticAnalysis(HttpRequest* request);
 
     //parse body
     int parseBody(const char* stream,

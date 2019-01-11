@@ -11,6 +11,7 @@
  *
  */
 
+#include <tiny_base/log.h>
 #include <tiny_http/http.h>
 #include <tiny_http/http_parser.h>
 
@@ -978,6 +979,7 @@ int HttpParser::parseHeaders(const char* stream,
 
 int HttpParser::parseHeadersMeaning(HttpHeaders* headers)
 {
+    int return_val;
     for (auto t : headers->generals) {
         auto p = headerKeyHash.find(t->keyHash);
         if (p == headerKeyHash.end()) {
@@ -985,9 +987,101 @@ int HttpParser::parseHeadersMeaning(HttpHeaders* headers)
         } else {
             HttpHeader** tmp = (HttpHeader**)((char*)headers + p->second.offset);
             *tmp = t;
-            p->second.fun(&(t->value), headers);
+            return_val = p->second.fun(&(t->value), headers);
+
+            if (return_val !=0 ) {
+                return -1;
+            }
         }
     }
+    return 0;
+}
+
+int HttpParser::semanticAnalysis(HttpRequest* request)
+{
+    HttpHeaders* hs = request->headers;
+    bool keep_alive = shouldKeepAlive(request);
+    enum http_body_type body_type = t_http_body_type_init;
+    unsigned short method = request->method;
+    unsigned short http_version = request->http_version_major * 10 + request->http_version_minor;
+    unsigned int status_code = request->statusCode;
+
+    if (hs->content_identify_length && hs->chunked) {
+
+        // Bad request.
+        std::cout << "[Debug] headers have content-length and chunked simultaneously\n";
+        return -1;
+    } else if (hs->content_identify_length && !hs->chunked) {
+
+        // Identify body by content_length.
+        std::cout << "[Debug] identify body by length\n";
+        body_type = t_http_body_end_by_length;
+    } else if (!hs->content_identify_length && hs->chunked) {
+
+        // Identify body by chunked.
+        std::cout << "[Debug] identify body by chunked\n";
+        body_type = t_http_body_chunked;
+    } else {
+
+        // Identify body by eof.
+        // Client can detect the close of connection.
+        std::cout << "[Debug] identify body by eof\n";
+        body_type = t_http_body_end_by_eof;
+
+        /* See RFC 2616 section 4.4 */
+        if (status_code / 100 == 1 || /* 1xx e.g. Continue */
+            status_code == 204 ||     /* No Content */
+            status_code == 304        /* Not Modified */
+        ) {                           /* response to a HEAD request */
+            // No body message.
+            body_type = t_http_body_skip;
+        }
+    }
+
+    if (http_version <= 9) {
+        printf("Skip body message HTTP%d\n", http_version);
+        body_type = t_http_body_skip;
+    }
+
+    if (!hs->valid_host && http_version >= 11) {
+        // Bad request.
+        printf("Must have host field in HTTP%d\n", http_version);
+        return -1;
+    }
+
+    if (method == HTTP_METHOD_HEAD) {
+        body_type = t_http_body_skip;
+    }
+
+    if (method == HTTP_METHOD_PUT && !hs->valid_content_length) {
+        //printf("Must have content in method PUT\n");
+        // Bad request.
+    }
+
+    if (method != HTTP_METHOD_GET &&  /* GET */
+        method != HTTP_METHOD_POST && /* POST */
+        method != HTTP_METHOD_HEAD && /* HEAD */
+        method != HTTP_METHOD_PUT     /* PUT */
+    ) {
+        printf("sorry, tinyweb can't support this http-method now\n");
+    }
+
+    // if (request->method == HTTP_METHOD_TRACE) {
+    //printf("Client request with method TRACE\n");
+    // }
+
+    //if (hs->has_upgrade && hs->connection_upgrade)
+    // {
+    //Upgrade: WebSocket
+    //Connection: Upgrade
+    //search google
+    // }
+
+    // if (request->method == HTTP_METHOD_CONNECT && http_version <= 10) {
+    //https://blog.csdn.net/kobejayandy/article/details/24606521
+    // }
+
+    request->body_type = body_type;
     return 0;
 }
 
@@ -997,12 +1091,16 @@ int HttpParser::parseBody(const char* stream,
     enum http_body_type body_type,
     unsigned int content_length_n)
 {
+    if (!len) {
+        return 0;
+    }
     const char* begin = stream;
 
     enum http_body_state stat;
 
     switch (body_type) {
     case t_http_body_type_init:
+        // TODO:
         break;
 
     case t_http_body_end_by_length:
@@ -1018,6 +1116,7 @@ int HttpParser::parseBody(const char* stream,
         break;
 
     case t_http_body_skip:
+        // TODO:
         break;
     }
 
@@ -1026,7 +1125,7 @@ int HttpParser::parseBody(const char* stream,
     for (unsigned int i = 0; i < len; i++) {
         char ch = *(begin + at + i);
 
-        // std::cout << i << " " << int(stat) << std::endl;
+        printf("parseBody:%c-%d\n", ch, int(stat));
 
         switch (stat) {
         case s_http_body_error:
@@ -1530,58 +1629,17 @@ int HttpParser::execute(const char* stream,
         goto error;
 
     //switch body type : chunk or end-by-eof or end-by-length
-    { //must keep this "{}", because goto command
-        HttpHeaders* hs = request->headers;
-        if (hs->content_identify_length && hs->chunked) {
-            //std::cout << "[Debug] both have length and chunked error\n";
-        } else if (hs->content_identify_length && !hs->chunked) {
-            //std::cout << "[Debug] identify body by length\n";
-            body_type = t_http_body_end_by_length;
-            content_length = hs->content_length_n;
-        } else if (!hs->content_identify_length && hs->chunked) {
-            //std::cout << "[Debug] identify body by chunk\n";
-            body_type = t_http_body_chunked;
-        } else {
-            //std::cout << "[Debug] identify body by eof\n";
-            body_type = t_http_body_end_by_eof;
-        }
+    return_val = semanticAnalysis(request);
+    if (return_val == -1)
+        goto error;
 
-        if (m_nHttpVersionMajor * 10 + m_nHttpVersionMinor <= 9) {
-            body_type = t_http_body_skip;
-        }
-
-        if (request->method == HTTP_METHOD_HEAD) {
-            body_type = t_http_body_skip;
-        }
-
-        if (!hs->valid_host && m_nHttpVersionMajor * 10 + m_nHttpVersionMinor >= 11) {
-            //printf("Must have host field in HTTP/%d.%d\n", m_nHttpVersionMajor, m_nHttpVersionMinor);
-            //error
-        }
-
-        if (request->method == HTTP_METHOD_PUT && !hs->valid_content_length) {
-            //printf("Must have content in method PUT\n");
-            //error
-        }
-
-        if (request->method == HTTP_METHOD_TRACE) {
-            //printf("Client request with method TRACE\n");
-        }
-
-        //if (hs->has_upgrade && hs->connection_upgrade)
-        {
-            //Upgrade: WebSocket
-            //Connection: Upgrade
-            //TODO:
-            //search google
-        }
-
-        if (request->method == HTTP_METHOD_CONNECT && m_nHttpVersionMajor * 10 + m_nHttpVersionMinor <= 10) {
-            //https://blog.csdn.net/kobejayandy/article/details/24606521
-        }
+    // FIXME: to handle the body.
+    // have bug.
+    if (body_begin == 0 || len - body_begin == 0) {
+        return 0;
     }
 
-    //parse http body type in according of body_type which parse from headersMeaning
+    body_type = request->body_type;
     return_val = parseBody(begin, body_begin, len - body_begin, body_type, content_length);
     if (return_val == -1)
         goto error;

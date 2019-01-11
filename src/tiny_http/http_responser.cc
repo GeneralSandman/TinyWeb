@@ -182,7 +182,7 @@ void HttpResponser::response(const HttpRequest* req, std::string& data)
     file_size = resp->file.getFileSize();
     buffer_num = file_size / buffer_size;
     if (file_size % buffer_size) {
-        buffer_num = file_size / buffer_size + 1;
+        buffer_num += 1;
     }
     chain = pool.getNewChain(buffer_num);
     pool.mallocSpace(chain, buffer_size);
@@ -196,7 +196,7 @@ void HttpResponser::response(const HttpRequest* req, std::string& data)
     // responseBodyToStr(&(resp->file), chain);
     resp->file.getData(chain);
 
-    data.assign((const char*)result.data, result.len);
+    data.append((const char*)result.data, result.len);
 
     // TODO: sendfile option
     chain_t* tmp;
