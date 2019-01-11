@@ -979,7 +979,6 @@ int HttpParser::parseHeaders(const char* stream,
 
 int HttpParser::parseHeadersMeaning(HttpHeaders* headers)
 {
-    int return_val;
     for (auto t : headers->generals) {
         auto p = headerKeyHash.find(t->keyHash);
         if (p == headerKeyHash.end()) {
@@ -987,11 +986,7 @@ int HttpParser::parseHeadersMeaning(HttpHeaders* headers)
         } else {
             HttpHeader** tmp = (HttpHeader**)((char*)headers + p->second.offset);
             *tmp = t;
-            return_val = p->second.fun(&(t->value), headers);
-
-            if (return_val !=0 ) {
-                return -1;
-            }
+            p->second.fun(&(t->value), headers);
         }
     }
     return 0;

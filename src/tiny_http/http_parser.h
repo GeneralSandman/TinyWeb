@@ -18,6 +18,7 @@
 #include <tiny_struct/sdstr_t.h>
 #include <tiny_http/http.h>
 #include <tiny_http/str_t.h>
+#include <tiny_http/http_time.h>
 
 #include <boost/function.hpp>
 #include <iostream>
@@ -48,6 +49,8 @@
 
 #define isIpv4Char(c) (isNum(c) || (c) == '.')
 #define isIpv6Char(c) (isHexChar(c) || (c) == ':' || (c) == '.')
+
+#define isMimeTypeChar(c) (isAlphaNum(c) || (c) == '/' || (c) == '.' || (c) == '*' || (c) == '-' || (c) == '_' || (c) == '+')
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -306,12 +309,25 @@ typedef struct HttpHeaders {
     unsigned int connection_upgrade : 1;
 
     unsigned int chrome : 1;
+    unsigned int firefox : 1;
+    unsigned int ie : 1;
+    unsigned int safari : 1;
+    unsigned int opera : 1;
+    unsigned int unknow : 1;
 
     unsigned int content_identify_length : 1;
     unsigned int content_identify_eof : 1;
     unsigned int chunked : 1;
 
     unsigned int has_upgrade : 1;
+
+    unsigned int valid_if_modified_since : 1;
+    unsigned int valid_if_unmodified_since : 1;
+    unsigned int valid_last_modified : 1;
+
+    time_t time_if_modified_since;
+    time_t time_if_unmodified_since;
+    time_t time_last_modified;
 
     //TODO:more information
 } HttpHeaders;
@@ -594,14 +610,15 @@ public:
     }
 };
 
+// Callbacks for parse header meaning.
+
 typedef boost::function<int(const Str*, HttpHeaders* const)> headerFun;
 typedef boost::function<int(const std::string&, HttpHeaders* const)> deheaderFun;
 
 inline int parseHostValue(const Str* s, HttpHeaders* const headers)
 {
     // std::cout << "[parse headerMeaning callback]get host value and parse\n";
-    // ignore the valid of host field
-    // TODO: to test the host field
+    // TODO: No need to check the host value is valid or not???
     headers->valid_host = 1;
     return 0;
 }
@@ -625,7 +642,8 @@ inline int parseConnectionValue(const Str* s, HttpHeaders* const headers)
         headers->connection_upgrade = 1;
         // std::cout << "connection upgrade\n";
     } else {
-        std::cout << "connection field is other value\n";
+        // std::cout << "connection field is other value\n";
+        return -1;
     }
     return 0;
 }
@@ -653,9 +671,46 @@ inline int parseContentLength(const Str* s, HttpHeaders* const headers)
     return 0;
 }
 
+
+inline int parseIfModifiedSince(const Str* s, HttpHeaders* const headers)
+{
+    std::cout << "[parse headerMeaning callback]get if-modified-since field:\n";
+    int return_val;
+    sdstr tmp;
+    sdsnnew(&tmp, s->data, s->len);
+
+    return_val = deformatHttpTime(&tmp, &(headers->time_if_modified_since));
+    if (return_val == 0) {
+        headers->valid_if_modified_since = 1;
+        std::cout << "if-modified-since value is valid\n";
+    }
+    sdsdestory(&tmp);
+
+    return 0;
+}
+
+inline int parseIfUnmodifiedSince(const Str* s, HttpHeaders* const headers)
+{
+    std::cout << "[parse headerMeaning callback]get if-unmodified-since field:\n";
+    // TODO: using http_time.h
+    int return_val;
+    sdstr tmp;
+    sdsnnew(&tmp, s->data, s->len);
+
+    return_val = deformatHttpTime(&tmp, &(headers->time_if_unmodified_since));
+    if (return_val == 0) {
+        headers->valid_if_unmodified_since = 1;
+        std::cout << "if-unmodified-since value is valid\n";
+    }
+    sdsdestory(&tmp);
+
+    return 0;
+}
+
 inline int parseUserAgent(const Str* s, HttpHeaders* const headers)
 {
     // std::cout << "[parse headerMeaning callback]get useragent:\n";
+    // TODO:
     headers->chrome = 1;
     // std::cout << "client brower is chrome\n";
     return 0;
@@ -684,6 +739,51 @@ inline int parseCookie(const Str* s, HttpHeaders* const headers)
 {
     // std::cout << "[parse headerMeaning callback]get cookie:\n";
     // printf("get value:%.*s\n", s->len, s->data);
+    return 0;
+}
+
+inline int parseContentType(const Str* s, HttpHeaders* const headers)
+{
+    // std::cout << "[parse headerMeaning callback]get content-length field:\n";
+
+    return 0;
+}
+
+inline int parseAcceptEncoding(const Str* s, HttpHeaders* const headers)
+{
+    // std::cout << "[parse headerMeaning callback]get content-length field:\n";
+
+    return 0;
+}
+
+inline int parseUpgrade(const Str* s, HttpHeaders* const headers)
+{
+    // std::cout << "[parse headerMeaning callback]get content-length field:\n";
+
+    return 0;
+}
+
+inline int parseExpect(const Str* s, HttpHeaders* const headers)
+{
+    // std::cout << "[parse headerMeaning callback]get content-length field:\n";
+
+    return 0;
+}
+
+inline int parseLastModified(const Str* s, HttpHeaders* const headers)
+{
+    std::cout << "[parse headerMeaning callback]get last-modified field:\n";
+    int return_val;
+    sdstr tmp;
+    sdsnnew(&tmp, s->data, s->len);
+
+    return_val = deformatHttpTime(&tmp, &(headers->time_last_modified));
+    if (return_val == 0) {
+        headers->valid_last_modified = 1;
+        std::cout << "last-modified value is valid\n";
+    }
+    sdsdestory(&tmp);
+
     return 0;
 }
 

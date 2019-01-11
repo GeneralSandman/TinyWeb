@@ -95,7 +95,7 @@ void HttpResponser::responseHeadersToStr(HttpResponseHeaders* headers, sdstr* re
     sdscatsds(res, &tmp);
     sdscat(res, "\r\n");
 
-    destory(&tmp);
+    sdsdestory(&tmp);
 }
 
 void HttpResponser::buildResponse(const HttpRequest* req, HttpResponse* response)
@@ -163,7 +163,7 @@ void HttpResponser::buildResponse(const HttpRequest* req, HttpResponse* response
         headers->content_length_n = file->info.st_size;
     }
 
-    destory(&file_path);
+    sdsdestory(&file_path);
 }
 
 void HttpResponser::response(const HttpRequest* req, std::string& data)
@@ -220,7 +220,7 @@ void HttpResponser::response(const HttpRequest* req, std::string& data)
 
     LOG(Debug) << "file-size(" << file_size << "),chain-size(" << chain_size << ")\n";
 
-    destory(&result);
+    sdsdestory(&result);
 }
 
 HttpResponser::~HttpResponser()

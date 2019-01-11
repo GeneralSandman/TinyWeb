@@ -25,9 +25,9 @@ void convertTime2Gmt(const time_t *src, bool isLocal, struct tm *gmt);
 void convertTm2Time(const struct tm *gmt, bool isLocal, time_t *time);
 
 void formatHttpTime(const time_t time, sdstr *str);
-void deformatHttpTime(const sdstr *str, time_t *time);
+int deformatHttpTime(const sdstr *str, time_t *time);
 
 void formatCookieTime(const time_t time, sdstr *str);
-void deformatCookieTime(const sdstr *str, time_t *time);
+int deformatCookieTime(const sdstr *str, time_t *time);
 
 #endif // !HTTP_TIME_H

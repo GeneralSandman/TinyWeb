@@ -80,6 +80,6 @@ void sdsjoinsds(sdstr *dest, sdstr *src, unsigned int n, const char *sep, int se
 
 void printf(sdstr *str);
 
-void destory(sdstr *str);
+void sdsdestory(sdstr *str);
 
 #endif // !SDSTR_H

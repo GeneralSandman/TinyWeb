@@ -56,13 +56,20 @@ void formatHttpTime(const time_t time, sdstr *str)
     sdsncat(str, buf, len);
 }
 
-void deformatHttpTime(const sdstr *str, time_t *time)
+int deformatHttpTime(const sdstr *str, time_t *time)
 {
+    char* res = nullptr;
+    *time = 0;
     struct tm gmt;
     memset((void *)&gmt, 0, sizeof(struct tm));
 
-    strptime(str->data, httpTimeFormat1, &gmt);
+    res = strptime(str->data, httpTimeFormat1, &gmt);
+    if (res == nullptr) {
+        std::cout << "strptime error\n";
+        return -1;
+    }
     convertTm2Time(&gmt, false, time);
+    return 0;
 }
 
 
@@ -77,12 +84,19 @@ void formatCookieTime(const time_t time, sdstr *str)
     sdsncat(str, buf, len);
 }
 
-void deformatCookieTime(const sdstr *str, time_t *time)
+int deformatCookieTime(const sdstr *str, time_t *time)
 {
+    char* res = nullptr;
+    *time = 0;
     struct tm gmt;
     memset((void *)&gmt, 0, sizeof(struct tm));
 
-    strptime(str->data, httpTimeFormat2, &gmt);
+    res = strptime(str->data, httpTimeFormat2, &gmt);
+    if (res == nullptr) {
+        std::cout << "strptime error\n";
+        return -1;
+    }
     convertTm2Time(&gmt, false, time);
+    return 0;
 }
 

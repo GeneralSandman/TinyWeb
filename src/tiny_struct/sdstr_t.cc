@@ -340,7 +340,7 @@ void printf(sdstr* str)
     printf("[sdstr](alloc=%d)(len=%d)(str=\"%.*s\")\n", str->alloc, str->len, str->len, str->data);
 }
 
-void destory(sdstr* str)
+void sdsdestory(sdstr* str)
 {
     free((void*)(str->data));
     str->len = 0;

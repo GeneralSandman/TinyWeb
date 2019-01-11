@@ -30,42 +30,42 @@ void test1()
         sdstr tmp;
         sdsnnew(&tmp, nullptr, 0);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
 
     {
         sdstr tmp;
         sdsnew(&tmp, nullptr);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
 
     {
         sdstr tmp;
         sdsnewempty(&tmp);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
 
     {
         sdstr tmp;
         sdsnnew(&tmp, str.c_str(), len);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
 
     {
         sdstr tmp;
         sdsnew(&tmp, str.c_str());
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
 
     {
         sdstr tmp;
         sdsnew(&tmp, str.c_str());
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
 
     {
@@ -75,11 +75,11 @@ void test1()
             sdstr s1;
             sdsnew(&s1, str.c_str());
             sdsnewdup(&tmp, &s1);
-            destory(&s1);
+            sdsdestory(&s1);
         }
 
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
 }
 
@@ -106,7 +106,7 @@ void test2()
         sdsncat(&tmp, str2.c_str(), len2);
         printf(&tmp);
 
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
 
     {
@@ -118,7 +118,7 @@ void test2()
         sdscat(&tmp, str2.c_str());
         printf(&tmp);
 
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
 
     {
@@ -130,7 +130,7 @@ void test2()
         sdsncatsds(&tmp, &sds2, sds2.len);
         printf(&tmp);
 
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
 
     {
@@ -142,11 +142,11 @@ void test2()
         sdscatsds(&tmp, &sds2);
         printf(&tmp);
 
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
 
-    destory(&sds);
-    destory(&sds2);
+    sdsdestory(&sds);
+    sdsdestory(&sds2);
 }
 
 void test3()
@@ -169,7 +169,7 @@ void test3()
         printf(&tmp);
         sdsncpy(&tmp, str2.c_str(), len2);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
     {
         sdstr tmp;
@@ -177,7 +177,7 @@ void test3()
         printf(&tmp);
         sdscpy(&tmp, str2.c_str());
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
     {
         sdstr tmp;
@@ -185,7 +185,7 @@ void test3()
         printf(&tmp);
         sdsncpysds(&tmp, &sds2, sds2.len);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
     {
         sdstr tmp;
@@ -193,7 +193,7 @@ void test3()
         printf(&tmp);
         sdscpysds(&tmp, &sds2);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
 
     std::cout << "--------\n";
@@ -204,7 +204,7 @@ void test3()
         printf(&tmp);
         sdsncpy(&tmp, str1.c_str(), len1);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
     {
         sdstr tmp;
@@ -212,7 +212,7 @@ void test3()
         printf(&tmp);
         sdscpy(&tmp, str1.c_str());
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
     {
         sdstr tmp;
@@ -220,7 +220,7 @@ void test3()
         printf(&tmp);
         sdsncpysds(&tmp, &sds, sds.len);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
     {
         sdstr tmp;
@@ -228,13 +228,13 @@ void test3()
         printf(&tmp);
         sdscpysds(&tmp, &sds);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
 
     std::cout << "--------\n";
 
-    destory(&sds);
-    destory(&sds2);
+    sdsdestory(&sds);
+    sdsdestory(&sds2);
 }
 
 void test4()
@@ -243,43 +243,43 @@ void test4()
         sdstr tmp;
         sdssetull(&tmp, 0);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
     {
         sdstr tmp;
         sdssetull(&tmp, 10);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
     {
         sdstr tmp;
         sdssetull(&tmp, 100);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
     {
         sdstr tmp;
         sdssetull(&tmp, 1000);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
     {
         sdstr tmp;
         sdssetull(&tmp, 10000);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
     {
         sdstr tmp;
         sdssetull(&tmp, 100000);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
     {
         sdstr tmp;
         sdssetull(&tmp, 1000000);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
 
     //------
@@ -288,43 +288,43 @@ void test4()
         sdstr tmp;
         sdssetll(&tmp, 0);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
     {
         sdstr tmp;
         sdssetll(&tmp, 10);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
     {
         sdstr tmp;
         sdssetll(&tmp, 100);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
     {
         sdstr tmp;
         sdssetll(&tmp, 1000);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
     {
         sdstr tmp;
         sdssetll(&tmp, 10000);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
     {
         sdstr tmp;
         sdssetll(&tmp, 100000);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
     {
         sdstr tmp;
         sdssetll(&tmp, 1000000);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
 
     //------
@@ -332,43 +332,43 @@ void test4()
         sdstr tmp;
         sdssetll(&tmp, -0);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
     {
         sdstr tmp;
         sdssetll(&tmp, -10);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
     {
         sdstr tmp;
         sdssetll(&tmp, -100);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
     {
         sdstr tmp;
         sdssetll(&tmp, -1000);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
     {
         sdstr tmp;
         sdssetll(&tmp, -10000);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
     {
         sdstr tmp;
         sdssetll(&tmp, -100000);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
     {
         sdstr tmp;
         sdssetll(&tmp, -1000000);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
 }
 
@@ -383,7 +383,7 @@ void test5()
         sdsnewempty(&tmp);
         sdscatsprintf(&tmp, "a=%d,b=%d,s=%s", 101, 101, str.c_str());
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
 }
 
@@ -398,7 +398,7 @@ void test6()
             printf(&tmp);
         }
 
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
     std::cout << "----------\n";
     {
@@ -410,7 +410,7 @@ void test6()
             printf(&tmp);
         }
 
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
 }
 
@@ -431,10 +431,10 @@ void test7()
     sdsnewempty(&result);
     sdsjoinsds(&result, sdss, 100, sep.c_str(), seplen);
     printf(&result);
-    destory(&result);
+    sdsdestory(&result);
 
     for (int i = 0; i < 100; i++) {
-        destory(sdss + i);
+        sdsdestory(sdss + i);
     }
 }
 
@@ -455,7 +455,7 @@ void test8()
     sdsnewempty(&result);
     sdsjoinstr(&result, sdss, 100, sep.c_str(), seplen);
     printf(&result);
-    destory(&result);
+    sdsdestory(&result);
 }
 
 void errtest()
@@ -466,34 +466,34 @@ void errtest()
         unsigned int len = str.size();
         sdsnnew(&tmp, str.c_str(), len);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
     {
         sdstr tmp;
         const char* str = "helloworld";
         sdsnnew(&tmp, str, strlen(str));
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
     {
         sdstr tmp;
         char* str = "helloworld";
         sdsnnew(&tmp, str, strlen(str));
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
     {
         sdstr tmp;
         char str[] = "helloworld";
         sdsnnew(&tmp, str, strlen(str));
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
     {
         sdstr tmp;
         sdsnnew(&tmp, "helloworld", 10);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
 }
 
@@ -504,21 +504,21 @@ void chunked_test()
         sdsnewempty(&tmp);
         sdscatsprintf(&tmp, "%x\r\n", 65535);
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
     {
         sdstr tmp;
         sdsnewempty(&tmp);
         sdscatsprintf(&tmp, "\r\n0\r\n\r\n");
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
     {
         sdstr tmp;
         sdsnewempty(&tmp);
         sdscatsprintf(&tmp, "\r\n");
         printf(&tmp);
-        destory(&tmp);
+        sdsdestory(&tmp);
     }
 
     return 0;

@@ -28,6 +28,15 @@ add_subdirectory("${SOURCE_DIR}/tiny_http" tiny_http.out)
 add_subdirectory("${SOURCE_DIR}/tiny_struct" tiny_struct.out)
 
 
+# idea_test
+add_executable(idea_test
+    idea_test.cc
+    )
+
+target_link_libraries(idea_test
+    tiny_http_model
+    )
+
 # all_test
 add_executable(all_test
     all_test.cc
@@ -106,6 +115,8 @@ add_executable(parseHeaderMeaning
 
 target_link_libraries(parseHeaderMeaning
     tiny_http_model
+    tiny_base_model
+    tiny_struct_model
     )
 
 # parseHost
