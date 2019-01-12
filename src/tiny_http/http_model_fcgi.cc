@@ -13,28 +13,14 @@
 
 #include <tiny_base/api.h>
 #include <tiny_base/log.h>
-#include <tiny_http/http_model_fcgi.h>
 #include <tiny_struct/sdstr_t.h>
+#include <tiny_http/http_model_fcgi.h>
 
-#include <arpa/inet.h>
-#include <ctype.h>
-#include <fcntl.h>
-#include <iostream>
-#include <netinet/in.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <string>
-#include <sys/mman.h>
-#include <sys/socket.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
 
-void makeHeader(
+void HttpModelFcgi::makeHeader(
     fcgi_header_t* header,
     int type,
-    int requestId,
     int contentLength,
     int paddingLength)
 {
@@ -48,7 +34,7 @@ void makeHeader(
     header->reserved = 0;
 }
 
-void makeBeginRequestBody(
+void HttpModelFcgi::makeBeginRequestBody(
     fcgi_begin_request_body_t* body,
     int role,
     int keepConn)
@@ -59,29 +45,22 @@ void makeBeginRequestBody(
     memset(body->reserved, 0, sizeof(body->reserved));
 }
 
-int sendBeginRequestRecord(int sockfd, int requestId)
+void HttpModelFcgi::makeBeginRequestRecord(std::string& data)
 {
-    int ret;
     fcgi_begin_request_t r;
 
-    makeHeader(&r.header, FCGI_BEGIN_REQUEST, requestId, sizeof(r.body), 0);
+    makeHeader(&r.header, FCGI_BEGIN_REQUEST, sizeof(r.body), 0);
     makeBeginRequestBody(&r.body, FCGI_RESPONDER, FCGI_CLOSE);
-    ret = write(sockfd, &r, sizeof(r));
 
-    if (ret == sizeof(r)) {
-        return 0;
-    } else {
-        return -1;
-    }
+    data.append((char*)&r, sizeof(r));
 }
 
-int sendParamsRecord(
-    int sockfd,
-    int requestId,
+void HttpModelFcgi::makeParamsRecord(
     char* name,
     int nlen,
     char* value,
-    int vlen)
+    int vlen,
+    std::string& data)
 {
     unsigned char *buf, *old;
     int ret, pl, cl, buffer_size;
@@ -97,7 +76,7 @@ int sendParamsRecord(
     old = buf = (unsigned char*)malloc(buffer_size);
 
     fcgi_header_t header;
-    makeHeader(&header, FCGI_PARAMS, requestId, cl, pl);
+    makeHeader(&header, FCGI_PARAMS, cl, pl);
     memcpy(buf, (char*)&header, FCGI_HEADER_LEN);
     buf += FCGI_HEADER_LEN;
 
@@ -127,37 +106,23 @@ int sendParamsRecord(
     buf = buf + nlen;
     memcpy(buf, value, vlen);
 
-    ret = write(sockfd, old, buffer_size);
+    data.append((char*)old, buffer_size);
 
     free((void*)old);
-
-    if (ret == buffer_size) {
-        return 0;
-    } else {
-        return -1;
-    }
 }
 
-int sendEmptyParamsRecord(int sockfd, int requestId)
+void HttpModelFcgi::makeEmptyParamsRecord(std::string& data)
 {
-    int ret;
     fcgi_header_t header;
 
-    makeHeader(&header, FCGI_PARAMS, requestId, 0, 0);
-    ret = write(sockfd, (char*)&header, FCGI_HEADER_LEN);
-
-    if (ret == FCGI_HEADER_LEN) {
-        return 0;
-    } else {
-        return -1;
-    }
+    makeHeader(&header, FCGI_PARAMS, 0, 0);
+    data.append((char*)&header, FCGI_HEADER_LEN);
 }
 
-int sendStdinRecord(
-    int sockfd,
-    int requestId,
-    char* data,
-    int len)
+void HttpModelFcgi::makeStdinRecord(
+    char* data_,
+    int len,
+    std::string& data)
 {
     int cl = len, pl, ret;
     char padding_buf[8] = { 0 };
@@ -172,161 +137,36 @@ int sendStdinRecord(
         pl = (cl % 8) == 0 ? 0 : 8 - (cl % 8);
 
         fcgi_header_t header;
-        makeHeader(&header, FCGI_STDIN, requestId, cl, pl);
-        ret = write(sockfd, (char*)&header, FCGI_HEADER_LEN);
-        if (ret != FCGI_HEADER_LEN) {
-            return -1;
-        }
+        makeHeader(&header, FCGI_STDIN, cl, pl);
+        data.append((char*)&header, FCGI_HEADER_LEN);
 
         // Send stdin data.
-        ret = write(sockfd, data, cl);
-        if (ret != cl) {
-            return -1;
-        }
+        data.append(data_, cl);
 
         // Send padding content data.
         if (pl > 0) {
-            ret = write(sockfd, padding_buf, pl);
-            if (ret != pl) {
-                return -1;
-            }
+            data.append(padding_buf, pl);
         }
 
         len -= cl;
-        data += cl;
+        data_ += cl;
     }
-
-    return 0;
 }
 
-int sendEmptyStdinRecord(int sockfd, int requestId)
+void HttpModelFcgi::makeEmptyStdinRecord(
+    std::string& data)
 {
     int ret;
     fcgi_header_t header;
 
-    makeHeader(&header, FCGI_STDIN, requestId, 0, 0);
-    ret = write(sockfd, (char*)&header, FCGI_HEADER_LEN);
-
-    if (ret == FCGI_HEADER_LEN) {
-        return 0;
-    } else {
-        return -1;
-    }
+    makeHeader(&header, FCGI_STDIN, 0, 0);
+    data.append((char*)&header, FCGI_HEADER_LEN);
 }
 
-int recvRecord(
-    read_record rr,
-    int fd,
-    int requestId)
+void HttpModelFcgi::buildFcgiRequest(http_header* hp, std::string& data)
 {
-    fcgi_header_t header;
-    fcgi_end_request_body_t endr;
-
-    char *con_buf = nullptr, *err_buf = nullptr;
-    unsigned int con_len = 0, err_len = 0;
-    int padding_buf[8] = { 0 };
-    int ret;
-
-    unsigned char type;
-    unsigned int request_id;
-    unsigned int content_length;
-    unsigned char padding_length;
-
-    while (rr(fd, &header, sizeof(header)) > 0) {
-
-        type = header.type;
-        request_id = (unsigned int)(header.request_id_hi << 8) + (unsigned int)(header.request_id_lo);
-        content_length = (unsigned int)(header.content_length_hi << 8) + (unsigned int)(header.content_length_lo);
-        padding_length = header.padding_length;
-
-        printf("type:%d,requestId:%d,contentLength:%d,paddingLength:%d\n",
-            type, request_id, content_length, padding_length);
-
-        if (request_id != requestId) {
-            LOG(Debug) << "requestId not same\n";
-            continue;
-        }
-
-        if (type == FCGI_STDOUT) {
-
-            con_len += content_length;
-
-            if (con_buf != nullptr) {
-                con_buf = (char*)realloc((void*)con_buf, con_len);
-            } else {
-                con_buf = (char*)malloc(content_length);
-            }
-
-            // FIXME: store date begin last used index.
-            ret = rr(fd, con_buf, content_length);
-            if (ret == -1 || ret != content_length) {
-                printf("read fcgi_stdout record error\n");
-                return -1;
-            }
-
-            printf("1zhenhuli out:%.*s\n", content_length, con_buf);
-
-            if (padding_length > 0) {
-                ret = rr(fd, padding_buf, padding_length);
-                if (ret == -1 || ret != padding_length) {
-                    printf("read fcgi_stdout padding error\n");
-                    return -1;
-                }
-                printf("1zhenhuli padding:%.*s\n", padding_length, padding_buf);
-            }
-
-        } else if (type == FCGI_STDERR) {
-
-            err_len += content_length;
-
-            if (err_buf != NULL) {
-                err_buf = (char*)realloc((void*)err_buf, err_len);
-            } else {
-                err_buf = (char*)malloc(content_length);
-            }
-
-            // FIXME: store date begin last used index.
-            ret = rr(fd, err_buf, content_length);
-            if (ret == -1 || ret != content_length) {
-                return -1;
-            }
-
-            printf("2zhenhuli err:%.*s\n", content_length, err_buf);
-
-            if (padding_length > 0) {
-                ret = rr(fd, padding_buf, padding_length);
-                if (ret == -1 || ret != padding_length) {
-                    printf("read fcgi_stderr padding error\n");
-                    return -1;
-                }
-                printf("2zhenhuli padding:%.*s\n", padding_length, padding_buf);
-            }
-
-        } else if (type == FCGI_END_REQUEST) {
-
-            ret = rr(fd, &endr, sizeof(endr));
-
-            if (ret == -1 || ret != sizeof(endr)) {
-                free(con_buf);
-                free(err_buf);
-                return -1;
-            }
-
-            printf("3zhenhuli end\n");
-            free(con_buf);
-            free(err_buf);
-            return 0;
-        }
-    }
-    return 0;
-}
-
-int send_fcgi(http_header* hp, int sock)
-{
-    int requestId, i, l;
+    int i, l;
     char* buf;
-
-    requestId = sock;
 
     char* paname[] = {
         "SCRIPT_FILENAME",
@@ -348,10 +188,7 @@ int send_fcgi(http_header* hp, int sock)
         (size_t) & (((http_header*)0)->conlength)
     };
 
-    if (sendBeginRequestRecord(sock, requestId) < 0) {
-        printf("sendBeginRequestRecord error\n");
-        return -1;
-    }
+    makeBeginRequestRecord(data);
 
     l = sizeof(paoffset) / sizeof(paoffset[0]);
     for (i = 0; i < l; i++) {
@@ -362,20 +199,14 @@ int send_fcgi(http_header* hp, int sock)
             strlen(paname[i]), paname[i], paoffset[i], len, len, tmp);
         if (len > 0) {
 
-            if (sendParamsRecord(sock, requestId,
-                    paname[i], strlen(paname[i]),
-                    tmp, len)
-                < 0) {
-                printf("sendParamsRecord error\n");
-                return -1;
-            }
+            makeParamsRecord(
+                paname[i], strlen(paname[i]),
+                tmp, len,
+                data);
         }
     }
 
-    if (sendEmptyParamsRecord(sock, requestId) < 0) {
-        printf("sendEmptyParamsRecord error\n");
-        return -1;
-    }
+    makeEmptyParamsRecord(data);
 
     l = atoi(hp->conlength);
     if (l > 0) {
@@ -384,40 +215,148 @@ int send_fcgi(http_header* hp, int sock)
         // if (rio_readnb(rp, buf, l) < 0) {
         printf("rio_readn error\n");
         free(buf);
-        return -1;
+        // return -1;
         // }
 
-        if (sendStdinRecord(sock, requestId, buf, l) < 0) {
-            printf("sendStdinRecord error\n");
-            free(buf);
-            return -1;
-        }
+        makeStdinRecord(buf, l, data);
 
         free(buf);
     }
 
-    if (sendEmptyStdinRecord(sock, requestId) < 0) {
-        printf("sendEmptyStdinRecord error\n");
+    makeEmptyStdinRecord(data);
+}
+
+int HttpModelFcgi::parseRecord(
+    const std::string& data)
+{
+    fcgi_header_t header;
+    fcgi_end_request_body_t endr;
+
+    char *con_buf = nullptr, *err_buf = nullptr;
+    unsigned int con_len = 0, err_len = 0;
+    int padding_buf[8] = { 0 };
+    int ret;
+
+    unsigned char type;
+    unsigned int request_id;
+    unsigned int content_length;
+    unsigned char padding_length;
+
+    const char* begin = data.c_str();
+    unsigned int i = 0;
+
+    while (memcpy((void*)&header, (const void*)(begin + i), sizeof(header))) {
+
+        i += sizeof(header);
+
+        type = header.type;
+        request_id = (unsigned int)(header.request_id_hi << 8) + (unsigned int)(header.request_id_lo);
+        content_length = (unsigned int)(header.content_length_hi << 8) + (unsigned int)(header.content_length_lo);
+        padding_length = header.padding_length;
+
+        printf("type:%d,requestId:%d,contentLength:%d,paddingLength:%d\n",
+            type, request_id, content_length, padding_length);
+
+        if (request_id != requestId) {
+            LOG(Debug) << "requestId not same,response-id(" << request_id << ")\n";
+            continue;
+        }
+
+        if (type == FCGI_STDOUT) {
+
+            con_len += content_length;
+
+            if (con_buf != nullptr) {
+                con_buf = (char*)realloc((void*)con_buf, con_len);
+            } else {
+                con_buf = (char*)malloc(content_length);
+            }
+
+            // FIXME: store date begin last used index.
+            memcpy(con_buf, (const void*)(begin + i), content_length);
+            i += content_length;
+            // if (ret == -1 || ret != content_length) {
+            // printf("read fcgi_stdout record error\n");
+            // return -1;
+            // }
+
+            printf("1zhenhuli out:%.*s\n", content_length, con_buf);
+            // TODO: http parser to parse http response.
+
+            if (padding_length > 0) {
+                memcpy(padding_buf, (const void*)(begin + i), padding_length);
+                i += padding_length;
+                // if (ret == -1 || ret != padding_length) {
+                // printf("read fcgi_stdout padding error\n");
+                // return -1;
+                // }
+                printf("1zhenhuli padding:%.*s\n", padding_length, padding_buf);
+            }
+
+        } else if (type == FCGI_STDERR) {
+
+            err_len += content_length;
+
+            if (err_buf != NULL) {
+                err_buf = (char*)realloc((void*)err_buf, err_len);
+            } else {
+                err_buf = (char*)malloc(content_length);
+            }
+
+            // FIXME: store date begin last used index.
+            memcpy(err_buf, (const void*)(begin + i), content_length);
+            i += content_length;
+            if (ret == -1 || ret != content_length) {
+                return -1;
+            }
+
+            printf("2zhenhuli err:%.*s\n", content_length, err_buf);
+
+            if (padding_length > 0) {
+                memcpy(padding_buf, (const void*)(begin + i), padding_length);
+                i += padding_length;
+                // if (ret == -1 || ret != padding_length) {
+                // printf("read fcgi_stderr padding error\n");
+                // return -1;
+                // }
+                printf("2zhenhuli padding:%.*s\n", padding_length, padding_buf);
+            }
+
+        } else if (type == FCGI_END_REQUEST) {
+
+            memcpy(&endr, (const void*)(begin + i), sizeof(endr));
+            i += sizeof(endr);
+
+            if (ret == -1 || ret != sizeof(endr)) {
+                free(con_buf);
+                free(err_buf);
+                return -1;
+            }
+
+            printf("3zhenhuli end\n");
+            free(con_buf);
+            free(err_buf);
+            return 0;
+        }
+
+        if (i == data.size()) {
+            break;
+        }
+    }
+    return 0;
+}
+
+int HttpModelFcgi::parseFcgiResponse(const std::string& data)
+{
+    char* p;
+    int n;
+
+    if (parseRecord(data) < 0) {
+        std::cout << "parse record error\n";
         return -1;
     }
 
     return 0;
-}
-
-void recv_fcgi(int sock)
-{
-    int requestId;
-    char* p;
-    int n;
-
-    requestId = sock;
-
-    // 读取处理结果
-    if (recvRecord(rio_readn, sock, requestId) < 0) {
-        printf("recvRecord error\n");
-        // return -1;
-    }
-
     /*
     FCGI_EndRequestBody endr;
     char *out, *err;
@@ -443,30 +382,4 @@ void recv_fcgi(int sock)
         free(err);
     }
     */
-}
-
-int open_clientfd()
-{
-    int sock;
-    struct sockaddr_in serv_addr;
-
-    sock = socket(PF_INET, SOCK_STREAM, 0);
-    if (-1 == sock) {
-        printf("socket error\n");
-        return -1;
-    }
-
-    memset(&serv_addr, 0, sizeof(serv_addr));
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = inet_addr(FCGI_HOST);
-    serv_addr.sin_port = htons(FCGI_PORT);
-
-    if (-1 == connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr))) {
-        handle_error("connect error\n");
-        return -1;
-    }
-
-    printf("connect 172.17.0.2:9000 success\n");
-
-    return sock;
 }
