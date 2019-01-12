@@ -140,8 +140,12 @@ def fcgiServer(ip,port):
     res = h + c + html
     conn.send(res)
 
-    sleepSecond(3)
-    conn.close()    
+    sleepSecond(5)
+    print "close connecion"
+    conn.close()
+
+    sleepSecond(5)
+    print "exit"
     s.close()
 
 if __name__ == "__main__":

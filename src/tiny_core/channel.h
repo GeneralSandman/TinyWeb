@@ -63,8 +63,8 @@ class Channel
 
         void setReadCallback(const readCallback &c) { m_fReadCallback = c; };
         void setWriteCallback(const callback &c) { m_fWriteCallback = c; };
-        void setCloseCallback(const callback &c) { m_fErrorCallback = c; };
-        void setErrorCallback(const callback &c) { m_fCloseCallback = c; };
+        void setCloseCallback(const callback &c) { m_fCloseCallback = c; };
+        void setErrorCallback(const callback &c) { m_fErrorCallback = c; };
 
         void enableRead()
         {

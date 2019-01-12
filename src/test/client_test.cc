@@ -69,7 +69,10 @@ void test1()
 
     loop->runAfter(10, std::bind(&EventLoop::quit, loop));
 
-    NetAddress serveraddress("127.0.0.1:9000");
+    int serverport;
+    std::cout << "input server-port:";
+    std::cin >> serverport;
+    NetAddress serveraddress(serverport);
     NetAddress clientaddress(9595);
     bool retry = false;
     bool keepconnect = false;

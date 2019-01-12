@@ -24,7 +24,6 @@
 
 void Connector::m_fConnect()
 {
-    LOG(Debug) << std::endl;
     assert(m_nState == Disconnected);
 
     // if (m_pConnectSocket != nullptr)
@@ -97,7 +96,6 @@ void Connector::m_fConnect()
 void Connector::m_fHandleWrite()
 {
     //Handle write event after invoking connect() return zero.
-    LOG(Debug) << std::endl;
     if (m_nState == Connecting)
     {
         //removeInvaildChannel
@@ -108,7 +106,7 @@ void Connector::m_fHandleWrite()
         //      the connection have established.We don't those
         //      event.
         //Else with error:the connect-channel is invaild.
-        LOG(Debug) << "zhenhuli socket error:" << error << std::endl;
+        // LOG(Debug) << "zhenhuli socket error:" << error << std::endl;
         if (error != 0) {
             m_fRemoveInvaildConnectChannel();
         }
@@ -136,7 +134,6 @@ void Connector::m_fHandleWrite()
 void Connector::m_fHandleError()
 {
     //Handle error event after invoking connect() return zero.
-    LOG(Debug) << std::endl;
     assert(m_nState == Connecting);
 
     int last_sockfd = m_pConnectChannel->getFd();

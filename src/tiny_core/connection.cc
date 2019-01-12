@@ -133,6 +133,7 @@ void Connection::send(const std::string &message)
             if ((unsigned int)nwrote == message.size())
             {
                 //write complete
+                m_pChannel->disableWrite();
                 if (m_nWriteCompleteCallback)
                     m_nWriteCompleteCallback(this);
             }
