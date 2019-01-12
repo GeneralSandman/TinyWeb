@@ -122,6 +122,27 @@ def webServer(ip,port):
     conn.close()    
     s.close()
 
+def fcgiServer(ip,port):
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind((ip, int(port)))
+    s.listen(8)
+
+    conn,addr=s.accept()
+    print 'client address:',addr
+
+
+    data=conn.recv(4096)
+    print 'recv client data:',data
+
+    h = "HTTP/1.0 200 OK\r\n"
+    c = "%sContent-Type: text/html\r\n\r\n"
+    html = "hello world"
+    res = h + c + html
+    conn.send(res)
+
+    sleepSecond(3)
+    conn.close()    
+    s.close()
 
 if __name__ == "__main__":
-    webServer(sys.argv[1], sys.argv[2])
+    fcgiServer(sys.argv[1], sys.argv[2])

@@ -44,3 +44,6 @@ src/CMakeCache.txt
 src/tiny_base/api\.cc
 
 src/tiny_core/processpool\.cc
+
+src/test/build/*
+src/mytest/build/*

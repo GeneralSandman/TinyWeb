@@ -180,13 +180,13 @@ headerCallback headers_in[] = {
     {
         .name = Str("if-modified-since"),
         .offset = offsetof__(HttpHeaders, if_modified_since),
-        .fun = boost::bind(parseValue, _1, _2),
+        .fun = boost::bind(parseIfModifiedSince, _1, _2),
     },
 
     {
         .name = Str("if-unmodified-since"),
         .offset = offsetof__(HttpHeaders, if_unmodified_since),
-        .fun = boost::bind(parseValue, _1, _2),
+        .fun = boost::bind(parseIfUnmodifiedSince, _1, _2),
     },
 
     {
@@ -216,31 +216,31 @@ headerCallback headers_in[] = {
     {
         .name = Str("content-type"),
         .offset = offsetof__(HttpHeaders, content_type),
-        .fun = boost::bind(parseValue, _1, _2),
+        .fun = boost::bind(parseContentType, _1, _2),
     },
 
     {
         .name = Str("accept-encoding"),
         .offset = offsetof__(HttpHeaders, accept_encoding),
-        .fun = boost::bind(parseValue, _1, _2),
+        .fun = boost::bind(parseAcceptEncoding, _1, _2),
     },
 
     {
         .name = Str("upgrade"),
         .offset = offsetof__(HttpHeaders, upgrade),
-        .fun = boost::bind(parseValue, _1, _2),
+        .fun = boost::bind(parseUpgrade, _1, _2),
     },
 
     {
         .name = Str("expect"),
         .offset = offsetof__(HttpHeaders, expect),
-        .fun = boost::bind(parseValue, _1, _2),
+        .fun = boost::bind(parseExpect, _1, _2),
     },
 
     {
         .name = Str("last-modified"),
         .offset = offsetof__(HttpHeaders, last_modified),
-        .fun = boost::bind(parseValue, _1, _2),
+        .fun = boost::bind(parseLastModified, _1, _2),
     },
 };
 
@@ -252,6 +252,7 @@ void headerMeaningInit()
     for (int i = 0; i < len; i++) {
         unsigned int hash = JSHash(headers_in[i].name.data, headers_in[i].name.len);
         headerKeyHash[hash] = headers_in[i];
+        std::cout << "add special header callback("<<headers_in[i].name.data<<")\n";
     }
 }
 
@@ -982,7 +983,7 @@ int HttpParser::parseHeadersMeaning(HttpHeaders* headers)
     for (auto t : headers->generals) {
         auto p = headerKeyHash.find(t->keyHash);
         if (p == headerKeyHash.end()) {
-            // std::cout << "general header" << std::endl;
+            std::cout << "[parse headerMeaning callback]general header" << std::endl;
         } else {
             HttpHeader** tmp = (HttpHeader**)((char*)headers + p->second.offset);
             *tmp = t;

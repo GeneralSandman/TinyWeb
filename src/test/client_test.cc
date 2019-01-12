@@ -11,13 +11,14 @@
 *
 */
 
+#include <tiny_base/buffer.h>
 #include <tiny_core/client.h>
 #include <tiny_core/netaddress.h>
 #include <tiny_core/connection.h>
 #include <tiny_core/eventloop.h>
 #include <tiny_core/factory.h>
 #include <tiny_core/timerid.h>
-#include <tiny_base/buffer.h>
+#include <tiny_http/http_protocol.h>
 
 using namespace std;
 
@@ -26,6 +27,7 @@ void connectCallback(Connection *newCon)
     std::cout << "get a new connection:["
               << newCon->getLocalAddress().getIpPort()
               << "--" << newCon->getPeerAddress().getIpPort() << "]" << std::endl;
+    newCon->send("I'm tinyweb fcgi client");
 }
 
 void getDataCallback(Connection *con, Buffer *data, Time time)
@@ -36,7 +38,7 @@ void getDataCallback(Connection *con, Buffer *data, Time time)
               << "--" << con->getPeerAddress().getIpPort() << "]:";
     std::cout << data->getAll() << "("
               << time.toString() << ")" << std::endl;
-    con->send("I'm client");
+    // con->send("I'm client");
 }
 
 void writeCompleteCallback(Connection *con)
@@ -67,10 +69,10 @@ void test1()
 
     loop->runAfter(10, std::bind(&EventLoop::quit, loop));
 
-    NetAddress serveraddress("127.0.0.1:9999");
-    NetAddress clientaddress("127.0.0.1:9595");
-    bool retry = true;
-    bool keepconnect = true;
+    NetAddress serveraddress("127.0.0.1:9000");
+    NetAddress clientaddress(9595);
+    bool retry = false;
+    bool keepconnect = false;
     tcpClient->start();
     tcpClient->connect(clientaddress, serveraddress, retry, keepconnect);
 
@@ -95,7 +97,7 @@ void test2()
 
     loop->runAfter(10, std::bind(&EventLoop::quit, loop));
 
-    NetAddress serveraddress("127.0.0.1:9999");
+    NetAddress serveraddress("172.17.0.3:9000");
     NetAddress clientaddress("127.0.0.1:9595");
     bool retry = true;
     bool keepconnect = false;
@@ -114,14 +116,14 @@ void test3()
 {
     //no retry , no keepconnect
     EventLoop *loop = new EventLoop();
-    Protocol *clientProtocol = new TestClientProtocol();
+    Protocol *clientProtocol = new FcgiClientProtocol();
     Factory *clientFactory = new ClientFactory(loop, clientProtocol);
     Client *tcpClient = new Client(loop, clientFactory);
 
     loop->runAfter(10, std::bind(&EventLoop::quit, loop));
 
-    NetAddress serveraddress("127.0.0.1:9999");
-    NetAddress clientaddress("127.0.0.1:9595");
+    NetAddress serveraddress("172.17.0.3:9000");
+    NetAddress clientaddress(9595);
     bool retry = false;
     bool keepconnect = false;
     tcpClient->start();
@@ -140,13 +142,13 @@ void test4()
 {
     //no retry , no keepconnect
     EventLoop *loop = new EventLoop();
-    Protocol *clientProtocol = new TestClientProtocol();
+    Protocol *clientProtocol = new FcgiClientProtocol();
     Factory *clientFactory = new ClientFactory(loop, clientProtocol);
     Client *tcpClient = new Client(loop, clientFactory);
 
     loop->runAfter(10, std::bind(&EventLoop::quit, loop));
 
-    NetAddress serveraddress("127.0.0.1:9999");
+    NetAddress serveraddress("172.17.0.3:9000");
     NetAddress clientaddress("127.0.0.1:9595");
     bool retry = false;
     bool keepconnect = false;
@@ -164,7 +166,8 @@ void test4()
 
 int main()
 {
-    // test1();
+    test1();
     // test2();
-    test3();
+    // test3();
+    // test4();
 }

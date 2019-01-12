@@ -17,6 +17,8 @@
 #include <tiny_http/http_protocol.h>
 #include <tiny_http/http_responser.h>
 
+// WebProtocol using for web server.
+
 WebProtocol::WebProtocol()
     : Protocol()
     , m_nKeepAlive(false)
@@ -70,3 +72,39 @@ WebProtocol::~WebProtocol()
 }
 
 RegistProtocol(WebProtocol);
+
+
+// FcgiClientProtocol using for fcgi client.
+
+FcgiClientProtocol::FcgiClientProtocol()
+    : Protocol()
+    , m_nKeepAlive(false)
+{
+    LOG(Debug) << "class FcgiClientProtocol constructor\n";
+}
+
+void FcgiClientProtocol::connectionMade()
+{
+    LOG(Info) << "get a new connection\n";
+
+    // Write fcgi request.
+}
+
+void FcgiClientProtocol::dataReceived(const std::string& data)
+{
+    LOG(Info) << "FcgiClientProtocol get data\n";
+
+    // Read fcgi response.
+}
+
+void FcgiClientProtocol::connectionLost()
+{
+    LOG(Info) << "lost a connection\n";
+}
+
+FcgiClientProtocol::~FcgiClientProtocol()
+{
+    LOG(Debug) << "class FcgiClientProtocol destructor\n";
+}
+
+RegistProtocol(FcgiClientProtocol);

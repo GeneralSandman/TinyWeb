@@ -18,6 +18,7 @@
 #include <tiny_base/log.h>
 #include <tiny_core/protocol.h>
 
+// Using for web server.
 class WebProtocol : public Protocol
 {
 private:
@@ -29,6 +30,20 @@ public:
   virtual void dataReceived(const std::string &);
   virtual void connectionLost();
   virtual ~WebProtocol();
+};
+
+// Using for fcgi client.
+class FcgiClientProtocol : public Protocol
+{
+private:
+  bool m_nKeepAlive;
+
+public:
+  FcgiClientProtocol();
+  virtual void connectionMade();
+  virtual void dataReceived(const std::string &);
+  virtual void connectionLost();
+  virtual ~FcgiClientProtocol();
 };
 
 #endif // !HTTP_PROTOCOL_H

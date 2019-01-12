@@ -11,19 +11,20 @@
 *
 */
 
+#include <tiny_base/api.h>
+#include <tiny_base/log.h>
 #include <tiny_core/eventloop.h>
 #include <tiny_core/netaddress.h>
 #include <tiny_core/connector.h>
 #include <tiny_core/socket.h>
 #include <tiny_core/timerid.h>
-#include <tiny_base/api.h>
-#include <tiny_base/log.h>
 
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 
 void Connector::m_fConnect()
 {
+    LOG(Debug) << std::endl;
     assert(m_nState == Disconnected);
 
     // if (m_pConnectSocket != nullptr)
@@ -96,6 +97,7 @@ void Connector::m_fConnect()
 void Connector::m_fHandleWrite()
 {
     //Handle write event after invoking connect() return zero.
+    LOG(Debug) << std::endl;
     if (m_nState == Connecting)
     {
         //removeInvaildChannel
@@ -106,7 +108,10 @@ void Connector::m_fHandleWrite()
         //      the connection have established.We don't those
         //      event.
         //Else with error:the connect-channel is invaild.
-        m_fRemoveInvaildConnectChannel();
+        LOG(Debug) << "zhenhuli socket error:" << error << std::endl;
+        if (error != 0) {
+            m_fRemoveInvaildConnectChannel();
+        }
         if (error)
         {
             if (m_nRetry)
@@ -131,6 +136,7 @@ void Connector::m_fHandleWrite()
 void Connector::m_fHandleError()
 {
     //Handle error event after invoking connect() return zero.
+    LOG(Debug) << std::endl;
     assert(m_nState == Connecting);
 
     int last_sockfd = m_pConnectChannel->getFd();

@@ -113,3 +113,14 @@ target_link_libraries(daemon_test
     tiny_base_model
     )
 
+# client_test
+add_executable(client_test
+    client_test.cc
+    )
+
+target_link_libraries(client_test
+    tiny_core_model
+    tiny_http_model
+    tiny_struct_model
+    tiny_base_model
+    )

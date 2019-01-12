@@ -42,38 +42,154 @@ typedef struct testHeaders {
 testHeaders headers[] = {
     {
         .str = "Host: 127.0.0.1:9999\r\n"
-               "Connection: close\r\n"
-               "Content-Type: text/xml; charset=utf-8\r\n"
-               "Accept-Encoding: compress, gzip\r\n"
-               "Cookie: $Version=1; Skin=new;\r\n"
-               "If-Modified-Since: Sat, 29 Oct 2010 19:43:31 GMT\r\n"
-               "Referer: http://www.zcmhi.com/archives/71.html\r\n"
-               "Content-Length: 348\r\n"
-               "Last-Modified: Fri, 20 Apr 2018 08:12:56 GMT\r\n"
+               "\r\n",
+        .valid = true,
+        .headerNum = 1,
+        .headers = {
+            { "Host", "127.0.0.1:9999" },
+        },
+    },
+
+    {
+        .str = "Connection: close\r\n"
+               "\r\n",
+        .valid = true,
+        .headerNum = 1,
+        .headers = {
+            { "Connection", "close" },
+        },
+    },
+
+    {
+        .str = "Content-Length: 348\r\n"
                "\r\n",
         .valid = true,
         .headerNum = 9,
         .headers = {
-            { "Host", "127.0.0.1:9999" },
-            { "Connection", "close" },
-            { "Content-Type", "text/xml; charset=utf-8" },
-            { "Accept-Encoding", "compress, gzip" },
-            { "Cookie", "$Version=1; Skin=new;" },
-            { "If-Modified-Since", "Sat, 29 Oct 2010 19:43:31 GMT" },
-            { "Referer", "http://www.zcmhi.com/archives/71.html" },
             { "Content-Length", "348" },
-            { "Last-Modified", "Fri, 20 Apr 2018 08:12:56 GMT" },
+        },
+    },
+
+    {
+        .str = "If-Modified-Since: Sat, 29 Oct 2010 19:43:31 GMT\r\n"
+               "\r\n",
+        .valid = true,
+        .headerNum = 9,
+        .headers = {
+            { "If-Modified-Since", "Sat, 29 Oct 2010 19:43:31 GMT" },
+        },
+    },
+
+    {
+        .str = "If-UnModified-Since: Sat, 29 Oct 2010 19:43:31 GMT\r\n"
+               "\r\n",
+        .valid = true,
+        .headerNum = 9,
+        .headers = {
+            { "If-UnModified-Since", "Sat, 29 Oct 2010 19:43:31 GMT" },
+        },
+    },
+
+    {
+        .str = "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36\r\n"
+               "\r\n",
+        .valid = true,
+        .headerNum = 9,
+        .headers = {
+            { "User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36\r\n" },
+        },
+    },
+
+    {
+        .str = "Referer: http://www.zcmhi.com/archives/71.html\r\n"
+               "\r\n",
+        .valid = true,
+        .headerNum = 9,
+        .headers = {
+            { "Referer", "http://www.zcmhi.com/archives/71.html" },
+        },
+    },
+
+    {
+        .str = "Transfer-Encoding: chunked\r\n"
+               "\r\n",
+        .valid = true,
+        .headerNum = 1,
+        .headers = {
+            { "Transfer-Encoding", "chunked" },
+        },
+    },
+
+    {
+        .str = "Cookie: $Version=1; Skin=new;\r\n"
+               "\r\n",
+        .valid = true,
+        .headerNum = 1,
+        .headers = {
+            { "Cookie", "$Version=1; Skin=new;" },
+        },
+    },
+
+    {
+        .str = "Content-Type: text/xml; charset=utf-8\r\n"
+               "\r\n",
+        .valid = true,
+        .headerNum = 1,
+        .headers = {
+            { "Content-Type", "text/xml; charset=utf-8" },
+        },
+    },
+
+    {
+        .str = "Accept-Encoding: compress, gzip\r\n"
+               "\r\n",
+        .valid = true,
+        .headerNum = 1,
+        .headers = {
+            { "Accept-Encoding", "compress, gzip" },
+        },
+    },
+
+    {
+        .str = "Upgrade: upgrade\r\n"
+               "\r\n",
+        .valid = true,
+        .headerNum = 1,
+        .headers = {
+            { "Upgrade", "upgrade" },
+        },
+    },
+
+    {
+        .str = "Expect: expect-value\r\n"
+               "\r\n",
+        .valid = true,
+        .headerNum = 1,
+        .headers = {
+            { "Expect", "expect-value" },
+        },
+    },
+
+    {
+        .str = "Last-Modified: Sat, 29 Oct 2010 19:43:31 GMT\r\n"
+               "\r\n",
+        .valid = true,
+        .headerNum = 1,
+        .headers = {
+            { "Last-Modified", "Sat, 29 Oct 2010 19:43:31 GMT" },
         },
     },
 
     {
         .str = "Host: 127.0.0.1:9999\r\n"
+               "Last-Modified: Sat, 29 Oct 2010 19:43:31 GMT\r\n"
                "Connection: close\r\n"
                "\r\n",
         .valid = true,
         .headerNum = 2,
         .headers = {
             { "Host", "127.0.0.1:9999" },
+            { "Last-Modified", "Sat, 29 Oct 2010 19:43:31 GMT" },
             { "Connection", "close" },
         },
     },
@@ -95,16 +211,6 @@ testHeaders headers[] = {
         .headerNum = 1,
         .headers = {
             { "Content-Type", "text/xml; charset=utf-8" },
-        },
-    },
-
-    {
-        .str = "Accept-Encoding: compress, gzip\r\n"
-               "\r\n",
-        .valid = true,
-        .headerNum = 1,
-        .headers = {
-            { "Accept-Encoding", "compress, gzip" },
         },
     },
 
@@ -317,6 +423,33 @@ testHeaders headers[] = {
             { "Host", "www.zcmhi.com" },
         },
     },
+
+    {
+        .str = "Host: 127.0.0.1:9999\r\n"
+               "Connection: close\r\n"
+               "Content-Type: text/xml; charset=utf-8\r\n"
+               "Accept-Encoding: compress, gzip\r\n"
+               "Cookie: $Version=1; Skin=new;\r\n"
+               "If-Modified-Since: Sat, 29 Oct 2010 19:43:31 GMT\r\n"
+               "Referer: http://www.zcmhi.com/archives/71.html\r\n"
+               "Content-Length: 348\r\n"
+               "Last-Modified: Fri, 20 Apr 2018 08:12:56 GMT\r\n"
+               "\r\n",
+        .valid = true,
+        .headerNum = 9,
+        .headers = {
+            { "Host", "127.0.0.1:9999" },
+            { "Connection", "close" },
+            { "Content-Type", "text/xml; charset=utf-8" },
+            { "Accept-Encoding", "compress, gzip" },
+            { "Cookie", "$Version=1; Skin=new;" },
+            { "If-Modified-Since", "Sat, 29 Oct 2010 19:43:31 GMT" },
+            { "Referer", "http://www.zcmhi.com/archives/71.html" },
+            { "Content-Length", "348" },
+            { "Last-Modified", "Fri, 20 Apr 2018 08:12:56 GMT" },
+        },
+    },
+
 };
 
 void testParseHeaderMeaning()
@@ -330,6 +463,7 @@ void testParseHeaderMeaning()
     int len = sizeof(headers) / sizeof(headers[0]);
 
     for (int i = 0; i < len; i++) {
+        std::cout << i << ")\n";
         alltest++;
 
         HttpParser parser(&settings);

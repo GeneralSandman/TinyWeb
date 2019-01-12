@@ -55,7 +55,7 @@ inline ssize_t rio_readn(int fd, void* usrbuf, size_t n)
 }
 
 #define FCGI_MAX_LENGTH 0xFFFF
-#define FCGI_HOST "172.17.0.2"
+#define FCGI_HOST "172.17.0.3"
 #define FCGI_PORT 9000
 
 #define FCGI_VERSION_1 1
