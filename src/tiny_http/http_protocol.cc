@@ -13,6 +13,7 @@
 
 #include <tiny_base/log.h>
 #include <tiny_core/protocol.h>
+#include <tiny_http/http_model_fcgi.h>
 #include <tiny_http/http_parser.h>
 #include <tiny_http/http_protocol.h>
 #include <tiny_http/http_responser.h>
@@ -73,12 +74,12 @@ WebProtocol::~WebProtocol()
 
 RegistProtocol(WebProtocol);
 
-
 // FcgiClientProtocol using for fcgi client.
 
 FcgiClientProtocol::FcgiClientProtocol()
     : Protocol()
     , m_nKeepAlive(false)
+    , fcgiModel(1314)
 {
     LOG(Debug) << "class FcgiClientProtocol constructor\n";
 }
@@ -88,6 +89,22 @@ void FcgiClientProtocol::connectionMade()
     LOG(Info) << "get a new connection\n";
 
     // Write fcgi request.
+    http_header header;
+    std::string cgiargs = "name=zhenhuli&age=99";
+    std::string requestData;
+
+    memset((void*)&header, 0, sizeof(http_header));
+    strcpy(header.uri, "");
+    strcpy(header.method, "GET");
+    strcpy(header.version, "HTTP/1.1");
+    strcpy(header.filename, "/var/www/html/test/dynamic_get.php");
+    strcpy(header.name, "");
+    strcpy(header.cgiargs, cgiargs.c_str());
+    strcpy(header.contype, "");
+    strcpy(header.conlength, "0");
+
+    fcgiModel.buildFcgiRequest(&header, requestData);
+    sendMessage(requestData);
 }
 
 void FcgiClientProtocol::dataReceived(const std::string& data)
@@ -95,6 +112,7 @@ void FcgiClientProtocol::dataReceived(const std::string& data)
     LOG(Info) << "FcgiClientProtocol get data\n";
 
     // Read fcgi response.
+    fcgiModel.parseFcgiResponse(data);
 }
 
 void FcgiClientProtocol::connectionLost()

@@ -59,6 +59,7 @@ int open_clientfd()
     }
 
     printf("connect 172.17.0.3:9000 success\n");
+    printf("connect fcgi-server(%s:%d) success\n", fcgiIp, fcgiPort);
 
     return sock;
 }
@@ -73,27 +74,10 @@ void test1()
 
     sock = open_clientfd();
 
-    // char *uri = "/";
-    // char *method = "POST";
-    // char *version = "1.1";
-    // char *filename = "test.php";
-    // char *name = "";
-    // char *cgiargs = "";
-    // char *contype = "";
-    // char *conlength = "0";
-
     for (int i = 0; i < 1; i++) {
 
         http_header header;
         memset((void*)&header, 0, sizeof(http_header));
-        // header.uri = uri;
-        // header.method = method;
-        // header.version = version;
-        // header.filename = filename;
-        // header.name = name;
-        // header.cgiargs = cgiargs;
-        // header.contype = contype;
-        // header.conlength = conlength;
         strcpy(header.uri, "");
         strcpy(header.method, "GET");
         strcpy(header.version, "HTTP/1.1");

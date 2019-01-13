@@ -12,11 +12,12 @@
  */
 
 #ifndef HTTP_PROTOCOL_H
-#define HTTP_PROTOCOL_Hs
+#define HTTP_PROTOCOL_H
 
 
 #include <tiny_base/log.h>
 #include <tiny_core/protocol.h>
+#include <tiny_http/http_model_fcgi.h> 
 
 // Using for web server.
 class WebProtocol : public Protocol
@@ -37,6 +38,8 @@ class FcgiClientProtocol : public Protocol
 {
 private:
   bool m_nKeepAlive;
+
+  HttpModelFcgi fcgiModel;
 
 public:
   FcgiClientProtocol();
