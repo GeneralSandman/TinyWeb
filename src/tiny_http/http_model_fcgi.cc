@@ -63,7 +63,7 @@ void HttpModelFcgi::makeParamsRecord(
     std::string& data)
 {
     unsigned char *buf, *old;
-    int ret, pl, cl, buffer_size;
+    int pl, cl, buffer_size;
 
     // Count content length.
     cl = nlen + vlen;
@@ -124,7 +124,7 @@ void HttpModelFcgi::makeStdinRecord(
     int len,
     std::string& data)
 {
-    int cl = len, pl, ret;
+    int cl = len, pl;
     char padding_buf[8] = { 0 };
 
     while (len > 0) {
@@ -156,7 +156,6 @@ void HttpModelFcgi::makeStdinRecord(
 void HttpModelFcgi::makeEmptyStdinRecord(
     std::string& data)
 {
-    int ret;
     fcgi_header_t header;
 
     makeHeader(&header, FCGI_STDIN, 0, 0);
@@ -235,7 +234,6 @@ int HttpModelFcgi::parseRecord(
     char *con_buf = nullptr, *err_buf = nullptr;
     unsigned int con_len = 0, err_len = 0;
     int padding_buf[8] = { 0 };
-    int ret;
 
     unsigned char type;
     unsigned int request_id;
@@ -290,7 +288,7 @@ int HttpModelFcgi::parseRecord(
                 // printf("read fcgi_stdout padding error\n");
                 // return -1;
                 // }
-                printf("1zhenhuli padding:%.*s\n", padding_length, padding_buf);
+                printf("1zhenhuli padding:%.*s\n", padding_length, (char*)padding_buf);
             }
 
         } else if (type == FCGI_STDERR) {
@@ -306,9 +304,9 @@ int HttpModelFcgi::parseRecord(
             // FIXME: store date begin last used index.
             memcpy(err_buf, (const void*)(begin + i), content_length);
             i += content_length;
-            if (ret == -1 || ret != content_length) {
-                return -1;
-            }
+            // if (ret == -1 || ret != content_length) {
+            //     return -1;
+            // }
 
             printf("2zhenhuli err:%.*s\n", content_length, err_buf);
 
@@ -327,11 +325,11 @@ int HttpModelFcgi::parseRecord(
             memcpy(&endr, (const void*)(begin + i), sizeof(endr));
             i += sizeof(endr);
 
-            if (ret == -1 || ret != sizeof(endr)) {
-                free(con_buf);
-                free(err_buf);
-                return -1;
-            }
+            // if (ret == -1 || ret != sizeof(endr)) {
+            //     free(con_buf);
+            //     free(err_buf);
+            //     return -1;
+            // }
 
             printf("3zhenhuli end\n");
             free(con_buf);
@@ -348,8 +346,6 @@ int HttpModelFcgi::parseRecord(
 
 int HttpModelFcgi::parseFcgiResponse(const std::string& data)
 {
-    char* p;
-    int n;
 
     if (parseRecord(data) < 0) {
         std::cout << "parse record error\n";

@@ -245,7 +245,7 @@ int MemoryPool::catChain(chain_t* dest,
     chain_t* pos;
     chain_t* new_chain;
 
-    for (dest; dest->next != nullptr; dest = dest->next) {
+    for (; dest->next != nullptr; dest = dest->next) {
     }
 
     if (!size)

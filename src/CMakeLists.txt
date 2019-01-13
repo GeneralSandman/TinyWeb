@@ -3,7 +3,7 @@
 cmake_minimum_required(VERSION 2.8)
 project (TinyWeb)
 
-set (TINYWEB_VERSION "\"TnyWeb/0.0.10\"")
+set (TINYWEB_VERSION "\"TnyWeb/0.0.8\"")
 
 # configure a header file to pass some of the CMake settings
 # to the source code
@@ -12,21 +12,24 @@ configure_file (
     "${PROJECT_SOURCE_DIR}/TinyWebConfig.h"
   )
 
-# add the binary tree to the search path for include files
-# so that we will find TutorialConfig.h
-include_directories("${PROJECT_BINARY_DIR}")
+add_definitions("-Wall -std=c++11")
+
+SET (SOURCE_DIR ./)
+
+include_directories(${SOURCE_DIR})
+
+add_subdirectory("${SOURCE_DIR}/tiny_base" tiny_base.out)
+add_subdirectory("${SOURCE_DIR}/tiny_core" tiny_core.out)
+add_subdirectory("${SOURCE_DIR}/tiny_http" tiny_http.out)
+add_subdirectory("${SOURCE_DIR}/tiny_struct" tiny_struct.out)
 
 
-add_subdirectory(tiny_base) 
-add_subdirectory(tiny_core) 
-add_subdirectory(tiny_http) 
-add_subdirectory(tiny_struct) 
-
-add_executable(Main
+add_executable(TinyWeb
     main.cc)
 
-target_link_libraries(Main
-    tiny_base_model
-    tiny_core_model
+target_link_libraries(TinyWeb
     tiny_http_model
-    tiny_http_struct)
+    tiny_core_model
+    tiny_struct_model
+    tiny_base_model
+    )
