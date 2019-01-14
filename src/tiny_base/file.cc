@@ -11,14 +11,14 @@
  *
  */
 
-#include <tiny_base/log.h>
 #include <tiny_base/file.h>
+#include <tiny_base/log.h>
 #include <tiny_base/memorypool.h>
 
-#include <sys/stat.h>
 #include <fcntl.h>
-#include <string> 
 #include <string.h>
+#include <string>
+#include <sys/stat.h>
 
 int isRegularFile(const std::string& fname)
 {
@@ -94,13 +94,13 @@ int File::setFile(const std::string& fname)
     return 0;
 }
 
-    inline unsigned int File::getFileSize()
-    {
-        if (valid) {
-            return info.st_size;
-        }
-        return 0;
+inline unsigned int File::getFileSize()
+{
+    if (valid) {
+        return info.st_size;
     }
+    return 0;
+}
 
 chain_t* File::appendData(chain_t* dest, const char* data, unsigned int len)
 {
@@ -210,6 +210,10 @@ void File::getData(chain_t* chain)
     free((void*)read_buffer);
 }
 
+// using for Range && Content-Range.
+void File::getDate(chain_t* chain, off_t begin, off_t end)
+{
+}
 // int sendfile(int outFd, HttpFile* file)
 // {
 //     if (outFd == 0) {

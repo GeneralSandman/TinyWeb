@@ -15,7 +15,6 @@ add_library(tiny_base_model STATIC
   file.cc
   memorypool.cc
   messagequeue.cc
-  reader.cc
   semaphore.cc
   sharedmemory.cc
   signalmanager.cc

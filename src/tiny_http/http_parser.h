@@ -294,6 +294,10 @@ typedef struct HttpHeaders {
 
     HttpHeader* x_powered_by;
 
+    HttpHeader* range;
+    HttpHeader* if_range;
+    HttpHeader* content_range;
+
     std::list<HttpHeader*> generals; //TODO:take place in list_t
 
     char* data;
@@ -794,6 +798,27 @@ inline int parseLastModified(const Str* s, HttpHeaders* const headers)
 inline int parseXPoweredBy(const Str* s, HttpHeaders* const headers)
 {
     std::cout << "[parse headerMeaning callback]x-powered-by\n";
+    printf("value:%.*s\n", s->len, s->data);
+    return 0;
+}
+
+inline int parseRange(const Str* s, HttpHeaders* const headers)
+{
+    std::cout << "[parse headerMeaning callback]range\n";
+    printf("value:%.*s\n", s->len, s->data);
+    return 0;
+}
+
+inline int parseIfRange(const Str* s, HttpHeaders* const headers)
+{
+    std::cout << "[parse headerMeaning callback]if-range\n";
+    printf("value:%.*s\n", s->len, s->data);
+    return 0;
+}
+
+inline int parseContentRange(const Str* s, HttpHeaders* const headers)
+{
+    std::cout << "[parse headerMeaning callback]content-range\n";
     printf("value:%.*s\n", s->len, s->data);
     return 0;
 }

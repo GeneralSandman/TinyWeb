@@ -248,6 +248,24 @@ headerCallback headers_in[] = {
         .offset = offsetof__(HttpHeaders, x_powered_by),
         .fun = boost::bind(parseXPoweredBy, _1, _2),
     },
+
+    {
+        .name = Str("range"),
+        .offset = offsetof__(HttpHeaders, range),
+        .fun = boost::bind(parseRange, _1, _2),
+    },
+
+    {
+        .name = Str("if-range"),
+        .offset = offsetof__(HttpHeaders, if_range),
+        .fun = boost::bind(parseIfRange, _1, _2),
+    },
+
+    {
+        .name = Str("content-range"),
+        .offset = offsetof__(HttpHeaders, content_range),
+        .fun = boost::bind(parseContentRange, _1, _2),
+    },
 };
 
 std::unordered_map<unsigned int, headerCallback> headerKeyHash;

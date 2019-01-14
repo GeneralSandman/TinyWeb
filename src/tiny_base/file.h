@@ -47,6 +47,8 @@ public:
     // Return the end of chain.
     chain_t* appendData(chain_t* dest, const char* data, unsigned int len);
     void getData(chain_t* chain);
+    // using for Range && Content-Range.
+    void getDate(chain_t* chain, off_t begin, off_t end);
 
     ~File(){
         if (valid) {

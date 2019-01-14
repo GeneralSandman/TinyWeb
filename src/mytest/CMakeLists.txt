@@ -37,6 +37,15 @@ target_link_libraries(idea_test
     tiny_http_model
     )
 
+# idea2_test
+add_executable(idea2_test
+    idea2_test.cc
+    )
+
+target_link_libraries(idea2_test
+    tiny_http_model
+    )
+
 # all_test
 add_executable(all_test
     all_test.cc
