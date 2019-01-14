@@ -12,6 +12,7 @@ add_library(tiny_base_model STATIC
   exception.cc
   list_timer.cc
   log.cc
+  file.cc
   memorypool.cc
   messagequeue.cc
   reader.cc

@@ -117,7 +117,7 @@ void FcgiClientProtocol::dataReceived(const std::string& data)
     // Read fcgi response.
     fcgiModel.parseFcgiResponse(data);
 
-    HttpParserSetting settings;
+    HttpParserSettings settings;
     HttpRequest* result = new HttpRequest;
     int begin = 0;
 
@@ -151,9 +151,6 @@ void FcgiClientProtocol::connectionLost()
 
 FcgiClientProtocol::~FcgiClientProtocol()
 {
-    if (nullptr != setting) {
-        delete setting;
-    }
     LOG(Debug) << "class FcgiClientProtocol destructor\n";
 }
 

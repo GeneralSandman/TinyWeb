@@ -41,7 +41,6 @@ private:
   bool m_nKeepAlive;
 
   HttpModelFcgi fcgiModel;
-  HttpParser fcgiParser;
 
 public:
   FcgiClientProtocol();

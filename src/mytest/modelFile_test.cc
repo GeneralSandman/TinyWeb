@@ -12,6 +12,7 @@
  */
 
 #include <tiny_base/configer.h>
+#include <tiny_base/file.h>
 #include <tiny_http/http_model_file.h>
 
 #include <iostream>
