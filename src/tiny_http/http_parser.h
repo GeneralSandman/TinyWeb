@@ -292,6 +292,8 @@ typedef struct HttpHeaders {
     HttpHeader* cookie;
     HttpHeader* last_modified;
 
+    HttpHeader* x_powered_by;
+
     std::list<HttpHeader*> generals; //TODO:take place in list_t
 
     char* data;
@@ -591,7 +593,8 @@ public:
         HttpHeaders* result);
 
     int parseHeadersMeaning(HttpHeaders* headers);
-    int semanticAnalysis(HttpRequest* request);
+    int semanticAnalysisHttp(HttpRequest* request);
+    int semanticAnalysisFcgiResponse(HttpRequest* request);
 
     //parse body
     int parseBody(const char* stream,
@@ -785,6 +788,13 @@ inline int parseLastModified(const Str* s, HttpHeaders* const headers)
     }
     sdsdestory(&tmp);
 
+    return 0;
+}
+
+inline int parseXPoweredBy(const Str* s, HttpHeaders* const headers)
+{
+    std::cout << "[parse headerMeaning callback]x-powered-by\n";
+    printf("value:%.*s\n", s->len, s->data);
     return 0;
 }
 

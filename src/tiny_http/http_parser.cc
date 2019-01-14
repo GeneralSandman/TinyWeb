@@ -242,6 +242,12 @@ headerCallback headers_in[] = {
         .offset = offsetof__(HttpHeaders, last_modified),
         .fun = boost::bind(parseLastModified, _1, _2),
     },
+
+    {
+        .name = Str("x-powered-by"),
+        .offset = offsetof__(HttpHeaders, x_powered_by),
+        .fun = boost::bind(parseXPoweredBy, _1, _2),
+    },
 };
 
 std::unordered_map<unsigned int, headerCallback> headerKeyHash;
@@ -1006,7 +1012,7 @@ int HttpParser::parseHeadersMeaning(HttpHeaders* headers)
     return 0;
 }
 
-int HttpParser::semanticAnalysis(HttpRequest* request)
+int HttpParser::semanticAnalysisHttp(HttpRequest* request)
 {
     HttpHeaders* hs = request->headers;
     bool keep_alive = shouldKeepAlive(request);
@@ -1094,6 +1100,14 @@ int HttpParser::semanticAnalysis(HttpRequest* request)
     return 0;
 }
 
+int HttpParser::semanticAnalysisFcgiResponse(HttpRequest* request)
+{
+    HttpHeaders* hs = request->headers;
+    // TODO: need to judge the meaning of fcgi response.
+
+    return 0;
+}
+
 int HttpParser::parseBody(const char* stream,
     unsigned int at,
     unsigned int len,
@@ -1134,7 +1148,7 @@ int HttpParser::parseBody(const char* stream,
     for (unsigned int i = 0; i < len; i++) {
         char ch = *(begin + at + i);
 
-        printf("parseBody:%c-%d\n", ch, int(stat));
+        // printf("parseBody:%c-%d\n", ch, int(stat));
 
         switch (stat) {
         case s_http_body_error:
@@ -1643,7 +1657,7 @@ int HttpParser::execute(const char* stream,
         goto error;
 
     //switch body type : chunk or end-by-eof or end-by-length
-    return_val = semanticAnalysis(request);
+    return_val = semanticAnalysisHttp(request);
     if (return_val == -1)
         goto error;
 

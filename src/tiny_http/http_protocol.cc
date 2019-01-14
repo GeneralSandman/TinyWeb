@@ -74,6 +74,8 @@ WebProtocol::~WebProtocol()
 
 RegistProtocol(WebProtocol);
 
+// WebProtocol
+
 // FcgiClientProtocol using for fcgi client.
 
 FcgiClientProtocol::FcgiClientProtocol()
@@ -105,6 +107,7 @@ void FcgiClientProtocol::connectionMade()
 
     fcgiModel.buildFcgiRequest(&header, requestData);
     sendMessage(requestData);
+
 }
 
 void FcgiClientProtocol::dataReceived(const std::string& data)
@@ -113,6 +116,32 @@ void FcgiClientProtocol::dataReceived(const std::string& data)
 
     // Read fcgi response.
     fcgiModel.parseFcgiResponse(data);
+
+    HttpParserSetting settings;
+    HttpRequest* result = new HttpRequest;
+    int begin = 0;
+
+    HttpParser parser(&settings);
+    parser.setType(HTTP_TYPE_FCGI_RESPONSE);
+
+    int tmp = parser.execute(data.c_str(),
+        begin,
+        data.size(),
+        result);
+
+    bool res = (tmp == -1) ? false : true;
+    if (res) {
+        HttpResponser responser;
+        std::string data;
+
+        responser.response(result, data);
+
+        // Funciton of basic class.
+        // send message to client.
+        // sendMessage(data);
+    }
+
+    delete result;
 }
 
 void FcgiClientProtocol::connectionLost()
@@ -122,7 +151,12 @@ void FcgiClientProtocol::connectionLost()
 
 FcgiClientProtocol::~FcgiClientProtocol()
 {
+    if (nullptr != setting) {
+        delete setting;
+    }
     LOG(Debug) << "class FcgiClientProtocol destructor\n";
 }
 
 RegistProtocol(FcgiClientProtocol);
+
+// FcgiClientProtocol

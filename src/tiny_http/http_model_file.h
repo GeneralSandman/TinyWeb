@@ -33,8 +33,8 @@ public:
     std::string mime_type;
     bool valid;
     int fd;
-    struct stat info;
     off_t offset;
+    struct stat info;
 
 public:
     HttpFile()
@@ -48,7 +48,7 @@ public:
     int setFile(const std::string& fname);
     int setPathWithDefault(const std::string& path, const std::vector<std::string>& pages);
 
-    unsigned int getFileSize()
+    inline unsigned int getFileSize()
     {
         if (valid) {
             return info.st_size;
