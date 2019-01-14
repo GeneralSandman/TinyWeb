@@ -252,17 +252,30 @@ void headerMeaningInit()
     for (int i = 0; i < len; i++) {
         unsigned int hash = JSHash(headers_in[i].name.data, headers_in[i].name.len);
         headerKeyHash[hash] = headers_in[i];
-        std::cout << "add special header callback("<<headers_in[i].name.data<<")\n";
+        std::cout << "add special header callback(" << headers_in[i].name.data << ")\n";
     }
 }
 
 void HttpParser::setType(enum HttpContentType type)
 {
     m_nType = type;
-    m_nState = (type == HTTP_TYPE_RESPONSE) ? s_resp_start
-                                            : ((type == HTTP_TYPE_REQUEST
-                                                    ? s_requ_start
-                                                    : s_start_resp_or_requ));
+
+    switch (type) {
+
+    case HTTP_TYPE_BOTH: {
+        m_nState = s_start_resp_or_requ;
+    } break;
+    case HTTP_TYPE_REQUEST: {
+        m_nState = s_requ_start;
+    } break;
+    case HTTP_TYPE_RESPONSE: {
+        m_nState = s_resp_start;
+    } break;
+    case HTTP_TYPE_FCGI_RESPONSE: {
+        m_nState = s_requ_line_done;
+    } break;
+
+    }
 }
 
 int HttpParser::invokeByName(const char* funName,
@@ -1276,12 +1289,17 @@ int HttpParser::execute(const char* stream,
         request->type = HTTP_TYPE_BOTH;
         break;
 
+    case s_requ_line_done:
+        request->type = HTTP_TYPE_FCGI_RESPONSE;
+        break;
+
     default:
         break;
     }
 
     for (unsigned int i = 0; i < len; i++) {
         char ch = *(begin + i);
+        // LOG(Debug) << "char:" << ch << ",stat:" << m_nState << std::endl;
 
         switch (m_nState) {
 
@@ -1597,7 +1615,7 @@ int HttpParser::execute(const char* stream,
         if (return_val == -1)
             goto error;
         //change goto error command
-    } else {
+    } else if (request->type == HTTP_TYPE_RESPONSE){
         //HTTP_TYPE_RESPONSE
         request->statusCode = m_nStatusCode;
         request->statusPhrase = std::string(status_phrase_begin, status_phrase_len);

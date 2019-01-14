@@ -330,6 +330,54 @@ testBody bodys[] = {
     },
 };
 
+testBody bodys_fcgi_response[] = {
+    {
+        .str = "X-Powered-By: PHP/5.6.39\r\n"
+               "Content-type: text/html; charset=UTF-8\r\n"
+               "\r\n"
+               "{\"name\":\"zhenhuli\",\"age\":\"99\"}",
+        .valid = true,
+        .body = "",
+    },
+
+    {
+        .str = "X-Powered-By: PHP/5.6.39\r\n"
+               "Content-type: text/html; charset=UTF-8\r\n"
+               "\r\n"
+               "{\"name\":\"zhenhuli\",\"age\":\"99\"}",
+        .valid = true,
+        .body = "",
+    },
+
+    {
+        .str = "X-Powered-By: PHP/5.6.39\r\n"
+               "Content-type: text/html; charset=UTF-8\r\n"
+               "\r\n"
+               "{\"name\":\"zhenhuli\",\"age\":\"99\"}",
+        .valid = true,
+        .body = "",
+    },
+
+    {
+        .str = "X-Powered-By: PHP/5.6.39\r\n"
+               "Content-type: text/html; charset=UTF-8\r\n"
+               "\r\n"
+               "{\"name\":\"zhenhuli\",\"age\":\"99\"}",
+        .valid = true,
+        .body = "",
+    },
+
+    {
+        .str = "X-Powered-By: PHP/5.6.39\r\n"
+               "Content-type: text/html; charset=UTF-8\r\n"
+               "\r\n"
+               "{\"name\":\"zhenhuli\",\"age\":\"99\"}",
+        .valid = true,
+        .body = "",
+    },
+
+};
+
 void testPraseBody()
 {
     HttpParserSettings settings;
@@ -373,7 +421,60 @@ void testPraseBody()
         delete result;
     }
 
-    std::cout << "[Parse Body Test] pass/all = " << passtest << "/" << alltest << std::endl;
+    std::cout << "[Parse Http Body Test] pass/all = " << passtest << "/" << alltest << std::endl;
+
+    if (!notPass.empty()) {
+        cout << "not pass body index:\t";
+        for (auto t : notPass)
+            std::cout << t << " ";
+        std::cout << std::endl;
+    }
+}
+
+void testPraseBody_FcgiResponse()
+{
+    HttpParserSettings settings;
+
+    vector<int> notPass;
+    int alltest = 0;
+    int passtest = 0;
+
+    int len = sizeof(bodys_fcgi_response) / sizeof(bodys_fcgi_response[0]);
+
+    for (int i = 0; i < len; i++) {
+        std::cout << i << ")" << std::endl;
+        alltest++;
+        int begin = 0;
+        HttpParser parser(&settings);
+        parser.setType(HTTP_TYPE_FCGI_RESPONSE);
+        HttpRequest* result = new HttpRequest;
+        int tmp = parser.execute(bodys_fcgi_response[i].str,
+            begin,
+            strlen(bodys_fcgi_response[i].str),
+            result);
+
+        bool res = (tmp == -1) ? false : true;
+        if (res == bodys_fcgi_response[i].valid) {
+
+            if (res) {
+
+                bool sameBody = true;
+                if (sameBody) {
+                    passtest++;
+                } else {
+                    notPass.push_back(i);
+                }
+            } else {
+                passtest++;
+            }
+        } else {
+            notPass.push_back(i);
+        }
+
+        delete result;
+    }
+
+    std::cout << "[Parse Fcgi-Response Body Test] pass/all = " << passtest << "/" << alltest << std::endl;
 
     if (!notPass.empty()) {
         cout << "not pass body index:\t";
@@ -386,6 +487,7 @@ void testPraseBody()
 int main()
 {
     headerMeaningInit();
-    testPraseBody();
+    // testPraseBody();
+    testPraseBody_FcgiResponse();
     return 0;
 }

@@ -97,6 +97,7 @@ add_executable(parseBody
 target_link_libraries(parseBody
     tiny_http_model
     tiny_base_model
+    tiny_struct_model
     )
 
 # parseHeader

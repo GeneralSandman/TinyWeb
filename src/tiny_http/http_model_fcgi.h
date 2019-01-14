@@ -148,7 +148,9 @@ public:
         const std::string& data);
     int parseFcgiResponse(const std::string& data);
 
-    ~HttpModelFcgi() {}
+    ~HttpModelFcgi() {
+        LOG(Debug) << "class HttpModelFcgi destructor\n";
+    }
 };
 
 #endif

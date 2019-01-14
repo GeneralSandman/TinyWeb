@@ -158,6 +158,7 @@ bool daemaonStillRun(std::string &name, pid_t prepid)
     std::string oldname;
     if (0 != getNamebyPid(prepid, oldname))
         return false;
+
     if (oldname == name)
         return true;
     else
@@ -230,6 +231,10 @@ int main(int argc, char **argv)
 
     pid_t prepid = daemonPrePid();
     std::cout << "pre pid:" << prepid << std::endl;
+
+    // command-line 
+
+    // Product-model only have
     if (0 == prepid &&
         opt.end() == opt.find('t') &&
         opt.end() == opt.find('v') &&
@@ -245,10 +250,12 @@ int main(int argc, char **argv)
         while (1)
         {
             // sleep(5);
+            std::cout << "I'm running\n";
+            sleep(2);
         }
-        ProcessPool pool;
-        pool.init();
-        pool.createProcess(2);
+        // ProcessPool pool;
+        // pool.init();
+        // pool.createProcess(2);
     }
     else
     {

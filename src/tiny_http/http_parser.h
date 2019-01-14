@@ -372,6 +372,7 @@ enum HttpContentType {
     HTTP_TYPE_BOTH,
     HTTP_TYPE_REQUEST,
     HTTP_TYPE_RESPONSE,
+    HTTP_TYPE_FCGI_RESPONSE,
 };
 
 typedef struct HttpRequest {

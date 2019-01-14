@@ -6,8 +6,7 @@
  */
 
 /*---Configer Class---
- *We need to upgrade this class
- *in order to handle config file error
+ *
  ****************************************
  *
  */
@@ -128,6 +127,7 @@ public:
         static Configer ConfigerInstance;
         return ConfigerInstance;
     }
+
     void setConfigerFile(const std::string& file);
     int checkConfigerFile(const std::string& file);
     int loadConfig(bool debug = false);
@@ -140,6 +140,7 @@ public:
     const LogConfig& getLogConfig();
 
     std::string getMimeType(const std::string& file_type);
+
     ~Configer();
 };
 
