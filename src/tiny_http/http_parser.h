@@ -15,10 +15,10 @@
 #define HTTP_PARSER_H
 
 #include <tiny_base/log.h>
-#include <tiny_struct/sdstr_t.h>
 #include <tiny_http/http.h>
-#include <tiny_http/str_t.h>
 #include <tiny_http/http_time.h>
+#include <tiny_http/str_t.h>
+#include <tiny_struct/sdstr_t.h>
 
 #include <boost/function.hpp>
 #include <iostream>
@@ -413,13 +413,13 @@ inline bool endMessageByEof(const HttpRequest* request)
         return false; //Don't need eof
 
     /* See RFC 2616 section 4.4 */
-      if (status_code / 100 == 1 || /* 1xx e.g. Continue */
-          status_code == 204 ||     /* No Content */
-          status_code == 304 ||     /* Not Modified */
-          body_type == t_http_body_skip) {     /* response to a HEAD request */
-          // No body message.
+    if (status_code / 100 == 1 ||        /* 1xx e.g. Continue */
+        status_code == 204 ||            /* No Content */
+        status_code == 304 ||            /* Not Modified */
+        body_type == t_http_body_skip) { /* response to a HEAD request */
+                                         // No body message.
         return false;
-      }
+    }
 
     return true;
 }
@@ -671,6 +671,7 @@ inline int parseContentLength(const Str* s, HttpHeaders* const headers)
         res += ch - '0';
     }
 
+    std::cout << "content-length:" << res << std::endl;
     headers->content_length_n = res;
     headers->valid_content_length = 1;
     headers->content_identify_length = 1;
@@ -678,7 +679,6 @@ inline int parseContentLength(const Str* s, HttpHeaders* const headers)
     //std::cout << "parse Content-Length:" << headers->content_length_n << std::endl;
     return 0;
 }
-
 
 inline int parseIfModifiedSince(const Str* s, HttpHeaders* const headers)
 {
@@ -753,6 +753,44 @@ inline int parseCookie(const Str* s, HttpHeaders* const headers)
 inline int parseContentType(const Str* s, HttpHeaders* const headers)
 {
     std::cout << "[parse headerMeaning callback]content-type\n";
+
+    // TODO: Content-Type: multipart/form-data; boundary=${boundary}
+    //
+    
+    std::string value;
+    std::string boundary;
+    bool boundary_begin = false;
+    unsigned int i = 0;
+    char ch;
+
+    for (; i < s->len; i++) {
+        ch = *(s->data + i);
+
+        if (ch == ';') {
+            break;
+        }
+        value.push_back(ch);
+    }
+    std::cout << "value:" << value << std::endl;
+    // multipart/form-data
+    // application/x-www-form-urlencoded
+    // application/json
+
+    for (; i < s->len; i++) {
+        
+        ch = *(s->data + i);
+
+        if (!boundary_begin && ch == '=') {
+            boundary_begin = true;
+            continue;
+        }
+
+        if (boundary_begin) {
+            boundary.push_back(ch);
+        }
+    }
+
+    std::cout << "boundary:" << boundary << std::endl;
 
     return 0;
 }

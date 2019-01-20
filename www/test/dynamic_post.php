@@ -1,2 +1,11 @@
-name: <?php echo $_POST["name"]; ?><br>
-e-mail: <?php echo $_POST["email"]; ?>
+<?php
+   class Client {
+       public $name = "";
+       public $email  = "";
+   }
+   $e = new Client();
+   $e->name = $_POST["name"];
+   $e->email  =$_POST["email"];
+   print_r($_POST);
+   echo json_encode($e);
+?>

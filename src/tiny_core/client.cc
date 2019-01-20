@@ -1,34 +1,34 @@
 /*
-*Author:GeneralSandman
-*Code:https://github.com/GeneralSandman/TinyWeb
-*E-mail:generalsandman@163.com
-*Web:www.generalsandman.cn
-*/
+ *Author:GeneralSandman
+ *Code:https://github.com/GeneralSandman/TinyWeb
+ *E-mail:generalsandman@163.com
+ *Web:www.dissigil.cn
+ */
 
 /*---XXX---
-*
-****************************************
-*
-*/
+ *
+ ****************************************
+ *
+ */
 
-#include <tiny_core/client.h>
-#include <tiny_core/connector.h>
-#include <tiny_core/connection.h>
-#include <tiny_core/factory.h>
 #include <tiny_base/log.h>
+#include <tiny_core/client.h>
+#include <tiny_core/connection.h>
+#include <tiny_core/connector.h>
+#include <tiny_core/factory.h>
 
 #include <boost/bind.hpp>
 
 void Client::m_fNewConnectionCallback(int sockfd,
-                                      const NetAddress &hostaddress,
-                                      const NetAddress &peeraddress) //this arg may be error.
+    const NetAddress& hostaddress,
+    const NetAddress& peeraddress) //this arg may be error.
 {
     //this function must identifer which localaddress
     //establish connection.
-    Connection *newCon = new Connection(m_pEventLoop,
-                                        sockfd,
-                                        hostaddress,
-                                        peeraddress);
+    Connection* newCon = new Connection(m_pEventLoop,
+        sockfd,
+        hostaddress,
+        peeraddress);
     m_nConNum++;
     // std::cout << m_nConNum << std::endl;
     newCon->setConnectCallback(m_nConnectCallback);
@@ -42,7 +42,7 @@ void Client::m_fNewConnectionCallback(int sockfd,
     newCon->establishConnection();
 }
 
-void Client::m_fHandleClose(Connection *con)
+void Client::m_fHandleClose(Connection* con)
 {
 
     if (m_nCloseCallback)
@@ -52,35 +52,31 @@ void Client::m_fHandleClose(Connection *con)
     auto p = m_nConnections.find(add);
     assert(p != m_nConnections.end());
 
-    Connector *conr = p->second.first;
-    Connection *conn = p->second.second;
+    Connector* conr = p->second.first;
+    Connection* conn = p->second.second;
 
     conr->stop();
     conn->destoryConnection();
 
     delete conn;
-    if (!conr->isKeepConnect())
-    { //can't be reused.
+    if (!conr->isKeepConnect()) { //can't be reused.
         delete conr;
         m_nConnections.erase(p);
-    }
-    else
-    { //This pair may be reused next time.
+    } else { //This pair may be reused next time.
     }
 
     if (m_nStarted && conr->isKeepConnect())
         conr->restart();
 }
 
-Client::Client(EventLoop *loop,
-               Factory *factory)
-    : m_nStarted(false),
-      m_nConNum(0),
-      m_pEventLoop(loop),
-      m_pFactory(factory)
+Client::Client(EventLoop* loop,
+    Factory* factory)
+    : m_nStarted(false)
+    , m_nConNum(0)
+    , m_pEventLoop(loop)
+    , m_pFactory(factory)
 {
-    if (m_pFactory != nullptr)
-    {
+    if (m_pFactory != nullptr) {
         setConnectCallback(m_pFactory->connectCallback());
         setMessageCallback(m_pFactory->getMessageCallback());
         setWriteCompleteCallback(m_pFactory->writeCompleteCallback());
@@ -95,20 +91,20 @@ void Client::start()
     m_nStarted = true;
 }
 
-void Client::connect(const NetAddress &hostAddress,
-                     const NetAddress &peeraddress,
-                     bool retry,
-                     bool keepconnect)
+void Client::connect(const NetAddress& hostAddress,
+    const NetAddress& peeraddress,
+    bool retry,
+    bool keepconnect)
 {
     assert(m_nStarted);
 
-    Connector *newConnector = new Connector(m_pEventLoop,
-                                            hostAddress,
-                                            peeraddress,
-                                            retry,
-                                            keepconnect);
+    Connector* newConnector = new Connector(m_pEventLoop,
+        hostAddress,
+        peeraddress,
+        retry,
+        keepconnect);
     newConnector->setConnectionCallback(boost::bind(&Client::m_fNewConnectionCallback,
-                                                    this, _1, _2, _3));
+        this, _1, _2, _3));
     AddressCouple address(hostAddress, peeraddress);
     ConnectorCouple couple(newConnector, nullptr);
     m_nConnections[address] = couple;
@@ -116,15 +112,14 @@ void Client::connect(const NetAddress &hostAddress,
     newConnector->start();
 }
 
-void Client::disconnect(const NetAddress &peeraddress,
-                        const NetAddress &hostaddress)
+void Client::disconnect(const NetAddress& peeraddress,
+    const NetAddress& hostaddress)
 {
     AddressCouple address(peeraddress, hostaddress);
     auto p = m_nConnections.find(address);
-    if (p != m_nConnections.end())
-    {
-        Connector *conr = p->second.first;
-        Connection *conn = p->second.second;
+    if (p != m_nConnections.end()) {
+        Connector* conr = p->second.first;
+        Connection* conn = p->second.second;
         conr->stop();
         conn->shutdownWrite();
         //stop this connection by connector.
@@ -132,9 +127,7 @@ void Client::disconnect(const NetAddress &peeraddress,
         delete conr;
         delete conn;
         m_nConnections.erase(p);
-    }
-    else
-    {
+    } else {
         //this connection don't exist.
         std::cout << "connection[" << peeraddress.getIpPort() << "-"
                   << hostaddress.getIpPort() << "] don't exist" << std::endl;
@@ -143,10 +136,9 @@ void Client::disconnect(const NetAddress &peeraddress,
 
 void Client::disconnectAll()
 {
-    for (auto t : m_nConnections)
-    {
-        Connector *conr = t.second.first;
-        Connection *conn = t.second.second;
+    for (auto t : m_nConnections) {
+        Connector* conr = t.second.first;
+        Connection* conn = t.second.second;
         conr->stop();
         conn->shutdownWrite();
         //close this connection

@@ -40,7 +40,15 @@ public:
     }
 
     int setFile(const std::string& fname);
-    inline unsigned int getFileSize();
+    inline unsigned int getFileSize()
+    {
+    if (valid) {
+        return info.st_size;
+    }
+
+    return 0;
+    }
+
 
     // appendData only used by getData(),
     // It append data begin dest and

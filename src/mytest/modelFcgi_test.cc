@@ -113,10 +113,60 @@ void test1()
 
 }
 
+void test2()
+{
+    int sock;
+
+    std::string cgiargs;
+    std::cout << "input cgiargs=";
+    std::cin >> cgiargs;
+
+    sock = open_clientfd();
+
+    for (int i = 0; i < 1; i++) {
+
+        http_header header;
+        memset((void*)&header, 0, sizeof(http_header));
+        strcpy(header.uri, "/var/www/html/test/dynamic_post.php");
+        strcpy(header.method, "POST");
+        strcpy(header.version, "HTTP/1.1");
+        strcpy(header.filename, "/var/www/html/test/dynamic_post.php");
+        strcpy(header.name, "/var/www/html/test/dynamic_post.php");
+        strcpy(header.cgiargs, cgiargs.c_str());
+        strcpy(header.contype, "application/x-www-form-urlencoded");
+        strcpy(header.conlength, "23");
+
+        LOG(Debug) << std::endl;
+        HttpModelFcgi fcgiModel(121412);
+        std::string data;
+        fcgiModel.buildFcgiRequest(&header, data);
+        int write_len = write(sock, data.c_str(), data.size());
+        if (write_len != data.size()) {
+            std::cout << "send fcgi request error\n";
+        }
+
+        LOG(Debug) << std::endl;
+        char *read_buffer;
+        read_buffer=(char*)malloc(4*1024);
+        int read_len = read(sock, read_buffer, 4*1024);
+        std::string response;
+        response.append(read_buffer, read_len);
+        fcgiModel.parseFcgiResponse(response);
+
+
+        free((void*)read_buffer);
+
+        LOG(Debug) << std::endl;
+    }
+    close(sock); // 关闭与fastcgi服务器连接的套接字
+
+}
+
 int main()
 {
     // std::cout << INT_MAX << std::endl;
     // std::cout << USHRT_MAX << std::endl;
     // std::cout << UCHAR_MAX << std::endl;
-    test1();
+    // test1();
+    test2();
 }

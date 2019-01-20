@@ -27,6 +27,7 @@ typedef struct testBody {
 } testBody;
 
 testBody bodys[] = {
+    // 0
     {
         .str = "GET /index.html HTTP/1.0\r\n"
                "\r\n",
@@ -84,7 +85,7 @@ testBody bodys[] = {
                "\r\n"
                "helloworld",
         .valid = false,
-        .body = "",
+        .body = "helloworld",
     },
 
     {
@@ -93,7 +94,7 @@ testBody bodys[] = {
                "\r\n"
                "helloworld",
         .valid = false,
-        .body = "",
+        .body = "helloworld",
     },
 
     {
@@ -102,7 +103,7 @@ testBody bodys[] = {
                "\r\n"
                "helloworld",
         .valid = false,
-        .body = "",
+        .body = "helloworld",
     },
 
     {
@@ -111,7 +112,7 @@ testBody bodys[] = {
                "\r\n"
                "helloworld",
         .valid = false,
-        .body = "",
+        .body = "helloworld",
     },
 
     // 10
@@ -330,6 +331,41 @@ testBody bodys[] = {
     },
 };
 
+testBody bodys_post_request[] = {
+    {
+        .str = "POST /test/dynamic_post.php HTTP/1.1\r\n"
+               "Host: 127.0.0.1\r\n"
+               "Connection: keep-alive\r\n"
+               "Content-Length: 243\r\n"
+               "Content-Type: multipart/form-data;boundary=----WebKitFormBoundaryk6KRh71N5xaURy12\r\n"
+               "\r\n"
+               "------WebKitFormBoundaryk6KRh71N5xaURy12\r\n"
+               "Content-Disposition: form-data;name =\"name\"\r\n"
+               "\r\n"
+               "7a68656e68756c69"
+               "------WebKitFormBoundaryk6KRh71N5xaURy12\r\n"
+               "Content-Disposition: form-data;name =\"email\"\r\n"
+               "\r\n"
+               "7a68656e68756c69"
+               "------WebKitFormBoundaryk6KRh71N5xaURy12--\r\n",
+        .valid = true,
+        .body = "",
+    },
+
+    {
+        .str = "POST /test/dynamic_post.php HTTP/1.1\r\n"
+               "Host: 127.0.0.1\r\n"
+               "Connection: keep-alive\r\n"
+               "Content-Length: 243\r\n"
+               "Content-Type: application/x-www-form-urlencoded\r\n"
+               "\r\n"
+                   .valid
+        = true,
+        .body = "",
+    },
+
+};
+
 testBody bodys_fcgi_response[] = {
     {
         .str = "X-Powered-By: PHP/5.6.39\r\n"
@@ -388,7 +424,7 @@ void testPraseBody()
 
     int len = sizeof(bodys) / sizeof(bodys[0]);
 
-    for (int i = 0; i < len; i++) {
+    for (int i = 10; i < 20; i++) {
         std::cout << i << ")" << std::endl;
         alltest++;
         int begin = 0;
@@ -422,6 +458,59 @@ void testPraseBody()
     }
 
     std::cout << "[Parse Http Body Test] pass/all = " << passtest << "/" << alltest << std::endl;
+
+    if (!notPass.empty()) {
+        cout << "not pass body index:\t";
+        for (auto t : notPass)
+            std::cout << t << " ";
+        std::cout << std::endl;
+    }
+}
+
+void testPraseBody_PostRequest()
+{
+    HttpParserSettings settings;
+
+    vector<int> notPass;
+    int alltest = 0;
+    int passtest = 0;
+
+    int len = sizeof(bodys_post_request) / sizeof(bodys_post_request[0]);
+
+    for (int i = 0; i < len; i++) {
+        std::cout << i << ")" << std::endl;
+        alltest++;
+        int begin = 0;
+        HttpParser parser(&settings);
+        parser.setType(HTTP_TYPE_REQUEST);
+        HttpRequest* result = new HttpRequest;
+        int tmp = parser.execute(bodys_post_request[i].str,
+            begin,
+            strlen(bodys_post_request[i].str),
+            result);
+
+        bool res = (tmp == -1) ? false : true;
+        if (res == bodys_post_request[i].valid) {
+
+            if (res) {
+
+                bool sameBody = true;
+                if (sameBody) {
+                    passtest++;
+                } else {
+                    notPass.push_back(i);
+                }
+            } else {
+                passtest++;
+            }
+        } else {
+            notPass.push_back(i);
+        }
+
+        delete result;
+    }
+
+    std::cout << "[Parse Http Post-Request Body Test] pass/all = " << passtest << "/" << alltest << std::endl;
 
     if (!notPass.empty()) {
         cout << "not pass body index:\t";
@@ -488,6 +577,7 @@ int main()
 {
     headerMeaningInit();
     // testPraseBody();
-    testPraseBody_FcgiResponse();
+    testPraseBody_PostRequest();
+    // testPraseBody_FcgiResponse();
     return 0;
 }

@@ -15,7 +15,9 @@
 #include <tiny_base/configer.h>
 #include <tiny_base/log.h>
 #include <tiny_base/memorypool.h>
+#include <tiny_base/file.h> 
 #include <tiny_http/http.h>
+#include <tiny_http/http_model_file.h> 
 #include <tiny_http/http_parser.h>
 #include <tiny_http/http_responser.h>
 #include <tiny_struct/sdstr_t.h>

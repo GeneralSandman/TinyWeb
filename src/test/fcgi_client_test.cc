@@ -19,7 +19,6 @@
 #include <tiny_core/netaddress.h>
 #include <tiny_core/timerid.h>
 #include <tiny_http/http_protocol.h>
-
 #include <tiny_http/http_model_fcgi.h>
 
 using namespace std;

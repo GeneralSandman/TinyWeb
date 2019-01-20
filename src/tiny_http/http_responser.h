@@ -16,6 +16,7 @@
 
 #include <TinyWebConfig.h>
 #include <tiny_http/http.h>
+#include <tiny_base/file.h> 
 #include <tiny_http/http_model_file.h>
 #include <tiny_http/http_parser.h>
 

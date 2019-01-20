@@ -298,7 +298,6 @@ void HttpParser::setType(enum HttpContentType type)
     case HTTP_TYPE_FCGI_RESPONSE: {
         m_nState = s_requ_line_done;
     } break;
-
     }
 }
 
@@ -1032,6 +1031,7 @@ int HttpParser::parseHeadersMeaning(HttpHeaders* headers)
 
 int HttpParser::semanticAnalysisHttp(HttpRequest* request)
 {
+    HttpContentType type = request->type;
     HttpHeaders* hs = request->headers;
     bool keep_alive = shouldKeepAlive(request);
     enum http_body_type body_type = t_http_body_type_init;
@@ -1091,7 +1091,8 @@ int HttpParser::semanticAnalysisHttp(HttpRequest* request)
         // Bad request.
     }
 
-    if (method != HTTP_METHOD_GET &&  /* GET */
+    if (type == HTTP_TYPE_REQUEST &&  /* http-request */
+        method != HTTP_METHOD_GET &&  /* GET */
         method != HTTP_METHOD_POST && /* POST */
         method != HTTP_METHOD_HEAD && /* HEAD */
         method != HTTP_METHOD_PUT     /* PUT */
@@ -1120,9 +1121,20 @@ int HttpParser::semanticAnalysisHttp(HttpRequest* request)
 
 int HttpParser::semanticAnalysisFcgiResponse(HttpRequest* request)
 {
+    HttpContentType type = request->type;
     HttpHeaders* hs = request->headers;
-    // TODO: need to judge the meaning of fcgi response.
+    bool keep_alive = shouldKeepAlive(request);
+    enum http_body_type body_type = t_http_body_type_init;
+    unsigned short method = request->method;
+    unsigned short http_version = request->http_version_major * 10 + request->http_version_minor;
+    unsigned int status_code = request->statusCode;
 
+    // TODO: need to judge the meaning of fcgi response.
+    LOG(Debug) << "analysis fcgi response\n";
+
+    body_type = t_http_body_end_by_eof;
+
+    request->body_type = body_type;
     return 0;
 }
 
@@ -1176,13 +1188,13 @@ int HttpParser::parseBody(const char* stream,
         case s_http_body_identify_by_length: {
             unsigned int to_read = MIN(content_length_n,
                 len - i);
-            //printf("content:%.*s\n", to_read, begin + at + i);
+            printf("len:%d,content:%.*s\n",to_read, to_read, begin + at + i);
             i += to_read;
             return 0;
         } break;
 
         case s_http_body_identify_by_eof:
-            //printf("content:%.*s\n", len - i, begin + at + i);
+            printf("content:%.*s\n", len - i, begin + at + i);
             i = len;
             break;
 
@@ -1233,8 +1245,7 @@ int HttpParser::parseBody(const char* stream,
         case s_http_body_chunk_data: {
             unsigned long long to_read = MIN(chunk_size,
                 len - i);
-            std::string data(begin + at + i, to_read);
-            //std::cout << "chunk data:" << data << std::endl;
+            printf("data-len:%d,chunk-data:%.*s\n", to_read, to_read, begin + at + i);
             i += to_read - 1;
             stat = s_http_body_chunk_data_almost_done;
         }
@@ -1647,7 +1658,7 @@ int HttpParser::execute(const char* stream,
         if (return_val == -1)
             goto error;
         //change goto error command
-    } else if (request->type == HTTP_TYPE_RESPONSE){
+    } else if (request->type == HTTP_TYPE_RESPONSE) {
         //HTTP_TYPE_RESPONSE
         request->statusCode = m_nStatusCode;
         request->statusPhrase = std::string(status_phrase_begin, status_phrase_len);
@@ -1675,7 +1686,11 @@ int HttpParser::execute(const char* stream,
         goto error;
 
     //switch body type : chunk or end-by-eof or end-by-length
-    return_val = semanticAnalysisHttp(request);
+    if (request->type == HTTP_TYPE_FCGI_RESPONSE) {
+        return_val = semanticAnalysisFcgiResponse(request);
+    } else {
+        return_val = semanticAnalysisHttp(request);
+    }
     if (return_val == -1)
         goto error;
 
@@ -1686,7 +1701,8 @@ int HttpParser::execute(const char* stream,
     }
 
     body_type = request->body_type;
-    return_val = parseBody(begin, body_begin, len - body_begin, body_type, content_length);
+    // TODO: update the parseBody function.
+    return_val = parseBody(begin, body_begin, len - body_begin, body_type, request->headers->content_length_n);
     if (return_val == -1)
         goto error;
 

@@ -13,8 +13,8 @@
 
 #include <tiny_base/api.h>
 #include <tiny_base/log.h>
-#include <tiny_struct/sdstr_t.h>
 #include <tiny_http/http_model_fcgi.h>
+#include <tiny_struct/sdstr_t.h>
 
 #include <string>
 
@@ -177,6 +177,8 @@ void HttpModelFcgi::buildFcgiRequest(http_header* hp, std::string& data)
         "CONTENT_LENGTH"
     };
 
+    // TODO: add SERVER_SOFTWARE
+
     int paoffset[] = {
         (size_t) & (((http_header*)0)->filename),
         (size_t) & (((http_header*)0)->name),
@@ -209,11 +211,13 @@ void HttpModelFcgi::buildFcgiRequest(http_header* hp, std::string& data)
 
     l = atoi(hp->conlength);
     if (l > 0) {
+        std::cout << "write stdin data len(" << l << ")\n";
         buf = (char*)malloc(l + 1);
-        memset(buf, '\0', l);
+        memset(buf, '\0', l + 1);
+        std::string post_data = "name=zhenhuli&email=gsd";
+        strcpy(buf, post_data.c_str());
         // if (rio_readnb(rp, buf, l) < 0) {
-        printf("rio_readn error\n");
-        free(buf);
+        // printf("rio_readn error\n");
         // return -1;
         // }
 

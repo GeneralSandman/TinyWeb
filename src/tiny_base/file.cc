@@ -94,14 +94,6 @@ int File::setFile(const std::string& fname)
     return 0;
 }
 
-inline unsigned int File::getFileSize()
-{
-    if (valid) {
-        return info.st_size;
-    }
-    return 0;
-}
-
 chain_t* File::appendData(chain_t* dest, const char* data, unsigned int len)
 {
     if (nullptr == dest || nullptr == data || 0 == len) {
