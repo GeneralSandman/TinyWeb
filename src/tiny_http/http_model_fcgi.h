@@ -143,7 +143,7 @@ public:
     void makeEmptyStdinRecord(
         std::string& data);
 
-    void buildFcgiRequest(http_header* hp, std::string& data);
+    void buildFcgiRequest(http_header* hp, const std::string& content, std::string& data);
     int parseRecord(
         const std::string& data);
     int parseFcgiResponse(const std::string& data);

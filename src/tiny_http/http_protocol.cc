@@ -104,8 +104,9 @@ void FcgiClientProtocol::connectionMade()
     strcpy(header.cgiargs, cgiargs.c_str());
     strcpy(header.contype, "");
     strcpy(header.conlength, "0");
+    std::string content;
 
-    fcgiModel.buildFcgiRequest(&header, requestData);
+    fcgiModel.buildFcgiRequest(&header, content, requestData);
     sendMessage(requestData);
 
 }

@@ -162,7 +162,9 @@ void HttpModelFcgi::makeEmptyStdinRecord(
     data.append((char*)&header, FCGI_HEADER_LEN);
 }
 
-void HttpModelFcgi::buildFcgiRequest(http_header* hp, std::string& data)
+void HttpModelFcgi::buildFcgiRequest(http_header* hp,
+    const std::string& content,
+    std::string& data)
 {
     int i, l;
     char* buf;
@@ -211,11 +213,11 @@ void HttpModelFcgi::buildFcgiRequest(http_header* hp, std::string& data)
 
     l = atoi(hp->conlength);
     if (l > 0) {
-        std::cout << "write stdin data len(" << l << ")\n";
         buf = (char*)malloc(l + 1);
         memset(buf, '\0', l + 1);
-        std::string post_data = "name=zhenhuli&email=gsd";
-        strcpy(buf, post_data.c_str());
+        // std::string post_data = "name=zhenhuli&email=gsd";
+        std::string post_data = "{\"name\":\"zhenhuli\",\"email\":\"gsd\"}";
+        strcpy(buf, content.c_str());
         // if (rio_readnb(rp, buf, l) < 0) {
         // printf("rio_readn error\n");
         // return -1;
