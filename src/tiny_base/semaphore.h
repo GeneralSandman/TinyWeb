@@ -32,9 +32,9 @@ class Semaphore
 
   public:
     Semaphore(int value=0);
-    void wait();
-    void tryWait();
-    void post();
+    void lock();
+    void tryLock();
+    void unLock();
     int getValue();
     ~Semaphore();
 };

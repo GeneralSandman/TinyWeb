@@ -46,6 +46,15 @@ target_link_libraries(idea2_test
     tiny_http_model
     )
 
+# idea3_test
+add_executable(idea3_test
+    idea3_test.cc
+    )
+
+target_link_libraries(idea3_test
+    tiny_http_model
+    )
+
 # all_test
 add_executable(all_test
     all_test.cc
@@ -185,6 +194,18 @@ target_link_libraries(responser_test
     tiny_http_model
     tiny_struct_model
     tiny_base_model
+    )
+
+# dynamicWeb_test
+add_executable(dynamicWeb_test
+    dynamicWeb_test.cc
+    )
+
+target_link_libraries(dynamicWeb_test
+    tiny_http_model
+    tiny_core_model
+    tiny_base_model
+    tiny_struct_model
     )
 
 # chain_test

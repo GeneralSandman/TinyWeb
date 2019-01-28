@@ -1,38 +1,40 @@
 /*
-*Author:GeneralSandman
-*Code:https://github.com/GeneralSandman/TinyWeb
-*E-mail:generalsandman@163.com
-*Web:www.dissigil.cn
-*/
+ *Author:GeneralSandman
+ *Code:https://github.com/GeneralSandman/TinyWeb
+ *E-mail:generalsandman@163.com
+ *Web:www.dissigil.cn
+ */
 
 /*---XXX---
-*
-****************************************
-*
-*/
+ *
+ ****************************************
+ *
+ */
 
 #ifndef SHAREDMEMORY_H
 #define SHAREDMEMORY_H
 
-#include <tiny_base/semaphore.h>
-// #include <tiny_base/log.h>
-#include <tiny_base/api.h>
-#include <tiny_struct/sdstr_t.h>
-
-#include <iostream>
+#include <TinyWebConfig.h> 
 #include <deque>
+#include <iostream>
 #include <sys/mman.h>
 
-class SharedMemory
-{
+class SharedMemory {
 private:
-  void *m_pSharedData;
-  size_t m_nSize;
-  sdstr m_nName;
+    void* m_pSharedData;
+    size_t m_nSize;
+    std::string m_nName;
+
+    void* shm_alloc(size_t size);
+    void shm_free(void* data, size_t size);
 
 public:
-  SharedMemory(int size);
-  ~SharedMemory();
+    SharedMemory(size_t size);
+    void* getSpace()
+    {
+        return m_pSharedData;
+    }
+    ~SharedMemory();
 };
 
 #endif // !SHAREDMEMORY_H

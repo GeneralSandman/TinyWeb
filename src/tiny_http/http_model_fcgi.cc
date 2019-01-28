@@ -198,8 +198,8 @@ void HttpModelFcgi::buildFcgiRequest(http_header* hp,
 
         char* tmp = (char*)((char*)hp + paoffset[i]);
         int len = strlen(tmp);
-        printf("paname:%.*s,offset:%d,len:%d,data:%.*s\n",
-            strlen(paname[i]), paname[i], paoffset[i], len, len, tmp);
+        printf("[Debug]paname:(%.*s),len:(%d),data:(%.*s)\n",
+            strlen(paname[i]), paname[i], len, len, tmp);
         if (len > 0) {
 
             makeParamsRecord(
@@ -215,13 +215,7 @@ void HttpModelFcgi::buildFcgiRequest(http_header* hp,
     if (l > 0) {
         buf = (char*)malloc(l + 1);
         memset(buf, '\0', l + 1);
-        // std::string post_data = "name=zhenhuli&email=gsd";
-        std::string post_data = "{\"name\":\"zhenhuli\",\"email\":\"gsd\"}";
         strcpy(buf, content.c_str());
-        // if (rio_readnb(rp, buf, l) < 0) {
-        // printf("rio_readn error\n");
-        // return -1;
-        // }
 
         makeStdinRecord(buf, l, data);
 
@@ -284,7 +278,7 @@ int HttpModelFcgi::parseRecord(
             // return -1;
             // }
 
-            printf("1zhenhuli out:%.*s\n", content_length, con_buf);
+            printf("[Debug][fcgi-out]:len(%d),data(%.*s)\n", content_length, content_length, con_buf);
             // TODO: http parser to parse http response.
 
             if (padding_length > 0) {
@@ -294,7 +288,7 @@ int HttpModelFcgi::parseRecord(
                 // printf("read fcgi_stdout padding error\n");
                 // return -1;
                 // }
-                printf("1zhenhuli padding:%.*s\n", padding_length, (char*)padding_buf);
+                printf("[Debug][fcgi-padding]:len(%d),data(%.*s)\n", padding_length, padding_length, (char*)padding_buf);
             }
 
         } else if (type == FCGI_STDERR) {
@@ -314,7 +308,7 @@ int HttpModelFcgi::parseRecord(
             //     return -1;
             // }
 
-            printf("2zhenhuli err:%.*s\n", content_length, err_buf);
+            printf("[Debug][fcgi-error]:len(%d),data(%.*s)\n", content_length, content_length, (char*)err_buf);
 
             if (padding_length > 0) {
                 memcpy(padding_buf, (const void*)(begin + i), padding_length);
@@ -323,7 +317,7 @@ int HttpModelFcgi::parseRecord(
                 // printf("read fcgi_stderr padding error\n");
                 // return -1;
                 // }
-                printf("2zhenhuli padding:%.*s\n", padding_length, padding_buf);
+                printf("[Debug][fcgi-padding]:len(%d),data(%.*s)\n", padding_length, padding_length, (char*)padding_buf);
             }
 
         } else if (type == FCGI_END_REQUEST) {
@@ -337,7 +331,7 @@ int HttpModelFcgi::parseRecord(
             //     return -1;
             // }
 
-            printf("3zhenhuli end\n");
+            printf("[Debug]3zhenhuli end\n");
             free(con_buf);
             free(err_buf);
             return 0;

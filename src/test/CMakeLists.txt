@@ -62,6 +62,17 @@ target_link_libraries(memorypool_test
     tiny_base_model
     )
 
+# sharedmemory_test
+add_executable(sharedmemory_test
+    sharedmemory_test.cc
+    )
+
+target_link_libraries(sharedmemory_test
+    tiny_struct_model
+    tiny_base_model
+    pthread
+    )
+
 # sdstr_test
 add_executable(sdstr_test
     sdstr_test.cc

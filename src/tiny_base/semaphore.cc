@@ -13,29 +13,44 @@
 
 #include <tiny_base/semaphore.h>
 #include <tiny_base/log.h>
+#include <tiny_base/api.h> 
 
 #include <semaphore.h>
 
 Semaphore::Semaphore(int value)
 {
     sem_init(&m_nSem, 1, value);
-    //The semaphore is shared between process
     LOG(Debug) << "class Semaphore constructor\n";
 }
 
-void Semaphore::wait()
+void Semaphore::lock()
 {
-    sem_wait(&m_nSem);
+    int res;
+    res = sem_wait(&m_nSem);
+
+    if (res == -1) {
+        handle_error("sem_wait() error:");
+    }
 }
 
-void Semaphore::tryWait()
+void Semaphore::tryLock()
 {
-    sem_trywait(&m_nSem);
+    int res;
+    res = sem_trywait(&m_nSem);
+
+    if (res == -1) {
+        handle_error("sem_wait() error:");
+    }
 }
 
-void Semaphore::post()
+void Semaphore::unLock()
 {
-    sem_post(&m_nSem);
+    int res;
+    res = sem_post(&m_nSem);
+
+    if (res == -1) {
+        handle_error("sem_wait() error:");
+    }
 }
 
 int Semaphore::getValue()

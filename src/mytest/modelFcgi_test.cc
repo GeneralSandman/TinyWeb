@@ -56,8 +56,7 @@ int open_clientfd()
         return -1;
     }
 
-    printf("connect 172.17.0.3:9000 success\n");
-    printf("connect fcgi-server(%s:%d) success\n", fcgiIp, fcgiPort);
+    printf("[Info]connect fcgi-server(%s:%d) success\n", fcgiIp, fcgiPort);
 
     return sock;
 }
@@ -85,10 +84,10 @@ void get_test()
         std::string content;
 
         LOG(Debug) << std::endl;
-        HttpModelFcgi fcgiModel(121412);
+        HttpModelFcgi fcgiModel(1212);
         std::string data;
         fcgiModel.buildFcgiRequest(&header, content, data);
-        int write_len = write(sock, data.c_str(), data.size());
+        unsigned int write_len = write(sock, data.c_str(), data.size());
         if (write_len != data.size()) {
             std::cout << "send fcgi request error\n";
         }
@@ -167,7 +166,7 @@ testPost posts[] = {
         .method = "",
         .filename = "",
         .content_type = "",
-        .content_length =,
+        .content_length = 0,
         .content = "",
 
         .valid = true,
@@ -178,7 +177,7 @@ testPost posts[] = {
         .method = "",
         .filename = "",
         .content_type = "",
-        .content_length =,
+        .content_length = 0,
         .content = "",
 
         .valid = true,
@@ -211,10 +210,10 @@ void post_test1()
         std::string content = "name=zhenhuli&email=gsd";
 
         LOG(Debug) << std::endl;
-        HttpModelFcgi fcgiModel(121412);
+        HttpModelFcgi fcgiModel(1212);
         std::string data;
         fcgiModel.buildFcgiRequest(&header, content, data);
-        int write_len = write(sock, data.c_str(), data.size());
+        unsigned int write_len = write(sock, data.c_str(), data.size());
         if (write_len != data.size()) {
             std::cout << "send fcgi request error\n";
         }
@@ -259,10 +258,10 @@ void post_test2()
         std::string content = "{\"name\":\"zhenhuli\",\"email\":\"gsd\"}";
 
         LOG(Debug) << std::endl;
-        HttpModelFcgi fcgiModel(121412);
+        HttpModelFcgi fcgiModel(1212);
         std::string data;
         fcgiModel.buildFcgiRequest(&header, content, data);
-        int write_len = write(sock, data.c_str(), data.size());
+        unsigned int write_len = write(sock, data.c_str(), data.size());
         if (write_len != data.size()) {
             std::cout << "send fcgi request error\n";
         }
@@ -316,10 +315,10 @@ void post_test3()
         std::string content(tmp, strlen(tmp));
 
         LOG(Debug) << std::endl;
-        HttpModelFcgi fcgiModel(121412);
+        HttpModelFcgi fcgiModel(1212);
         std::string data;
         fcgiModel.buildFcgiRequest(&header, content, data);
-        int write_len = write(sock, data.c_str(), data.size());
+        unsigned int write_len = write(sock, data.c_str(), data.size());
         if (write_len != data.size()) {
             std::cout << "send fcgi request error\n";
         }
@@ -367,16 +366,14 @@ void post_test4()
                      "</xml>";
         std::string content(tmp, strlen(tmp));
 
-        LOG(Debug) << std::endl;
-        HttpModelFcgi fcgiModel(121412);
+        HttpModelFcgi fcgiModel(1212);
         std::string data;
         fcgiModel.buildFcgiRequest(&header, content, data);
-        int write_len = write(sock, data.c_str(), data.size());
+        unsigned int write_len = write(sock, data.c_str(), data.size());
         if (write_len != data.size()) {
             std::cout << "send fcgi request error\n";
         }
 
-        LOG(Debug) << std::endl;
         char* read_buffer;
         read_buffer = (char*)malloc(4 * 1024);
         int read_len = read(sock, read_buffer, 4 * 1024);
@@ -385,8 +382,6 @@ void post_test4()
         fcgiModel.parseFcgiResponse(response);
 
         free((void*)read_buffer);
-
-        LOG(Debug) << std::endl;
     }
 }
 
@@ -419,10 +414,10 @@ void post_test5()
         std::cout << "len:" << strlen(tmp) << std::endl;
 
         LOG(Debug) << std::endl;
-        HttpModelFcgi fcgiModel(121412);
+        HttpModelFcgi fcgiModel(1212);
         std::string data;
         fcgiModel.buildFcgiRequest(&header, content, data);
-        int write_len = write(sock, data.c_str(), data.size());
+        unsigned int write_len = write(sock, data.c_str(), data.size());
         if (write_len != data.size()) {
             std::cout << "send fcgi request error\n";
         }
@@ -446,7 +441,7 @@ int main()
     // get_test();
     // post_test1();
     // post_test2();
-    // post_test3();
+    post_test3();
     // post_test4();
-    post_test5();
+    // post_test5();
 }

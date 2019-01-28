@@ -754,44 +754,6 @@ inline int parseContentType(const Str* s, HttpHeaders* const headers)
 {
     std::cout << "[parse headerMeaning callback]content-type\n";
 
-    // TODO: Content-Type: multipart/form-data; boundary=${boundary}
-    //
-    
-    std::string value;
-    std::string boundary;
-    bool boundary_begin = false;
-    unsigned int i = 0;
-    char ch;
-
-    for (; i < s->len; i++) {
-        ch = *(s->data + i);
-
-        if (ch == ';') {
-            break;
-        }
-        value.push_back(ch);
-    }
-    std::cout << "value:" << value << std::endl;
-    // multipart/form-data
-    // application/x-www-form-urlencoded
-    // application/json
-
-    for (; i < s->len; i++) {
-        
-        ch = *(s->data + i);
-
-        if (!boundary_begin && ch == '=') {
-            boundary_begin = true;
-            continue;
-        }
-
-        if (boundary_begin) {
-            boundary.push_back(ch);
-        }
-    }
-
-    std::cout << "boundary:" << boundary << std::endl;
-
     return 0;
 }
 
