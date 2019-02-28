@@ -22,16 +22,18 @@
 #ifndef SEMAPHORE_H
 #define SEMAPHORE_H
 
+#include <tiny_base/sharedmemory.h>
+
 #include <semaphore.h>
 
 class Semaphore
 {
   private:
-    sem_t m_nSem;
+    sem_t* m_nSem;
     //sem_t must be stored in shared memory
 
   public:
-    Semaphore(int value=0);
+    Semaphore(SharedMemory *memory, int value=0);
     void lock();
     void tryLock();
     void unLock();

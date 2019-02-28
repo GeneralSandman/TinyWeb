@@ -11,22 +11,24 @@
 *
 */
 
+#include <tiny_base/sharedmemory.h>
 #include <tiny_base/semaphore.h>
 #include <tiny_base/log.h>
 #include <tiny_base/api.h> 
 
 #include <semaphore.h>
 
-Semaphore::Semaphore(int value)
+Semaphore::Semaphore(SharedMemory *memory, int value)
 {
-    sem_init(&m_nSem, 1, value);
+    m_nSem = (sem_t *)memory->getSpace();
+    sem_init(m_nSem, 1, value); // shared in multi-process.
     LOG(Debug) << "class Semaphore constructor\n";
 }
 
 void Semaphore::lock()
 {
     int res;
-    res = sem_wait(&m_nSem);
+    res = sem_wait(m_nSem);
 
     if (res == -1) {
         handle_error("sem_wait() error:");
@@ -36,7 +38,7 @@ void Semaphore::lock()
 void Semaphore::tryLock()
 {
     int res;
-    res = sem_trywait(&m_nSem);
+    res = sem_trywait(m_nSem);
 
     if (res == -1) {
         handle_error("sem_wait() error:");
@@ -46,7 +48,7 @@ void Semaphore::tryLock()
 void Semaphore::unLock()
 {
     int res;
-    res = sem_post(&m_nSem);
+    res = sem_post(m_nSem);
 
     if (res == -1) {
         handle_error("sem_wait() error:");
@@ -56,12 +58,12 @@ void Semaphore::unLock()
 int Semaphore::getValue()
 {
     int res;
-    sem_getvalue(&m_nSem, &res);
+    sem_getvalue(m_nSem, &res);
     return res;
 }
 
 Semaphore::~Semaphore()
 {
-    sem_destroy(&m_nSem);
+    sem_destroy(m_nSem);
     LOG(Debug) << "class Semaphore destructor\n";
 }

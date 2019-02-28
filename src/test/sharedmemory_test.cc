@@ -33,8 +33,10 @@ void consumer()
     int* data;
     std::string str;
     for (int i = 0; i < 1; i++) {
+        test1.sem->lock();
         data = (int*)test1.memory->getSpace();
         std::cout << "consumer:" << *data << std::endl;
+        test1.sem->unLock();
     }
 }
 
@@ -42,7 +44,7 @@ void productor()
 {
     int* data;
     std::string str;
-    for (int i = 0; i < 20000; i++) {
+    for (int i = 0; i < 200000; i++) {
         test1.sem->lock();
         data = (int*)test1.memory->getSpace();
         *data = *data + 1;
@@ -56,8 +58,9 @@ void productor()
 int main()
 {
 
+    SharedMemory* sem_memory = new SharedMemory(sizeof(sem_t));
+    test1.sem = new Semaphore(sem_memory, 1);
     test1.memory = new SharedMemory(sizeof(int));
-    test1.sem = new Semaphore(1);
 
     int* data = (int*)test1.memory->getSpace();
     *data = 0;
@@ -69,6 +72,7 @@ int main()
         std::cout << "fork error" << std::endl;
         return -1;
     } else if (pid == 0) {
+        sleep(15);
         consumer();
     } else {
 
@@ -82,7 +86,6 @@ int main()
             productor();
         }
     }
-
     std::cout << "exit" << std::endl;
 
     return 0;
