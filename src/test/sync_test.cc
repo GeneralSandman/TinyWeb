@@ -15,7 +15,7 @@
 #include <tiny_core/time.h>
 
 #include <iostream>
-#include <memory> 
+#include <memory>
 #include <string.h>
 #include <unistd.h>
 
@@ -37,11 +37,11 @@ void productor(Sync* sync)
 {
     int* data;
     std::string str;
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < 200000; i++) {
         sync->sem->lock();
         data = (int*)sync->memory->getSpace();
         *data = *data + 1;
-        std::cout << "[" << getpid() << "]write:" << *data << std::endl;
+        // std::cout << "[" << getpid() << "]write:" << *data << std::endl;
         sync->sem->unLock();
     }
 }
@@ -59,7 +59,7 @@ int main()
         std::cout << "fork error" << std::endl;
         return -1;
     } else if (pid == 0) {
-        sleep(15);
+        sleep(7);
         consumer(sync.get());
     } else {
 
@@ -70,7 +70,15 @@ int main()
         } else if (pid == 0) {
             productor(sync.get());
         } else {
-            productor(sync.get());
+            pid = fork();
+            if (pid < 0) {
+                std::cout << "fork3 error" << std::endl;
+                return -1;
+            } else if (pid == 0) {
+                productor(sync.get());
+            } else {
+                productor(sync.get());
+            }
         }
     }
     std::cout << "exit" << std::endl;

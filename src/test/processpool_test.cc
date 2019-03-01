@@ -20,9 +20,16 @@ using namespace std;
 
 void initConfiger()
 {
-    std::string file = "../../TinyWeb.conf";
+    std::string file = "../../tmp_TinyWeb.conf";
     Configer& configer = Configer::getConfigerInstance();
-    configer.setConfigerFile(file);
+
+    if (0 == configer.checkConfigerFile(file)) {
+        std::cout << "file valid" << std::endl;
+        configer.setConfigerFile(file);
+    } else {
+        std::cout << "file invalid" << std::endl;
+        return;
+    }
 
     bool debug = true;
     if (0 == configer.loadConfig(debug))
