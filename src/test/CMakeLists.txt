@@ -73,6 +73,17 @@ target_link_libraries(sharedmemory_test
     pthread
     )
 
+# sync_test
+add_executable(sync_test
+    sync_test.cc
+    )
+
+target_link_libraries(sync_test
+    tiny_struct_model
+    tiny_base_model
+    pthread
+    )
+
 # sdstr_test
 add_executable(sdstr_test
     sdstr_test.cc
