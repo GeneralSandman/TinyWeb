@@ -52,6 +52,10 @@ void Configer::setConfigerFile(const std::string& file)
 
 int Configer::checkConfigerFile(const std::string& file)
 {
+    cacheConf.clear();
+    serverConf.clear();
+    mimeTypes.clear();
+
     boost::property_tree::ptree root;
     boost::property_tree::ptree items;
 
@@ -123,18 +127,19 @@ int Configer::checkConfigerFile(const std::string& file)
 
     // server-config
     for (piterator it = server.begin(); it != server.end(); ++it) {
-        ServerConfig server;
-        server.listen = it->second.get<int>("listen", 80);
-        server.www = it->second.get<std::string>("www", "");
+        ServerConfig tmp;
+        
+        tmp.listen = it->second.get<int>("listen", 80);
+        tmp.www = it->second.get<std::string>("www", "");
 
         ptree servername = it->second.get_child("servername");
         for (piterator a = servername.begin(); a != servername.end(); a++) {
-            server.servername.push_back(a->second.get_value<std::string>());
+            tmp.servername.push_back(a->second.get_value<std::string>());
         }
 
         ptree indexpage = it->second.get_child("indexpage");
         for (piterator a = indexpage.begin(); a != indexpage.end(); a++) {
-            server.indexpage.push_back(a->second.get_value<std::string>());
+            tmp.indexpage.push_back(a->second.get_value<std::string>());
         }
 
         ptree errorpage_ptree = it->second.get_child("errorpage");
@@ -146,7 +151,7 @@ int Configer::checkConfigerFile(const std::string& file)
             ptree code = a->second.get_child("code");
             for (auto b = code.begin(); b != code.end(); b++) {
                 page.code = b->second.get_value<int>();
-                server.errorpages.push_back(page);
+                tmp.errorpages.push_back(page);
             }
         }
 
@@ -162,10 +167,10 @@ int Configer::checkConfigerFile(const std::string& file)
                 std::string page = b->second.get_value<std::string>();
                 f.indexpage.push_back(page);
             }
-            server.fcgis.push_back(f);
+            tmp.fcgis.push_back(f);
         }
 
-        serverConf.push_back(server);
+        serverConf.push_back(tmp);
     }
 
     // log-config
@@ -196,6 +201,10 @@ int Configer::checkConfigerFile(const std::string& file)
 
 int Configer::loadConfig(bool debug)
 {
+    cacheConf.clear();
+    serverConf.clear();
+    mimeTypes.clear();
+
     boost::property_tree::ptree root;
     boost::property_tree::ptree items;
     boost::property_tree::read_json<boost::property_tree::ptree>(m_nFile, root);
@@ -258,18 +267,19 @@ int Configer::loadConfig(bool debug)
 
     // server-config
     for (piterator it = server.begin(); it != server.end(); ++it) {
-        ServerConfig server;
-        server.listen = it->second.get<int>("listen", 80);
-        server.www = it->second.get<std::string>("www", "");
+        ServerConfig tmp;
+
+        tmp.listen = it->second.get<int>("listen", 80);
+        tmp.www = it->second.get<std::string>("www", "");
 
         ptree servername = it->second.get_child("servername");
         for (piterator a = servername.begin(); a != servername.end(); a++) {
-            server.servername.push_back(a->second.get_value<std::string>());
+            tmp.servername.push_back(a->second.get_value<std::string>());
         }
 
         ptree indexpage = it->second.get_child("indexpage");
         for (piterator a = indexpage.begin(); a != indexpage.end(); a++) {
-            server.indexpage.push_back(a->second.get_value<std::string>());
+            tmp.indexpage.push_back(a->second.get_value<std::string>());
         }
 
         ptree errorpage_ptree = it->second.get_child("errorpage");
@@ -281,7 +291,7 @@ int Configer::loadConfig(bool debug)
             ptree code = a->second.get_child("code");
             for (auto b = code.begin(); b != code.end(); b++) {
                 page.code = b->second.get_value<int>();
-                server.errorpages.push_back(page);
+                tmp.errorpages.push_back(page);
             }
         }
 
@@ -297,10 +307,10 @@ int Configer::loadConfig(bool debug)
                 std::string page = b->second.get_value<std::string>();
                 f.indexpage.push_back(page);
             }
-            server.fcgis.push_back(f);
+            tmp.fcgis.push_back(f);
         }
 
-        serverConf.push_back(server);
+        serverConf.push_back(tmp);
     }
 
     // log-config

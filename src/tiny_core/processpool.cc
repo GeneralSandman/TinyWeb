@@ -44,12 +44,23 @@ void test_parent_period_print(void)
     LOG(Debug) << "[parent] print every second\n";
 }
 
+void test_parent_period_write_sharememory(ProcessPool* pool)
+{
+    Time now(Time::now());
+    std::string data = now.toString();
+
+    pool->writeToShareMemory(data);
+    LOG(Debug) << "[parent] write share-memory every second,data-size(" << data.size() << 
+        "),data(" << data << ")\n";
+}
+
 ProcessPool* ProcessPool::m_pPoolInstance = nullptr;
 
 ProcessPool::ProcessPool()
     : m_pEventLoop(new EventLoop())
     , m_pMaster(new Master(this, m_pEventLoop.get(), 0, "master"))
     , m_pProcess(nullptr)
+    , m_pSync(new Sync(100))
 {
     m_nPid = getpid();
     m_pPoolInstance = this;
@@ -85,7 +96,7 @@ void ProcessPool::createProcess(int nums)
             //2.set signal handlers
             //3.create listen server
             m_pProcess = std::make_shared<Process>(std::to_string(i),
-                i, socketpairFds);
+                i, socketpairFds, m_pSync);
             m_pProcess->setAsChild(int(getpid()));
             m_pProcess->setSignalHandlers();
             for (auto listenFd : m_nListenSocketFds) {
@@ -155,6 +166,8 @@ void ProcessPool::start()
                        << ") message every one seconds\n";
 
             m_pEventLoop->runEvery(1, boost::bind(&test_parent_period_print));
+            m_pEventLoop->runEvery(1, boost::bind(&test_parent_period_write_sharememory, this));
+
         }
         status = 1;
         while (status) {

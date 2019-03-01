@@ -13,6 +13,7 @@
 
 #include <tiny_base/api.h>
 #include <tiny_base/log.h>
+#include <tiny_base/sync.h>
 #include <tiny_core/eventloop.h>
 #include <tiny_core/process.h>
 #include <tiny_core/processpool.h>
@@ -22,6 +23,7 @@
 #include <boost/bind.hpp>
 #include <iostream>
 #include <string>
+#include <memory>
 #include <sys/types.h>
 #include <unistd.h>
 
@@ -46,17 +48,26 @@ void test_child_period_print(void)
     LOG(Debug) << "[child] print every second\n";
 }
 
+void test_child_period_read_sharememory(Process* process)
+{
+    std::string data = process->readFromSharedMemory();
+    LOG(Debug) << "[child] read share-memory every second,data-size(" << data.size() << 
+        "),data(" << data << ")\n";
+}
+
 Process* Process::m_pProcessInstance = nullptr;
 
 Process::Process(const std::string& name,
     int number,
-    int sockfd[2])
+    int sockfd[2],
+    std::shared_ptr<Sync> sync)
     : m_pEventLoop(new EventLoop())
     , m_pSlave(new Slave(m_pEventLoop, number, name))
     , m_nName(name)
     , m_nNumber(number)
     , m_nPid(getpid())
     , m_nPipe(SocketPair(m_pEventLoop, sockfd))
+    , m_pSync(sync)
 {
     m_pProcessInstance = this;
     LOG(Debug) << "class Process constructor\n";
@@ -93,6 +104,7 @@ void Process::setSignalHandlers()
 void Process::start()
 {
     m_pEventLoop->runEvery(1, boost::bind(&test_child_period_print));
+    m_pEventLoop->runEvery(1, boost::bind(&test_child_period_read_sharememory, this));
 
     status = 1;
 

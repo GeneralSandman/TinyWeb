@@ -18,6 +18,7 @@
 #include <tiny_base/buffer.h>
 #include <tiny_base/log.h>
 #include <tiny_base/signalmanager.h>
+#include <tiny_base/sync.h>
 #include <tiny_core/process.h>
 
 #include <map>
@@ -64,6 +65,8 @@ private:
     SignalManager m_nSignalManager;
 
     int status;
+
+    std::shared_ptr<Sync> m_pSync;
 
     static ProcessPool* m_pPoolInstance;
 
@@ -139,6 +142,33 @@ public:
     void start();
     void killAll();
     void killSoftly();
+
+    void writeToShareMemory(const std::string& data)
+    {
+        void* address = nullptr;
+        m_pSync->sem->lock();
+        address = m_pSync->memory->getSpace();
+        memcpy(address, (const void*)data.c_str(), data.size());
+        m_pSync->sem->unLock();
+    }
+
+    std::string readFromSharedMemory(void)
+    {
+        char* address = nullptr;
+        unsigned int len = 0;
+        std::string res;
+
+
+        m_pSync->sem->lock();
+        address = (char*)m_pSync->memory->getSpace();
+        len = strlen(address);
+        res.reserve(len);
+        res.assign((const char*)address, len);
+        m_pSync->sem->unLock();
+
+        return res;
+    }
+
     ~ProcessPool();
     friend class Process;
 };
