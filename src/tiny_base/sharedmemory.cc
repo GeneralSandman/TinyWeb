@@ -24,8 +24,12 @@ void* SharedMemory::shm_alloc(size_t size)
     m_pSharedData = mmap(NULL, m_nSize,
         PROT_READ | PROT_WRITE,
         MAP_ANON | MAP_SHARED, -1, 0);
-    if (m_pSharedData == MAP_FAILED)
+    if (m_pSharedData == MAP_FAILED) {
         handle_error("mmap error:");
+        return nullptr;
+    }
+    
+    return m_pSharedData;
 }
 
 void SharedMemory::shm_free(void* data, size_t size)

@@ -59,6 +59,13 @@ void WebProtocol::dataReceived(const std::string& data)
         sendMessage(data);
     }
 
+    // if (dynamic request) {
+    //     // start fcgi client pool
+    //     // get response of fcgi
+
+    //     // pass http-header to fcgi-client... how?
+    // }
+
     delete result;
 }
 
@@ -81,32 +88,35 @@ RegistProtocol(WebProtocol);
 FcgiClientProtocol::FcgiClientProtocol()
     : Protocol()
     , m_nKeepAlive(false)
-    , fcgiModel(1314)
+    , fcgiModel(1314) // FIXME:
 {
     LOG(Debug) << "class FcgiClientProtocol constructor\n";
 }
 
 void FcgiClientProtocol::connectionMade()
 {
+    // TODO: how to pass param.
     LOG(Info) << "get a new connection\n";
 
     // Write fcgi request.
-    http_header header;
-    std::string cgiargs = "name=zhenhuli&age=99";
+    // http_header header;
+    // std::string cgiargs = "name=zhenhuli&age=99";
+    std::string content;
     std::string requestData;
 
-    memset((void*)&header, 0, sizeof(http_header));
-    strcpy(header.uri, "");
-    strcpy(header.method, "GET");
-    strcpy(header.version, "HTTP/1.1");
-    strcpy(header.filename, "/var/www/html/test/dynamic_get.php");
-    strcpy(header.name, "");
-    strcpy(header.cgiargs, cgiargs.c_str());
-    strcpy(header.contype, "");
-    strcpy(header.conlength, "0");
-    std::string content;
+    // memset((void*)&header, 0, sizeof(http_header));
+    // strcpy(header.uri, "");
+    // strcpy(header.method, "GET");
+    // strcpy(header.version, "HTTP/1.1");
+    // strcpy(header.filename, "/var/www/html/test/dynamic_get.php");
+    // strcpy(header.name, "");
+    // strcpy(header.cgiargs, cgiargs.c_str());
+    // strcpy(header.contype, "");
+    // strcpy(header.conlength, "0");
 
-    fcgiModel.buildFcgiRequest(&header, content, requestData);
+    // fcgiModel.buildFcgiRequest(&header, content, requestData);
+    fcgiModel.buildFcgiRequest(&m_nRequestHeader, content, requestData);
+    
     sendMessage(requestData);
 
 }

@@ -1669,6 +1669,7 @@ int HttpParser::execute(const char* stream,
 
     //parse headers information.
     request->headers = new HttpHeaders;
+    httpHeadersInit(request->headers);
     request->headers->data = (char*)begin;
     request->headers->offset = headers_begin;
     request->headers->len = headers_len;

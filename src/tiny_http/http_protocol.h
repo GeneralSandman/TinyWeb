@@ -40,10 +40,14 @@ class FcgiClientProtocol : public Protocol
 private:
   bool m_nKeepAlive;
 
+  http_header m_nRequestHeader;
   HttpModelFcgi fcgiModel;
 
 public:
   FcgiClientProtocol();
+  void setFcgiRequest(http_header header) {
+    m_nRequestHeader = header;
+  }
   virtual void connectionMade();
   virtual void dataReceived(const std::string &);
   virtual void connectionLost();

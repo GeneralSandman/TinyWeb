@@ -1,15 +1,15 @@
 /*
-*Author:GeneralSandman
-*Code:https://github.com/GeneralSandman/TinyWeb
-*E-mail:generalsandman@163.com
-*Web:www.generalsandman.cn
-*/
+ *Author:GeneralSandman
+ *Code:https://github.com/GeneralSandman/TinyWeb
+ *E-mail:generalsandman@163.com
+ *Web:www.generalsandman.cn
+ */
 
 /*---XXX---
-*
-****************************************
-*
-*/
+ *
+ ****************************************
+ *
+ */
 
 #include <tiny_base/sharedmemory.h>
 #include <tiny_base/semaphore.h>
@@ -37,6 +37,7 @@ void Semaphore::lock()
 
 void Semaphore::tryLock()
 {
+    // FIXME:
     int res;
     res = sem_trywait(m_nSem);
 

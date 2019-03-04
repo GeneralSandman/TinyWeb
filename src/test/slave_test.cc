@@ -49,8 +49,8 @@ void test1()
     std::string name = "slave";
     Slave slave(loop,i,name);
 
-    Socket *socket1,*socket2,*socket3;
-    int listen1,listen2,listen3;
+    Socket *socket1;
+    int listen1;
     NetAddress address1("172.17.0.2:9090");
 
     // Create server1
@@ -66,6 +66,38 @@ void test1()
 }
 
 void test2()
+{
+    EventLoop *loop = new EventLoop();
+
+    int i = 0;
+    std::string name = "slave";
+    Slave slave(loop,i,name);
+
+    Socket *socket1,*socket2;
+    int listen1,listen2;
+    NetAddress address1("172.17.0.2:9090");
+    NetAddress address2("172.17.0.2:9091");
+
+    // Create server1
+    socket1 = new Socket(createNoBlockSocket());
+    socket1->bindAddress(address1);
+    listen1 = socket1->getFd();
+    slave.createListenServer(listen1);
+    // Create server2
+    socket2 = new Socket(createNoBlockSocket());
+    socket2->bindAddress(address2);
+    listen2 = socket2->getFd();
+    slave.createListenServer(listen2);
+
+
+    slave.work();
+
+    delete socket1;
+    delete socket2;
+    delete loop;
+}
+
+void test3()
 {
     EventLoop *loop = new EventLoop();
 
@@ -110,5 +142,6 @@ int main()
     headerMeaningInit();
     test1();
     // test2();
+    // test3();
     return 0;
 }

@@ -140,7 +140,7 @@ enum state {
     s_requ_line_almost_done,
     s_requ_line_done,
 
-    // heaser statue
+    // parse header statue
     s_header_start,
     s_header,
     s_header_almost_done,
@@ -189,7 +189,7 @@ enum http_header_state {
     s_http_headers_done,
 };
 
-// Type of body.
+// Types of body.
 enum http_body_type {
     t_http_body_type_init = 1,
     t_http_body_end_by_length,
@@ -268,6 +268,9 @@ typedef struct HttpHeader {
 
 inline void httpHeaderInit(HttpHeader* header)
 {
+    if (header == nullptr) {
+        return;
+    }
     header->keyHash = 0;
     setStrNull(&(header->key));
     setStrNull(&(header->value));
@@ -340,22 +343,68 @@ typedef struct HttpHeaders {
 
 inline void httpHeadersInit(HttpHeaders* headers)
 {
-    httpHeaderInit(headers->host);
-    httpHeaderInit(headers->connection);
-    httpHeaderInit(headers->if_modified_since);
-    httpHeaderInit(headers->if_unmodified_since);
-    httpHeaderInit(headers->user_agent);
-    httpHeaderInit(headers->referer);
-    httpHeaderInit(headers->content_length);
-    httpHeaderInit(headers->content_type);
-    httpHeaderInit(headers->transfer_encoding);
-    httpHeaderInit(headers->accept_encoding);
-    httpHeaderInit(headers->upgrade);
-    httpHeaderInit(headers->expect);
-    httpHeaderInit(headers->cookie);
-    httpHeaderInit(headers->last_modified);
+    if (headers == nullptr) {
+        return;
+    }
+    // httpHeaderInit(headers->host);
+    // httpHeaderInit(headers->connection);
+    // httpHeaderInit(headers->if_modified_since);
+    // httpHeaderInit(headers->if_unmodified_since);
+    // httpHeaderInit(headers->user_agent);
+    // httpHeaderInit(headers->referer);
+
+    // httpHeaderInit(headers->content_length);
+    // httpHeaderInit(headers->content_type);
+    // httpHeaderInit(headers->transfer_encoding);
+    // httpHeaderInit(headers->accept_encoding);
+
+    // httpHeaderInit(headers->upgrade);
+    // httpHeaderInit(headers->expect);
+
+    // httpHeaderInit(headers->cookie);
+    // httpHeaderInit(headers->last_modified);
+
+    // httpHeaderInit(headers->x_powered_by);
+
+    // httpHeaderInit(headers->range);
+    // httpHeaderInit(headers->if_range);
+    // httpHeaderInit(headers->content_range);
 
     headers->data = nullptr;
+    headers->offset = 0;
+    headers->len = 0;
+
+    headers->content_length_n = 0;
+
+    headers->valid_content_length = 0;
+    headers->valid_host = 0;
+    headers->valid_referer = 0;
+
+    headers->connection_keep_alive = 0;
+    headers->connection_close = 0;
+    headers->connection_upgrade = 0;
+
+    headers->chrome = 0;
+    headers->firefox = 0;
+    headers->ie = 0;
+    headers->safari = 0;
+    headers->opera = 0;
+    headers->unknow = 0;
+
+    headers->content_identify_length = 0;
+    headers->content_identify_eof = 0;
+    headers->chunked = 0;
+
+    headers->has_upgrade = 0;
+
+    headers->valid_if_modified_since = 0;
+    headers->valid_if_unmodified_since = 0;
+    headers->valid_last_modified = 0;
+
+    headers->time_if_modified_since = 0;
+    headers->time_if_unmodified_since = 0;
+    headers->time_last_modified = 0;
+
 }
 
 void pushHeader(HttpHeaders* headers,
@@ -554,7 +603,7 @@ public:
         , m_nIsUpgrade(0)
         , m_pData(nullptr)
     {
-        // std::cout << "class HttpParser constructor\n";
+        LOG(Debug) << "class HttpParser constructor\n";
     }
 
     void setType(enum HttpContentType type);
@@ -614,7 +663,7 @@ public:
 
     ~HttpParser()
     {
-        // std::cout << "class HttpParser destructor\n";
+        LOG(Debug) << "class HttpParser destructor\n";
     }
 };
 
