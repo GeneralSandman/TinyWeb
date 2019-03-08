@@ -139,7 +139,7 @@ void test3()
 
 void test4()
 {
-    std::string file = "../../TinyWeb.conf.tmp";
+    std::string file = "../../TinyWeb.conf";
     Configer& configer = Configer::getConfigerInstance();
 
     if (0 == configer.checkConfigerFile(file)) {
@@ -183,6 +183,11 @@ void test4()
 
     std::cout << "======server\n";
     std::cout << server.listen << std::endl;
+    std::cout << "fcgi=";
+    for (auto fcgi:server.fcgis) {
+        std::cout << fcgi.pattern << " ";
+    }
+    std::cout << std::endl;
 
     std::cout << "======cache\n";
     std::cout << cache.name << std::endl;

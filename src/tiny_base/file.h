@@ -30,6 +30,11 @@ public:
     off_t offset;
     struct stat info;
 
+    // appendData only used by getData(),
+    // It append data begin dest and
+    // Return the end of chain.
+    chain_t* appendData(chain_t* dest, const char* data, unsigned int len);
+
 public:
     File()
         : valid(false)
@@ -42,23 +47,19 @@ public:
     int setFile(const std::string& fname);
     inline unsigned int getFileSize()
     {
-    if (valid) {
-        return info.st_size;
+        if (valid) {
+            return info.st_size;
+        }
+
+        return 0;
     }
 
-    return 0;
-    }
-
-
-    // appendData only used by getData(),
-    // It append data begin dest and
-    // Return the end of chain.
-    chain_t* appendData(chain_t* dest, const char* data, unsigned int len);
     void getData(chain_t* chain);
     // using for Range && Content-Range.
-    void getDate(chain_t* chain, off_t begin, off_t end);
+    void getData(chain_t* chain, off_t begin, off_t end);
 
-    ~File(){
+    ~File()
+    {
         if (valid) {
             close(fd);
         }

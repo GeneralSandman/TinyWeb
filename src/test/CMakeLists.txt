@@ -85,6 +85,16 @@ target_link_libraries(sync_test
     pthread
     )
 
+# file_test
+add_executable(file_test
+    file_test.cc
+    )
+
+target_link_libraries(file_test
+    tiny_http_model
+    tiny_base_model
+    )
+
 # sdstr_test
 add_executable(sdstr_test
     sdstr_test.cc

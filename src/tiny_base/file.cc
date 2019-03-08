@@ -203,7 +203,7 @@ void File::getData(chain_t* chain)
 }
 
 // using for Range && Content-Range.
-void File::getDate(chain_t* chain, off_t begin, off_t end)
+void File::getData(chain_t* chain, off_t begin, off_t end)
 {
 }
 // int sendfile(int outFd, HttpFile* file)
