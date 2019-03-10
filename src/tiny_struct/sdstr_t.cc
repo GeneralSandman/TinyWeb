@@ -123,6 +123,21 @@ void sdsMakeSpace(sdstr* str, unsigned int addlen)
     str->data = (char*)tmp;
 }
 
+void sdsgrowzero(sdstr* str, unsigned int len)
+{
+    if (nullptr == str)
+        return;
+    unsigned int old_len = str->len;
+    if (old_len >= len) {
+        return;
+    }
+
+    sdsMakeSpace(str, len - old_len);
+    memset(str->data + old_len, 0, (len - old_len));
+
+    str->len = len;
+}
+
 void sdsncat(sdstr* dest, const char* src, unsigned int len)
 {
     sdsMakeSpace(dest, len);

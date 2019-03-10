@@ -458,6 +458,75 @@ void test8()
     sdsdestory(&result);
 }
 
+void test9()
+{
+    std::string str = "zhenhuli";
+    unsigned int len = str.size();
+
+    {
+        sdstr tmp;
+        sdsnnew(&tmp, nullptr, 0);
+        printf(&tmp);
+        sdsgrowzero(&tmp, 10);
+        printf(&tmp);
+        sdsdestory(&tmp);
+    }
+
+    {
+        sdstr tmp;
+        sdsnew(&tmp, nullptr);
+        printf(&tmp);
+        sdsgrowzero(&tmp, 10);
+        printf(&tmp);
+        sdsdestory(&tmp);
+    }
+
+    {
+        sdstr tmp;
+        sdsnewempty(&tmp);
+        printf(&tmp);
+        sdsgrowzero(&tmp, 10);
+        printf(&tmp);
+        sdsdestory(&tmp);
+    }
+
+    {
+        sdstr tmp;
+        sdsnnew(&tmp, str.c_str(), len);
+        printf(&tmp);
+        sdsgrowzero(&tmp, 10);
+        printf(&tmp);
+        sdsdestory(&tmp);
+    }
+
+    {
+        sdstr tmp;
+        sdsnew(&tmp, str.c_str());
+        printf(&tmp);
+        sdsgrowzero(&tmp, 10);
+        printf(&tmp);
+        sdsdestory(&tmp);
+    }
+
+    {
+        sdstr tmp;
+        sdsnew(&tmp, str.c_str());
+        printf(&tmp);
+        sdsgrowzero(&tmp, 5);
+        printf(&tmp);
+        sdsdestory(&tmp);
+    }
+
+    {
+        sdstr tmp;
+        sdsnew(&tmp, str.c_str());
+        printf(&tmp);
+        sdsgrowzero(&tmp, 10);
+        printf(&tmp);
+        sdsdestory(&tmp);
+    }
+}
+
 void errtest()
 {
     {
@@ -520,20 +589,19 @@ void chunked_test()
         printf(&tmp);
         sdsdestory(&tmp);
     }
-
-    return 0;
 }
 
 int main(int argc, char* argv[])
 {
-    test1();
-    test2();
-    test3();
-    test4();
-    test5();
-    test6();
-    test7();
-    test8();
-    errtest();
-    chunked_test();
+    // test1();
+    // test2();
+    // test3();
+    // test4();
+    // test5();
+    // test6();
+    // test7();
+    // test8();
+    test9();
+    // errtest();
+    // chunked_test();
 }

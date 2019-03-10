@@ -16,70 +16,70 @@
 
 #include <tiny_base/memorypool.h>
 
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <string>
 
 #define SDS_MIN_ALLOC_SIZE
-typedef struct sdstr
-{
-    MemoryPool *pool;
-    char * data;
+typedef struct sdstr {
+    MemoryPool* pool;
+    char* data;
     unsigned int len;
     unsigned int alloc;
-}sdstr;
+} sdstr;
 
+void sdsnnew(sdstr* str, const char* init, unsigned int len);
 
-void sdsnnew(sdstr * str, const char * init, unsigned int len);
+void sdsnew(sdstr* str, const char* init);
 
-void sdsnew(sdstr * str, const char * init);
+void sdsnewempty(sdstr* str, unsigned int alloc = 0);
 
-void sdsnewempty(sdstr *str, unsigned int alloc=0);
+void sdsnewdup(sdstr* str, const sdstr* src);
 
-void sdsnewdup(sdstr *str, const sdstr *src);
+void sdsMakeSpace(sdstr* str, unsigned int addlen);
 
-void sdsMakeSpace(sdstr *str, unsigned int addlen);
+void sdsgrowzero(sdstr* str, unsigned int len);
 
-void sdsncat(sdstr *dest, const char* src, unsigned int len);
+void sdsncat(sdstr* dest, const char* src, unsigned int len);
 
-void sdscat(sdstr *dest, const char* src);
+void sdscat(sdstr* dest, const char* src);
 
-void sdsncatsds(sdstr *dest, const sdstr *src, unsigned int len);
+void sdsncatsds(sdstr* dest, const sdstr* src, unsigned int len);
 
-void sdscatsds(sdstr *dest, const sdstr *src);
+void sdscatsds(sdstr* dest, const sdstr* src);
 
-void sdsncpy(sdstr *dest, const char* src, unsigned int len);
+void sdsncpy(sdstr* dest, const char* src, unsigned int len);
 
-void sdscpy(sdstr *dest, const char * src);
+void sdscpy(sdstr* dest, const char* src);
 
-void sdsncpysds(sdstr *dest, const sdstr *src, unsigned int len);
+void sdsncpysds(sdstr* dest, const sdstr* src, unsigned int len);
 
-void sdscpysds(sdstr *dest, const sdstr *src);
+void sdscpysds(sdstr* dest, const sdstr* src);
 
-void convertull2str(char *dest, unsigned long long value);
+void convertull2str(char* dest, unsigned long long value);
 
-void convertll2str(char *dest, long long v);
-
-// Only used to init a sds.
-void sdssetull(sdstr *dest, unsigned long long value);
+void convertll2str(char* dest, long long v);
 
 // Only used to init a sds.
-void sdssetll(sdstr *dest, long long value);
+void sdssetull(sdstr* dest, unsigned long long value);
 
-void sdsclear(sdstr * str);
+// Only used to init a sds.
+void sdssetll(sdstr* dest, long long value);
 
-void sdscatvsprintf(sdstr *str, const char *fmt, va_list ap);
+void sdsclear(sdstr* str);
 
-void sdscatsprintf(sdstr *str, const char *fmt, ...);
+void sdscatvsprintf(sdstr* str, const char* fmt, va_list ap);
 
-void sdsjoinstr(sdstr *dest, const char *src[], unsigned int n, const char *sep, int seplen);
+void sdscatsprintf(sdstr* str, const char* fmt, ...);
 
-void sdsjoinsds(sdstr *dest, sdstr *src, unsigned int n, const char *sep, int seplen);
+void sdsjoinstr(sdstr* dest, const char* src[], unsigned int n, const char* sep, int seplen);
 
-void printf(sdstr *str);
+void sdsjoinsds(sdstr* dest, sdstr* src, unsigned int n, const char* sep, int seplen);
 
-void sdsdestory(sdstr *str);
+void printf(sdstr* str);
+
+void sdsdestory(sdstr* str);
 
 #endif // !SDSTR_H
