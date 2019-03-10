@@ -177,6 +177,44 @@ inline unsigned int countChain(chain_t* chain)
     return num;
 }
 
+inline void clearData(chain_t* chain)
+{
+    buffer_t* buffer = nullptr;
+    while(nullptr != chain) {
+        buffer = chain->buffer;
+        buffer->used = buffer->begin;
+        buffer->deal = buffer->begin;
+        buffer->islast = false;
+        chain = chain->next;
+    }
+}
+
+inline unsigned int countAllBufferSize(const chain_t* chain)
+{
+    unsigned int all_buffer_size = 0;
+    const chain_t* tmp = chain;
+    buffer_t* buffer;
+    while (tmp != nullptr) {
+        buffer = tmp->buffer;
+        all_buffer_size += (buffer->used - buffer->begin);
+        tmp = tmp->next;
+    }
+    return all_buffer_size;
+}
+
+inline unsigned int countAllNoDealSize(const chain_t* chain)
+{
+    unsigned int all_buffer_size = 0;
+    const chain_t* tmp = chain;
+    buffer_t* buffer;
+    while (tmp != nullptr) {
+        buffer = tmp->buffer;
+        all_buffer_size += (buffer->used - buffer->deal);
+        tmp = tmp->next;
+    }
+    return all_buffer_size;
+}
+
 class MemoryPool {
 private:
     size_t m_nAllocatedSpace; //Debug

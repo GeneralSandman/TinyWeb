@@ -145,59 +145,60 @@ chain_t* File::appendData(chain_t* dest, const char* data, unsigned int len)
         }
     }
 
-    return chain;
+    if (nullptr == chain) {
+        return chain;
+    }
+
+    if (chain->buffer->end - chain->buffer->used) {
+        return chain;
+    } else {
+        chain->buffer->islast = false;
+        return chain->next;
+    }
 }
 
 void File::getData(chain_t* chain)
 {
-    //Make sure enough space for data.
+    // The space of chain maybe not enough for all file.
+    // Load file to fill all chain and
+    // Updata offset of file.
 
     if (!valid || chain == nullptr || chain->buffer == nullptr) {
         return;
     }
 
-    unsigned int chain_size;
     chain_t* end_chain;
     chain_t* tmp_chain;
     buffer_t* tmp_buffer;
     char* read_buffer;
-    unsigned int buffer_size;
-    unsigned int read_len;
+    unsigned int chain_size = 0;
+    unsigned int buffer_size = 0;
+    unsigned int read_len = 0;
 
-    chain_size = 0;
-    tmp_chain = chain;
     buffer_size = chain->buffer->end - chain->buffer->begin;
     if (!buffer_size) {
         buffer_size = 4 * 1024;
     }
     read_buffer = (char*)malloc(buffer_size);
 
-    while (tmp_chain) {
-        tmp_buffer = tmp_chain->buffer;
-        chain_size += tmp_buffer->end - tmp_buffer->begin;
-        tmp_chain = tmp_chain->next;
-    }
-    if (info.st_size > chain_size) {
-        LOG(Warn) << "chain size is not enough\n";
-    }
-
     end_chain = chain;
-    while ((read_len = pread(fd, (void*)read_buffer, buffer_size, offset))) {
+    while (nullptr != end_chain
+        && (read_len = pread(fd, (void*)read_buffer, buffer_size, offset))) {
         offset += read_len;
         end_chain = appendData(end_chain, read_buffer, read_len);
     }
 
     // Only for debug.
     unsigned int l = countChain(chain);
-    LOG(Debug) << "chain size(" << l << "),status(";
+    std::string debug_str;
     for (auto t = chain; t != nullptr; t = t->next) {
         if (t->buffer->islast) {
-            std::cout << "-";
+            debug_str.append("-");
         } else {
-            std::cout << "+";
+            debug_str.append("+");
         }
     }
-    std::cout << ")\n";
+    LOG(Debug) << "chain status: size(" << l << "), status(" << debug_str << ")\n";
 
     free((void*)read_buffer);
 }

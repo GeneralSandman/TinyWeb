@@ -20,50 +20,79 @@
 
 using namespace std;
 
-void file_test1()
+
+
+bool file_test1(const std::string& fileName)
 {
     int return_val;
     MemoryPool pool;
-    std::string fileName = "../memorypool_test.cc";
     File* file = new File();
 
     return_val = file->setFile(fileName);
     if (return_val != 0) {
         std::cout << "setFile error,file(" << fileName << ")\n";
-        return;
+        return false;
     }
 
     unsigned int file_size = file->getFileSize();
-    std::cout << "file(" << fileName << "),size(" << file->getFileSize() << ")\n";
 
     unsigned int buffer_size = 1024 * 4;
-    unsigned int buffer_num = file_size / buffer_size;
-    if (file_size % buffer_size) {
-        buffer_num += 1;
-    }
+    unsigned int buffer_num = 10;
 
     chain_t* chain = nullptr;
     chain = pool.getNewChain(buffer_num);
     pool.mallocSpace(chain, buffer_size);
 
-    file->getData(chain);
-
     unsigned int all_buffer_size = 0;
-    chain_t* tmp = chain;
-    buffer_t* buffer;
-    while (tmp != nullptr) {
-        buffer = tmp->buffer;
-        all_buffer_size += (buffer->used - buffer->begin);
-        tmp = tmp->next;
+    unsigned int get_times = 0;
+    while (!file->noMoreData()) {
+        unsigned int chain_size = 0;
+        clearData(chain);
+        file->getData(chain);
+        chain_size = countAllBufferSize(chain);
+        all_buffer_size += chain_size;
+        get_times += 1;
+
+        // std::cout << "chain size:" << chain_size << std::endl;
     }
 
-    std::cout << "all buffer size:" << all_buffer_size << std::endl;
+    std::cout << "file(" << fileName << "),"
+              << "size(" << file->getFileSize() << "),"
+              << "all-buffer-size(" << all_buffer_size << "),"
+              << "times-of-get-data:" << get_times << "),\n";
 
     delete file;
+
+    bool same_times = false;
+    unsigned int target_get_times = 0;
+    target_get_times = file_size / (buffer_num * buffer_size);
+    if (file_size % (buffer_num * buffer_size))
+        target_get_times++;
+
+    return (file->getFileSize() == all_buffer_size
+        && target_get_times == get_times);
 }
 
 void file_test2()
 {
+}
+
+void files_test1()
+{
+    std::string begin = "../../../www/1-63k_files/";
+    std::string end = "k.txt";
+
+    unsigned int all_test = 0;
+    unsigned int pass_test = 0;
+    for (int i = 1; i <= 7421; i++) {
+        all_test++;
+        std::string fileName = begin + std::to_string(i) + end;
+        if (file_test1(fileName)) {
+            pass_test++;
+        }
+    }
+
+    std::cout << "class File test:pass/all=" << pass_test << "/" << all_test << std::endl;
 }
 
 void http_file_test1()
@@ -72,8 +101,9 @@ void http_file_test1()
 
 int main()
 {
-    file_test1();
+    // file_test1();
     // file_test2();
+    files_test1();
     // http_file_test1();
 
     return 0;

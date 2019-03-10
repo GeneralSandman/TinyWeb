@@ -20,6 +20,7 @@
 #include <tiny_base/api.h>
 #include <tiny_base/buffer.h>
 #include <tiny_base/log.h>
+#include <tiny_base/memorypool.h>
 #include <tiny_core/callback.h>
 #include <tiny_core/connection.h>
 #include <tiny_core/time.h>
@@ -103,6 +104,8 @@ public:
     void loseConnection();
 
     void sendMessage(const std::string&);
+    void sendBuffer(buffer_t* buffer);
+    void sendChain(const chain_t* chain);
     void closeProtocol();
     void closeProtocolAfter(int seconds);
 

@@ -23,6 +23,11 @@
 WebProtocol::WebProtocol()
     : Protocol()
     , m_nKeepAlive(false)
+    , m_nBufferSize(4 * 1024)
+    , m_nMaxChainSize(16 * 4 * 1024)
+    , m_pFileChain(nullptr)
+    , m_nUseWriteCompleteCallback(false)
+    , m_nBeginSendFile(false)
 {
     LOG(Debug) << "class WebProtocol constructor\n";
 }
@@ -36,29 +41,95 @@ void WebProtocol::dataReceived(const std::string& data)
 {
     LOG(Info) << "WebProtocol get data\n";
 
-    HttpParserSettings settings;
-    HttpRequest* result = new HttpRequest;
     int begin = 0;
+    int valid;
+    bool valid_requ;
+    m_nBeginSendHeader = false;
+    m_nBeginSendFile = false;
+    m_nUseWriteCompleteCallback = false;
+    m_pRequest = std::make_shared<HttpRequest>();
+    m_pResponse = std::make_shared<HttpResponse>();
 
-    HttpParser parser(&settings);
-    parser.setType(HTTP_TYPE_REQUEST);
-
-    int tmp = parser.execute(data.c_str(),
+    m_nParser.setType(HTTP_TYPE_REQUEST);
+    valid = m_nParser.execute(data.c_str(),
         begin,
         data.size(),
-        result);
+        m_pRequest.get());
+    valid_requ = (valid == -1) ? false : true;
 
-    bool res = (tmp == -1) ? false : true;
-    if (res) {
-        HttpResponser responser;
-        std::string data;
+    // TODO:updata
+    // 1. new responser
+    // 2. build http-resp-header
+    // 3. build http-resp-body {write by memory or sendfile}
+    // 4. write http-resp-header
+    // 5. write http-resp-body
+    // 6. if http-file is too big. setting write-complete callback.
+    //    write the reset of file.
 
-        responser.response(result, data);
+    sdstr str;
+    sdsnewempty(&str);
 
-        // Funciton of basic class.
-        sendMessage(data);
+    m_nResponser.buildResponse(m_pRequest.get(), valid_requ, m_pResponse.get());
+
+    // malloc space for write file.
+    unsigned int file_size = m_pResponse->file.getFileSize();
+    unsigned int buffer_num = 0;
+    if (file_size && file_size <= m_nMaxChainSize) {
+        buffer_num = file_size / m_nBufferSize;
+        if (file_size % m_nBufferSize) {
+            buffer_num++;
+        }
+    } else if (file_size && file_size > m_nMaxChainSize) {
+        buffer_num = m_nMaxChainSize / m_nBufferSize;
+    }
+    m_pFileChain = m_nPool.getNewChain(buffer_num);
+    m_nPool.mallocSpace(m_pFileChain, m_nBufferSize);
+
+    // Encode http response.
+    m_nResponser.lineToStr(&(m_pResponse->line), &str);
+    m_nResponser.headersToStr(&(m_pResponse->headers), &str);
+    // m_nResponser.bodyToChain(&(m_pResponse->file), m_pFileChain);
+    LOG(Debug) << "all-buffer-size:" << countAllBufferSize(m_pFileChain) << ","
+               << "all-nodeal-size:" << countAllNoDealSize(m_pFileChain) << std::endl;
+    m_pResponse->file.getData(m_pFileChain);
+    LOG(Debug) << "all-buffer-size:" << countAllBufferSize(m_pFileChain) << ","
+               << "all-nodeal-size:" << countAllNoDealSize(m_pFileChain) << std::endl;
+
+    // Rest data of file need to send or not.
+    if (m_nMaxChainSize < file_size) {
+        auto func = [this]() mutable -> int {
+            LOG(Info) << "write rest of file\n";
+            // HttpResponser* responser = &(m_nResponser);
+            // HttpResponse* response = m_pResponse.get();
+            HttpFile* file = &(m_pResponse->file);
+
+            clearData(m_pFileChain);
+            // responser->bodyToChain(file, this->m_pFileChain);
+            LOG(Debug) << "all-buffer-size:" << countAllBufferSize(m_pFileChain) << ","
+                       << "all-nodeal-size:" << countAllNoDealSize(m_pFileChain) << std::endl;
+            file->getData(m_pFileChain);
+            LOG(Debug) << "all-buffer-size:" << countAllBufferSize(m_pFileChain) << ","
+                       << "all-nodeal-size:" << countAllNoDealSize(m_pFileChain) << std::endl;
+            if (file->noMoreData()) {
+                std::cout << "no more data\n";
+                m_nUseWriteCompleteCallback = false;
+            }
+            sendChain(m_pFileChain);
+
+            return 0;
+        };
+
+        std::cout << "set write complete callback\n";
+        m_fWriteRestFile = func;
+        m_nUseWriteCompleteCallback = true;
     }
 
+    std::string tmp;
+    tmp.append((const char*)str.data, str.len);
+    sendMessage(tmp);
+    sendChain(m_pFileChain);
+
+    // TODO:
     // if (dynamic request) {
     //     // start fcgi client pool
     //     // get response of fcgi
@@ -66,7 +137,33 @@ void WebProtocol::dataReceived(const std::string& data)
     //     // pass http-header to fcgi-client... how?
     // }
 
-    delete result;
+    sdsdestory(&str);
+}
+
+void WebProtocol::writeCompletely()
+{
+    LOG(Info) << "write complete:" 
+        << m_nBeginSendHeader << " "
+        << m_nBeginSendFile << std::endl;
+
+    // if (!m_nBeginSendHeader) {
+        // m_nBeginSendHeader = true;
+        // return;
+    // }
+
+    if (!m_nBeginSendFile) {
+        // update this when sendMessage completely.
+        m_nBeginSendFile = true;
+        return;
+    }
+
+    // write the reset of file.
+    if (!m_nUseWriteCompleteCallback) {
+        m_fWriteRestFile = nullptr;
+        return;
+    }
+
+    m_fWriteRestFile();
 }
 
 void WebProtocol::connectionLost()
@@ -116,9 +213,8 @@ void FcgiClientProtocol::connectionMade()
 
     // fcgiModel.buildFcgiRequest(&header, content, requestData);
     fcgiModel.buildFcgiRequest(&m_nRequestHeader, content, requestData);
-    
-    sendMessage(requestData);
 
+    sendMessage(requestData);
 }
 
 void FcgiClientProtocol::dataReceived(const std::string& data)

@@ -50,8 +50,17 @@ public:
         if (valid) {
             return info.st_size;
         }
-
         return 0;
+    }
+    inline bool noMoreData()
+    {
+        if (valid) {
+            // std::cout << "noMoreData:offset(" << offset << "),file-size(" << info.st_size << ")\n";
+            return (offset == info.st_size);
+        } else {
+            return true;
+        }
+        return false;
     }
 
     void getData(chain_t* chain);

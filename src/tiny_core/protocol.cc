@@ -80,6 +80,16 @@ void Protocol::sendMessage(const std::string& data)
     m_pConnection->send(data);
 }
 
+void Protocol::sendBuffer(buffer_t* buffer)
+{
+    m_pConnection->send(buffer);
+}
+
+void Protocol::sendChain(const chain_t* chain)
+{
+    m_pConnection->send(chain);
+}
+
 void Protocol::closeProtocol()
 {
     m_pFactory->closeProtocol(this);

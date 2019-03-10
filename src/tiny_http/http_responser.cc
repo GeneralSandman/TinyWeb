@@ -13,11 +13,11 @@
 
 #include <TinyWebConfig.h>
 #include <tiny_base/configer.h>
+#include <tiny_base/file.h>
 #include <tiny_base/log.h>
 #include <tiny_base/memorypool.h>
-#include <tiny_base/file.h> 
 #include <tiny_http/http.h>
-#include <tiny_http/http_model_file.h> 
+#include <tiny_http/http_model_file.h>
 #include <tiny_http/http_parser.h>
 #include <tiny_http/http_responser.h>
 #include <tiny_struct/sdstr_t.h>
@@ -56,51 +56,7 @@ HttpResponser::HttpResponser()
     LOG(Debug) << "class HttpResponser constructor\n";
 }
 
-void HttpResponser::responseLineToStr(const HttpResponseLine* line, sdstr* line_str)
-{
-    unsigned int major = line->http_version_major;
-    unsigned int minor = line->http_version_minor;
-    const char* code = httpStatusCode(line->status);
-    const char* phrase = httpStatusStr(line->status);
-
-    sdscatsprintf(line_str, "HTTP/%d.%d %s %s\r\n", major, minor, code, phrase);
-}
-
-void HttpResponser::responseHeadersToStr(HttpResponseHeaders* headers, sdstr* res)
-{
-    sdstr tmp;
-    sdsnewempty(&tmp, 256); // more efficient
-
-    if (headers->connection_keep_alive) {
-        sdscat(&tmp, "Connection: keep-alive\r\n");
-    } else if (headers->connection_close) {
-        sdscat(&tmp, "Connection: close\r\n");
-    }
-
-    if (headers->valid_content_length) {
-        sdscatsprintf(&tmp, "Content-Length: %u\r\n", headers->content_length_n);
-    }
-
-    if (headers->chunked) {
-        sdscat(&tmp, "Transfer-Encoding: chunked\r\n");
-    }
-
-    if (headers->server) {
-        char* version = TINYWEB_VERSION;
-        sdscatsprintf(&tmp, "Server: %s\r\n", version);
-    }
-
-    if (headers->file_type.size()) {
-        sdscatsprintf(&tmp, "Content-Type: %s\r\n", headers->file_type.c_str());
-    }
-
-    sdscatsds(res, &tmp);
-    sdscat(res, "\r\n");
-
-    sdsdestory(&tmp);
-}
-
-void HttpResponser::buildResponse(const HttpRequest* req, HttpResponse* response)
+void HttpResponser::buildResponse(const HttpRequest* req, bool valid_requ, HttpResponse* response)
 {
     Url* url = req->url;
     sdstr file_path;
@@ -168,61 +124,61 @@ void HttpResponser::buildResponse(const HttpRequest* req, HttpResponse* response
     sdsdestory(&file_path);
 }
 
+void HttpResponser::lineToStr(const HttpResponseLine* line, sdstr* line_str)
+{
+    unsigned int major = line->http_version_major;
+    unsigned int minor = line->http_version_minor;
+    const char* code = httpStatusCode(line->status);
+    const char* phrase = httpStatusStr(line->status);
+
+    sdscatsprintf(line_str, "HTTP/%d.%d %s %s\r\n", major, minor, code, phrase);
+}
+
+void HttpResponser::headersToStr(HttpResponseHeaders* headers, sdstr* res)
+{
+    sdstr tmp;
+    sdsnewempty(&tmp, 256); // more efficient
+
+    if (headers->connection_keep_alive) {
+        sdscat(&tmp, "Connection: keep-alive\r\n");
+    } else if (headers->connection_close) {
+        sdscat(&tmp, "Connection: close\r\n");
+    }
+
+    if (headers->valid_content_length) {
+        sdscatsprintf(&tmp, "Content-Length: %u\r\n", headers->content_length_n);
+    }
+
+    if (headers->chunked) {
+        sdscat(&tmp, "Transfer-Encoding: chunked\r\n");
+    }
+
+    if (headers->server) {
+        char* version = TINYWEB_VERSION;
+        sdscatsprintf(&tmp, "Server: %s\r\n", version);
+    }
+
+    if (headers->file_type.size()) {
+        sdscatsprintf(&tmp, "Content-Type: %s\r\n", headers->file_type.c_str());
+    }
+
+    sdscatsds(res, &tmp);
+    sdscat(res, "\r\n");
+
+    sdsdestory(&tmp);
+}
+
+void HttpResponser::bodyToStr(const HttpFile* file, sdstr* body_str)
+{
+}
+
+void HttpResponser::bodyToChain(HttpFile* file, chain_t* chain)
+{
+    file->getData(chain);
+}
+
 void HttpResponser::response(const HttpRequest* req, std::string& data)
 {
-    MemoryPool pool;
-    chain_t* chain;
-    unsigned int buffer_size = 4 * 1024;
-    unsigned int buffer_num = 0;
-    unsigned int file_size = 0;
-    HttpResponse* resp;
-
-    resp = new HttpResponse;
-
-    buildResponse(req, resp);
-
-    file_size = resp->file.getFileSize();
-    buffer_num = file_size / buffer_size;
-    if (file_size % buffer_size) {
-        buffer_num += 1;
-    }
-    chain = pool.getNewChain(buffer_num);
-    pool.mallocSpace(chain, buffer_size);
-
-    sdstr result;
-    sdsnewempty(&result);
-
-    responseLineToStr(&(resp->line), &result);
-    responseHeadersToStr(&(resp->headers), &result);
-
-    // responseBodyToStr(&(resp->file), chain);
-    resp->file.getData(chain);
-
-    data.append((const char*)result.data, result.len);
-
-    // TODO: sendfile option
-    chain_t* tmp;
-    buffer_t* buffer;
-    unsigned int data_size;
-    unsigned int chain_size; // debug
-
-    tmp = chain;
-    chain_size = 0;
-    while (tmp) {
-        buffer = tmp->buffer;
-
-        data_size = buffer->used - buffer->begin;
-        chain_size += data_size;
-        if (data_size) {
-            data.append((const char*)buffer->begin, data_size);
-        }
-
-        tmp = tmp->next;
-    }
-
-    LOG(Debug) << "file-size(" << file_size << "),chain-size(" << chain_size << ")\n";
-
-    sdsdestory(&result);
 }
 
 HttpResponser::~HttpResponser()

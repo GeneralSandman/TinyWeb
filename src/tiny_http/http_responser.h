@@ -12,7 +12,7 @@
  */
 
 #ifndef HTTP_RESPONSER_H
-#define HTTP_REsPONSER_H
+#define HTTP_RESPONSER_H
 
 #include <TinyWebConfig.h>
 #include <tiny_http/http.h>
@@ -66,10 +66,12 @@ class HttpResponser {
 public:
     HttpResponser();
 
-    void responseLineToStr(const HttpResponseLine* line, sdstr* line_str);
-    void responseHeadersToStr(HttpResponseHeaders* headers, sdstr* res);
+    void buildResponse(const HttpRequest* req, bool valid_requ, HttpResponse* response);
+    void lineToStr(const HttpResponseLine* line, sdstr* line_str);
+    void headersToStr(HttpResponseHeaders* headers, sdstr* headers_str);
+    void bodyToStr(const HttpFile* file, sdstr* body_str);
+    void bodyToChain(HttpFile* file, chain_t* chain);
 
-    void buildResponse(const HttpRequest* req, HttpResponse* response);
     void response(const HttpRequest* req, std::string& data);
 
     ~HttpResponser();
