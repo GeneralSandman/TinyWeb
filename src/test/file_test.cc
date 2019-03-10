@@ -20,8 +20,6 @@
 
 using namespace std;
 
-
-
 bool file_test1(const std::string& fileName)
 {
     int return_val;
@@ -35,7 +33,6 @@ bool file_test1(const std::string& fileName)
     }
 
     unsigned int file_size = file->getFileSize();
-
     unsigned int buffer_size = 1024 * 4;
     unsigned int buffer_num = 10;
 
@@ -44,21 +41,24 @@ bool file_test1(const std::string& fileName)
     pool.mallocSpace(chain, buffer_size);
 
     unsigned int all_buffer_size = 0;
+    unsigned int all_data_size = 0;
     unsigned int get_times = 0;
     while (!file->noMoreData()) {
         unsigned int chain_size = 0;
+        unsigned int data_size = 0;
         clearData(chain);
         file->getData(chain);
         chain_size = countAllBufferSize(chain);
+        data_size = countAllNoDealSize(chain);
         all_buffer_size += chain_size;
+        all_data_size += data_size;
         get_times += 1;
-
-        // std::cout << "chain size:" << chain_size << std::endl;
     }
 
     std::cout << "file(" << fileName << "),"
               << "size(" << file->getFileSize() << "),"
               << "all-buffer-size(" << all_buffer_size << "),"
+              << "all-data-size(" << all_data_size << "),"
               << "times-of-get-data:" << get_times << "),\n";
 
     delete file;
@@ -69,7 +69,8 @@ bool file_test1(const std::string& fileName)
     if (file_size % (buffer_num * buffer_size))
         target_get_times++;
 
-    return (file->getFileSize() == all_buffer_size
+    return (file_size == all_buffer_size
+        && file_size == all_data_size
         && target_get_times == get_times);
 }
 
@@ -84,7 +85,7 @@ void files_test1()
 
     unsigned int all_test = 0;
     unsigned int pass_test = 0;
-    for (int i = 1; i <= 7421; i++) {
+    for (int i = 1; i <= 7412; i++) {
         all_test++;
         std::string fileName = begin + std::to_string(i) + end;
         if (file_test1(fileName)) {

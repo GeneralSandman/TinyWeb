@@ -149,10 +149,17 @@ chain_t* File::appendData(chain_t* dest, const char* data, unsigned int len)
         return chain;
     }
 
-    if (chain->buffer->end - chain->buffer->used) {
+    empty_size = chain->buffer->end - chain->buffer->used;
+    if (empty_size) {
+        chain->buffer->islast = true;
         return chain;
     } else {
+        // empty_size
         chain->buffer->islast = false;
+        if (nullptr != chain->next) {
+            chain->next->buffer->islast = true;
+            return chain->next;
+        }
         return chain->next;
     }
 }

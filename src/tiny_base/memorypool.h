@@ -204,15 +204,15 @@ inline unsigned int countAllBufferSize(const chain_t* chain)
 
 inline unsigned int countAllNoDealSize(const chain_t* chain)
 {
-    unsigned int all_buffer_size = 0;
+    unsigned int all_nodeal_size = 0;
     const chain_t* tmp = chain;
     buffer_t* buffer;
     while (tmp != nullptr) {
         buffer = tmp->buffer;
-        all_buffer_size += (buffer->used - buffer->deal);
+        all_nodeal_size += (buffer->used - buffer->deal);
         tmp = tmp->next;
     }
-    return all_buffer_size;
+    return all_nodeal_size;
 }
 
 class MemoryPool {

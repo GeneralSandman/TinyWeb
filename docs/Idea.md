@@ -100,6 +100,9 @@ ngx_shmtx_t锁是可以在共享内存上使用的,它是Nginx中最常见的锁
      负责处理逻辑
 - EventLoop 管理SignalManager，在loop()中根据信号处理函数设置的全局变量去进行状态控制。
 
+- struct chain_t判断是最后一个chain的办法
+    - 下一阶段要append(data) 所在的buffer_t 中```islast == true```
+    - 
 
 
 
