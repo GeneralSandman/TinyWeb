@@ -17,10 +17,19 @@ fillFile(){
 
 }
 
+createUrlFile(){
+    file="http://127.0.0.1:9090/1-63k_files/"$1"k.txt"
+    echo "create url:"$file
+    echo $file >> urlsk.txt
+}
+
 echo "create gzip test files\n"
+echo "touch urls file\n"
+touch urlsk.txt
 n=1
-while(($n<=1024))
+while(($n<=1024*1024*1))
 do
     fillFile $n
-    let "n++"
+    createUrlFile $n
+    let "n = n + 1"
 done

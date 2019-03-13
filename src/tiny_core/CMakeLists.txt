@@ -8,6 +8,7 @@ add_library(tiny_core_model STATIC
   accepter.cc
   channel.cc
   client.cc
+  clientpool.cc
   connection.cc
   connector.cc
   currentthread.cc

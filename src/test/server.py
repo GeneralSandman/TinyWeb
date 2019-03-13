@@ -101,6 +101,29 @@ def server2(ip,port):
         print "\n"
     s.close()
 
+def server3(ip,port):
+    print "bind address:",ip,":",port
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind((ip, int(port)))
+    s.listen(8)
+    while(1):
+        conn,addr=s.accept()
+        print "get a connection:",addr
+
+        data=conn.recv(4096)
+        print "get data:",data
+
+        print "send message to client"
+        conn.send("I get you");
+
+        print "close this connection after 3 seconds "
+        sleepSecond(3)
+        conn.close()
+        print "we have close this connection:",addr
+        print "\n"
+    s.close()
+
+
 def webServer(ip,port):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((ip, int(port)))
@@ -148,28 +171,7 @@ def fcgiServer(ip,port):
     print "exit"
     s.close()
 
-def server3(ip,port):
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind((ip, int(port)))
-    s.listen(8)
 
-
-    while(1):
-        conn,addr=s.accept()
-        print "server.py get a connection:",addr
-
-        print "send message to client"
-        conn.send("I get you");
-
-        # data=conn.recv(4096)
-        # print data
-
-        print "close this connection after 3 seconds "
-        sleepSecond(3)
-        conn.close()
-        print "we have close this connection:",addr
-        print "\n"
-    s.close()
 
 if __name__ == "__main__":
-    fcgiServer(sys.argv[1], sys.argv[2])
+    server3(sys.argv[1], sys.argv[2])

@@ -264,3 +264,89 @@ FcgiClientProtocol::~FcgiClientProtocol()
 RegistProtocol(FcgiClientProtocol);
 
 // FcgiClientProtocol
+
+
+// NewFcgiClientProtocol using for new fcgi client.
+
+NewFcgiClientProtocol::NewFcgiClientProtocol()
+    : Protocol()
+    , m_nKeepAlive(false)
+    , fcgiModel(1314) // FIXME:
+{
+    LOG(Debug) << "class NewFcgiClientProtocol constructor\n";
+}
+
+void NewFcgiClientProtocol::connectionMade()
+{
+    // TODO: how to pass param.
+    LOG(Info) << "get a new connection\n";
+
+    // Write fcgi request.
+    http_header header;
+    std::string cgiargs = "name=zhenhuli&age=99";
+    std::string content;
+    std::string requestData;
+
+    memset((void*)&header, 0, sizeof(http_header));
+    strcpy(header.uri, "");
+    strcpy(header.method, "GET");
+    strcpy(header.version, "HTTP/1.1");
+    strcpy(header.filename, "/var/www/html/test/dynamic_get.php");
+    strcpy(header.name, "");
+    strcpy(header.cgiargs, cgiargs.c_str());
+    strcpy(header.contype, "");
+    strcpy(header.conlength, "0");
+
+    fcgiModel.buildFcgiRequest(&header, content, requestData);
+    // fcgiModel.buildFcgiRequest(&m_nRequestHeader, content, requestData);
+
+    sendMessage(requestData);
+}
+
+void NewFcgiClientProtocol::dataReceived(const std::string& data)
+{
+    LOG(Info) << "NewFcgiClientProtocol get data\n";
+
+    // Read fcgi response.
+    fcgiModel.parseFcgiResponse(data);
+
+    HttpParserSettings settings;
+    HttpRequest* result = new HttpRequest;
+    int begin = 0;
+
+    HttpParser parser(&settings);
+    parser.setType(HTTP_TYPE_FCGI_RESPONSE);
+
+    int tmp = parser.execute(data.c_str(),
+        begin,
+        data.size(),
+        result);
+
+    bool res = (tmp == -1) ? false : true;
+    if (res) {
+        HttpResponser responser;
+        std::string data;
+
+        responser.response(result, data);
+
+        // Funciton of basic class.
+        // send message to client.
+        // sendMessage(data);
+    }
+
+    delete result;
+}
+
+void NewFcgiClientProtocol::connectionLost()
+{
+    LOG(Info) << "lost a connection\n";
+}
+
+NewFcgiClientProtocol::~NewFcgiClientProtocol()
+{
+    LOG(Debug) << "class NewFcgiClientProtocol destructor\n";
+}
+
+RegistProtocol(NewFcgiClientProtocol);
+
+// FcgiClientProtocol

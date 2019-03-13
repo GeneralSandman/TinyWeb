@@ -78,4 +78,24 @@ public:
     virtual ~FcgiClientProtocol();
 };
 
+// Using for new fcgi client.
+class NewFcgiClientProtocol : public Protocol {
+private:
+    bool m_nKeepAlive;
+
+    http_header m_nRequestHeader;
+    HttpModelFcgi fcgiModel;
+
+public:
+    NewFcgiClientProtocol();
+    void setFcgiRequest(http_header header)
+    {
+        m_nRequestHeader = header;
+    }
+    virtual void connectionMade();
+    virtual void dataReceived(const std::string&);
+    virtual void connectionLost();
+    virtual ~NewFcgiClientProtocol();
+};
+
 #endif // !HTTP_PROTOCOL_H
