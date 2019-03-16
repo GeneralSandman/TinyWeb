@@ -9,7 +9,7 @@ using namespace std;
 #include <iostream>
 
 
-int main()
+int main_()
 {
     vector<int> v(8);
     std::cout << v.size() << std::endl;
@@ -21,7 +21,19 @@ int main()
     std::cout << v2.capacity() << std::endl;
 
     int size;
-    std::cout << r << std::endl;
+    // std::cout << r << std::endl;
 
     return 0;
+}
+
+int main()
+{
+    char str[] = "0000000000000000\r\n";
+
+    unsigned int size = 65535;
+    sprintf(str, "%16x\r\n", size);
+
+    size_t len = strlen(str);
+    printf("size:%u,len:%u,data:%.*s(end)", sizeof(str), len, len, str);
+
 }

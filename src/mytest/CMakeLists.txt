@@ -86,14 +86,15 @@ target_link_libraries(modelGzip_test
     z
     )
 
-# modelGzip_test
+# modelChunked_test
 add_executable(modelChunked_test
     modelChunked_test.cc
     )
 
-target_link_libraries(modelGzip_test
+target_link_libraries(modelChunked_test
     tiny_http_model
     tiny_base_model
+    tiny_struct_model
     )
 
 # modelFcgi_test

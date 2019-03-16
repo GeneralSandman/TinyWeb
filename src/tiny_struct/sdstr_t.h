@@ -30,6 +30,8 @@ typedef struct sdstr {
     unsigned int alloc;
 } sdstr;
 
+void sdssetpool(MemoryPool* pool_);
+
 void sdsnnew(sdstr* str, const char* init, unsigned int len);
 
 void sdsnew(sdstr* str, const char* init);

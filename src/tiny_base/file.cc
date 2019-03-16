@@ -96,6 +96,7 @@ int File::setFile(const std::string& fname)
 
 chain_t* File::appendData(chain_t* dest, const char* data, unsigned int len)
 {
+    // Have same code with appendData() in memorypool.h
     if (nullptr == dest || nullptr == data || 0 == len) {
         return dest;
     }
@@ -192,7 +193,7 @@ void File::getData(chain_t* chain)
     while (nullptr != end_chain
         && (read_len = pread(fd, (void*)read_buffer, buffer_size, offset))) {
         offset += read_len;
-        end_chain = appendData(end_chain, read_buffer, read_len);
+        end_chain = File::appendData(end_chain, read_buffer, read_len);
     }
 
     // Only for debug.

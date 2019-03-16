@@ -20,6 +20,14 @@
 #include <string.h>
 #include <string>
 
+void sdssetpool(sdstr* str, MemoryPool* pool_)
+{
+    if (str == nullptr)
+        return;
+
+    str->pool = pool_;
+}
+
 void sdsnnew(sdstr* str, const char* init, unsigned int len)
 {
     if (str == nullptr)

@@ -13,6 +13,7 @@
 
 #include <tiny_base/api.h>
 #include <tiny_base/log.h>
+#include <tiny_base/buffer.h>
 #include <tiny_core/channel.h>
 #include <tiny_core/connection.h>
 #include <tiny_core/eventloop.h>
@@ -194,6 +195,10 @@ void Connection::send(const chain_t* chain)
 
     while (tmp_chain) {
         buffer = tmp_chain->buffer;
+        if (nullptr == buffer) {
+            tmp_chain = tmp_chain->next;
+            continue;
+        }
         data_size = buffer->used - buffer->deal;
 
         if (!m_pChannel->isWriting() && m_nOutputBuffer.readableBytes() == 0) {

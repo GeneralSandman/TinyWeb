@@ -179,15 +179,28 @@ void HttpResponser::bodyToChain(HttpFile* file, chain_t* chain)
 
 void HttpResponser::bodyToChain(HttpFile* file,
     chain_t* chain,
-    enum body_transport_type type)
+    enum content_encoding_type cont,
+    enum transport_encoding_type trans)
 {
-    if (body_str_t == type) {
+    // TODO:
+    if (cont == content_gzip_t) {
+        LOG(Debug) << "content-encoding: gzip" << std::endl;
 
-    } else if (body_chunked_t == type) {
+    } else (cont == content_deflate_t) {
+        LOG(Debug) << "content-encoding: deflate" << std::endl;
 
-    } else if (body_gzip_t == type) {
-        // new HttpModelGzip(file)
-        // 
+    }
+
+
+    if (trans == transport_content_length_t) {
+        LOG(Debug) << "transport-encoding: content-length" << std::endl;
+
+        // set value of header::content_length_n
+
+    } else if (trans == transport_chunked_t) {
+        LOG(Debug) << "transport-encoding: chunked" << std::endl;
+
+
     }
 }
 

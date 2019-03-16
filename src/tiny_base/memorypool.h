@@ -151,6 +151,14 @@ typedef struct buffer_t {
     unsigned char* deal;
 
     bool islast;
+
+    // used for file
+    bool sendfile;
+    bool valid;
+    int file_fd;
+    off_t offset;
+    unsigned int len;
+
 } buffer_t;
 
 typedef struct chain_t {
@@ -247,6 +255,79 @@ inline unsigned int countAllNoDealSize(const chain_t* chain)
     return all_nodeal_size;
 }
 
+inline chain_t* appendData(chain_t* dest, const char* data, unsigned int len)
+{
+    // Have same code with appendData() in file.h
+
+    // Make sure have enough space.
+    if (nullptr == dest || nullptr == data || 0 == len) {
+        return dest;
+    }
+
+    chain_t* chain;
+    buffer_t* buffer;
+    unsigned int buff_size;
+    unsigned int predata_size;
+    unsigned int empty_size;
+
+    const char* pos = data;
+    unsigned int left = len;
+    unsigned int to_write = 0;
+
+    // LOG(Debug) << "append size:" << left << std::endl;
+
+    chain = dest;
+    while (left && nullptr != chain) {
+        buffer = chain->buffer;
+        buff_size = buffer->end - buffer->begin;
+        predata_size = buffer->used - buffer->begin;
+        empty_size = buff_size - predata_size;
+
+        if (!empty_size) {
+            // This chain is full, change to next chain.
+            buffer->islast = false;
+            chain = chain->next;
+            continue;
+        }
+
+        to_write = (left > empty_size) ? empty_size : left;
+        memcpy((void*)buffer->used, (const void*)pos, to_write);
+        // LOG(Debug) << "buffer:all-size(" << buff_size
+        // << "),predata-size(" << predata_size
+        // << "),postdata-size(" << predata_size + to_write << ")\n";
+
+        buffer->used = buffer->used + to_write;
+        buffer->islast = true;
+
+        left -= to_write;
+        pos += to_write;
+
+        if (left) {
+            // This chain is full, change to next chain.
+            buffer->islast = false;
+            chain = chain->next;
+        }
+    }
+
+    if (nullptr == chain) {
+        return chain;
+    }
+
+    empty_size = chain->buffer->end - chain->buffer->used;
+    if (empty_size) {
+        chain->buffer->islast = true;
+        return chain;
+    } else {
+        // empty_size
+        chain->buffer->islast = false;
+        if (nullptr != chain->next) {
+            chain->next->buffer->islast = true;
+            return chain->next;
+        }
+        return chain->next;
+    }
+}
+
 class MemoryPool {
 private:
     size_t m_nAllocatedSpace;
@@ -284,6 +365,29 @@ public:
         chain_t* src,
         unsigned int size = 0);
     bool mallocSpace(chain_t* chain, size_t size);
+
+    // chain_t* appendData(const chain_t* dest, const sdstr* str)
+    // {
+    //     if (nullptr == dest || nullptr == str)
+    //         return dest;
+    //     // O(N)
+    //     // TODO: update chain_t & buffer_t.
+    //     chain_t* tmp_chain = nullptr;
+    //     buffer_t* buffer = nullptr;
+
+    //     tmp_chain = dest;
+    //     while(nullptr != tmp_chain) {
+    //         buffer = tmp_chain->buffer;
+
+    //         if ()
+    //     }
+
+    //     if (nullptr == tmp_chain || buffer->end - buffer->used < str->len) {
+    //         // add new chain.
+    //     } else {
+
+    //     }
+    // }
 
     ~MemoryPool();
 };

@@ -61,10 +61,14 @@ typedef struct HttpResponse {
 
 } HttpResponse;
 
-enum body_transport_type {
-    body_str_t = 1,
-    body_chunked_t,
-    body_gzip_t,
+enum content_encoding_type {
+    content_gzip_t = 1,
+    content_deflate_t,
+};
+
+enum transport_encoding_type {
+    transport_content_length_t = 1,
+    transport_chunked_t,
 };
 
 class HttpResponser {

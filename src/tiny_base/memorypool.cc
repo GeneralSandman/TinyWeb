@@ -263,9 +263,11 @@ int MemoryPool::catChain(chain_t* dest,
     chain_t* pos;
     chain_t* new_chain;
 
-    for (; dest->next != nullptr; dest = dest->next) {
+    for (; dest != nullptr && dest->next != nullptr; dest = dest->next) {
     }
 
+    dest->buffer->islast = false;
+    
     if (!size)
         size = countChain(src);
     // std::cout << "copy size(" << size << ")" << std::endl;
