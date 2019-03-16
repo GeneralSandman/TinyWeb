@@ -14,7 +14,6 @@
 #ifndef MEMORY_POOL_H
 #define MEMORY_POOL_H
 
-
 #include <tiny_base/log.h>
 
 #include <boost/function.hpp>
@@ -114,7 +113,7 @@ public:
 
 #define ALIGN 8
 #define MAXSPACE 128
-#define LIST_SIZE MAXSPACE / ALIGN
+#define LIST_SIZE (MAXSPACE / ALIGN)
 
 #define ALIGN_LARGE 16
 
@@ -165,6 +164,26 @@ typedef struct block_t {
     block_t* next;
 } block_t;
 
+inline void buffer_init(buffer_t* buffer)
+{
+    if (nullptr == buffer)
+        return;
+    buffer->begin = nullptr;
+    buffer->end = nullptr;
+    buffer->used = nullptr;
+    buffer->deal = nullptr;
+    buffer->islast = false;
+}
+
+inline void block_init(block_t* block)
+{
+    if (nullptr == block)
+        return;
+    block->data = nullptr;
+    block->len = 0;
+    block->next = nullptr;
+}
+
 inline unsigned int countChain(chain_t* chain)
 {
     unsigned int num = 0;
@@ -180,7 +199,7 @@ inline unsigned int countChain(chain_t* chain)
 inline void clearData(chain_t* chain)
 {
     buffer_t* buffer = nullptr;
-    while(nullptr != chain) {
+    while (nullptr != chain) {
         buffer = chain->buffer;
         buffer->used = buffer->begin;
         buffer->deal = buffer->begin;
@@ -190,6 +209,19 @@ inline void clearData(chain_t* chain)
 }
 
 inline unsigned int countAllBufferSize(const chain_t* chain)
+{
+    unsigned int all_buffer_size = 0;
+    const chain_t* tmp = chain;
+    buffer_t* buffer;
+    while (tmp != nullptr) {
+        buffer = tmp->buffer;
+        all_buffer_size += (buffer->end - buffer->begin);
+        tmp = tmp->next;
+    }
+    return all_buffer_size;
+}
+
+inline unsigned int countAllDataSize(const chain_t* chain)
 {
     unsigned int all_buffer_size = 0;
     const chain_t* tmp = chain;
@@ -217,8 +249,8 @@ inline unsigned int countAllNoDealSize(const chain_t* chain)
 
 class MemoryPool {
 private:
-    size_t m_nAllocatedSpace; //Debug
-    size_t m_nAllSpace;       //Debug
+    size_t m_nAllocatedSpace;
+    size_t m_nAllSpace;
     obj* m_nFreeList[LIST_SIZE];
     struct cleanup* m_pCleanHandlers;
 
@@ -229,7 +261,7 @@ private:
     //List for large block
     block_t* blocks;
     block_t* free_blocks;
-    size_t m_nAllocatedLargeSpace; //Debug
+    size_t m_nAllocatedLargeSpace;
 
     void* m_fFillFreeList(size_t);
     char* m_fAllocChunk(size_t, int&);
@@ -251,7 +283,7 @@ public:
     int catChain(chain_t* dest,
         chain_t* src,
         unsigned int size = 0);
-    void mallocSpace(chain_t* chain, size_t size);
+    bool mallocSpace(chain_t* chain, size_t size);
 
     ~MemoryPool();
 };

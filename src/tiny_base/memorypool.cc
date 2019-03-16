@@ -36,7 +36,7 @@ MemoryPool::MemoryPool()
     for (int i = 0; i < LIST_SIZE; i++)
         m_nFreeList[i] = nullptr;
 
-    LOG(Debug) << "class MemoryPool constructor\n";
+    // LOG(Debug) << "class MemoryPool constructor\n";
 }
 
 void* MemoryPool::m_fFillFreeList(size_t s)
@@ -110,7 +110,7 @@ char* MemoryPool::m_fAllocChunk(size_t s, int& chunk_num)
             ((obj*)m_pHeapBegin)->p_next = *list;
             *list = (obj*)m_pHeapBegin;
             // LOG(Debug) << "add remaining heap-space to list:size(" << left_size
-                       // << "),list-index(" << FREELIST_INDEX(left_size) << ")\n";
+            // << "),list-index(" << FREELIST_INDEX(left_size) << ")\n";
         }
 
         //We have to set malloc_size carefully.
@@ -126,7 +126,7 @@ char* MemoryPool::m_fAllocChunk(size_t s, int& chunk_num)
         m_pCleanHandlers = newCleanHandler;
 
         // if (!newCleanHandler || !m_pHeapBegin)
-            // LOG(Debug) << "alloc error---\n";
+        // LOG(Debug) << "alloc error---\n";
 
         if (nullptr == m_pHeapBegin) {
             //Malloc error
@@ -155,25 +155,29 @@ char* MemoryPool::m_fAllocChunk(size_t s, int& chunk_num)
 
 void* MemoryPool::m_fMallocLargeSpace(size_t size)
 {
-    // LOG(Debug) << "malloc large space:" << size << std::endl;
+    block_t* new_block = nullptr;
+    new_block = (block_t*)allocate(sizeof(block_t));
+    if (nullptr == new_block)
+        return nullptr;
+    block_init(new_block);
+
     void* res = nullptr;
     res = malloc(size);
     if (nullptr == res) {
-        LOG(Debug) << "malloc large space error\n";
+        LOG(Debug) << "MemoryPool:malloc large space error\n";
+
+        deallocate((void*)(new_block), sizeof(block_t));
         return nullptr;
+    } else {
+        // Add to allocated list.
+        new_block->data = res;
+        new_block->len = size;
+        new_block->next = blocks;
+        blocks = new_block;
+
+        m_nAllocatedLargeSpace += size;
+        return res;
     }
-
-    m_nAllocatedLargeSpace += size;
-
-    // Add to allocated list.
-    block_t* new_block = nullptr;
-    new_block = (block_t*)allocate(sizeof(block_t));
-    new_block->data = res;
-    new_block->len = size;
-    new_block->next = blocks;
-    blocks = new_block;
-
-    return res;
 }
 
 void* MemoryPool::allocate(size_t s)
@@ -187,7 +191,7 @@ void* MemoryPool::allocate(size_t s)
     } else {
         // Get free block from free list
         // LOG(Debug) << "[MemoryPool allocate] get space from list:size(" << ROUND_UP(s)
-                   // << "),list-index(" << FREELIST_INDEX(s) << ")\n";
+        // << "),list-index(" << FREELIST_INDEX(s) << ")\n";
         obj** list = m_nFreeList + FREELIST_INDEX(s);
         result = *list;
         if (result == nullptr) {
@@ -217,9 +221,18 @@ void MemoryPool::deallocate(void* p, size_t s)
 
 void* MemoryPool::reallocate(void* p, size_t oldsize, size_t newsize)
 {
-    // LOG(Debug) << "reallocate\n";
+    if (oldsize >= newsize) {
+        // Ignore.
+        return p;
+    }
+
+    void* res = allocate(newsize);
+    if (nullptr == res) {
+        return nullptr;
+    }
+
     deallocate(p, oldsize);
-    return allocate(newsize);
+    return res;
 }
 
 chain_t* MemoryPool::getNewChain(size_t num)
@@ -229,13 +242,18 @@ chain_t* MemoryPool::getNewChain(size_t num)
 
     while (num--) {
         new_chain = (chain_t*)allocate(sizeof(chain_t));
-        new_chain->buffer = nullptr;
+        if (nullptr == new_chain) {
+            LOG(Debug) << "MemoryPool:can't alloc enough chain\n";
+            break;
+        }
 
+        new_chain->buffer = nullptr;
         new_chain->next = tmp;
+
         tmp = new_chain;
     }
 
-    return new_chain;
+    return tmp;
 }
 
 int MemoryPool::catChain(chain_t* dest,
@@ -253,7 +271,7 @@ int MemoryPool::catChain(chain_t* dest,
     // std::cout << "copy size(" << size << ")" << std::endl;
     new_chain = getNewChain(size);
     if (nullptr == new_chain) {
-        std::cout << "get new chain error" << std::endl;
+        LOG(Debug) << "get new chain error" << std::endl;
     }
 
     dest->next = new_chain;
@@ -269,23 +287,55 @@ int MemoryPool::catChain(chain_t* dest,
     return 0;
 }
 
-void MemoryPool::mallocSpace(chain_t* chain, size_t size)
+bool MemoryPool::mallocSpace(chain_t* chain, size_t size)
 {
     void* new_mem = nullptr;
+    buffer_t* new_buffer = nullptr;
     while (nullptr != chain) {
+
+        new_buffer = (buffer_t*)allocate(sizeof(buffer_t));
+        if (nullptr == new_buffer)
+            return false;
+        buffer_init(new_buffer);
+
         new_mem = m_fMallocLargeSpace(size);
-        chain->buffer = (buffer_t*)allocate(sizeof(buffer_t));
-        chain->buffer->begin = (unsigned char*)new_mem;
-        chain->buffer->end = (unsigned char*)new_mem + size;
-        chain->buffer->used = chain->buffer->begin;
-        chain->buffer->deal = chain->buffer->begin;
-        chain->buffer->islast = false;
-        chain = chain->next;
+        if (nullptr == new_mem) {
+            LOG(Debug) << "MemoryPool:malloc chain error\n";
+
+            deallocate((void*)(new_buffer), sizeof(buffer_t));
+            return false;
+        } else {
+            chain->buffer = new_buffer;
+            new_buffer->begin = (unsigned char*)new_mem;
+            new_buffer->end = (unsigned char*)new_mem + size;
+            new_buffer->used = new_buffer->begin;
+            new_buffer->deal = new_buffer->begin;
+
+            chain = chain->next;
+        }
     }
+
+    return true;
 }
 
 MemoryPool::~MemoryPool()
 {
+    // Free Large block
+    size_t num = 0;
+    size_t size = 0;
+    void* tmp = nullptr;
+    while (nullptr != blocks) {
+        num++;
+        size += blocks->len;
+
+        tmp = (void*)blocks->data;
+        blocks = blocks->next;
+        if (nullptr != tmp)
+            free(tmp);
+    }
+    // LOG(Debug) << "[LargeBlock-Summary]block num(" << num << "),all-size(" << size << ")" << std::endl;
+
+    // Free Small block.
     size_t all = 0;
     for (int i = 0; i < LIST_SIZE; i++) {
         obj* tmp = m_nFreeList[i];
@@ -296,10 +346,10 @@ MemoryPool::~MemoryPool()
             tmp = tmp->p_next;
         }
         all += num * size;
-        if (size) {
+        // if (num) {
             // LOG(Debug) << "size(" << size
-                       // << "),nums(" << num << ")\n";
-        }
+            // << "),nums(" << num << ")\n";
+        // }
     }
 
     /*
@@ -316,19 +366,5 @@ MemoryPool::~MemoryPool()
         free(cur);
     }
 
-    // Free Large block
-    size_t num = 0;
-    size_t size = 0;
-    void* tmp = nullptr;
-    while (nullptr != blocks) {
-        num++;
-        size += blocks->len;
-
-        tmp = (void*)blocks->data;
-        blocks = blocks->next;
-        free(tmp);
-    }
-    // LOG(Debug) << "[LargeBlock-Summary]block num(" << num << "),all-size(" << size << ")" << std::endl;
-
-    LOG(Debug) << "class MemoryPool destructor\n";
+    // LOG(Debug) << "class MemoryPool destructor\n";
 }
