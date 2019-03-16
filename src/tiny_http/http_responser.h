@@ -61,6 +61,12 @@ typedef struct HttpResponse {
 
 } HttpResponse;
 
+enum body_transport_type {
+    body_str_t = 1,
+    body_chunked_t,
+    body_gzip_t,
+};
+
 class HttpResponser {
 
 public:
@@ -71,6 +77,8 @@ public:
     void headersToStr(HttpResponseHeaders* headers, sdstr* headers_str);
     void bodyToStr(const HttpFile* file, sdstr* body_str);
     void bodyToChain(HttpFile* file, chain_t* chain);
+
+    void bodyToChain(HttpFile* file, chain_t* chain, enum body_transport_type type);
 
     void response(const HttpRequest* req, std::string& data);
 

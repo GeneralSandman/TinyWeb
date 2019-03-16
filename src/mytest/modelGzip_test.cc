@@ -14,6 +14,7 @@
 #include <tiny_base/configer.h>
 #include <tiny_base/log.h>
 #include <tiny_base/memorypool.h>
+#include <tiny_base/file.h>
 #include <tiny_http/http_model_gzip.h>
 
 #include <assert.h>
@@ -67,12 +68,54 @@ int readFileList(const std::string& basePath, std::vector<std::string>& files)
     return 0;
 }
 
+gzip_status gzip_out(chain_t* chain,
+    const std::string& outputfile)
+{
+    buffer_t* buffer;
+    unsigned int size;
+    int outputfd;
+
+    chain_t* in_chain;
+    buffer_t* in_buffer;
+
+    //open output file
+    outputfd = open(outputfile.c_str(), O_RDWR | O_CREAT | O_APPEND, 0666);
+    if (-1 == outputfd) {
+        printf("create input-file(%s) error\n", outputfile.c_str());
+        return gzip_error;
+    }
+
+    // LOG(Debug) << "out size:" << countChain(chain) << std::endl;
+    // for (auto t = context->out; t != nullptr; t = t->next) {
+    // if (t->buffer->islast) {
+    // std::cout << "-";
+    // } else {
+    // std::cout << "+";
+    // }
+    // }
+    while (chain) {
+        buffer = chain->buffer;
+        size = buffer->used - buffer->begin;
+
+        if (!size) {
+            break;
+        }
+
+        write(outputfd, (char*)buffer->begin, size);
+        // printf("comperss-data[%p,%u](%.*s)\n", buffer->begin, size, size, buffer->begin);
+
+        if (buffer->islast) {
+            break;
+        }
+        chain = chain->next;
+    }
+
+    close(outputfd);
+}
+
 void compress(const std::string& inputfile, const std::string& outfile)
 {
     MemoryPool pool;
-    int inputfd;
-    int read_len;
-    char* read_buf;
 
     // appointed configure file and select 'develop' section.
     Configer& configer = Configer::getConfigerInstance();
@@ -80,69 +123,123 @@ void compress(const std::string& inputfile, const std::string& outfile)
     configer.loadConfig(true);
 
     //get and add data
-    gzip_config_t config;
-    gzip_context_t context;
     gzip_status res;
 
-    get_gzip_config(&config);
-    gzip_context_init(&pool, &config, &context);
-
-    //open input file
-    inputfd = open(inputfile.c_str(), O_RDONLY);
-    if (-1 == inputfd) {
-        printf("open input-file(%s) error\n", inputfile.c_str());
-        return;
+    unsigned int chain_size = 10;
+    unsigned int buffer_size = 4 * 1024;
+    chain_t* input = pool.getNewChain(chain_size);
+    if (input == nullptr) {
+        std::cout << "getNewChain failed" << std::endl;
     }
-    read_buf = (char*)malloc(1024);
-    while ((read_len = read(inputfd, read_buf, 1024)) > 0) {
-        LOG(Debug) << "read data size(" << read_len << "),and write to chain" << std::endl;
-        gzip_add_data(&context, read_buf, read_len);
+    if (!pool.mallocSpace(input, buffer_size)) {
+        std::cout << "mallocSpace failed" << std::endl;
     }
 
-    // gzip
-    res = gzip_body(&context);
-    if (gzip_error == res) {
-        std::cout << "gzip data error" << std::endl;
-    }
-    gzip_out(&context, outfile);
+    File file;
+    file.setFile(inputfile);
 
-    free((void*)read_buf);
+    HttpModelGzip gzip(&pool);
+    gzip.init();
+    while(!file.noMoreData()) {
+        chain_t* output = nullptr;
+        file.getData(input);
+        bool endData = file.noMoreData();
+        res = gzip.compress(input, output, endData);
+        if (res == gzip_error)
+            break;
+
+        gzip_out(output, outfile);
+
+        clearData(input);
+
+    }
+}
+
+void readFileList2(std::vector<std::string>& files, int max)
+{
+    std::string a = "/home/tinyweb/www/1-63k_files/";
+    std::string b = "k.txt";
+
+    for (int i=1 ;i<=max;i++)
+    {
+        std::string file = a + std::to_string(i) + b;
+        files.push_back(file);
+    }
 }
 
 void test1()
 {
+    int max = 4;
+
     std::string basePath;
     std::cin >> basePath;
     std::vector<std::string> files;
+    std::vector<std::string> nopass_files;
     readFileList(basePath, files);
+    // readFileList2(files, max);
+    
 
     int alltest = 0;
     int passtest = 0;
+    std::cout << "begin test" << std::endl;
     for (auto file : files) {
+
+        std::cout << file << std::endl;
+
         alltest++;
         std::string gzfile = file + ".tmp.gz";
         std::string ungzfile = file + ".tmp";
-        std::cout << "test " << file << std::endl;
-        compress(file, gzfile);
-        // compress(file, gzfile);
-        // uncompress(gzfile, ungzfile);
-        if (0 == diffgzip(file, ungzfile))
-            passtest++;
-        else
-            printf("not pass file(%s)\n", file.c_str());
-    }
 
-    for (auto file : files) {
-        std::string gzfile = file + ".tmp.gz";
-        std::string ungzfile = file + ".tmp";
-        // remove(gzfile.c_str());
+        compress(file, gzfile);
+        if (0 == diffgzip(file, ungzfile)) {
+            passtest++;
+        }
+        else {
+            printf("not pass file(%s)\n", file.c_str());
+            nopass_files.push_back(file);
+        }
+
         remove(ungzfile.c_str());
+
+        // if (alltest == 100) 
+            // break;
     }
 
     std::cout << "[gzip Test] pass/all = " << passtest << "/" << alltest << std::endl;
+    if (alltest - passtest) {
+        std::cout << "no pass files:" << std::endl;
+        for (auto t: nopass_files) {
+            std::cout << t << std::endl;
+        }
+    }
 }
+
+void test2()
+{
+    std::string file;
+    std::cout << "input file name:";
+    std::cin >> file;
+
+    std::string gzfile = file + ".tmp.gz";
+    std::string ungzfile = file + ".tmp";
+
+    compress(file, gzfile);
+    // compress(file, gzfile);
+    // uncompress(gzfile, ungzfile);
+    if (0 == diffgzip(file, ungzfile))
+        printf("pass file(%s)\n", file.c_str());
+    else
+        printf("not pass file(%s)\n", file.c_str());
+
+    // remove(gzfile.c_str());
+    remove(ungzfile.c_str());
+
+    // std::cout << "[gzip Test] pass/all = " << passtest << "/" << alltest << std::endl;
+}
+
 int main()
 {
     test1();
+    // test2();
     return 0;
 }

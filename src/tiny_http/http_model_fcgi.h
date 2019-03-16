@@ -18,7 +18,6 @@
 #include <tiny_http/http_model_fcgi.h>
 #include <tiny_struct/sdstr_t.h>
 
-
 #define FCGI_MAX_LENGTH 0xFFFF
 #define FCGI_VERSION_1 1
 #define FCGI_HEADER_LEN 8
@@ -46,7 +45,6 @@
 #define FCGI_CANT_MPX_CONN 2    // max connection
 #define FCGI_OVERLOADED 3       // connection overload
 #define FCGI_UNKNOWN_ROLE 4     // unknow role
-
 
 typedef struct fcgi_config_t {
     bool enable;
@@ -104,13 +102,13 @@ typedef struct http_header {
     char conlength[16];
 } http_header;
 
-
 class HttpModelFcgi {
 private:
     unsigned short requestId;
 
 public:
-    HttpModelFcgi(unsigned short request_id) {
+    HttpModelFcgi(unsigned short request_id)
+    {
         requestId = request_id;
         LOG(Debug) << "class HttpModelFcgi constructor\n";
     }
@@ -148,7 +146,8 @@ public:
         const std::string& data);
     int parseFcgiResponse(const std::string& data);
 
-    ~HttpModelFcgi() {
+    ~HttpModelFcgi()
+    {
         LOG(Debug) << "class HttpModelFcgi destructor\n";
     }
 };

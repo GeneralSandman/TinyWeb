@@ -57,8 +57,6 @@ add_executable(memorypool_test
     )
 
 target_link_libraries(memorypool_test
-    tiny_core_model
-    tiny_http_model
     tiny_struct_model
     tiny_base_model
     )

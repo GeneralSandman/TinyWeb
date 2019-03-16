@@ -53,22 +53,53 @@ enum gzip_status {
     gzip_done
 };
 
+void gzip_config_init(gzip_config_t* conf);
 void get_gzip_config(gzip_config_t* conf);
 
-void gzip_context_init(MemoryPool* pool,
-    gzip_config_t* conf,
-    gzip_context_t* context);
-gzip_status gzip_add_data(gzip_context_t* context,
-    const char* data,
-    unsigned int len);
+void gzip_context_init(gzip_config_t* conf,
+    gzip_context_t* context,
+    chain_t* output);
 
-gzip_status gzip_deflate_init(gzip_context_t* context);
-gzip_status gzip_deflate(gzip_context_t* context);
-gzip_status gzip_deflate_end(gzip_context_t* context);
+class HttpModelGzip {
+private:
+    MemoryPool* m_pPool;
+    chain_t* m_pOutputChain;
 
-gzip_status gzip_body(gzip_context_t* context);
+    gzip_config_t* m_pConfig;
+    gzip_context_t* m_pContext;
 
-gzip_status gzip_out(gzip_context_t* context,
-    const std::string& file);
+    bool m_nEndData;
+
+
+    gzip_status gzip_deflate_init();
+    gzip_status gzip_deflate();
+    gzip_status gzip_deflate_end();
+
+
+public:
+    HttpModelGzip(MemoryPool* pool)
+    {
+        // LOG(Debug) << "class HttpModelGzip constructor\n";
+        m_pPool = pool;
+        m_pConfig = new gzip_config_t;
+        m_pContext = new gzip_context_t;
+        m_nEndData = false;
+    }
+
+    gzip_status init();
+    gzip_status compress(chain_t* input, chain_t* & output, bool endData);
+    gzip_status uncompress(chain_t* input, chain_t* output);
+
+    gzip_status gzip_out(gzip_context_t* context,
+        const std::string& file);
+    
+    ~HttpModelGzip()
+    {
+        // LOG(Debug) << "class HttpModelGzip destructor\n";
+
+        delete m_pConfig;
+        delete m_pContext;
+    }
+};
 
 #endif

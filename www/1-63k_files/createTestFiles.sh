@@ -27,7 +27,7 @@ echo "create gzip test files\n"
 echo "touch urls file\n"
 touch urlsk.txt
 n=1
-while(($n<=1024*1024*1))
+while(($n<=1024))
 do
     fillFile $n
     createUrlFile $n

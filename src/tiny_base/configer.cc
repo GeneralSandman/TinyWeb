@@ -42,7 +42,7 @@ int loadConfig(bool debug)
 
 Configer::Configer()
 {
-    LOG(Debug) << "class Configer constructor\n";
+    // LOG(Debug) << "class Configer constructor\n";
 }
 
 void Configer::setConfigerFile(const std::string& file)
@@ -401,5 +401,5 @@ std::string Configer::getMimeType(const std::string& file_type)
 
 Configer::~Configer()
 {
-    LOG(Debug) << "class Configer destructor\n";
+    // LOG(Debug) << "class Configer destructor\n";
 }

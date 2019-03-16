@@ -263,16 +263,16 @@ void ClientPool::disconnect(const NetAddress& peeraddress,
 
 void ClientPool::disconnectAll()
 {
-    for (std::map<AddressCouple, ConnectorCouples>::iterator i = m_nConnections.begin(); i != m_nConnections.end(); i++) {
-        for (auto t = i->begin(); t != i->end(); t++) {
-            Connector* conr = t->first;
-            Connection* conn = t->second;
-            conn->shutdownWrite();
-            conr->stop();
-            delete conr;
-            delete conn;
-        }
-    }
+    // for (std::map<AddressCouple, ConnectorCouples>::iterator i = m_nConnections.begin(); i != m_nConnections.end(); i++) {
+        // for (auto t = i->begin(); t != i->end(); t++) {
+    //         Connector* conr = t->first;
+    //         Connection* conn = t->second;
+    //         conn->shutdownWrite();
+    //         conr->stop();
+    //         delete conr;
+    //         delete conn;
+    //     }
+    // }
 
     m_nConnections.clear();
 }

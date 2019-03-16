@@ -86,11 +86,11 @@ int File::setFile(const std::string& fname)
     }
 
     type = getType(name);
-    std::cout << "type:" << type << std::endl;
+    // std::cout << "type:" << type << std::endl;
     valid = true;
     fd = return_val;
 
-    LOG(Debug) << "response file:" << name << std::endl;
+    // LOG(Debug) << "response file:" << name << std::endl;
     return 0;
 }
 
@@ -205,7 +205,7 @@ void File::getData(chain_t* chain)
             debug_str.append("+");
         }
     }
-    LOG(Debug) << "chain status: size(" << l << "), status(" << debug_str << ")\n";
+    // LOG(Debug) << "chain status: size(" << l << "), status(" << debug_str << ")\n";
 
     free((void*)read_buffer);
 }

@@ -177,6 +177,20 @@ void HttpResponser::bodyToChain(HttpFile* file, chain_t* chain)
     file->getData(chain);
 }
 
+void HttpResponser::bodyToChain(HttpFile* file,
+    chain_t* chain,
+    enum body_transport_type type)
+{
+    if (body_str_t == type) {
+
+    } else if (body_chunked_t == type) {
+
+    } else if (body_gzip_t == type) {
+        // new HttpModelGzip(file)
+        // 
+    }
+}
+
 void HttpResponser::response(const HttpRequest* req, std::string& data)
 {
 }
