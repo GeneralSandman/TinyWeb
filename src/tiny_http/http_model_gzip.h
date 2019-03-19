@@ -50,23 +50,24 @@ enum gzip_status {
     gzip_ok = 0,
     gzip_error,
     gzip_continue,
-    gzip_done
+    gzip_done,
 };
 
 void gzip_config_init(gzip_config_t* conf);
 void get_gzip_config(gzip_config_t* conf);
 
-void gzip_context_init(gzip_config_t* conf,
-    gzip_context_t* context,
+void gzip_context_init(gzip_context_t* context,
+    gzip_config_t* conf,
     chain_t* output);
 
 class HttpModelGzip {
 private:
     MemoryPool* m_pPool;
-    chain_t* m_pOutputChain;
 
     gzip_config_t* m_pConfig;
     gzip_context_t* m_pContext;
+
+    chain_t* m_pOutputChain;
 
     bool m_nEndData;
 

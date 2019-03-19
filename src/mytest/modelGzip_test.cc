@@ -113,6 +113,24 @@ gzip_status gzip_out(chain_t* chain,
     close(outputfd);
 }
 
+void print_chain(chain_t* chain)
+{
+    std::cout << "chain-status(";
+    while(nullptr != chain) {
+        buffer_t* buffer = chain->buffer;
+
+        if(buffer->islast)
+            std::cout << "-";
+        else
+        {
+            std::cout << "+";
+        }
+        
+        chain = chain->next;
+    }
+    std::cout << std::endl;
+}
+
 void compress(const std::string& inputfile, const std::string& outfile)
 {
     MemoryPool pool;
@@ -143,6 +161,7 @@ void compress(const std::string& inputfile, const std::string& outfile)
     while(!file.noMoreData()) {
         chain_t* output = nullptr;
         file.getData(input);
+        // print_chain(input);
         bool endData = file.noMoreData();
         res = gzip.compress(input, output, endData);
         if (res == gzip_error)
@@ -151,6 +170,7 @@ void compress(const std::string& inputfile, const std::string& outfile)
         gzip_out(output, outfile);
 
         clearData(input);
+        clearData(output);
 
     }
 }
@@ -172,12 +192,76 @@ void test1()
     int max = 4;
 
     std::string basePath;
+    std::cout << "input file-path:";
     std::cin >> basePath;
     std::vector<std::string> files;
     std::vector<std::string> nopass_files;
     readFileList(basePath, files);
     // readFileList2(files, max);
     
+
+    int alltest = 0;
+    int passtest = 0;
+    std::cout << "begin test" << std::endl;
+    for (auto file : files) {
+
+        std::cout << file << std::endl;
+
+        alltest++;
+        std::string gzfile = file + ".tmp.gz";
+        std::string ungzfile = file + ".tmp";
+
+        compress(file, gzfile);
+        if (0 == diffgzip(file, ungzfile)) {
+            passtest++;
+        }
+        else {
+            printf("not pass file(%s)\n", file.c_str());
+            nopass_files.push_back(file);
+        }
+
+        remove(ungzfile.c_str());
+
+        // if (alltest == 100) 
+            // break;
+    }
+
+    std::cout << "[gzip Test] pass/all = " << passtest << "/" << alltest << std::endl;
+    if (alltest - passtest) {
+        std::cout << "no pass files:" << std::endl;
+        for (auto t: nopass_files) {
+            std::cout << t << std::endl;
+        }
+    }
+}
+
+void test12()
+{
+    int max = 4;
+
+    std::vector<std::string> files;
+    std::vector<std::string> nopass_files;
+    
+
+files.push_back("/home/tinyweb/www/1-63k_files//1095k.txt");
+files.push_back("/home/tinyweb/www/1-63k_files//1400k.txt");
+files.push_back("/home/tinyweb/www/1-63k_files//2040k.txt");
+files.push_back("/home/tinyweb/www/1-63k_files//1800k.txt");
+files.push_back("/home/tinyweb/www/1-63k_files//1640k.txt");
+files.push_back("/home/tinyweb/www/1-63k_files//1600k.txt");
+files.push_back("/home/tinyweb/www/1-63k_files//2000k.txt");
+files.push_back("/home/tinyweb/www/1-63k_files//1440k.txt");
+files.push_back("/home/tinyweb/www/1-63k_files//1840k.txt");
+files.push_back("/home/tinyweb/www/1-63k_files//5120k.txt");
+files.push_back("/home/tinyweb/www/1-63k_files//1880k.txt");
+files.push_back("/home/tinyweb/www/1-63k_files//1480k.txt");
+files.push_back("/home/tinyweb/www/1-63k_files//1680k.txt");
+files.push_back("/home/tinyweb/www/1-63k_files//1920k.txt");
+files.push_back("/home/tinyweb/www/1-63k_files//1520k.txt");
+files.push_back("/home/tinyweb/www/1-63k_files//1760k.txt");
+files.push_back("/home/tinyweb/www/1-63k_files//1720k.txt");
+files.push_back("/home/tinyweb/www/1-63k_files//1960k.txt");
+files.push_back("/home/tinyweb/www/1-63k_files//1560k.txt");
 
     int alltest = 0;
     int passtest = 0;
@@ -240,6 +324,7 @@ void test2()
 int main()
 {
     test1();
+    // test12();
     // test2();
     return 0;
 }

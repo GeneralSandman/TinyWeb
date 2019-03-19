@@ -82,8 +82,12 @@ public:
     void bodyToStr(const HttpFile* file, sdstr* body_str);
     void bodyToChain(HttpFile* file, chain_t* chain);
 
-    void bodyToChain(HttpFile* file, chain_t* chain, enum body_transport_type type);
+    void bodyToChain(HttpFile* file,
+    chain_t* chain,
+    enum content_encoding_type cont,
+    enum transport_encoding_type trans);
 
+    
     void response(const HttpRequest* req, std::string& data);
 
     ~HttpResponser();

@@ -143,6 +143,8 @@ inline size_t FREELIST_INDEX(size_t n)
     return ((n) + ALIGN - 1) / ALIGN - 1;
 }
 
+struct block_t;
+
 typedef struct buffer_t {
     unsigned char* begin;
     unsigned char* end;
@@ -152,12 +154,15 @@ typedef struct buffer_t {
 
     bool islast;
 
-    // used for file
+    // used for file.
     bool sendfile;
     bool valid;
     int file_fd;
     off_t offset;
     unsigned int len;
+
+    // only used for memorypool.
+    block_t* block;
 
 } buffer_t;
 
@@ -347,7 +352,8 @@ private:
     void* m_fFillFreeList(size_t);
     char* m_fAllocChunk(size_t, int&);
 
-    void* m_fMallocLargeSpace(size_t size);
+    block_t* m_fMallocLargeSpace(size_t size);
+    void m_fFreeLargeSpace(block_t*);
 
 public:
     MemoryPool();
@@ -365,6 +371,8 @@ public:
         chain_t* src,
         unsigned int size = 0);
     bool mallocSpace(chain_t* chain, size_t size);
+
+    void truncateChain(chain_t* chain, unsigned int size);
 
     // chain_t* appendData(const chain_t* dest, const sdstr* str)
     // {

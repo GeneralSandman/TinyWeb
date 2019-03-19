@@ -186,7 +186,7 @@ void HttpResponser::bodyToChain(HttpFile* file,
     if (cont == content_gzip_t) {
         LOG(Debug) << "content-encoding: gzip" << std::endl;
 
-    } else (cont == content_deflate_t) {
+    } else if (cont == content_deflate_t) {
         LOG(Debug) << "content-encoding: deflate" << std::endl;
 
     }

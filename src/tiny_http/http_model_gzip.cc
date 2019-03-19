@@ -54,8 +54,8 @@ void get_gzip_config(gzip_config_t* gzip_conf)
     gzip_conf->memlevel = 0;
 }
 
-void gzip_context_init(gzip_config_t* conf,
-    gzip_context_t* context,
+void gzip_context_init(gzip_context_t* context,
+    gzip_config_t* conf,
     chain_t* output)
 {
     if (nullptr == output || nullptr == conf || nullptr == context) {
@@ -96,7 +96,8 @@ gzip_status HttpModelGzip::gzip_deflate_init()
         //-conf->wbits,
         //conf->memlevel,
         MAX_WBITS + 16,
-        8,
+        MAX_MEM_LEVEL,
+        // 8,
         Z_DEFAULT_STRATEGY);
 
     if (Z_OK != res) {
@@ -109,6 +110,7 @@ gzip_status HttpModelGzip::gzip_deflate_init()
 
 gzip_status HttpModelGzip::gzip_deflate()
 {
+    // LOG(Debug) << "gzip_deflate\n";
     gzip_context_t* context = m_pContext;
     unsigned int before_gzip_size = 0;
     unsigned int after_gzip_size = 0;
@@ -131,6 +133,7 @@ gzip_status HttpModelGzip::gzip_deflate()
     int res;
     do {
         before_gzip_size = in->used - in->deal;
+        after_gzip_size = 0;
 
         if ((in->islast || context->curr_in == nullptr)
             && m_nEndData) {
@@ -142,6 +145,11 @@ gzip_status HttpModelGzip::gzip_deflate()
         if (out->used == out->end) {
             // FIXME: when out isn't enough.
             context->curr_out = context->curr_out->next;
+            if (context->curr_out == nullptr) {
+                LOG(Debug) << "out buffer is not enough\n";
+                return gzip_error;
+                break;
+            }
             out = context->curr_out->buffer;
         }
 
@@ -149,17 +157,17 @@ gzip_status HttpModelGzip::gzip_deflate()
         stream->avail_out = out->end - out->used;
 
         // printf("[before deflate]: before_gzip_size(%u),after_gzip_size(%u),next_in(%p),avail_in(%u),next_out(%p),avail_out(%u)\n",
-            // before_gzip_size, after_gzip_size,
-            // stream->next_in, stream->avail_in,
-            // stream->next_out, stream->avail_out);
+        //     before_gzip_size, after_gzip_size,
+        //     stream->next_in, stream->avail_in,
+        //     stream->next_out, stream->avail_out);
         
         res = deflate(stream, context->flush);
         after_gzip_size = out->end - out->used - stream->avail_out;
 
         // printf("[after deflate]: before_gzip_size(%u),after_gzip_size(%u),next_in(%p),avail_in(%u),next_out(%p),avail_out(%u)\n",
-            // before_gzip_size, after_gzip_size,
-            // stream->next_in, stream->avail_in,
-            // stream->next_out, stream->avail_out);
+        //     before_gzip_size, after_gzip_size,
+        //     stream->next_in, stream->avail_in,
+        //     stream->next_out, stream->avail_out);
 
         if (Z_NO_FLUSH == context->flush && Z_OK != res) {
             LOG(Debug) << "deflate() error1\n";
@@ -174,7 +182,7 @@ gzip_status HttpModelGzip::gzip_deflate()
         in->deal += before_gzip_size;
         out->used = out->used + after_gzip_size;
 
-    } while (0 == stream->avail_out && in->islast);
+    } while (0 == stream->avail_out && (in->islast || context->curr_in == nullptr));
 
     if (in->islast) {
         context->curr_out->buffer->islast = true;
@@ -210,11 +218,12 @@ gzip_status HttpModelGzip::gzip_deflate_end()
 
 gzip_status HttpModelGzip::init()
 {
-    m_pOutputChain = m_pPool->getNewChain(10);
+    get_gzip_config(m_pConfig);
+
+    m_pOutputChain = m_pPool->getNewChain(m_pConfig->buffers_4k);
     m_pPool->mallocSpace(m_pOutputChain, 1024 * 4);
 
-    get_gzip_config(m_pConfig);
-    gzip_context_init(m_pConfig, m_pContext, m_pOutputChain);
+    gzip_context_init(m_pContext, m_pConfig, m_pOutputChain);
     return gzip_deflate_init();
 }
 

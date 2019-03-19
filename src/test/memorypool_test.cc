@@ -236,12 +236,61 @@ void test3()
     }
 }
 
+void test4(MemoryPool* pool)
+{
+    chain_t* chain = nullptr;
+    unsigned int bufferSize = 4 * 1024;
+    unsigned int chainSize = 200;
+
+    chain = pool->getNewChain(chainSize);
+    if (nullptr == chain)
+        return;
+    if (false == pool->mallocSpace(chain, bufferSize))
+    {
+        printf("get chain(len:%u, buffer-size:%u) error\n", chainSize, bufferSize);
+        return;
+    }
+
+    printf("chain status:buffer-size:%u, data-size:%u, nodeal-size:%u\n", countAllBufferSize(chain),
+    countAllDataSize(chain), countAllNoDealSize(chain));
+
+    bool res = true;
+
+    unsigned int tmp = countAllBufferSize(chain);
+    bool tmp_bool = (tmp == bufferSize * chainSize);
+    res = res && tmp_bool;
+
+    tmp = countAllDataSize(chain);
+    tmp_bool = (tmp == 0);
+    res = res && tmp_bool;
+
+    tmp = countAllNoDealSize(chain);
+    tmp_bool = (tmp == 0);
+    res = res && tmp_bool;
+    
+    if (res)
+        std::cout << "[MemoryPool test]pass test\n";
+
+
+    pool->truncateChain(chain, 100);
+    printf("chain status:buffer-size:%u, data-size:%u, nodeal-size:%u\n", countAllBufferSize(chain),
+    countAllDataSize(chain), countAllNoDealSize(chain));
+
+}
+
+void test5()
+{
+    MemoryPool pool;
+    test4(&pool);
+
+}
 int main()
 {
-    // basicShow();
+    basicShow();
     // test1();
     // test2();
     // test();
-    testx();
+    // testx();
     // test3();
+    test5();
 }

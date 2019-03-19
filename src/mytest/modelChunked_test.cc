@@ -36,7 +36,7 @@ void print_chain(chain_t* chain)
         
         chain = chain->next;
     }
-    std::cout << std::endl;
+    std::cout << ")\n";
 }
 
 void test1()
@@ -61,22 +61,34 @@ void test1()
     File file;
     file.setFile(inputfile);
 
-    chunked_t chunk;
+    HttpModelChunk chunk(&pool);
     chain_t* output;
-    chunked_init(&chunk, &pool);
-    while(!file.noMoreData()) {
-        file.getData(input);
 
-        std::cout << countAllDataSize(input) << std::endl;
+    unsigned int file_size;
+    unsigned int before_chunked = 0;
+    unsigned int after_chunked = 0;
+
+    while(true) {
+        bool tail = file.noMoreData();
+
+        file.getData(input);
         print_chain(input);
 
-        bool endData = file.noMoreData();
+        before_chunked = countAllDataSize(input);
 
-        output = chunked_chain(&chunk, input);
+        chunk.chunkedChain(input, output, tail);
         print_chain(output);
-        std::cout << countAllDataSize(output) << std::endl;
 
+        after_chunked = countAllDataSize(output);
+        
+        
         clearData(input);
+        clearData(output);
+
+        std::cout << "before-chunked:" << before_chunked << ",after-chunked:" << after_chunked << std::endl;
+
+        if (tail)
+            break;
     }
 }
 

@@ -153,7 +153,7 @@ char* MemoryPool::m_fAllocChunk(size_t s, int& chunk_num)
     }
 }
 
-void* MemoryPool::m_fMallocLargeSpace(size_t size)
+block_t* MemoryPool::m_fMallocLargeSpace(size_t size)
 {
     block_t* new_block = nullptr;
     new_block = (block_t*)allocate(sizeof(block_t));
@@ -176,8 +176,26 @@ void* MemoryPool::m_fMallocLargeSpace(size_t size)
         blocks = new_block;
 
         m_nAllocatedLargeSpace += size;
-        return res;
+        return new_block;
     }
+}
+
+void MemoryPool::m_fFreeLargeSpace(block_t* block)
+{
+    if (nullptr == block) {
+        return;
+    }
+
+    block_t* new_block = nullptr;
+    new_block = (block_t*)allocate(sizeof(block_t));
+    if(nullptr) {
+        LOG(Warn) << "big error!!" << std::endl;
+        return;
+    }
+    block_init(new_block);
+    new_block->data = block->data;
+    new_block->next = free_blocks;
+    free_blocks = new_block;
 }
 
 void* MemoryPool::allocate(size_t s)
@@ -293,6 +311,7 @@ bool MemoryPool::mallocSpace(chain_t* chain, size_t size)
 {
     void* new_mem = nullptr;
     buffer_t* new_buffer = nullptr;
+    block_t* new_block = nullptr;
     while (nullptr != chain) {
 
         new_buffer = (buffer_t*)allocate(sizeof(buffer_t));
@@ -300,24 +319,72 @@ bool MemoryPool::mallocSpace(chain_t* chain, size_t size)
             return false;
         buffer_init(new_buffer);
 
-        new_mem = m_fMallocLargeSpace(size);
-        if (nullptr == new_mem) {
+        new_block = m_fMallocLargeSpace(size);
+        if (nullptr == new_block) {
             LOG(Debug) << "MemoryPool:malloc chain error\n";
 
             deallocate((void*)(new_buffer), sizeof(buffer_t));
             return false;
         } else {
+            new_mem = new_block->data;
             chain->buffer = new_buffer;
+
             new_buffer->begin = (unsigned char*)new_mem;
             new_buffer->end = (unsigned char*)new_mem + size;
             new_buffer->used = new_buffer->begin;
             new_buffer->deal = new_buffer->begin;
 
+            new_buffer->block = new_block;
             chain = chain->next;
         }
     }
 
     return true;
+}
+
+void MemoryPool::truncateChain(chain_t* chain, unsigned int size)
+{
+    if (nullptr == chain) {
+        return;
+    }
+    unsigned chain_size = countChain(chain);
+
+    if (chain_size > size) {
+        // free chain.
+    } else if (chain_size == size) {
+        return;
+    } else {
+        // add chain.
+        return;
+    }
+
+
+    chain_t* cur = nullptr;
+
+    cur = chain;
+    while(--size) {
+        cur = cur->next;
+    }
+
+    chain_t* pre;
+    chain_t* dele = cur->next;
+    buffer_t* buffer = nullptr;
+    block_t* block = nullptr;
+    cur->next = nullptr;
+
+    while(dele) {
+        buffer = dele->buffer;
+        block = buffer->block;
+
+        m_fFreeLargeSpace(block);
+
+        pre = dele;
+        dele = dele->next;
+        // dealloc memory of buffer.
+        // dealloc memory of chain.
+        deallocate((void*)(pre), sizeof(chain_t));
+        deallocate((void*)(pre->buffer), sizeof(buffer_t));
+    }
 }
 
 MemoryPool::~MemoryPool()
@@ -335,7 +402,7 @@ MemoryPool::~MemoryPool()
         if (nullptr != tmp)
             free(tmp);
     }
-    // LOG(Debug) << "[LargeBlock-Summary]block num(" << num << "),all-size(" << size << ")" << std::endl;
+    LOG(Debug) << "[LargeBlock-Summary]block num(" << num << "),all-size(" << size << ")" << std::endl;
 
     // Free Small block.
     size_t all = 0;
@@ -348,19 +415,18 @@ MemoryPool::~MemoryPool()
             tmp = tmp->p_next;
         }
         all += num * size;
-        // if (num) {
-            // LOG(Debug) << "size(" << size
-            // << "),nums(" << num << ")\n";
-        // }
+        if (num) {
+            LOG(Debug) << "size(" << size
+            << "),nums(" << num << ")\n";
+        }
     }
 
-    /*
     LOG(Debug) << "[SmallBlock-Summary]all space size(" << m_nAllSpace
                << "),heap size(" << m_pHeapEnd - m_pHeapBegin
                << "),free list size(" << all
                << "),allocate to user size(" << m_nAllocatedSpace
                << ")\n";
-    */
+
     while (m_pCleanHandlers != nullptr) {
         struct cleanup* cur = m_pCleanHandlers;
         m_pCleanHandlers = m_pCleanHandlers->next;
