@@ -33,7 +33,7 @@ public:
     // appendData only used by getData(),
     // It append data begin dest and
     // Return the end of chain.
-    chain_t* appendData(chain_t* dest, const char* data, unsigned int len);
+    unsigned int appendData(chain_t* & dest, const char* data, unsigned int len);
 
 public:
     File()

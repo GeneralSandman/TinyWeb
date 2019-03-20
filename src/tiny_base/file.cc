@@ -94,11 +94,11 @@ int File::setFile(const std::string& fname)
     return 0;
 }
 
-chain_t* File::appendData(chain_t* dest, const char* data, unsigned int len)
+unsigned int File::appendData(chain_t* & dest, const char* data, unsigned int len)
 {
     // Have same code with appendData() in memorypool.h
     if (nullptr == dest || nullptr == data || 0 == len) {
-        return dest;
+        return 0;
     }
 
     chain_t* chain;
@@ -129,6 +129,7 @@ chain_t* File::appendData(chain_t* dest, const char* data, unsigned int len)
 
         to_write = (left > empty_size) ? empty_size : left;
         memcpy((void*)buffer->used, (const void*)pos, to_write);
+
         // LOG(Debug) << "buffer:all-size(" << buff_size
         // << "),predata-size(" << predata_size
         // << "),postdata-size(" << predata_size + to_write << ")\n";
@@ -141,28 +142,32 @@ chain_t* File::appendData(chain_t* dest, const char* data, unsigned int len)
 
         if (left) {
             // This chain is full, change to next chain.
+            // LOG(Debug) << std::endl;
             buffer->islast = false;
             chain = chain->next;
         }
     }
 
     if (nullptr == chain) {
-        return chain;
+        dest = chain;
+        return len - left;
     }
 
     empty_size = chain->buffer->end - chain->buffer->used;
     if (empty_size) {
         chain->buffer->islast = true;
-        return chain;
+        dest = chain;
     } else {
         // empty_size
         chain->buffer->islast = false;
         if (nullptr != chain->next) {
             chain->next->buffer->islast = true;
-            return chain->next;
+            dest = chain->next;
         }
-        return chain->next;
+        dest = chain->next;
     }
+
+    return len - left;
 }
 
 void File::getData(chain_t* chain)
@@ -182,6 +187,7 @@ void File::getData(chain_t* chain)
     unsigned int chain_size = 0;
     unsigned int buffer_size = 0;
     unsigned int read_len = 0;
+    unsigned int write_len = 0;
 
     buffer_size = chain->buffer->end - chain->buffer->begin;
     if (!buffer_size) {
@@ -192,8 +198,15 @@ void File::getData(chain_t* chain)
     end_chain = chain;
     while (nullptr != end_chain
         && (read_len = pread(fd, (void*)read_buffer, buffer_size, offset))) {
-        offset += read_len;
-        end_chain = File::appendData(end_chain, read_buffer, read_len);
+        // offset += read_len;
+        // end_chain = File::appendData(end_chain, read_buffer, read_len);
+
+        write_len = File::appendData(end_chain, read_buffer, read_len);
+        offset += write_len;
+
+        if (read_len > write_len) {
+            break;
+        }
     }
 
     // Only for debug.
