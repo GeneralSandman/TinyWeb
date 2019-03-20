@@ -18,6 +18,7 @@
 
 #include <boost/function.hpp>
 #include <stddef.h>
+#include <math.h>
 
 //Information of BasicAllocator
 
@@ -141,6 +142,34 @@ inline size_t ROUND_UP16(size_t n)
 inline size_t FREELIST_INDEX(size_t n)
 {
     return ((n) + ALIGN - 1) / ALIGN - 1;
+}
+
+// inline size_t logarithm2(size_t size)
+// {
+//     float res = log2(size);
+//     size_t res_int = (size_t)(res);
+
+//     return (res - res_int) > 0 ? res_int + 1 : res_int;
+// }
+
+inline size_t ROUND_UP2N(size_t size)
+{
+    float res = log2(size);
+    size_t res_int = (size_t)(res);
+
+    res = (res - res_int) > 0 ? res_int + 1 : res_int;
+
+    return pow(2, res);
+}
+
+inline size_t BLOCK_FREELIST_INDEX(size_t size)
+{
+    float res = log2(size);
+    size_t res_int = (size_t)(res);
+
+    res = (res - res_int) > 0 ? res_int + 1 : res_int;
+
+    return res - 8;
 }
 
 struct block_t;
@@ -372,7 +401,7 @@ public:
         unsigned int size = 0);
     bool mallocSpace(chain_t* chain, size_t size);
 
-    void truncateChain(chain_t* chain, unsigned int size);
+    bool truncateChain(chain_t* chain, unsigned int size, unsigned int buffer_size = 0);
 
     // chain_t* appendData(const chain_t* dest, const sdstr* str)
     // {

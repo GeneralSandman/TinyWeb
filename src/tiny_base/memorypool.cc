@@ -161,6 +161,9 @@ block_t* MemoryPool::m_fMallocLargeSpace(size_t size)
         return nullptr;
     block_init(new_block);
 
+    // find space from free_blocks.
+    
+
     void* res = nullptr;
     res = malloc(size);
     if (nullptr == res) {
@@ -187,15 +190,18 @@ void MemoryPool::m_fFreeLargeSpace(block_t* block)
     }
 
     block_t* new_block = nullptr;
-    new_block = (block_t*)allocate(sizeof(block_t));
+    new_block = (block_t*)MemoryPool::allocate(sizeof(block_t));
     if(nullptr) {
         LOG(Warn) << "big error!!" << std::endl;
         return;
     }
     block_init(new_block);
     new_block->data = block->data;
+    new_block->len = block->len;
     new_block->next = free_blocks;
     free_blocks = new_block;
+
+    m_nAllocatedLargeSpace -= block->len;
 }
 
 void* MemoryPool::allocate(size_t s)
@@ -281,6 +287,10 @@ int MemoryPool::catChain(chain_t* dest,
     chain_t* pos;
     chain_t* new_chain;
 
+    if (nullptr == src) {
+        return 0;
+    }
+
     for (; dest != nullptr && dest->next != nullptr; dest = dest->next) {
     }
 
@@ -309,6 +319,8 @@ int MemoryPool::catChain(chain_t* dest,
 
 bool MemoryPool::mallocSpace(chain_t* chain, size_t size)
 {
+    if (chain == nullptr || size == 0)
+        return false;
     void* new_mem = nullptr;
     buffer_t* new_buffer = nullptr;
     block_t* new_block = nullptr;
@@ -342,20 +354,23 @@ bool MemoryPool::mallocSpace(chain_t* chain, size_t size)
     return true;
 }
 
-void MemoryPool::truncateChain(chain_t* chain, unsigned int size)
+bool MemoryPool::truncateChain(chain_t* chain, unsigned int size, unsigned int buffer_size)
 {
     if (nullptr == chain) {
-        return;
+        return false;
     }
     unsigned chain_size = countChain(chain);
 
     if (chain_size > size) {
         // free chain.
     } else if (chain_size == size) {
-        return;
+        LOG(Debug) << "don't change chain\n";
+        return true;
     } else {
         // add chain.
-        return;
+        // Suggest using catChain();
+        LOG(Debug) << "can't add len\n";
+        return false;
     }
 
 
@@ -367,24 +382,26 @@ void MemoryPool::truncateChain(chain_t* chain, unsigned int size)
     }
 
     chain_t* pre;
-    chain_t* dele = cur->next;
+    chain_t* delete_chain = cur->next;
     buffer_t* buffer = nullptr;
     block_t* block = nullptr;
     cur->next = nullptr;
 
-    while(dele) {
-        buffer = dele->buffer;
+    while(delete_chain) {
+        buffer = delete_chain->buffer;
         block = buffer->block;
 
         m_fFreeLargeSpace(block);
 
-        pre = dele;
-        dele = dele->next;
+        pre = delete_chain;
+        delete_chain = delete_chain->next;
         // dealloc memory of buffer.
         // dealloc memory of chain.
-        deallocate((void*)(pre), sizeof(chain_t));
         deallocate((void*)(pre->buffer), sizeof(buffer_t));
+        deallocate((void*)(pre), sizeof(chain_t));
     }
+
+    return true;
 }
 
 MemoryPool::~MemoryPool()
@@ -393,6 +410,15 @@ MemoryPool::~MemoryPool()
     size_t num = 0;
     size_t size = 0;
     void* tmp = nullptr;
+    
+    size_t free_num = 0;
+    size_t free_size = 0;
+    while (nullptr != free_blocks) {
+        free_num++;
+        free_size += free_blocks->len;
+
+        free_blocks = free_blocks->next;
+    }
     while (nullptr != blocks) {
         num++;
         size += blocks->len;
@@ -402,7 +428,10 @@ MemoryPool::~MemoryPool()
         if (nullptr != tmp)
             free(tmp);
     }
-    LOG(Debug) << "[LargeBlock-Summary]block num(" << num << "),all-size(" << size << ")" << std::endl;
+    LOG(Debug) << "[LargeBlock-Summary]all-block num(" << num << "),all-size(" << size 
+    << "),allocatedLargeSpace("<<
+    m_nAllocatedLargeSpace<<"),free-block num(" 
+    << free_num << "),free-size(" << free_size << ")\n";
 
     // Free Small block.
     size_t all = 0;

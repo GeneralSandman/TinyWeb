@@ -18,6 +18,18 @@
 
 
 #include <iostream>
+#include <assert.h>
+#include <dirent.h>
+#include <fcntl.h>
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <vector>
+#include <zlib.h>
 
 using namespace std;
 
@@ -39,11 +51,60 @@ void print_chain(chain_t* chain)
     std::cout << ")\n";
 }
 
+int gzip_out(chain_t* chain,
+    const std::string& outputfile)
+{
+    buffer_t* buffer;
+    unsigned int size;
+    int outputfd;
+
+    chain_t* in_chain;
+    buffer_t* in_buffer;
+
+    //open output file
+    outputfd = open(outputfile.c_str(), O_RDWR | O_CREAT | O_APPEND, 0666);
+    if (-1 == outputfd) {
+        printf("create input-file(%s) error\n", outputfile.c_str());
+        return -1;
+    }
+
+    // LOG(Debug) << "out size:" << countChain(chain) << std::endl;
+    // for (auto t = context->out; t != nullptr; t = t->next) {
+    // if (t->buffer->islast) {
+    // std::cout << "-";
+    // } else {
+    // std::cout << "+";
+    // }
+    // }
+    while (chain) {
+        buffer = chain->buffer;
+        size = buffer->used - buffer->begin;
+
+        if (!size) {
+            break;
+        }
+
+        write(outputfd, (char*)buffer->begin, size);
+        // printf("comperss-data[%p,%u](%.*s)\n", buffer->begin, size, size, buffer->begin);
+
+        if (buffer->islast) {
+            break;
+        }
+        chain = chain->next;
+    }
+
+    close(outputfd);
+    return 0;
+}
+
 void test1()
 {
     std::string inputfile;
     std::cout << "input file:";
     std::cin >> inputfile;
+
+    std::string chunked_file;
+    chunked_file = inputfile + ".chunked.tmp";
 
     MemoryPool pool;
 
@@ -65,28 +126,32 @@ void test1()
     chain_t* output;
 
     unsigned int file_size;
-    unsigned int before_chunked = 0;
-    unsigned int after_chunked = 0;
+    unsigned int a = 0;
+    unsigned int b = 0;
+    unsigned int c = 0;
 
     while(true) {
         bool tail = file.noMoreData();
 
+        void* address = chunk.chunked_begin(input);
+        a = countAllDataSize(input);
+
         file.getData(input);
-        print_chain(input);
+        b = countAllDataSize(input);
 
-        before_chunked = countAllDataSize(input);
+        chunk.chunked_end(input, address, b - a);
+        c = countAllDataSize(input);
 
-        chunk.chunkedChain(input, output, tail);
-        print_chain(output);
+        gzip_out(input, chunked_file);
 
-        after_chunked = countAllDataSize(output);
-        
-        
         clearData(input);
-        clearData(output);
 
-        std::cout << "before-chunked:" << before_chunked << ",after-chunked:" << after_chunked << std::endl;
+        std::cout << "begin-chunked:" << a << ",get-data:" << b - a << ",end-chunked:" << c << std::endl;
+        if (a == 18 && c - b ==2) {
+            std::cout << "pass test\n";
+        }
 
+        std::cout << "-------\n";
         if (tail)
             break;
     }

@@ -20,100 +20,64 @@
 class HttpModelChunk {
 private:
     MemoryPool* m_pPool;
+    bool first;
 
 public:
     HttpModelChunk(MemoryPool* pool)
         : m_pPool(pool)
+        , first(true)
     {
         // LOG(Debug) << "class HttpModelChunk constructor\n";
     }
 
-    void chunkedChain(chain_t* in, chain_t*& out, bool tail)
+    void* chunked_begin(chain_t* in)
     {
-        if (tail) {
-            chunked_chain_tail(in, out);
+        if (nullptr == in)
+            return nullptr;
+
+        char source_first[] = "0000000000000000\r\n";
+        char source_middle[] = "\r\n0000000000000000\r\n";
+        char source_end[] = "\r\n";
+
+        // TODO:
+        if (first) {
+            appendData(in, source_first, strlen(source_first));
         } else {
-            chunked_chain(in, out);
+            appendData(in, source_middle, strlen(source_middle));
         }
+
+        return in->buffer->begin;
     }
 
-    void chunked_chain_tail(chain_t* in,chain_t* & out)
-    {
-        char tail_str[] = "0\r\n\r\n";
-        chain_t* tail_chain = in;
-        buffer_t* buffer = nullptr;
-        while (tail_chain) {
-            buffer = tail_chain->buffer;
-            if (buffer->islast)
-                break;
-            if (nullptr == tail_chain->next)
-                break;
-
-            tail_chain = tail_chain->next;
-        }
-
-        if (nullptr != buffer) {
-            unsigned int empty_size = buffer->end - buffer->used;
-            if (empty_size < strlen(tail_str)) {
-                chain_t* new_chain = nullptr;
-                new_chain = m_pPool->getNewChain(1);
-                m_pPool->mallocSpace(new_chain, 1024);
-                appendData(new_chain, tail_str, strlen(tail_str));
-
-                m_pPool->catChain(tail_chain, new_chain);
-            } else {
-                appendData(tail_chain, tail_str, strlen(tail_str));
-            }
-        }
-
-        out = in;
-    }
-
-    void chunked_chain(chain_t* in, chain_t*& out)
+    void chunked_end(chain_t* in, void* chunk_len_begin, unsigned int chunk_len = 0)
     {
         if (nullptr == in)
             return;
-        unsigned int all_data_size = countAllDataSize(in);
 
+        char source_first[] = "0000000000000000\r\n";
+        char source_middle[] = "\r\n0000000000000000\r\n";
+        char source_end[] = "\r\n";
         sdstr str1;
-        char source[] = "0000000000000000\r\n";
-        sdsnewempty(&str1, sizeof(source));
-        sdscatsprintf(&str1, "%x\r\n", all_data_size);
+
+        if (first) {
+            sdsnewempty(&str1, sizeof(source_first));
+            sdscatsprintf(&str1, "%016x\r\n", chunk_len);
+            first = false;
+
+        } else {
+
+            sdsnewempty(&str1, sizeof(source_middle));
+            sdscatsprintf(&str1, "\r\n%016x\r\n", chunk_len);
+        }
+
         printf(&str1);
+        memcpy(chunk_len_begin, (const void*)str1.data, str1.len);
 
-        chain_t* header = m_pPool->getNewChain(1);
-        m_pPool->mallocSpace(header, sizeof(source));
-        appendData(header, str1.data, str1.len);
-
-        char tail_str[] = "\r\n";
-        chain_t* tail_chain = in;
-        buffer_t* buffer = nullptr;
-        while (tail_chain) {
-            buffer = tail_chain->buffer;
-            if (buffer->islast)
-                break;
-            if (nullptr == tail_chain->next)
-                break;
-
-            tail_chain = tail_chain->next;
+        if (chunk_len == 0) {
+            LOG(Debug) << "append end \r\n"
+                       << std::endl;
+            appendData(in, source_end, strlen(source_end));
         }
-
-        if (nullptr != buffer) {
-            unsigned int empty_size = buffer->end - buffer->used;
-            if (empty_size < strlen(tail_str)) {
-                chain_t* new_chain = nullptr;
-                new_chain = m_pPool->getNewChain(1);
-                m_pPool->mallocSpace(new_chain, 1024);
-                appendData(new_chain, tail_str, strlen(tail_str));
-
-                m_pPool->catChain(tail_chain, new_chain);
-            } else {
-                appendData(tail_chain, tail_str, strlen(tail_str));
-            }
-        }
-
-        m_pPool->catChain(header, in);
-        out = header;
 
         sdsdestory(&str1);
     }

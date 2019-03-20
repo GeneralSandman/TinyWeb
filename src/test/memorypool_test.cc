@@ -276,6 +276,19 @@ void test4(MemoryPool* pool)
     printf("chain status:buffer-size:%u, data-size:%u, nodeal-size:%u\n", countAllBufferSize(chain),
     countAllDataSize(chain), countAllNoDealSize(chain));
 
+    chain_t* chain2 = nullptr;
+    chain2 = pool->getNewChain(100);
+    // chain = pool->getNewChain(chainSize);
+    if (nullptr == chain2) {
+        std::cout << "get new chain error" << std::endl;
+        return;
+    }
+    if(false == pool->mallocSpace(chain2, bufferSize)) {
+        std::cout << "malloc space error\n";
+        return;
+    }
+    printf("chain status:buffer-size:%u, data-size:%u, nodeal-size:%u\n", countAllBufferSize(chain2),
+    countAllDataSize(chain2), countAllNoDealSize(chain2));
 }
 
 void test5()
