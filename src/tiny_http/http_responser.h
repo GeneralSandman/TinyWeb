@@ -15,9 +15,12 @@
 #define HTTP_RESPONSER_H
 
 #include <TinyWebConfig.h>
+#include <tiny_base/file.h>
+#include <tiny_base/memorypool.h>
 #include <tiny_http/http.h>
-#include <tiny_base/file.h> 
+#include <tiny_http/http_model_chunked.h>
 #include <tiny_http/http_model_file.h>
+#include <tiny_http/http_model_gzip.h>
 #include <tiny_http/http_parser.h>
 
 #include <iostream>
@@ -62,19 +65,25 @@ typedef struct HttpResponse {
 } HttpResponse;
 
 enum content_encoding_type {
-    content_gzip_t = 1,
+    content_no_t = 1,
+    content_gzip_t,
     content_deflate_t,
 };
 
 enum transport_encoding_type {
-    transport_content_length_t = 1,
+    transport_no_t = 1,
+    transport_content_length_t,
     transport_chunked_t,
 };
 
 class HttpResponser {
 
+    MemoryPool* m_pPool;
+    HttpModelChunk m_nChunkModel;
+    HttpModelGzip m_nGzipModel;
+
 public:
-    HttpResponser();
+    HttpResponser(MemoryPool* pool);
 
     void buildResponse(const HttpRequest* req, bool valid_requ, HttpResponse* response);
     void lineToStr(const HttpResponseLine* line, sdstr* line_str);
@@ -82,12 +91,16 @@ public:
     void bodyToStr(const HttpFile* file, sdstr* body_str);
     void bodyToChain(HttpFile* file, chain_t* chain);
 
-    void bodyToChain(HttpFile* file,
-    chain_t* chain,
-    enum content_encoding_type cont,
-    enum transport_encoding_type trans);
+    chain_t* bodyToChain(HttpFile* file,
+        chain_t* chain,
+        enum content_encoding_type cont,
+        enum transport_encoding_type trans);
 
-    
+    bool noMoreBody(HttpFile* file,
+        chain_t* chain,
+        enum content_encoding_type cont,
+        enum transport_encoding_type trans);
+
     void response(const HttpRequest* req, std::string& data);
 
     ~HttpResponser();

@@ -18,9 +18,9 @@
 #include <tiny_base/memorypool.h>
 #include <tiny_core/protocol.h>
 #include <tiny_http/http_model_fcgi.h>
+#include <tiny_http/http_model_file.h>
 #include <tiny_http/http_parser.h>
 #include <tiny_http/http_responser.h>
-#include <tiny_http/http_model_file.h>
 
 #include <functional>
 #include <memory>
@@ -35,6 +35,7 @@ private:
     const unsigned int m_nBufferSize;
     const unsigned long m_nMaxChainSize;
     chain_t* m_pFileChain;
+    chain_t* m_pWriteChain;
 
     bool m_nBeginSendHeader;
     bool m_nBeginSendFile;
@@ -48,7 +49,6 @@ private:
     std::shared_ptr<HttpRequest> m_pRequest;
     std::shared_ptr<HttpResponse> m_pResponse;
 
-
 public:
     WebProtocol();
     virtual void connectionMade();
@@ -61,6 +61,8 @@ public:
 // Using for fcgi client.
 class FcgiClientProtocol : public Protocol {
 private:
+    MemoryPool m_nPool;
+
     bool m_nKeepAlive;
 
     http_header m_nRequestHeader;
@@ -81,6 +83,8 @@ public:
 // Using for new fcgi client.
 class NewFcgiClientProtocol : public Protocol {
 private:
+    MemoryPool m_nPool;
+
     bool m_nKeepAlive;
 
     http_header m_nRequestHeader;

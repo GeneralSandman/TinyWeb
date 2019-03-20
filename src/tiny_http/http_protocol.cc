@@ -22,12 +22,14 @@
 
 WebProtocol::WebProtocol()
     : Protocol()
+    , m_nPool()
     , m_nKeepAlive(false)
     , m_nBufferSize(4 * 1024)
     , m_nMaxChainSize(16 * 4 * 1024)
     , m_pFileChain(nullptr)
     , m_nUseWriteCompleteCallback(false)
     , m_nBeginSendFile(false)
+    , m_nResponser(&m_nPool)
 {
     LOG(Debug) << "class WebProtocol constructor\n";
 }
@@ -88,33 +90,40 @@ void WebProtocol::dataReceived(const std::string& data)
     // Encode http response.
     m_nResponser.lineToStr(&(m_pResponse->line), &str);
     m_nResponser.headersToStr(&(m_pResponse->headers), &str);
-    // m_nResponser.bodyToChain(&(m_pResponse->file), m_pFileChain);
     LOG(Debug) << "all-buffer-size:" << countAllBufferSize(m_pFileChain) << ","
                << "all-nodeal-size:" << countAllNoDealSize(m_pFileChain) << std::endl;
-    m_pResponse->file.getData(m_pFileChain);
+    // m_pResponse->file.getData(m_pFileChain);
+    m_pWriteChain = m_nResponser.bodyToChain(&(m_pResponse->file), m_pFileChain, content_no_t, transport_no_t);
     LOG(Debug) << "all-buffer-size:" << countAllBufferSize(m_pFileChain) << ","
                << "all-nodeal-size:" << countAllNoDealSize(m_pFileChain) << std::endl;
 
     // Rest data of file need to send or not.
     if (m_nMaxChainSize < file_size) {
-        auto func = [this]() mutable -> int {
+
+        auto func
+            = [this]() mutable -> int {
             LOG(Info) << "write rest of file\n";
             // HttpResponser* responser = &(m_nResponser);
             // HttpResponse* response = m_pResponse.get();
             HttpFile* file = &(m_pResponse->file);
 
-            clearData(m_pFileChain);
+            // clearData(m_pFileChain);
             // responser->bodyToChain(file, this->m_pFileChain);
             LOG(Debug) << "all-buffer-size:" << countAllBufferSize(m_pFileChain) << ","
                        << "all-nodeal-size:" << countAllNoDealSize(m_pFileChain) << std::endl;
-            file->getData(m_pFileChain);
+            // file->getData(m_pFileChain);
+            m_pWriteChain = m_nResponser.bodyToChain(file, m_pFileChain, content_no_t, transport_no_t);
             LOG(Debug) << "all-buffer-size:" << countAllBufferSize(m_pFileChain) << ","
                        << "all-nodeal-size:" << countAllNoDealSize(m_pFileChain) << std::endl;
-            if (file->noMoreData()) {
+            // if (file->noMoreData()) {
+            //     std::cout << "no more data\n";
+            //     m_nUseWriteCompleteCallback = false;
+            // }
+            if (m_nResponser.noMoreBody()) {
                 std::cout << "no more data\n";
                 m_nUseWriteCompleteCallback = false;
             }
-            sendChain(m_pFileChain);
+            sendChain(m_pWriteChain);
 
             return 0;
         };
@@ -127,7 +136,7 @@ void WebProtocol::dataReceived(const std::string& data)
     std::string tmp;
     tmp.append((const char*)str.data, str.len);
     sendMessage(tmp);
-    sendChain(m_pFileChain);
+    sendChain(m_pWriteChain);
 
     // TODO:
     // if (dynamic request) {
@@ -142,13 +151,13 @@ void WebProtocol::dataReceived(const std::string& data)
 
 void WebProtocol::writeCompletely()
 {
-    LOG(Info) << "write complete:" 
-        << m_nBeginSendHeader << " "
-        << m_nBeginSendFile << std::endl;
+    LOG(Info) << "write complete:"
+              << m_nBeginSendHeader << " "
+              << m_nBeginSendFile << std::endl;
 
     // if (!m_nBeginSendHeader) {
-        // m_nBeginSendHeader = true;
-        // return;
+    // m_nBeginSendHeader = true;
+    // return;
     // }
 
     if (!m_nBeginSendFile) {
@@ -184,6 +193,7 @@ RegistProtocol(WebProtocol);
 
 FcgiClientProtocol::FcgiClientProtocol()
     : Protocol()
+    , m_nPool()
     , m_nKeepAlive(false)
     , fcgiModel(1314) // FIXME:
 {
@@ -238,7 +248,7 @@ void FcgiClientProtocol::dataReceived(const std::string& data)
 
     bool res = (tmp == -1) ? false : true;
     if (res) {
-        HttpResponser responser;
+        HttpResponser responser(&m_nPool);
         std::string data;
 
         responser.response(result, data);
@@ -265,11 +275,11 @@ RegistProtocol(FcgiClientProtocol);
 
 // FcgiClientProtocol
 
-
 // NewFcgiClientProtocol using for new fcgi client.
 
 NewFcgiClientProtocol::NewFcgiClientProtocol()
     : Protocol()
+    , m_nPool()
     , m_nKeepAlive(false)
     , fcgiModel(1314) // FIXME:
 {
@@ -324,7 +334,7 @@ void NewFcgiClientProtocol::dataReceived(const std::string& data)
 
     bool res = (tmp == -1) ? false : true;
     if (res) {
-        HttpResponser responser;
+        HttpResponser responser(&m_nPool);
         std::string data;
 
         responser.response(result, data);

@@ -419,6 +419,7 @@ MemoryPool::~MemoryPool()
 
         free_blocks = free_blocks->next;
     }
+    
     while (nullptr != blocks) {
         num++;
         size += blocks->len;
@@ -428,10 +429,11 @@ MemoryPool::~MemoryPool()
         if (nullptr != tmp)
             free(tmp);
     }
-    LOG(Debug) << "[LargeBlock-Summary]all-block num(" << num << "),all-size(" << size 
-    << "),allocatedLargeSpace("<<
-    m_nAllocatedLargeSpace<<"),free-block num(" 
-    << free_num << "),free-size(" << free_size << ")\n";
+
+    // LOG(Debug) << "[LargeBlock-Summary]all-block num(" << num << "),all-size(" << size 
+    // << "),allocatedLargeSpace("<<
+    // m_nAllocatedLargeSpace<<"),free-block num(" 
+    // << free_num << "),free-size(" << free_size << ")\n";
 
     // Free Small block.
     size_t all = 0;
@@ -444,17 +446,17 @@ MemoryPool::~MemoryPool()
             tmp = tmp->p_next;
         }
         all += num * size;
-        if (num) {
-            LOG(Debug) << "size(" << size
-            << "),nums(" << num << ")\n";
-        }
+        // if (num) {
+        //     LOG(Debug) << "size(" << size
+        //     << "),nums(" << num << ")\n";
+        // }
     }
 
-    LOG(Debug) << "[SmallBlock-Summary]all space size(" << m_nAllSpace
-               << "),heap size(" << m_pHeapEnd - m_pHeapBegin
-               << "),free list size(" << all
-               << "),allocate to user size(" << m_nAllocatedSpace
-               << ")\n";
+    // LOG(Debug) << "[SmallBlock-Summary]all space size(" << m_nAllSpace
+    //            << "),heap size(" << m_pHeapEnd - m_pHeapBegin
+    //            << "),free list size(" << all
+    //            << "),allocate to user size(" << m_nAllocatedSpace
+    //            << ")\n";
 
     while (m_pCleanHandlers != nullptr) {
         struct cleanup* cur = m_pCleanHandlers;
