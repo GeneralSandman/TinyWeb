@@ -47,7 +47,7 @@ class ListNode
     }
         ~ListNode()
         {
-            LOG(Debug) << "class ListNode destuctor\n";
+            LOG(Debug) << "class ListNode destructor\n";
         }
         friend class List<T>;
         friend class ListIter<T>;
@@ -464,7 +464,7 @@ List<T>::~List()
         delete cur;
         cur = next;
     }
-    LOG(Debug) << "class List destuctor\n";
+    LOG(Debug) << "class List destructor\n";
 }
 //---List-api-end----//
 
