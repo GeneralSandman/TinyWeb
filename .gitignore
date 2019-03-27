@@ -48,3 +48,5 @@ src/tiny_core/processpool\.cc
 src/test/build/*
 src/mytest/build/*
 src/build/*
+
+www/1-63k_files/*k.txt

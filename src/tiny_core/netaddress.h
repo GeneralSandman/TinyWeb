@@ -41,7 +41,7 @@ public:
 
   friend bool operator==(const NetAddress &a, const NetAddress &b)
   {
-    return memcmp(&a.m_nAddress, &b.m_nAddress, sizeof(struct sockaddr_in));
+    return !memcmp(&a.m_nAddress, &b.m_nAddress, sizeof(struct sockaddr_in));
   }
   friend bool operator<(const NetAddress &a, const NetAddress &b)
   {

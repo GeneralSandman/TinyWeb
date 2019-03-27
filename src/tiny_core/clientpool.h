@@ -27,6 +27,21 @@ class Connector;
 class Connection;
 class Factory;
 
+typedef struct client_t {
+    Connector* connector;
+    Connection* connection;
+    bool valid;
+    bool isusing;
+} client_t;
+
+inline void client_init(client_t* client)
+{
+    client->connector = nullptr;
+    client->connection = nullptr;
+    client->valid = false;
+    client->isusing = false;
+}
+
 class ClientPool {
 private:
     EventLoop* m_pEventLoop;
@@ -38,11 +53,10 @@ private:
     unsigned int m_nUsing;
 
     typedef std::pair<NetAddress, NetAddress> AddressCouple;
-    typedef std::pair<Connector*, Connection*> ConnectorCouple;
-    typedef std::deque<ConnectorCouple> ConnectorCouples;
+    typedef std::deque<client_t*> ConnectorCouples2;
     typedef std::pair<AddressCouple, Protocol*> MultiProtocol;
 
-    std::map<AddressCouple, ConnectorCouples> m_nConnections;
+    std::map<AddressCouple, ConnectorCouples2> m_nConnections2;
     std::map<Connection*, Protocol*> m_nProtocols;
     std::deque<MultiProtocol> m_nWaitList;
 
@@ -55,6 +69,10 @@ private:
     void m_fNewConnectionCallback(int, const NetAddress&,
         const NetAddress&);
     void m_fHandleClose(Connection*);
+
+    void m_fGiveUpControl(Connection* con);
+    void m_fWakeUp(Connection* con);
+    bool m_fDoTaskNoDelay(ConnectorCouples2& couples, Protocol* protocol);
 
 public:
     ClientPool(EventLoop*, const NetAddress&);

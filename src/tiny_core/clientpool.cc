@@ -25,60 +25,66 @@ void ClientPool::m_nConnectCallback(Connection* con)
     LOG(Info) << "invoke connect-callback of Protocol\n";
 
     auto p = m_nProtocols.find(con);
-    // assert(p != m_nProtocols.end());
     if (p != m_nProtocols.end()) {
         Protocol* prot = p->second;
-        prot->makeConnection();
-    } else {
+        // prot->makeConnection();
     }
 }
+
 void ClientPool::m_nMessageCallback(Connection* con,
     Buffer* input, Time time)
 {
     LOG(Info) << "invoke message-callback of Protocol\n";
 
-    auto p = m_nProtocols.find(con);
-    assert(p != m_nProtocols.end());
-    Protocol* prot = p->second;
+    LOG(Debug) << "connection:" << con << std::endl;
 
-    std::string all = input->getAll();
-    prot->getMessage(all);
+    auto p = m_nProtocols.find(con);
+    if (p != m_nProtocols.end()) {
+        Protocol* prot = p->second;
+
+        std::string all = input->getAll();
+        prot->getMessage(all);
+    } else {
+        LOG(Debug) << "zhenhuli\n";
+    }
 }
+
 void ClientPool::m_nWriteCompleteCallback(Connection* con)
 {
     LOG(Info) << "invoke writecomplete-callback of Protocol\n";
 
     auto p = m_nProtocols.find(con);
-    assert(p != m_nProtocols.end());
-    Protocol* prot = p->second;
+    if (p != m_nProtocols.end()) {
+        Protocol* prot = p->second;
 
-    prot->writeComplete();
+        prot->writeComplete();
+    }
 }
+
 void ClientPool::m_nCloseCallback(Connection* con)
 {
     LOG(Info) << "invoke close-callback of Protocol\n";
 
     auto p = m_nProtocols.find(con);
-    assert(p != m_nProtocols.end());
-    Protocol* prot = p->second;
+    if (p != m_nProtocols.end()) {
+        Protocol* prot = p->second;
 
-    prot->loseConnection();
-
-    m_nProtocols.erase(p);
+        prot->loseConnection();
+        m_nProtocols.erase(p);
+    }
 }
 
 void ClientPool::m_fNewConnectionCallback(int sockfd,
     const NetAddress& hostaddress,
     const NetAddress& peeraddress) //this arg may be error.
 {
-    //this function must identifer which localaddress
-    //establish connection.
+    // this function must identifer which localaddress
+    // establish connection.
     Connection* newCon = new Connection(m_pEventLoop,
         sockfd,
         hostaddress,
         peeraddress);
     m_nConNum++;
-    // std::cout << m_nConNum << std::endl;
 
     ConnectionCallback tmp_nConnectCallback = ConnectionCallback(
         boost::bind(
@@ -102,14 +108,18 @@ void ClientPool::m_fNewConnectionCallback(int sockfd,
     newCon->setCloseCallback(tmp_nCloseCallback);
 
     AddressCouple add(hostaddress, peeraddress);
-    assert(m_nConnections.find(add) != m_nConnections.end());
-    // m_nConnections[add].second = newCon;
-    assert(!m_nConnections[add].empty());
-    ConnectorCouple couple = m_nConnections[add].front();
-    m_nConnections[add].pop_front();
-    assert(couple.second == nullptr);
-    couple.second = newCon;
-    m_nConnections[add].push_back(couple);
+
+    // version 2
+    // Maybe some bugs.
+    assert(m_nConnections2.find(add) != m_nConnections2.end());
+    assert(!m_nConnections2[add].empty());
+    client_t* client = m_nConnections2[add].front();
+    m_nConnections2[add].pop_front();
+    assert(client->connection == nullptr);
+    client->connection = newCon;
+    client->valid = true;
+    client->isusing = false;
+    m_nConnections2[add].push_back(client);
 }
 
 void ClientPool::m_fHandleClose(Connection* con)
@@ -117,22 +127,28 @@ void ClientPool::m_fHandleClose(Connection* con)
     m_nCloseCallback(con);
 
     AddressCouple add(con->getLocalAddress(), con->getPeerAddress());
-    auto p = m_nConnections.find(add);
-    assert(p != m_nConnections.end());
+    auto p = m_nConnections2.find(add);
+    assert(p != m_nConnections2.end());
 
-    ConnectorCouple couple;
-    for (auto i = m_nConnections[add].begin(); i != m_nConnections[add].end(); i++) {
-        couple = *i;
-        if (couple.second == con) {
-            m_nConnections[add].erase(i);
+    client_t* client = nullptr;
+    auto i = m_nConnections2[add].begin();
+    auto end = m_nConnections2[add].end();
+    for (; i != end; i++) {
+        client = *i;
+        if (client->connection == con) {
+            m_nConnections2[add].erase(i);
             break;
         }
+        client = nullptr;
     }
 
-    LOG(Debug) << m_nConnections.size() << std::endl;
+    if (nullptr == client) {
+        LOG(Warn) << "find connection error\n";
+        return;
+    }
 
-    Connector* conr = couple.first;
-    Connection* conn = couple.second;
+    Connector* conr = client->connector;
+    Connection* conn = client->connection;
 
     conr->stop();
     conn->destoryConnection();
@@ -145,6 +161,110 @@ void ClientPool::m_fHandleClose(Connection* con)
 
     if (m_nStarted && conr->isKeepConnect())
         conr->restart();
+}
+
+void ClientPool::m_fGiveUpControl(Connection* con)
+{
+    AddressCouple address(con->getLocalAddress(), con->getPeerAddress());
+
+    if (m_nConnections2.find(address) == m_nConnections2.end()) {
+        return;
+    }
+
+    client_t* client = nullptr;
+    auto i = m_nConnections2[address].begin();
+    for (; i != m_nConnections2[address].end(); i++) {
+        client = *i;
+
+        if (client->connection == con) {
+            m_nConnections2[address].erase(i);
+            break;
+        }
+        client = nullptr;
+    }
+    if (nullptr == client) {
+        return;
+    }
+
+    client->isusing = false;
+    m_nConnections2[address].push_front(client);
+
+    LOG(Info) << "give up control\n";
+}
+
+void ClientPool::m_fWakeUp(Connection* con)
+{
+    LOG(Info) << "weak up protocol in wait-list\n";
+
+    auto i = m_nWaitList.begin();
+    auto end = m_nWaitList.end();
+    for (; i != end; i++) {
+
+        LOG(Debug) << "old-connection(host:" << con->getLocalAddress().getIpPort()
+                   << ",peer:" << con->getPeerAddress().getIpPort() << ")\n";
+        LOG(Debug) << "wait-list-connection(host:" << i->first.first.getIpPort()
+                   << ",peer:" << i->first.second.getIpPort() << ")\n";
+
+        if (i->first.first == con->getLocalAddress()
+            && i->first.second == con->getPeerAddress()) {
+
+            LOG(Debug) << "find match protocol from wait-list\n";
+
+            AddressCouple address(con->getLocalAddress(), con->getPeerAddress());
+            Protocol* protocol = i->second;
+            bool res = m_fDoTaskNoDelay(m_nConnections2[address], protocol);
+            if (!res) {
+                LOG(Warn) << "big error\n";
+            }
+
+            m_nWaitList.erase(i);
+            break;
+        }
+    }
+    if (i == end) {
+        LOG(Debug) << "don't find match protocol from wait-list\n";
+        return;
+    }
+}
+
+bool ClientPool::m_fDoTaskNoDelay(ConnectorCouples2& couples, Protocol* protocol)
+{
+    LOG(Info) << "do task with no-delay\n";
+
+    auto i = couples.begin();
+    client_t* client = nullptr;
+
+    for (; i != couples.end(); i++) {
+        client = *i;
+        std::cout << client << "-" << client->valid << "-" << client->isusing << std::endl;
+        if (client != nullptr && client->valid && !client->isusing) {
+            couples.erase(i);
+            break;
+        }
+        client = nullptr;
+    }
+
+    if (nullptr == client) {
+        LOG(Warn) << "There are no idle connection\n";
+        return false;
+    }
+
+    client->isusing = true;
+    couples.push_back(client);
+
+    Connection* con = client->connection;
+
+    protocol->m_pFactory = nullptr;
+    protocol->m_nNumber = 1;
+    protocol->m_pConnection = con;
+    m_nProtocols[con] = protocol;
+
+    // disableConnection in close protocol.
+    con->establishConnection();
+    protocol->makeConnection();
+    buildProtocol(protocol);
+
+    return true;
 }
 
 ClientPool::ClientPool(EventLoop* loop,
@@ -161,24 +281,27 @@ ClientPool::ClientPool(EventLoop* loop,
 
 void ClientPool::closeProtocol(Protocol* protocol)
 {
-    // Don't use it now.
+    LOG(Debug) << "close Protocol\n";
+    // Protocol give up control to connection.
+
     auto p = m_nProtocols.find(protocol->m_pConnection);
     if (p != m_nProtocols.end()) {
         Connection* con = p->first;
         Protocol* prot = p->second;
 
-        con->shutdownWrite();
-        //invoke the member function of Protocol
+        // con->shutdownWrite();
         prot->loseConnection();
+        m_fGiveUpControl(con);
+        m_fWakeUp(con);
 
-        delete prot;
+        // delete prot;
         m_nProtocols.erase(p);
+        LOG(Debug) << "erase protocol\n";
     }
 }
 
 void ClientPool::closeProtocolAfter(Protocol* protocol, int seconds)
 {
-    // Don't use it now.
     m_pEventLoop->runAfter(seconds, boost::bind(&ClientPool::closeProtocol, this, protocol));
 }
 
@@ -195,24 +318,21 @@ void ClientPool::doTask(const NetAddress& hostAddress,
     Protocol* protocol)
 {
     AddressCouple address(hostAddress, peerAddress);
-    auto p = m_nConnections.find(address);
-    if (p == m_nConnections.end()) {
-        std::cout << "no have connection, need to build new one\n";
+    if (m_nConnections2.find(address) == m_nConnections2.end()) {
+        LOG(Info) << "no have connection, need to build new one\n";
         return;
     }
-    ConnectorCouple conCouple = m_nConnections[address].front();
 
-    Connection* con = conCouple.second;
+    bool res = m_fDoTaskNoDelay(m_nConnections2[address], protocol);
 
-    m_nProtocols[con] = protocol;
-    // Init some number of Protocol;
-    protocol->m_pFactory = nullptr;
-    protocol->m_nNumber = 1;
-    protocol->m_pConnection = con;
-
-    con->establishConnection();
-    // protocol->makeConnection();
-    buildProtocol(protocol);
+    if (!res) {
+        // There no idle connection.
+        // Push to wait list.
+        LOG(Info) << "push to wait-list(host:" << hostAddress.getIpPort()
+                  << ",peer:" << peerAddress.getIpPort() << ")\n";
+        MultiProtocol tmp(address, protocol);
+        m_nWaitList.push_back(tmp);
+    }
 }
 
 void ClientPool::start()
@@ -236,8 +356,10 @@ void ClientPool::connect(const NetAddress& hostAddress,
         this, _1, _2, _3));
 
     AddressCouple address(hostAddress, peeraddress);
-    ConnectorCouple couple(newConnector, nullptr);
-    m_nConnections[address].push_back(couple);
+    client_t* newClient = new client_t;
+    client_init(newClient);
+    newClient->connector = newConnector;
+    m_nConnections2[address].push_back(newClient);
 
     newConnector->start();
 }
@@ -264,7 +386,7 @@ void ClientPool::disconnect(const NetAddress& peeraddress,
 void ClientPool::disconnectAll()
 {
     // for (std::map<AddressCouple, ConnectorCouples>::iterator i = m_nConnections.begin(); i != m_nConnections.end(); i++) {
-        // for (auto t = i->begin(); t != i->end(); t++) {
+    // for (auto t = i->begin(); t != i->end(); t++) {
     //         Connector* conr = t->first;
     //         Connection* conn = t->second;
     //         conn->shutdownWrite();
@@ -274,7 +396,7 @@ void ClientPool::disconnectAll()
     //     }
     // }
 
-    m_nConnections.clear();
+    m_nConnections2.clear();
 }
 
 void ClientPool::stop()
@@ -285,7 +407,7 @@ void ClientPool::stop()
 
 ClientPool::~ClientPool()
 {
-    stop();
+    disconnectAll();
 
     LOG(Debug) << "class ClientPool destructor\n";
 }
