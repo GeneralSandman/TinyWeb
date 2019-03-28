@@ -28,7 +28,7 @@ Slave::Slave(EventLoop* loop, int num, const std::string& name)
     , m_nName(name)
     , m_nListenAddress(NetAddress("172.17.0.2:9090"))
 {
-    LOG(Debug) << "class Slave constuctor\n";
+    LOG(Debug) << "class Slave constructor\n";
 }
 
 void Slave::createListenServer(int listenSocket)
@@ -55,14 +55,14 @@ void Slave::work()
     for (auto t : m_nMachines) {
         t.m_pServer->start();
     }
-    status = 1;
+    m_nStart = true;
 
-    while (status) {
+    while (m_nStart) {
         m_pEventLoop->loop();
         // reconfig
 
         if (status_terminate || status_quit_softly || status_restart || status_reconfigure)
-            status = 0;
+            m_nStart = false;
     }
 }
 

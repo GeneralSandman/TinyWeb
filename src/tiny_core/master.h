@@ -31,7 +31,7 @@ protected:
 
     std::vector<Socket*> m_pListenSockets;
 
-    int status;
+    bool m_nStart;
 
 public:
     Master(ProcessPool*, EventLoop*, int, const std::string&);

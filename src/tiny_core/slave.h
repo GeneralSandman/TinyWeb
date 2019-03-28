@@ -55,7 +55,7 @@ protected:
 
     std::vector<VritualMachine> m_nMachines;
 
-    int status;
+    bool m_nStart;
 
 public:
     Slave(EventLoop*, int, const std::string&);

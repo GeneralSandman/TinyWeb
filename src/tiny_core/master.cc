@@ -34,7 +34,7 @@ Master::Master(ProcessPool* pool, EventLoop* loop, int num, const std::string& n
     , m_nNumber(num)
     , m_nName(name)
 {
-    LOG(Debug) << "class Master constuctor\n";
+    LOG(Debug) << "class Master constructor\n";
 }
 
 void Master::init()
@@ -65,19 +65,19 @@ void Master::getListenSockets(std::vector<int>& result)
 void Master::work()
 {
     LOG(Debug) << "[master]:start working\n";
-    status = 1;
+    m_nStart = true;
 
-    while (status) {
+    while (m_nStart) {
         m_pEventLoop->loop();
         if (status_terminate || status_quit_softly) {
             LOG(Debug) << "[master]:(term/stop)I will kill all chilern\n";
             m_pProcessPool->killAll();
-            status = 0;
+            m_nStart = false;
         }
         if (status_restart || status_reconfigure) {
             LOG(Debug) << "[master]:(restart/reload)quit and create new processpool\n";
             m_pProcessPool->killAll();
-            status = 0;
+            m_nStart = false;
         }
     }
 }
@@ -87,5 +87,5 @@ Master::~Master()
     for (auto t : m_pListenSockets) {
         delete t;
     }
-    LOG(Debug) << "class Master destuctor\n";
+    LOG(Debug) << "class Master destructor\n";
 }
