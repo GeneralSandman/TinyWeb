@@ -62,6 +62,8 @@ int main()
         ProcessPool pool;
         pool.init();
         pool.createProcess(1);
+
+        pool.start();
     }
 
     return 0;

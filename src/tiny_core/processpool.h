@@ -77,7 +77,6 @@ private:
 
     static void m_fSignalHandler(ProcessPool* pool, int sign)
     {
-        assert(nullptr != pool);
         if (nullptr == pool)
             return;
         LOG(Debug) << "[parent] signal manager get signal(" << sign << ")\n";
@@ -125,7 +124,10 @@ private:
             if (m_nPids[index] == pid)
                 break;
         }
-        assert(index != m_nPids.size());
+        // assert(index != m_nPids.size());
+        if (index == m_nPids.size()) {
+            LOG(Debug) << "process(" << pid << ") doesn't exist\n";
+        }
 
         m_nPipes[index]->clearSocket();
         m_nPipes.erase(m_nPipes.begin() + index);
@@ -143,31 +145,8 @@ public:
     void killAll();
     void killSoftly();
 
-    void writeToShareMemory(const std::string& data)
-    {
-        void* address = nullptr;
-        m_pSync->sem->lock();
-        address = m_pSync->memory->getSpace();
-        memcpy(address, (const void*)data.c_str(), data.size());
-        m_pSync->sem->unLock();
-    }
-
-    std::string readFromSharedMemory(void)
-    {
-        char* address = nullptr;
-        unsigned int len = 0;
-        std::string res;
-
-
-        m_pSync->sem->lock();
-        address = (char*)m_pSync->memory->getSpace();
-        len = strlen(address);
-        res.reserve(len);
-        res.assign((const char*)address, len);
-        m_pSync->sem->unLock();
-
-        return res;
-    }
+    void writeToShareMemory(const std::string& data);
+    std::string readFromSharedMemory(void);
 
     ~ProcessPool();
     friend class Process;
