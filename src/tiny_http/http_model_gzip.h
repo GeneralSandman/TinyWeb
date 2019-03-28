@@ -88,6 +88,10 @@ public:
     }
 
     gzip_status init();
+    chain_t* getOutputChain()
+    {
+        return m_pOutputChain;
+    }
     gzip_status compress(chain_t* input, chain_t* & output, bool endData);
     gzip_status uncompress(chain_t* input, chain_t* output);
 

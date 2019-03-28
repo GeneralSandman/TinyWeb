@@ -55,6 +55,7 @@ HttpResponser::HttpResponser(MemoryPool* pool)
     : m_pPool(pool)
     , m_nChunkModel(pool)
     , m_nGzipModel(pool)
+    , m_nWriteTailChunk(false)
 {
     m_nGzipModel.init();
     LOG(Debug) << "class HttpResponser constructor\n";
@@ -122,6 +123,7 @@ void HttpResponser::buildResponse(const HttpRequest* req, bool valid_requ, HttpR
     }
 
     if (headers->valid_content_length) {
+        // TODO: change this value by gzip.
         headers->content_length_n = file->info.st_size;
     }
 
@@ -150,7 +152,7 @@ void HttpResponser::headersToStr(HttpResponseHeaders* headers, sdstr* res)
     }
 
     if (headers->valid_content_length) {
-        sdscatsprintf(&tmp, "Content-Length: %u\r\n", headers->content_length_n);
+        // sdscatsprintf(&tmp, "Content-Length: %u\r\n", headers->content_length_n);
     }
 
     if (headers->chunked) {
@@ -167,7 +169,7 @@ void HttpResponser::headersToStr(HttpResponseHeaders* headers, sdstr* res)
     }
 
     // sdscat(&tmp, "Content-Encoding: gzip\r\n");
-    // sdscat(&tmp, "Transfer-Encoding: chunked\r\n");
+    sdscat(&tmp, "Transfer-Encoding: chunked\r\n");
 
     sdscatsds(res, &tmp);
     sdscat(res, "\r\n");
@@ -179,53 +181,26 @@ void HttpResponser::bodyToStr(const HttpFile* file, sdstr* body_str)
 {
 }
 
-void HttpResponser::bodyToChain(HttpFile* file, chain_t* chain)
-{
-    file->getData(chain);
-}
-
 chain_t* HttpResponser::bodyToChain(HttpFile* file,
     chain_t* chain,
     enum content_encoding_type cont,
     enum transport_encoding_type trans)
 {
     // TODO:
+    chain_t* origin = chain;
     chain_t* result = nullptr;
+    void* chunklen_address = nullptr;
+    unsigned int before_chunked = 0;
+    unsigned int after_chunked = 0;
+
+    if (cont == content_gzip_t) {
+        chain = m_nGzipModel.getOutputChain();
+    }
 
     clearData(chain);
+    clearData(origin);
 
-    if (cont == content_no_t) {
-        LOG(Debug) << "content-encoding: no" << std::endl;
-        if (!file->noMoreData()) {
-            file->getData(chain);
-            result = chain;
-        } else {
-            result = nullptr;
-        }
-        return result;
-
-    } else if (cont == content_gzip_t) {
-        LOG(Debug) << "content-encoding: gzip" << std::endl;
-
-        if (!file->noMoreData()) {
-            chain_t* output = nullptr;
-
-            file->getData(chain);
-
-            bool endData = file->noMoreData();
-            gzip_status res = m_nGzipModel.compress(chain, output, endData);
-            if (res == gzip_error) {
-                LOG(Debug) << "compress error\n";
-            }
-
-            result = output;
-        } else {
-            result = nullptr;
-        }
-
-    } else if (cont == content_deflate_t) {
-        LOG(Debug) << "content-encoding: deflate" << std::endl;
-    }
+    // --------
 
     if (trans == transport_no_t) {
         LOG(Debug) << "transport-encoding: no" << std::endl;
@@ -238,20 +213,84 @@ chain_t* HttpResponser::bodyToChain(HttpFile* file,
     } else if (trans == transport_chunked_t) {
         LOG(Debug) << "transport-encoding: chunked" << std::endl;
 
-        if (nullptr == result) {
-            return nullptr;
+        chunklen_address = m_nChunkModel.chunked_begin(chain);
+        before_chunked = countAllDataSize(chain);
+    }
+
+    // -----------
+
+    if (cont == content_no_t) {
+        LOG(Debug) << "content-encoding: no" << std::endl;
+        if (!file->noMoreData()) {
+            file->getData(chain);
+        } 
+
+        result = chain;
+
+    } else if (cont == content_gzip_t) {
+        LOG(Debug) << "content-encoding: gzip" << std::endl;
+
+        if (!file->noMoreData()) {
+            chain_t* output = nullptr;
+
+            LOG(Debug) << "all buffer-size:" << countAllBufferSize(origin) 
+                << ",all data-size:" << countAllDataSize(origin) << std::endl;
+
+            file->getData(origin);
+
+            bool endData = file->noMoreData();
+            LOG(Debug) << "zhenhuli:" << endData << std::endl;
+            gzip_status res = m_nGzipModel.compress(origin, output, endData);
+            if (res == gzip_error) {
+                LOG(Debug) << "compress error\n";
+            }
+
+            result = output;
+        } else {
+            result = chain;
         }
 
-        void* address = m_nChunkModel.chunked_begin(result);
-        unsigned int a = countAllDataSize(result);
-
-        file->getData(result);
-        unsigned int b = countAllDataSize(result);
-
-        m_nChunkModel.chunked_end(result, address, b - a);
-
-        return result;
+    } else if (cont == content_deflate_t) {
+        LOG(Debug) << "content-encoding: deflate" << std::endl;
     }
+
+    // ------------
+
+    if (trans == transport_no_t) {
+        LOG(Debug) << "transport-encoding: no" << std::endl;
+
+    } else if (trans == transport_content_length_t) {
+        LOG(Debug) << "transport-encoding: content-length" << std::endl;
+
+        // set value of header::content_length_n
+
+    } else if (trans == transport_chunked_t) {
+        LOG(Debug) << "transport-encoding: chunked" << std::endl;
+
+        after_chunked = countAllDataSize(result);
+        m_nChunkModel.chunked_end(result, chunklen_address, after_chunked - before_chunked);
+
+        if (after_chunked - before_chunked == 0) {
+            LOG(Debug) << "tail chunk\n";
+            if (content_gzip_t == cont) {
+                if (file->noMoreData()) {
+                    LOG(Debug) << "empty chain && file noMoreData, is tail chunk\n";
+                    m_nWriteTailChunk = true;
+                }
+                else {
+                    LOG(Debug) << "empty chain between compress, clearData && don't send\n";
+                    // result = nullptr;
+                    clearData(result);
+                }
+            } else {
+                m_nWriteTailChunk = true;
+            }
+        }
+
+    }
+
+    return result;
+    // -----------
 }
 
 bool HttpResponser::noMoreBody(HttpFile* file,
@@ -259,23 +298,18 @@ bool HttpResponser::noMoreBody(HttpFile* file,
         enum content_encoding_type cont,
         enum transport_encoding_type trans)
 {
-    if (cont == content_no_t) {
-        LOG(Debug) << "content-encoding: no" << std::endl;
-    } else if (cont == content_gzip_t) {
-        LOG(Debug) << "content-encoding: gzip" << std::endl;
-    } else if (cont == content_deflate_t) {
-        LOG(Debug) << "content-encoding: deflate" << std::endl;
+    bool res = false;
+    if (trans == transport_chunked_t) {
+        res = file->noMoreData() && m_nWriteTailChunk;
+        LOG(Debug) << "chunked, judge by file->noMoreData() && writeTailChunk,value(" << res << ")\n";
+    } else {
+        res = file->noMoreData();
+        LOG(Debug) << "no-chunked, judge by file->noMoreData(),value(" << res << ")\n";
     }
 
-    if (trans == transport_no_t) {
-        LOG(Debug) << "transport-encoding: no" << std::endl;
-    } else if (trans == transport_content_length_t) {
-        LOG(Debug) << "transport-encoding: content-length" << std::endl;
-        return file->noMoreData();
-    } else if (trans == transport_chunked_t) {
-        LOG(Debug) << "transport-encoding: chunked" << std::endl;
-    }
+    return res;
 }
+
 void HttpResponser::response(const HttpRequest* req, std::string& data)
 {
 }

@@ -74,8 +74,8 @@ public:
         memcpy(chunk_len_begin, (const void*)str1.data, str1.len);
 
         if (chunk_len == 0) {
-            LOG(Debug) << "append end \r\n"
-                       << std::endl;
+            // LOG(Debug) << "append end \r\n"
+                    //    << std::endl;
             appendData(in, source_end, strlen(source_end));
         }
 

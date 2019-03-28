@@ -82,6 +82,8 @@ class HttpResponser {
     HttpModelChunk m_nChunkModel;
     HttpModelGzip m_nGzipModel;
 
+    bool m_nWriteTailChunk;
+
 public:
     HttpResponser(MemoryPool* pool);
 
@@ -89,7 +91,6 @@ public:
     void lineToStr(const HttpResponseLine* line, sdstr* line_str);
     void headersToStr(HttpResponseHeaders* headers, sdstr* headers_str);
     void bodyToStr(const HttpFile* file, sdstr* body_str);
-    void bodyToChain(HttpFile* file, chain_t* chain);
 
     chain_t* bodyToChain(HttpFile* file,
         chain_t* chain,

@@ -238,7 +238,7 @@ gzip_status HttpModelGzip::compress(chain_t* input, chain_t*& output,
         // LOG(Debug) << "input is nullptr" << std::endl;
         return gzip_ok;
     }
-    clearData(m_pOutputChain);
+    // clearData(m_pOutputChain);
 
     m_pContext->in = input;
     m_pContext->out = m_pOutputChain;

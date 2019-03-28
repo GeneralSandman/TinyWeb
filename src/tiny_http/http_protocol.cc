@@ -25,7 +25,7 @@ WebProtocol::WebProtocol()
     , m_nPool()
     , m_nKeepAlive(false)
     , m_nBufferSize(4 * 1024)
-    , m_nMaxChainSize(16 * 4 * 1024)
+    , m_nMaxChainSize(10 * 4 * 1024)
     , m_pFileChain(nullptr)
     , m_nUseWriteCompleteCallback(false)
     , m_nBeginSendFile(false)
@@ -59,7 +59,7 @@ void WebProtocol::dataReceived(const std::string& data)
         m_pRequest.get());
     valid_requ = (valid == -1) ? false : true;
 
-    // TODO:updata
+    // TODO:update
     // 1. new responser
     // 2. build http-resp-header
     // 3. build http-resp-body {write by memory or sendfile}
@@ -73,7 +73,7 @@ void WebProtocol::dataReceived(const std::string& data)
 
     m_nResponser.buildResponse(m_pRequest.get(), valid_requ, m_pResponse.get());
 
-    // malloc space for write file.
+    // Malloc space for write file.
     unsigned int file_size = m_pResponse->file.getFileSize();
     unsigned int buffer_num = 0;
     if (file_size && file_size <= m_nMaxChainSize) {
@@ -90,45 +90,41 @@ void WebProtocol::dataReceived(const std::string& data)
     // Encode http response.
     m_nResponser.lineToStr(&(m_pResponse->line), &str);
     m_nResponser.headersToStr(&(m_pResponse->headers), &str);
-    LOG(Debug) << "all-buffer-size:" << countAllBufferSize(m_pFileChain) << ","
-               << "all-nodeal-size:" << countAllNoDealSize(m_pFileChain) << std::endl;
-    // m_pResponse->file.getData(m_pFileChain);
-    m_pWriteChain = m_nResponser.bodyToChain(&(m_pResponse->file), m_pFileChain, content_no_t, transport_no_t);
-    LOG(Debug) << "all-buffer-size:" << countAllBufferSize(m_pFileChain) << ","
-               << "all-nodeal-size:" << countAllNoDealSize(m_pFileChain) << std::endl;
+    LOG(Debug) << "all-buffer-size:" << countAllBufferSize(m_pFileChain)
+               << ",all-nodeal-size:" << countAllNoDealSize(m_pFileChain) << std::endl;
+    m_pWriteChain = m_nResponser.bodyToChain(&(m_pResponse->file), m_pFileChain, content_no_t, transport_chunked_t);
+    LOG(Debug) << "all-buffer-size:" << countAllBufferSize(m_pWriteChain)
+               << ",all-nodeal-size:" << countAllNoDealSize(m_pWriteChain) << std::endl;
 
     // Rest data of file need to send or not.
-    if (m_nMaxChainSize < file_size) {
+    if (!m_nResponser.noMoreBody(&(m_pResponse->file), m_pFileChain, content_no_t, transport_chunked_t)) {
 
         auto func
             = [this]() mutable -> int {
             LOG(Info) << "write rest of file\n";
-            // HttpResponser* responser = &(m_nResponser);
-            // HttpResponse* response = m_pResponse.get();
             HttpFile* file = &(m_pResponse->file);
 
             // clearData(m_pFileChain);
-            // responser->bodyToChain(file, this->m_pFileChain);
-            LOG(Debug) << "all-buffer-size:" << countAllBufferSize(m_pFileChain) << ","
-                       << "all-nodeal-size:" << countAllNoDealSize(m_pFileChain) << std::endl;
-            // file->getData(m_pFileChain);
-            m_pWriteChain = m_nResponser.bodyToChain(file, m_pFileChain, content_no_t, transport_no_t);
-            LOG(Debug) << "all-buffer-size:" << countAllBufferSize(m_pFileChain) << ","
-                       << "all-nodeal-size:" << countAllNoDealSize(m_pFileChain) << std::endl;
+            LOG(Debug) << "all-buffer-size:" << countAllBufferSize(m_pFileChain)
+                       << ",all-nodeal-size:" << countAllNoDealSize(m_pFileChain) << std::endl;
+            m_pWriteChain = m_nResponser.bodyToChain(file, m_pFileChain, content_no_t, transport_chunked_t);
+            LOG(Debug) << "all-buffer-size:" << countAllBufferSize(m_pWriteChain)
+                       << ",all-nodeal-size:" << countAllNoDealSize(m_pWriteChain) << std::endl;
             // if (file->noMoreData()) {
             //     std::cout << "no more data\n";
             //     m_nUseWriteCompleteCallback = false;
             // }
-            if (m_nResponser.noMoreBody()) {
+            if (m_nResponser.noMoreBody(file, m_pFileChain, content_no_t, transport_chunked_t)) {
                 std::cout << "no more data\n";
                 m_nUseWriteCompleteCallback = false;
             }
             sendChain(m_pWriteChain);
+            clearData(m_pWriteChain);
 
             return 0;
         };
 
-        std::cout << "set write complete callback\n";
+        std::cout << "Set write complete callback\n";
         m_fWriteRestFile = func;
         m_nUseWriteCompleteCallback = true;
     }
@@ -137,14 +133,7 @@ void WebProtocol::dataReceived(const std::string& data)
     tmp.append((const char*)str.data, str.len);
     sendMessage(tmp);
     sendChain(m_pWriteChain);
-
-    // TODO:
-    // if (dynamic request) {
-    //     // start fcgi client pool
-    //     // get response of fcgi
-
-    //     // pass http-header to fcgi-client... how?
-    // }
+    clearData(m_pWriteChain);
 
     sdsdestory(&str);
 }
@@ -168,7 +157,7 @@ void WebProtocol::writeCompletely()
 
     // write the reset of file.
     if (!m_nUseWriteCompleteCallback) {
-        m_fWriteRestFile = nullptr;
+        // m_fWriteRestFile = nullptr;
         return;
     }
 
