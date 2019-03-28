@@ -25,6 +25,7 @@ target_link_libraries(processpool_test
     tiny_struct_model
     tiny_base_model
     pthread
+    z
     )
 
 # process_test
@@ -155,6 +156,7 @@ target_link_libraries(client_test
     tiny_http_model
     tiny_struct_model
     tiny_base_model
+    z
     )
 
 # clientpool_test

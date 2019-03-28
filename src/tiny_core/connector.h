@@ -72,6 +72,7 @@ private:
 
 public:
   Connector(EventLoop *, const NetAddress &, const NetAddress &, bool retry, bool keepconnect);
+  int getSocketFd() { return m_nSockfd; }
   void setConnectionCallback(newConnectionCallback c) { m_nNewConnectionCallback = c; }
   bool isRetry() { return m_nRetry; }
   bool isKeepConnect() { return m_nKeepConnect; }

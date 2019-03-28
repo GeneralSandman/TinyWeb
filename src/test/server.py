@@ -106,6 +106,7 @@ def server3(ip,port):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((ip, int(port)))
     s.listen(8)
+    print "\nwait connect:\n"
     while(1):
         conn,addr=s.accept()
         print "get a connection:",addr
@@ -113,16 +114,78 @@ def server3(ip,port):
         data=conn.recv(4096)
         print "get data:",data
 
-        print "send message to client"
-        conn.send("I get you");
+        message = "I am server, have received you message"
+        print "send message to client:",message
+        conn.send(message);
 
-        print "close this connection after 3 seconds "
-        sleepSecond(3)
+        print "close this connection after 5 seconds "
+        sleepSecond(5)
         conn.close()
         print "we have close this connection:",addr
         print "\n"
     s.close()
 
+def server4(ip,port):
+    print "bind address:",ip,":",port
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind((ip, int(port)))
+    s.listen(8)
+    print "\nwait connect:\n"
+    while(1):
+        conn,addr=s.accept()
+        print "get a connection:",addr
+
+        i = 0
+        while(True):
+            data=""
+            data=conn.recv(4096)
+            print "get data:",data
+
+            message = "I am server, have received you message"
+            print "send message to client:",message
+            conn.send(message);
+
+            i+=1
+
+        conn.close()
+        
+        print "we have close this connection:",addr
+        print "\n"
+    s.close()
+
+def server5(ip,port):
+    print "bind address:",ip,":",port
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    s.bind((ip, int(port)))
+    s.listen(8)
+    print "\nwait connect:\n"
+    while(1):
+        conn,addr=s.accept()
+
+        pid = os.fork()
+        if 0 == pid:
+            print "child handle connection:", addr
+
+            data = ""
+            data = conn.recv(4096)
+            print "get data:", data
+
+            message = "I am server, have received you message"
+            print "send message to client:",message
+            conn.send(message)
+
+            sleepSecond(1)
+
+            conn.close()
+
+            print "child lost connection:", addr
+            print "\n"
+            break
+        else :
+            pass
+
+    s.close()
 
 def webServer(ip,port):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -174,4 +237,4 @@ def fcgiServer(ip,port):
 
 
 if __name__ == "__main__":
-    server3(sys.argv[1], sys.argv[2])
+    server5(sys.argv[1], sys.argv[2])

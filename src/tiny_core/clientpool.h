@@ -85,7 +85,7 @@ public:
         const NetAddress& peerAddress,
         bool retry,
         bool keepConnect,
-        int num);
+        int num = 1);
 
     void doTask(const NetAddress& hostAddress,
         const NetAddress& peerAddress,
