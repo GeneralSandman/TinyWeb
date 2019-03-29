@@ -57,9 +57,10 @@ protected:
 
     bool m_nStart;
 
+    typedef std::pair<NetAddress, Socket*> NetSocketPair;
 public:
     Slave(EventLoop*, int, const std::string&);
-    void createListenServer(int listenSocket);
+    void createListenServer(const NetSocketPair& pair);
     void work();
     ~Slave();
 };

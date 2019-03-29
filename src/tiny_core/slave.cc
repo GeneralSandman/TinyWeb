@@ -26,19 +26,19 @@ Slave::Slave(EventLoop* loop, int num, const std::string& name)
     : m_pEventLoop(loop)
     , m_nNumber(num)
     , m_nName(name)
-    , m_nListenAddress(NetAddress("172.17.0.2:9090"))
+    // , m_nListenAddress(NetAddress("172.17.0.2:9090"))
 {
     LOG(Debug) << "class Slave constructor\n";
 }
 
-void Slave::createListenServer(int listenSocket)
+void Slave::createListenServer(const NetSocketPair& pair)
 {
     Protocol* protocol = new WebProtocol();
     Factory* factory = new Factory(m_pEventLoop, protocol);
-    Server* server = new Server(m_pEventLoop, m_nListenAddress,
-        listenSocket, factory);
+    Server* server = new Server(m_pEventLoop, pair.first,
+        pair.second->getFd(), factory);
     VritualMachine newMachine(protocol, factory,
-        listenSocket, server);
+        pair.second->getFd(), server);
 
     m_nMachines.push_back(newMachine);
 }

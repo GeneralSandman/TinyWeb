@@ -30,12 +30,12 @@
 #include <sys/wait.h>
 
 #include <tiny_core/status.h>
-extern int status_quit_softly; //QUIT
-extern int status_terminate;   //TERM,INT
+extern int status_quit_softly; // QUIT
+extern int status_terminate;   // TERM, INT
 extern int status_exiting;
 extern int status_restart;
-extern int status_reconfigure; //HUP,reboot
-extern int status_child_quit;  //CHLD
+extern int status_reconfigure; // HUP, reboot
+extern int status_child_quit;  // CHLD
 
 typedef boost::function<void()> Fun;
 
@@ -55,7 +55,7 @@ private:
     SocketPair m_nPipe;
 
     SignalManager m_nSignalManager;
-    int status;
+    bool m_nStatus;
 
     std::shared_ptr<Sync> m_pSync;
 
@@ -68,76 +68,57 @@ private:
 
     static void m_fSignalHandler(Process* proc, int sign)
     {
-        assert(nullptr != proc);
         if (nullptr == proc)
             return;
+
         pid_t pid = getpid();
         LOG(Debug) << "[child] (" << pid << ") signal manager get signal(" << sign << ")\n";
 
         switch (sign) {
+
         case SIGINT:
         case SIGTERM:
             status_terminate = 1;
             LOG(Debug) << "[child] (" << pid << ") will terminate\n";
             break;
+
         case SIGQUIT:
             status_quit_softly = 1;
             LOG(Debug) << "[child] (" << pid << ") will quit softly\n";
             break;
+
         case SIGPIPE:
             break;
+
         case SIGUSR1:
             status_restart = 1;
             LOG(Debug) << "[child] (" << pid << ") restart\n";
             break;
+
         case SIGUSR2:
             status_reconfigure = 1;
             LOG(Debug) << "[child] (" << pid << ") reload\n";
             break;
+
         default:
             break;
         }
     }
+    typedef std::pair<NetAddress, Socket*> NetSocketPair;
 
 public:
     Process(const std::string& name, int number, int sockfd[2],
-    std::shared_ptr<Sync> sync);
+        std::shared_ptr<Sync> sync);
     void setAsChild(int port);
-    void createListenServer(int listen);
+    void createListenServer(const NetSocketPair& pair);
     void setSignalHandlers();
     void start();
     pid_t getPid();
     bool started();
     int join();
 
-
-    void writeToShareMemory(const std::string& data)
-    {
-        void* address = nullptr;
-        m_pSync->sem->lock();
-        address = m_pSync->memory->getSpace();
-        memcpy(address, (const void*)data.c_str(), data.size());
-        m_pSync->sem->unLock();
-    }
-
-    std::string readFromSharedMemory(void)
-    {
-        char* address = nullptr;
-        unsigned int len = 0;
-        std::string res;
-
-
-        m_pSync->sem->lock();
-        address = (char*)m_pSync->memory->getSpace();
-        
-        len = strlen(address);
-        res.reserve(len);
-        res.assign((const char*)address, len);
-
-        m_pSync->sem->unLock();
-
-        return res;
-    }
+    void writeToShareMemory(const std::string& data);
+    std::string readFromSharedMemory(void);
 
     ~Process();
     friend class ProcessPool;

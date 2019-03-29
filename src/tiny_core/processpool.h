@@ -61,7 +61,9 @@ private:
     std::vector<pid_t> m_nPids;
     int m_nProcessNum;
 
-    std::vector<int> m_nListenSocketFds;
+    typedef std::pair<NetAddress, Socket*> NetSocketPair;
+    std::vector<NetSocketPair> m_nListenSocketFds;
+
     SignalManager m_nSignalManager;
 
     int status;
@@ -79,15 +81,18 @@ private:
     {
         if (nullptr == pool)
             return;
+
         LOG(Debug) << "[parent] signal manager get signal(" << sign << ")\n";
         int status;
         pid_t pid;
         switch (sign) {
+
         case SIGINT:
         case SIGTERM:
             status_terminate = 1;
             LOG(Debug) << "[parent] will terminate all slave process\n";
             break;
+
         case SIGQUIT:
             status_quit_softly = 1;
             LOG(Debug) << "[parent] quit softly\n";
@@ -102,16 +107,20 @@ private:
             //   std::cout << "[parent]:reconfigure\n";
             //   //kill childern softly and create new process
             //   break;
+
         case SIGPIPE:
             break;
+
         case SIGUSR1:
             status_restart = 1;
             LOG(Debug) << "[parent] restart \n";
             break;
+
         case SIGUSR2:
             status_reconfigure = 1;
             LOG(Debug) << "[parent] reload config\n";
             break;
+
         default:
             break;
         }
@@ -127,6 +136,7 @@ private:
         // assert(index != m_nPids.size());
         if (index == m_nPids.size()) {
             LOG(Debug) << "process(" << pid << ") doesn't exist\n";
+            return;
         }
 
         m_nPipes[index]->clearSocket();

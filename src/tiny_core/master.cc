@@ -43,23 +43,22 @@ void Master::init()
     std::vector<ServerConfig> serverConf = configer.getServerConfig();
 
     for (auto t : serverConf) {
-        std::cout << "listen port:" << t.listen << std::endl;
         NetAddress tmp("172.17.0.2", t.listen);
         Socket* socket = new Socket(createNoBlockSocket());
         socket->bindAddress(tmp);
-        m_pListenSockets.push_back(socket);
+
+        NetSocketPair newPair(tmp, socket);
+        m_nListenSockets.push_back(newPair);
         // FIXME:how to handle the problem of same listen-address.
 
         LOG(Info) << "bind address(" << tmp.getIpPort() << ")\n";
     }
 }
 
-void Master::getListenSockets(std::vector<int>& result)
+void Master::getListenSockets(std::vector<NetSocketPair>& result)
 {
     result.clear();
-    for (auto socket : m_pListenSockets) {
-        result.push_back(socket->getFd());
-    }
+    result.assign(m_nListenSockets.begin(), m_nListenSockets.end());
 }
 
 void Master::work()
@@ -84,8 +83,8 @@ void Master::work()
 
 Master::~Master()
 {
-    for (auto t : m_pListenSockets) {
-        delete t;
+    for (auto t : m_nListenSockets) {
+        delete t.second;
     }
     LOG(Debug) << "class Master destructor\n";
 }

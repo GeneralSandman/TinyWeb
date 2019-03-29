@@ -45,13 +45,15 @@ void test_child_CloseCallback(Connection* con)
 
 void test_child_period_print(void)
 {
-    LOG(Debug) << "[child] print every second\n";
+    pid_t pid = getpid();
+    LOG(Debug) << "[child] (" << pid << ") print every second\n";
 }
 
 void test_child_period_read_sharememory(Process* process)
 {
+    pid_t pid = getpid();
     std::string data = process->readFromSharedMemory();
-    LOG(Debug) << "[child] read share-memory every second,data-size(" << data.size() << 
+    LOG(Debug) << "[child] (" << pid << ") read share-memory every second,data-size(" << data.size() << 
         "),data(" << data << ")\n";
 }
 
@@ -80,16 +82,16 @@ void Process::setAsChild(int port)
     m_nPipe.setCloseCallback(boost::bind(&test_child_CloseCallback, _1));
 }
 
-void Process::createListenServer(int listen)
+void Process::createListenServer(const NetSocketPair& pair)
 {
-    m_pSlave->createListenServer(listen);
+    m_pSlave->createListenServer(pair);
 }
 
 void Process::setSignalHandlers()
 {
     std::vector<Signal> signals = {
-        Signal(SIGINT, "SIGINT", "killAll", childSignalHandler),
-        Signal(SIGTERM, "SIGTERM", "killSoftly", childSignalHandler),
+        Signal(SIGINT, "SIGINT", "kill all", childSignalHandler),
+        Signal(SIGTERM, "SIGTERM", "kill softly", childSignalHandler),
         Signal(SIGUSR1, "SIGUSR1", "restart", childSignalHandler),
         Signal(SIGUSR2, "SIGUSR2", "reload", childSignalHandler),
         Signal(SIGQUIT, "QIGQUIT", "quit softly", childSignalHandler),
@@ -106,13 +108,13 @@ void Process::start()
     m_pEventLoop->runEvery(1, boost::bind(&test_child_period_print));
     m_pEventLoop->runEvery(1, boost::bind(&test_child_period_read_sharememory, this));
 
-    status = 1;
+    m_nStatus = true;
 
-    while (status) {
+    while (m_nStatus) {
         m_pSlave->work();
 
         if (status_terminate || status_quit_softly || status_restart || status_reconfigure)
-            status = 0;
+            m_nStatus = false;
     }
 }
 
@@ -123,8 +125,7 @@ pid_t Process::getPid()
 
 bool Process::started()
 {
-    // TODO:
-    return true;
+    return m_nStatus;
 }
 
 int Process::join()
@@ -132,6 +133,33 @@ int Process::join()
     // TODO:
     return 0;
 }
+
+    void Process::writeToShareMemory(const std::string& data)
+    {
+        void* address = nullptr;
+        m_pSync->sem->lock();
+        address = m_pSync->memory->getSpace();
+        memcpy(address, (const void*)data.c_str(), data.size());
+        m_pSync->sem->unLock();
+    }
+
+    std::string Process::readFromSharedMemory(void)
+    {
+        char* address = nullptr;
+        unsigned int len = 0;
+        std::string res;
+
+        m_pSync->sem->lock();
+        address = (char*)m_pSync->memory->getSpace();
+
+        len = strlen(address);
+        res.reserve(len);
+        res.assign((const char*)address, len);
+
+        m_pSync->sem->unLock();
+
+        return res;
+    }
 
 Process::~Process()
 {

@@ -30,27 +30,35 @@
 
 void test_parent_MessageCallback(Connection* con, Buffer* buf, Time time)
 {
-    LOG(Debug) << "[parent] get message:"
+    pid_t pid = getpid();
+
+    LOG(Debug) << "[parent] (" << pid << ") get message:"
                << buf->getAll() << std::endl;
 }
 
 void test_parent_CloseCallback(Connection* con)
 {
-    LOG(Debug) << "[parent] one connection close" << std::endl;
+    pid_t pid = getpid();
+
+    LOG(Debug) << "[parent] (" << pid << ") one connection close" << std::endl;
 }
 
 void test_parent_period_print(void)
 {
-    LOG(Debug) << "[parent] print every second\n";
+    pid_t pid = getpid();
+
+    LOG(Debug) << "[parent] (" << pid << ") print every second\n";
 }
 
 void test_parent_period_write_sharememory(ProcessPool* pool)
 {
+    pid_t pid = getpid();
+
     Time now(Time::now());
     std::string data = now.toString();
 
     pool->writeToShareMemory(data);
-    LOG(Debug) << "[parent] write share-memory every second,data-size(" << data.size() << 
+    LOG(Debug) << "[parent] (" << pid << ") write share-memory every second,data-size(" << data.size() << 
         "),data(" << data << ")\n";
 }
 

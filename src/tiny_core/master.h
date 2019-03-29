@@ -20,6 +20,7 @@
 
 class ProcessPool;
 class EventLoop;
+class NetAddress;
 class Socket;
 
 class Master {
@@ -29,14 +30,15 @@ protected:
     int m_nNumber;
     std::string m_nName;
 
-    std::vector<Socket*> m_pListenSockets;
+    typedef std::pair<NetAddress, Socket*> NetSocketPair;
+    std::vector<NetSocketPair> m_nListenSockets;
 
     bool m_nStart;
 
 public:
     Master(ProcessPool*, EventLoop*, int, const std::string&);
     void init();
-    void getListenSockets(std::vector<int>& result);
+    void getListenSockets(std::vector<NetSocketPair>& result);
     void work();
     ~Master();
 };
