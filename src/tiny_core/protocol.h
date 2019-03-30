@@ -34,6 +34,7 @@
 class Connection;
 class Buffer;
 class Factory;
+class ClientPool;
 class Protocol;
 
 typedef Protocol* (*createProtocol)(void);
@@ -62,6 +63,7 @@ public:
     }
     void regist(const std::string& name, createProtocol f)
     {
+        LOG(Debug) << "zhenhuli debug:" << name << std::endl;
         m_nProts[name] = f;
     }
     ~Reflect()
@@ -116,6 +118,24 @@ public:
     virtual ~Protocol();
 
     friend class Factory;
+};
+
+/*-------ClientPoolProtocol------------*/
+
+class ClientPoolProtocol : public Protocol {
+private:
+    ClientPool* m_pClientPool;
+
+public:
+    ClientPoolProtocol();
+    void setClientPool(ClientPool* pool);
+    void yield();
+
+    virtual void connectionMade();
+    virtual void dataReceived(const std::string& data);
+    virtual void writeCompletely();
+    virtual void connectionLost();
+    virtual ~ClientPoolProtocol();
 };
 
 #endif // !PROTOCOL_H

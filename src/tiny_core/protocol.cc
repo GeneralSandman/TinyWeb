@@ -12,6 +12,7 @@
  */
 
 #include <tiny_base/log.h>
+#include <tiny_core/clientpool.h>
 #include <tiny_core/connection.h>
 #include <tiny_core/factory.h>
 #include <tiny_core/protocol.h>
@@ -128,3 +129,64 @@ Protocol::~Protocol()
 RegistProtocol(Protocol);
 
 //----------end Protocol api----------//
+
+//----------Protocol api----------//
+
+ClientPoolProtocol::ClientPoolProtocol()
+    : Protocol()
+    , m_pClientPool(nullptr)
+{
+    LOG(Debug) << "class ClientPoolProtocol constructor\n";
+}
+
+void ClientPoolProtocol::setClientPool(ClientPool* pool)
+{
+    m_pClientPool = pool;
+}
+
+void ClientPoolProtocol::yield()
+{
+    LOG(Debug) << "class ClientPoolProtocol give up control to connection\n";
+
+    if (nullptr != m_pClientPool) {
+        m_pClientPool->closeProtocol(this);
+    }
+}
+
+void ClientPoolProtocol::connectionMade()
+{
+    LOG(Info) << "ClientPoolProtocol connection made\n";
+
+    LOG(Info) << "ClientPoolProtocol send message\n";
+    std::string message = "zhenhuli";
+    sendMessage(message);
+}
+
+void ClientPoolProtocol::dataReceived(const std::string& data)
+{
+    LOG(Info) << "ClientPoolProtocol data received:"
+              << data << std::endl;
+
+    // Give up control of this connection.
+    yield();
+}
+
+void ClientPoolProtocol::writeCompletely()
+{
+    LOG(Info) << "ClientPoolProtocol write completely\n";
+}
+
+void ClientPoolProtocol::connectionLost()
+{
+    LOG(Info) << "ClientPoolProtocol connection lost\n";
+}
+
+ClientPoolProtocol::~ClientPoolProtocol()
+{
+    LOG(Debug) << "class ClientPoolProtocol destructor\n";
+}
+
+RegistProtocol(ClientPoolProtocol);
+
+//----------end ClientPoolProtocol api----------//
+
