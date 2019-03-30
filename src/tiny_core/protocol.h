@@ -63,7 +63,6 @@ public:
     }
     void regist(const std::string& name, createProtocol f)
     {
-        LOG(Debug) << "zhenhuli debug:" << name << std::endl;
         m_nProts[name] = f;
     }
     ~Reflect()

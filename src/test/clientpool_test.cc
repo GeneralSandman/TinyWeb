@@ -24,57 +24,8 @@
 
 using namespace std;
 
-class TestProtocol : public Protocol {
-private:
-    ClientPool* m_pClientPool;
-public:
-    TestProtocol(ClientPool* pool)
-        : Protocol()
-        , m_pClientPool(pool)
-    {
-        LOG(Debug) << "class TestProtocol constructor\n";
-    }
 
-    void yield()
-    {
-        LOG(Debug) << "class TestProtocol give up control to connection\n";
 
-        m_pClientPool->closeProtocol(this);
-    }
-
-    virtual void connectionMade()
-    {
-        LOG(Info) << "TestProtocol connection made\n";
-
-        LOG(Info) << "TestProtocol send message\n";
-        std::string message = "zhenhuli";
-        sendMessage(message);
-    }
-
-    virtual void dataReceived(const std::string& data)
-    {
-        LOG(Info) << "TestProtocol data received:"
-            << data << std::endl;
-
-        // Give up control of this connection.
-        yield();
-    }
-
-    virtual void writeCompletely()
-    {
-        LOG(Info) << "TestProtocol write completely\n";
-    }
-
-    virtual void connectionLost()
-    {
-        LOG(Info) << "TestProtocol connection lost\n";
-    }
-
-    virtual ~TestProtocol()
-    {
-        LOG(Debug) << "class TestProtocol destructor\n";
-    }
-};
 
 void test1()
 {
@@ -82,7 +33,7 @@ void test1()
 
     EventLoop* loop = new EventLoop();
     ClientPool* clientPool = new ClientPool(loop, clientAddress);
-    Protocol* protocol = new TestProtocol(clientPool);
+    Protocol* protocol = new ClientPoolProtocol();
 
     loop->runAfter(10, std::bind(&EventLoop::quit, loop));
 
@@ -110,7 +61,7 @@ void test2()
 
     EventLoop* loop = new EventLoop();
     ClientPool* clientPool = new ClientPool(loop, clientAddress);
-    Protocol* protocol = new TestProtocol(clientPool);
+    Protocol* protocol = new ClientPoolProtocol();
 
     loop->runAfter(15, std::bind(&EventLoop::quit, loop));
 
@@ -148,7 +99,7 @@ void test3()
 
     EventLoop* loop = new EventLoop();
     ClientPool* clientPool = new ClientPool(loop, clientAddress);
-    Protocol* protocol = new TestProtocol(clientPool);
+    Protocol* protocol = new ClientPoolProtocol();
 
     loop->runAfter(15, std::bind(&EventLoop::quit, loop));
 
@@ -186,7 +137,7 @@ void test4()
 
     EventLoop* loop = new EventLoop();
     ClientPool* clientPool = new ClientPool(loop, clientAddress);
-    Protocol* protocol = new TestProtocol(clientPool);
+    Protocol* protocol = new ClientPoolProtocol();
 
     loop->runAfter(10, std::bind(&EventLoop::quit, loop));
 

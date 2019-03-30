@@ -41,6 +41,8 @@ void initConfiger()
     std::cout << std::endl;
 }
 
+typedef std::pair<NetAddress, Socket*> NetSocketPair;
+
 void test1()
 {
     EventLoop *loop = new EventLoop();
@@ -50,14 +52,13 @@ void test1()
     Slave slave(loop,i,name);
 
     Socket *socket1;
-    int listen1;
     NetAddress address1("172.17.0.2:9090");
 
     // Create server1
     socket1 = new Socket(createNoBlockSocket());
     socket1->bindAddress(address1);
-    listen1 = socket1->getFd();
-    slave.createListenServer(listen1);
+    NetSocketPair pair1(address1, socket1);
+    slave.createListenServer(pair1);
 
     slave.work();
 
@@ -74,20 +75,19 @@ void test2()
     Slave slave(loop,i,name);
 
     Socket *socket1,*socket2;
-    int listen1,listen2;
     NetAddress address1("172.17.0.2:9090");
     NetAddress address2("172.17.0.2:9091");
 
     // Create server1
     socket1 = new Socket(createNoBlockSocket());
     socket1->bindAddress(address1);
-    listen1 = socket1->getFd();
-    slave.createListenServer(listen1);
+    NetSocketPair pair1(address1, socket1);
+    slave.createListenServer(pair1);
     // Create server2
     socket2 = new Socket(createNoBlockSocket());
     socket2->bindAddress(address2);
-    listen2 = socket2->getFd();
-    slave.createListenServer(listen2);
+    NetSocketPair pair2(address2, socket2);
+    slave.createListenServer(pair2);
 
 
     slave.work();
@@ -106,7 +106,6 @@ void test3()
     Slave slave(loop,i,name);
 
     Socket *socket1,*socket2,*socket3;
-    int listen1,listen2,listen3;
     NetAddress address1("172.17.0.2:9090");
     NetAddress address2("172.17.0.2:9091");
     NetAddress address3("172.17.0.2:9092");
@@ -114,18 +113,19 @@ void test3()
     // Create server1
     socket1 = new Socket(createNoBlockSocket());
     socket1->bindAddress(address1);
-    listen1 = socket1->getFd();
-    slave.createListenServer(listen1);
+    NetSocketPair pair1(address1, socket1);
+    slave.createListenServer(pair1);
+
     // Create server2
     socket2 = new Socket(createNoBlockSocket());
     socket2->bindAddress(address2);
-    listen2 = socket2->getFd();
-    slave.createListenServer(listen2);
+    NetSocketPair pair2(address2, socket2);
+    slave.createListenServer(pair2);
     // Create server3
     socket3 = new Socket(createNoBlockSocket());
     socket3->bindAddress(address3);
-    listen3 = socket3->getFd();
-    slave.createListenServer(listen3);
+    NetSocketPair pair3(address3, socket3);
+    slave.createListenServer(pair3);
 
 
     slave.work();
@@ -140,8 +140,8 @@ int main()
 {
     initConfiger();
     headerMeaningInit();
-    test1();
+    // test1();
     // test2();
-    // test3();
+    test3();
     return 0;
 }
