@@ -51,7 +51,7 @@ protected:
     int m_nNumber;
     std::string m_nName;
 
-    NetAddress m_nListenAddress; // TODO:delete
+    // NetAddress m_nListenAddress; // TODO:delete
 
     std::vector<VritualMachine> m_nMachines;
 

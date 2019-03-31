@@ -1,26 +1,26 @@
 /*
-*Author:GeneralSandman
-*Code:https://github.com/GeneralSandman/TinyWeb
-*E-mail:generalsandman@163.com
-*Web:www.generalsandman.cn
-*/
+ *Author:GeneralSandman
+ *Code:https://github.com/GeneralSandman/TinyWeb
+ *E-mail:generalsandman@163.com
+ *Web:www.generalsandman.cn
+ */
 
-#include <tiny_core/master.h>
-#include <tiny_core/eventloop.h>
-#include <tiny_core/server.h>
-#include <tiny_core/protocol.h>
-#include <tiny_base/configer.h>
-#include <tiny_core/factory.h>
-#include <tiny_base/log.h>
 #include <tiny_base/api.h>
+#include <tiny_base/configer.h>
+#include <tiny_base/log.h>
+#include <tiny_core/eventloop.h>
+#include <tiny_core/factory.h>
+#include <tiny_core/master.h>
+#include <tiny_core/protocol.h>
+#include <tiny_core/server.h>
 
-#include <unistd.h>
-#include <signal.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
+#include <signal.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-EventLoop *Master::m_pEventLoop = nullptr;
+EventLoop* Master::m_pEventLoop = nullptr;
 
 void logSecond()
 {
@@ -35,11 +35,9 @@ void Master::m_fSwitchtoDaemon()
 
     //First step:fork and end parent process
     pid = fork();
-    if (pid > 0)
-    {
+    if (pid > 0) {
         exit(0);
-    }
-    else if (pid < 0)
+    } else if (pid < 0)
         handle_error("fork error\n");
 
     //Secode step:
@@ -52,11 +50,9 @@ void Master::m_fSwitchtoDaemon()
     //dissociating form the controlling tty
     //this means that it is no longer a session leader
     pid = fork();
-    if (pid > 0)
-    {
+    if (pid > 0) {
         exit(0);
-    }
-    else if (pid < 0)
+    } else if (pid < 0)
         handle_error("fork error\n");
     std::cout << "switch daemon ( pid:" << getpid() << " )" << std::endl;
 
@@ -77,8 +73,7 @@ void Master::m_fSwitchtoDaemon()
     //Seventh step:
     //redirecting the standard streams to /dev/null
     int fd = open("/dev/null", O_RDWR, 0);
-    if (fd == -1)
-    {
+    if (fd == -1) {
         handle_error("redirect standard streams error");
     }
     dup2(fd, STDIN_FILENO);
@@ -102,7 +97,7 @@ void Master::m_fSignalHandler(int sig)
         m_pEventLoop->quit();
 }
 
-Master::Master(const std::string &configfile, bool debug)
+Master::Master(const std::string& configfile, bool debug)
 {
     //init configer
     m_nConfigFile = configfile;
@@ -112,12 +107,9 @@ Master::Master(const std::string &configfile, bool debug)
 
     //if not debug ,change to daemon process
     log_level loglevel;
-    if (debug)
-    { //Command line parameters have higer priority
+    if (debug) { //Command line parameters have higer priority
         loglevel = Debug;
-    }
-    else
-    { //if we dont use "-d",get loglevel by confige file
+    } else { //if we dont use "-d",get loglevel by confige file
         std::string loglevel_s = getConfigValue("loglevel");
         loglevel = convertStringToLoglevel(loglevel_s);
     }
@@ -134,11 +126,11 @@ Master::Master(const std::string &configfile, bool debug)
     std::string errorfile = logpath + getConfigValue("errorfile");
     std::string fatalfile = logpath + getConfigValue("fatalfile");
     initLogger(debugfile,
-               infofile,
-               warnfile,
-               errorfile,
-               fatalfile,
-               loglevel); //error used
+        infofile,
+        warnfile,
+        errorfile,
+        fatalfile,
+        loglevel); //error used
 
     //init listen Address
     std::string listenPort_s = getConfigValue("listen");

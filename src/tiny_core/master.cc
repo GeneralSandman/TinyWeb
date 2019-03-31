@@ -33,6 +33,7 @@ Master::Master(ProcessPool* pool, EventLoop* loop, int num, const std::string& n
     , m_pEventLoop(loop)
     , m_nNumber(num)
     , m_nName(name)
+    , m_nStart(false)
 {
     LOG(Debug) << "class Master constructor\n";
 }

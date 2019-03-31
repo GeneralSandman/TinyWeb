@@ -132,6 +132,9 @@ target_link_libraries(main_test
     tiny_core_model
     tiny_http_model
     tiny_base_model
+    tiny_struct_model
+    pthread
+    z
     )
 
 # daemon_test
