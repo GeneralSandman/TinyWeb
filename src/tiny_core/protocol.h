@@ -130,10 +130,6 @@ public:
     void setClientPool(ClientPool* pool);
     void yield();
 
-    virtual void connectionMade();
-    virtual void dataReceived(const std::string& data);
-    virtual void writeCompletely();
-    virtual void connectionLost();
     virtual ~ClientPoolProtocol();
 };
 

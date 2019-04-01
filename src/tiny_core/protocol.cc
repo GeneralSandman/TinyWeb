@@ -146,39 +146,9 @@ void ClientPoolProtocol::setClientPool(ClientPool* pool)
 
 void ClientPoolProtocol::yield()
 {
-    LOG(Debug) << "class ClientPoolProtocol give up control to connection\n";
-
     if (nullptr != m_pClientPool) {
         m_pClientPool->closeProtocol(this);
     }
-}
-
-void ClientPoolProtocol::connectionMade()
-{
-    LOG(Info) << "ClientPoolProtocol connection made\n";
-
-    LOG(Info) << "ClientPoolProtocol send message\n";
-    std::string message = "zhenhuli";
-    sendMessage(message);
-}
-
-void ClientPoolProtocol::dataReceived(const std::string& data)
-{
-    LOG(Info) << "ClientPoolProtocol data received:"
-              << data << std::endl;
-
-    // Give up control of this connection.
-    yield();
-}
-
-void ClientPoolProtocol::writeCompletely()
-{
-    LOG(Info) << "ClientPoolProtocol write completely\n";
-}
-
-void ClientPoolProtocol::connectionLost()
-{
-    LOG(Info) << "ClientPoolProtocol connection lost\n";
 }
 
 ClientPoolProtocol::~ClientPoolProtocol()
