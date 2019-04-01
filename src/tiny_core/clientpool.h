@@ -36,6 +36,8 @@ typedef struct client_t {
 
 inline void client_init(client_t* client)
 {
+    if (nullptr == client) 
+        return;
     client->connector = nullptr;
     client->connection = nullptr;
     client->valid = false;
@@ -55,23 +57,31 @@ private:
     typedef std::deque<client_t*> ConnectorCouples;
     typedef std::pair<NetAddress, Protocol*> MultiProtocol; // (peerAddress, Protocol*)
 
-    std::map<NetAddress, ConnectorCouples> m_nConnections; // peerAddress -> ConnectorCouples
+    std::map<NetAddress, ConnectorCouples> m_nConnections;
     std::map<Connection*, Protocol*> m_nProtocols;
     std::deque<MultiProtocol> m_nWaitList;
 
+    // Invoke callback of protocol according to connection.
     void m_nConnectCallback(Connection* con);
     void m_nMessageCallback(Connection* con,
         Buffer* input, Time time);
     void m_nWriteCompleteCallback(Connection* con);
     void m_nCloseCallback(Connection* con);
 
+    // Set(clear) something when connection establish(close).
     void m_fNewConnectionCallback(int, const NetAddress&,
         const NetAddress&);
     void m_fHandleClose(Connection*);
 
+    // Functions which be invoked when doTask.
     void m_fGiveUpControl(Connection* con);
     void m_fWakeUp(Connection* con);
     bool m_fDoTaskNoDelay(ConnectorCouples& couples, Protocol* protocol);
+
+    void m_fConnect(const NetAddress& hostAddress,
+        const NetAddress& peeraddress,
+        bool retry,
+        bool keepconnect);
 
 public:
     ClientPool(EventLoop*, const NetAddress&);
@@ -85,20 +95,16 @@ public:
         bool retry,
         bool keepConnect,
         int num = 1);
-
     void doTask(const NetAddress& hostAddress,
         const NetAddress& peerAddress,
         Protocol* protocol);
 
     void start();
-    void connect(const NetAddress& hostAddress,
-        const NetAddress& peeraddress,
-        bool retry,
-        bool keepconnect);
     void disconnect(const NetAddress& hostaddress,
         const NetAddress& peeraddress);
     void disconnectAll();
     void stop();
+
     ~ClientPool();
 };
 
