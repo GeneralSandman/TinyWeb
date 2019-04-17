@@ -341,6 +341,15 @@ typedef struct HttpHeaders {
     //TODO:more information
 } HttpHeaders;
 
+typedef struct TinyWebCacheHeaders {
+
+    HttpHeader* tinyweb_cache_date;
+    HttpHeader* tinyweb_cache_location;
+    HttpHeader* tinyweb_cache_access;
+    HttpHeader* tinyweb_cache_body_offset;
+
+}TinyWebCacheHeaders;
+
 inline void httpHeadersInit(HttpHeaders* headers)
 {
     if (headers == nullptr) {
@@ -871,6 +880,36 @@ inline int parseContentRange(const Str* s, HttpHeaders* const headers)
     printf("value:%.*s\n", s->len, s->data);
     return 0;
 }
+
+/*parse TinyWeb Cache file header*/
+inline int parseTinyWebCacheDate(const Str* s, HttpHeaders* const headers)
+{
+    std::cout << "[parse headerMeaning callback] TinyWeb-Cache: cache-file date\n";
+    printf("value:%.*s\n", s->len, s->data);
+    return 0;
+}
+
+inline int parseTinyWebCacheLocation(const Str* s, HttpHeaders* const headers)
+{
+    std::cout << "[parse headerMeaning callback] TinyWeb-Cache: cache-file location\n";
+    printf("value:%.*s\n", s->len, s->data);
+    return 0;
+}
+
+inline int parseTinyWebCacheAccess(const Str* s, HttpHeaders* const headers)
+{
+    std::cout << "[parse headerMeaning callback] TinyWeb-Cache: cache-file access\n";
+    printf("value:%.*s\n", s->len, s->data);
+    return 0;
+}
+
+inline int parseTinyWebCacheBodyOffset(const Str* s, HttpHeaders* const headers)
+{
+    std::cout << "[parse headerMeaning callback] TinyWeb-Cache: cache-file body offset\n";
+    printf("value:%.*s\n", s->len, s->data);
+    return 0;
+}
+/*parse TinyWeb Cache file header*/
 
 inline int parseValue(const Str* s, HttpHeaders* const headers)
 {

@@ -268,6 +268,33 @@ headerCallback headers_in[] = {
     },
 };
 
+/*parse TinyWeb Cache file header*/
+headerCallback headers_in_cache[] = {
+    {
+        .name = Str("TinyWeb-Cache-Date"),
+        .offset = offsetof__(TinyWebCacheHeaders, tinyweb_cache_date),
+        .fun = boost::bind(parseTinyWebCacheDate, _1, _2),
+    },
+
+    {
+        .name = Str("TinyWeb-Cache-Location"),
+        .offset = offsetof__(TinyWebCacheHeaders, tinyweb_cache_location),
+        .fun = boost::bind(parseTinyWebCacheLocation, _1, _2),
+    },
+
+    {
+        .name = Str("TinyWeb-Cache-Access"),
+        .offset = offsetof__(TinyWebCacheHeaders, tinyweb_cache_access),
+        .fun = boost::bind(parseTinyWebCacheAccess, _1, _2),
+    },
+
+    {
+        .name = Str("TinyWeb-Cache-Body-Offset"),
+        .offset = offsetof__(TinyWebCacheHeaders, tinyweb_cache_body_offset),
+        .fun = boost::bind(parseTinyWebCacheBodyOffset, _1, _2),
+    },
+};
+
 std::unordered_map<unsigned int, headerCallback> headerKeyHash;
 
 void headerMeaningInit()
@@ -277,6 +304,17 @@ void headerMeaningInit()
         unsigned int hash = JSHash(headers_in[i].name.data, headers_in[i].name.len);
         headerKeyHash[hash] = headers_in[i];
         std::cout << "add special header callback(" << headers_in[i].name.data << ")\n";
+    }
+}
+
+/*init TinyWeb Cache file header*/
+void headerMeaningInit_cache()
+{
+    int len = ARRAY_SIZE(headers_in_cache);
+    for (int i = 0; i < len; i++) {
+        unsigned int hash = JSHash(headers_in_cache[i].name.data, headers_in_cache[i].name.len);
+        headerKeyHash[hash] = headers_in_cache[i];
+        std::cout << "add special(TinyWeb-Cache) header callback(" << headers_in_cache[i].name.data << ")\n";
     }
 }
 
