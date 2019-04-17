@@ -108,6 +108,17 @@ target_link_libraries(modelFcgi_test
     tiny_struct_model
     )
 
+# modelCache_test
+add_executable(modelCache_test
+    modelCache_test.cc
+    )
+
+target_link_libraries(modelCache_test
+    tiny_http_model
+    tiny_base_model
+    tiny_struct_model
+    )
+
 # parseBody
 add_executable(parseBody
     parseBody_test.cc

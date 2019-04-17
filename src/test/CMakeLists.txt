@@ -185,3 +185,12 @@ target_link_libraries(fcgi_client_test
     tiny_struct_model
     tiny_base_model
     )
+
+# md5_test
+add_executable(md5_test
+    md5_test.cc
+    )
+
+target_link_libraries(md5_test
+    tiny_base_model
+    )
