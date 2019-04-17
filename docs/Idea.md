@@ -120,19 +120,7 @@ ngx_shmtx_t锁是可以在共享内存上使用的,它是Nginx中最常见的锁
 
 
 sendfile 和 connection 中outputBuffer的逻辑交互如何处理
-什么时候该处理sendfile中的文件。。
-如何client收到的消息会出现这样的情况：file内容与outputBuffer中的内容交织。。。
 
-为outputBuffer设置输出标志位，当某标志为到达队列前面，则调用相应sendfile。
-
-
-outputBuffer
-
-|-------------------|--------------|--------|-----|
-file1               file2           file3   file3  file4
-
-
-设置sendfile Queue，到达outputBuffer消息边界时，触发相应的writeFileCallback
 
 将core中buffer的设计更改为 new-memorypool中buffer的设计，buffer 中有数据结构表示是否文件还是内存中的数据。
 
@@ -177,3 +165,6 @@ proxy_cache 指定用于页面缓存的共享内存，对应http层设置的keys
 proxy_cache_valid 为不同的响应状态码设置不同的缓存时间
 expires 缓存时间
 
+
+
+缓存系统设计
