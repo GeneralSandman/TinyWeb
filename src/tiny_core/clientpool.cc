@@ -12,15 +12,14 @@
  */
 
 #include <tiny_base/log.h>
-#include <tiny_core/protocol.h>
 #include <tiny_core/clientpool.h>
 #include <tiny_core/connection.h>
 #include <tiny_core/connector.h>
 #include <tiny_core/eventloop.h>
 #include <tiny_core/factory.h>
+#include <tiny_core/protocol.h>
 
 #include <boost/bind.hpp>
-
 
 void ClientPool::m_nConnectCallback(Connection* con)
 {
@@ -76,8 +75,8 @@ void ClientPool::m_nCloseCallback(Connection* con)
 
         prot->loseConnection();
 
-        LOG(Info) << "erase <Connection(" << con->getLocalAddress().getIpPort() 
-            << "--" << con->getPeerAddress().getIpPort() << "),Protocol>\n";
+        LOG(Info) << "erase <Connection(" << con->getLocalAddress().getIpPort()
+                  << "--" << con->getPeerAddress().getIpPort() << "),Protocol>\n";
 
         delete prot;
         prot = nullptr;
@@ -109,7 +108,7 @@ void ClientPool::m_fNewConnectionCallback(int sockfd,
             this, _1, _2, _3));
     WriteCompleteCallback tmp_nWriteCompleteCallback = WriteCompleteCallback(
         boost::bind(
-            &ClientPool::m_nWriteCompleteCallback, 
+            &ClientPool::m_nWriteCompleteCallback,
             this, _1));
     CloseCallback tmp_nCloseCallback = CloseCallback(
         boost::bind(
@@ -120,7 +119,7 @@ void ClientPool::m_fNewConnectionCallback(int sockfd,
     newCon->setMessageCallback(tmp_nMessageCallback);
     newCon->setWriteCompleteCallback(tmp_nWriteCompleteCallback);
     newCon->setCloseCallback(tmp_nCloseCallback);
-    
+
     // Add this new Connection to m_nConnections.
     assert(m_nConnections.find(peerAddress) != m_nConnections.end());
     client_t* client = nullptr;
@@ -128,7 +127,7 @@ void ClientPool::m_fNewConnectionCallback(int sockfd,
     auto end = m_nConnections[peerAddress].end();
     for (; i != end; i++) {
         client = *i;
-        if (nullptr != client && nullptr != client->connector 
+        if (nullptr != client && nullptr != client->connector
             && client->connector->getSocketFd() == sockfd) {
             m_nConnections[peerAddress].erase(i);
             break;
@@ -181,8 +180,8 @@ void ClientPool::m_fHandleClose(Connection* con)
 
         prot->loseConnection();
         delete prot;
-        p->second = nullptr;
-        m_nProtocols.erase(p);
+        j->second = nullptr;
+        m_nProtocols.erase(j);
     }
 
     Connector* conr = client->connector;
@@ -280,7 +279,7 @@ bool ClientPool::m_fDoTaskNoDelay(ConnectorCouples& couples, Protocol* protocol)
     for (; i != couples.end(); i++) {
         client = *i;
         LOG(Debug) << "Connection:" << client->connection << "-" << client->valid << "-" << client->isusing << std::endl;
-        if (nullptr != client 
+        if (nullptr != client
             && client->valid && !client->isusing) {
             couples.erase(i);
             break;
@@ -333,8 +332,8 @@ void ClientPool::m_fConnect(const NetAddress& hostAddress,
         keepconnect);
     newConnector->setConnectionCallback(
         boost::bind(
-        &ClientPool::m_fNewConnectionCallback,
-        this, _1, _2, _3));
+            &ClientPool::m_fNewConnectionCallback,
+            this, _1, _2, _3));
 
     client_t* newClient = new client_t;
     client_init(newClient);
@@ -369,8 +368,8 @@ void ClientPool::closeProtocol(Protocol* protocol)
         // con->shutdownWrite();
         prot->loseConnection();
         LOG(Debug) << "erase <Connection(" << con->getLocalAddress().getIpPort()
-            << "--" << con->getPeerAddress().getIpPort() << "),Protocol>\n";
-        LOG(Debug) << "m_nProtocols size:" << m_nProtocols.size() << std::endl;        
+                   << "--" << con->getPeerAddress().getIpPort() << "),Protocol>\n";
+        LOG(Debug) << "m_nProtocols size:" << m_nProtocols.size() << std::endl;
         LOG(Debug) << "Connection:" << con << ",Protocol:" << prot << std::endl;
 
         delete prot;
@@ -455,8 +454,11 @@ void ClientPool::disconnectAll()
             Connector* conr = client->connector;
             Connection* conn = client->connection;
 
-            conr->stop();
-            conn->destoryConnection();
+            if (nullptr != conr)
+                conr->stop();
+
+            if (nullptr != conn)
+                conn->destoryConnection();
 
             delete conr;
             delete conn;
@@ -467,7 +469,7 @@ void ClientPool::disconnectAll()
 
     for (auto i = m_nWaitList.begin(); i != m_nWaitList.end(); i++) {
         Protocol* prot = i->second;
-        
+
         delete prot;
         i->second = nullptr;
     }

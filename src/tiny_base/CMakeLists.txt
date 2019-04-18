@@ -18,4 +18,5 @@ add_library(tiny_base_model STATIC
   semaphore.cc
   sharedmemory.cc
   signalmanager.cc
+  md5.cc
 )

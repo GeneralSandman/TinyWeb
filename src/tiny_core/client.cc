@@ -23,8 +23,8 @@ void Client::m_fNewConnectionCallback(int sockfd,
     const NetAddress& hostaddress,
     const NetAddress& peeraddress) //this arg may be error.
 {
-    //this function must identifer which localaddress
-    //establish connection.
+    // this function must identifer which localaddress
+    // establish connection.
     Connection* newCon = new Connection(m_pEventLoop,
         sockfd,
         hostaddress,
@@ -44,6 +44,7 @@ void Client::m_fNewConnectionCallback(int sockfd,
 
 void Client::m_fHandleClose(Connection* con)
 {
+    LOG(Debug) << "client handle close callback\n";
 
     if (m_nCloseCallback)
         m_nCloseCallback(con);
@@ -139,8 +140,11 @@ void Client::disconnectAll()
     for (auto t : m_nConnections) {
         Connector* conr = t.second.first;
         Connection* conn = t.second.second;
-        conr->stop();
-        conn->shutdownWrite();
+
+        if (nullptr != conr)
+            conr->stop();
+        if (nullptr != conn)
+            conn->shutdownWrite();
         //close this connection
         //stop this connection by connector.
         //FIXME:
