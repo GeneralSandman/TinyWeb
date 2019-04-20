@@ -86,7 +86,6 @@ HttpProxyer::HttpProxyer(EventLoop* loop,
     : m_pEventLoop(loop)
     , m_nClientAddress(clientAddress)
     , m_pClientPool(new ClientPool(loop, clientAddress))
-    , m_pProtocol(protocol)
 {
     LOG(Debug) << "class HttpProxyer constructor\n";
 }

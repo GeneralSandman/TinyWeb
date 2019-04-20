@@ -130,13 +130,13 @@ RegistProtocol(Protocol);
 
 //----------end Protocol api----------//
 
-//----------Protocol api----------//
+//----------ClientPoolProtocol api----------//
 
 ClientPoolProtocol::ClientPoolProtocol()
     : Protocol()
     , m_pClientPool(nullptr)
 {
-    LOG(Debug) << "class ClientPoolProtocol constructor\n";
+    // LOG(Debug) << "class ClientPoolProtocol constructor\n";
 }
 
 void ClientPoolProtocol::setClientPool(ClientPool* pool)
@@ -153,10 +153,54 @@ void ClientPoolProtocol::yield()
 
 ClientPoolProtocol::~ClientPoolProtocol()
 {
-    LOG(Debug) << "class ClientPoolProtocol destructor\n";
+    // LOG(Debug) << "class ClientPoolProtocol destructor\n";
 }
 
 RegistProtocol(ClientPoolProtocol);
 
 //----------end ClientPoolProtocol api----------//
 
+//----------TestClientPoolProtocol api----------//
+
+TestClientPoolProtocol::TestClientPoolProtocol()
+    : ClientPoolProtocol()
+{
+    LOG(Debug) << "class TestClientPoolProtocol constructor\n";
+}
+
+void TestClientPoolProtocol::connectionMade()
+{
+    LOG(Info) << "TestClientPoolProtocol connection made\n";
+
+    LOG(Info) << "TestClientPoolProtocol send message\n";
+    std::string message = "zhenhuli";
+    sendMessage(message);
+}
+
+void TestClientPoolProtocol::dataReceived(const std::string& data)
+{
+    LOG(Info) << "TestClientPoolProtocol data received:"
+              << data << std::endl;
+
+    // Give up control of this connection.
+    // yield();
+}
+
+void TestClientPoolProtocol::writeCompletely()
+{
+    LOG(Info) << "TestClientPoolProtocol write completely\n";
+}
+
+void TestClientPoolProtocol::connectionLost()
+{
+    LOG(Info) << "TestClientPoolProtocol connection lost\n";
+}
+
+TestClientPoolProtocol::~TestClientPoolProtocol()
+{
+    LOG(Debug) << "class TestClientPoolProtocol destructor\n";
+}
+
+RegistProtocol(TestClientPoolProtocol);
+
+//----------end TestClientPoolProtocol api----------//

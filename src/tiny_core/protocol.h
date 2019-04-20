@@ -133,4 +133,19 @@ public:
     virtual ~ClientPoolProtocol();
 };
 
+
+/*-------TestClientPoolProtocol------------*/
+
+class TestClientPoolProtocol : public ClientPoolProtocol {
+public:
+    TestClientPoolProtocol();
+
+    void connectionMade();
+    void dataReceived(const std::string& data);
+    void writeCompletely();
+    void connectionLost();
+
+    virtual ~TestClientPoolProtocol();
+};
+
 #endif // !PROTOCOL_H

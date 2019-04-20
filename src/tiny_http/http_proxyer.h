@@ -23,11 +23,13 @@
 
 class EventLoop;
 
+typedef boost::function<void()> ProxyCallback;
+
 typedef struct proxy_callback_t {
-    ConnectionCallback connectCallback;
-    MessageCallback messageCallback;
-    WriteCompleteCallback writeCompleteCallback;
-    CloseCallback closeCallback;
+    ProxyCallback connectCallback;
+    ProxyCallback messageCallback;
+    ProxyCallback writeCompleteCallback;
+    ProxyCallback closeCallback;
 } proxy_callback_t;
 
 class HttpProxyProtocol : public ClientPoolProtocol {
@@ -61,7 +63,6 @@ private:
 
     EventLoop* m_pEventLoop;
     ClientPool* m_pClientPool;
-    Protocol* m_pProtocol;
     std::vector<Protocol*> m_nProtocols;
 
     ConnectionCallback m_nConnectCallback;
@@ -70,9 +71,8 @@ private:
     CloseCallback m_nCloseCallback;
 
 public:
-    HttpProxyer(EventLoop* loop,
-        const NetAddress& clientAddress,
-        Protocol* protocol);
+    HttpProxyer(EventLoop* loop,const NetAddress& clientAddress);
+    
     void start();
     void stop();
 
