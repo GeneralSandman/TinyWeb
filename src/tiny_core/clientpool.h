@@ -57,7 +57,7 @@ private:
     typedef std::deque<client_t*> ConnectorCouples;
     typedef std::pair<NetAddress, Protocol*> MultiProtocol; // (peerAddress, Protocol*)
 
-    std::map<NetAddress, ConnectorCouples> m_nConnections;
+    std::map<std::string, ConnectorCouples> m_nConnections; // peerAddress.getIpPort() -> ConnectorCouples
     std::map<Connection*, Protocol*> m_nProtocols;
     std::deque<MultiProtocol> m_nWaitList;
 
