@@ -51,17 +51,17 @@ void specialResponseBody(enum http_status s, std::string& res)
     LOG(Debug) << "response special body\n";
 }
 
-HttpResponser::HttpResponser(MemoryPool* pool)
+HttpBuilder::HttpBuilder(MemoryPool* pool)
     : m_pPool(pool)
     , m_nChunkModel(pool)
     , m_nGzipModel(pool)
     , m_nWriteTailChunk(false)
 {
     m_nGzipModel.init();
-    LOG(Debug) << "class HttpResponser constructor\n";
+    LOG(Debug) << "class HttpBuilder constructor\n";
 }
 
-void HttpResponser::buildResponse(const HttpRequest* req, bool valid_requ, HttpResponse* response)
+void HttpBuilder::buildResponse(const HttpRequest* req, bool valid_requ, HttpResponse* response)
 {
     Url* url = req->url;
     sdstr file_path;
@@ -130,7 +130,7 @@ void HttpResponser::buildResponse(const HttpRequest* req, bool valid_requ, HttpR
     sdsdestory(&file_path);
 }
 
-void HttpResponser::lineToStr(const HttpResponseLine* line, sdstr* line_str)
+void HttpBuilder::lineToStr(const HttpResponseLine* line, sdstr* line_str)
 {
     unsigned int major = line->http_version_major;
     unsigned int minor = line->http_version_minor;
@@ -140,7 +140,7 @@ void HttpResponser::lineToStr(const HttpResponseLine* line, sdstr* line_str)
     sdscatsprintf(line_str, "HTTP/%d.%d %s %s\r\n", major, minor, code, phrase);
 }
 
-void HttpResponser::headersToStr(HttpResponseHeaders* headers, sdstr* res)
+void HttpBuilder::headersToStr(HttpResponseHeaders* headers, sdstr* res)
 {
     sdstr tmp;
     sdsnewempty(&tmp, 256); // more efficient
@@ -177,11 +177,11 @@ void HttpResponser::headersToStr(HttpResponseHeaders* headers, sdstr* res)
     sdsdestory(&tmp);
 }
 
-void HttpResponser::bodyToStr(const HttpFile* file, sdstr* body_str)
+void HttpBuilder::bodyToStr(const HttpFile* file, sdstr* body_str)
 {
 }
 
-chain_t* HttpResponser::bodyToChain(HttpFile* file,
+chain_t* HttpBuilder::bodyToChain(HttpFile* file,
     chain_t* chain,
     enum content_encoding_type cont,
     enum transport_encoding_type trans)
@@ -293,7 +293,7 @@ chain_t* HttpResponser::bodyToChain(HttpFile* file,
     // -----------
 }
 
-bool HttpResponser::noMoreBody(HttpFile* file,
+bool HttpBuilder::noMoreBody(HttpFile* file,
         chain_t* chain,
         enum content_encoding_type cont,
         enum transport_encoding_type trans)
@@ -310,11 +310,11 @@ bool HttpResponser::noMoreBody(HttpFile* file,
     return res;
 }
 
-void HttpResponser::response(const HttpRequest* req, std::string& data)
+void HttpBuilder::response(const HttpRequest* req, std::string& data)
 {
 }
 
-HttpResponser::~HttpResponser()
+HttpBuilder::~HttpBuilder()
 {
-    LOG(Debug) << "class HttpResponser destructor\n";
+    LOG(Debug) << "class HttpBuilder destructor\n";
 }

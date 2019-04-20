@@ -11,8 +11,8 @@
  *
  */
 
-#ifndef HTTP_RESPONSER_H
-#define HTTP_RESPONSER_H
+#ifndef HTTP_BUILDER_H
+#define HTTP_BUILDER_H
 
 #include <TinyWebConfig.h>
 #include <tiny_base/file.h>
@@ -76,7 +76,7 @@ enum transport_encoding_type {
     transport_chunked_t,
 };
 
-class HttpResponser {
+class HttpBuilder {
 
     MemoryPool* m_pPool;
     HttpModelChunk m_nChunkModel;
@@ -84,8 +84,14 @@ class HttpResponser {
 
     bool m_nWriteTailChunk;
 
+    unsigned int m_nType : 2; //Http request or response
+
 public:
-    HttpResponser(MemoryPool* pool);
+    HttpBuilder(MemoryPool* pool);
+
+    void setType(enum HttpContentType type) {
+        m_nType = type;
+    }
 
     void buildResponse(const HttpRequest* req, bool valid_requ, HttpResponse* response);
     void lineToStr(const HttpResponseLine* line, sdstr* line_str);
@@ -104,7 +110,7 @@ public:
 
     void response(const HttpRequest* req, std::string& data);
 
-    ~HttpResponser();
+    ~HttpBuilder();
 };
 
-#endif
+#endif // !HTTP_BUILDER_H

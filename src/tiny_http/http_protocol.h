@@ -44,7 +44,7 @@ private:
 
     HttpParserSettings m_nSettings;
     HttpParser m_nParser;
-    HttpResponser m_nResponser;
+    HttpBuilder m_nResponser;
 
     std::shared_ptr<HttpRequest> m_pRequest;
     std::shared_ptr<HttpResponse> m_pResponse;

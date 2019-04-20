@@ -138,6 +138,58 @@ void WebProtocol::dataReceived(const std::string& data)
     sdsdestory(&str);
 }
 
+void WebProtocol::getDataFromProxy()
+{
+    // 
+    int valid;
+
+    m_nParser.execute();
+
+    auto connectCallback = [](const int* i) {
+        LOG(Debug) << "WebProtocol connect source-server by Proxyer\n";
+
+        LOG(Debug) << "Debug int value:" << *i << std::endl;
+        // Create HttpRequest.
+        // Send request to source-server.
+    }
+
+    auto messageCallback = [](const int*) {
+        LOG(Debug) << "WebProtocol get message from source-server by Proxyer\n";
+
+        LOG(Debug) << "Debug int value:" << *i << std::endl;
+        // Create HttpParser.
+        // Parse respnse from source-server.
+    }
+
+    auto writeCompleteCallback = [](const int*) {
+        LOG(Debug) << "WebProtocol write completely source-server by Proxyer\n";
+
+        LOG(Debug) << "Debug int value:" << *i << std::endl;
+    }
+
+    auto closeCallback = [](const int*) {
+        LOG(Debug) << "WebProtocol close connection with source-server by Proxyer\n";
+        // do nothing
+        LOG(Debug) << "Debug int value:" << *i << std::endl;
+    }
+
+
+    // m_nProxyer request something of source-sever
+    // static-site-proxyer or dynamic-response-fcgi
+    proxy_callback_t * proxy_callback = new proxy_callback_t;
+    int * tmp = new int;
+    *tmp = 90090;
+    proxy_callback->connectCallback = boost::bind(connectCallback, tmp); // send proxy request.
+    proxy_callback->messageCallback = boost::bind(messageCallback, tmp); // parse proxy response.
+    proxy_callback->writeCompleteCallback = boost::bind(writeCompleteCallback, tmp);
+    proxy_callback->closeCallback = boost::bind(closeCallback, tmp);
+
+    NetAddress serverAddress;
+    m_nProxyer.request(serverAddress, proxy_callback);
+
+    m_nResponser.buildResponse();
+}
+
 void WebProtocol::writeCompletely()
 {
     LOG(Info) << "write complete:"
@@ -237,7 +289,7 @@ void FcgiClientProtocol::dataReceived(const std::string& data)
 
     bool res = (tmp == -1) ? false : true;
     if (res) {
-        HttpResponser responser(&m_nPool);
+        HttpBuilder responser(&m_nPool);
         std::string data;
 
         responser.response(result, data);
@@ -323,7 +375,7 @@ void NewFcgiClientProtocol::dataReceived(const std::string& data)
 
     bool res = (tmp == -1) ? false : true;
     if (res) {
-        HttpResponser responser(&m_nPool);
+        HttpBuilder responser(&m_nPool);
         std::string data;
 
         responser.response(result, data);
