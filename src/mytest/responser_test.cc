@@ -561,7 +561,7 @@ void testResponser_gzip()
 
         bool res = (tmp == -1) ? false : true;
         if (res) {
-            HttpResponser responser;
+            HttpBuilder responser;
             string data;
 
             responser.response(result, data);
@@ -599,7 +599,7 @@ void testResponser()
 
         bool res = (tmp == -1) ? false : true;
         if (res) {
-            HttpResponser responser;
+            HttpBuilder responser;
             string data;
 
             responser.response(result, data);
