@@ -139,6 +139,10 @@ def server4(ip,port):
         while(True):
             data=""
             data=conn.recv(4096)
+
+            if (data == ""):
+                print "connection close"
+                break
             print "get data:",data
 
             message = "I am server, have received you message"
@@ -179,7 +183,7 @@ def server5(ip,port):
 
             conn.close()
 
-            print "child lost connection:", addr
+            print "child close connection:", addr
             print "\n"
             break
         else :
