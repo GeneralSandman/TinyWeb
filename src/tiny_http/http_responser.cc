@@ -101,9 +101,9 @@ void HttpBuilder::buildResponse(const HttpRequest* req, bool valid_requ, HttpRes
     }
 
     if (!return_val) {
-        std::cout << "++file exit" << std::endl;
+        LOG(Debug) << "file(" << f << ") exit\n";
     } else {
-        std::cout << "--file not exit" << std::endl;
+        LOG(Debug) << "file(" << f << ") not exit\n";
     }
 
     HttpResponseLine* line = &(response->line);
@@ -223,7 +223,7 @@ chain_t* HttpBuilder::bodyToChain(HttpFile* file,
         LOG(Debug) << "content-encoding: no" << std::endl;
         if (!file->noMoreData()) {
             file->getData(chain);
-        } 
+        }
 
         result = chain;
 
@@ -233,8 +233,8 @@ chain_t* HttpBuilder::bodyToChain(HttpFile* file,
         if (!file->noMoreData()) {
             chain_t* output = nullptr;
 
-            LOG(Debug) << "all buffer-size:" << countAllBufferSize(origin) 
-                << ",all data-size:" << countAllDataSize(origin) << std::endl;
+            LOG(Debug) << "all buffer-size:" << countAllBufferSize(origin)
+                       << ",all data-size:" << countAllDataSize(origin) << std::endl;
 
             file->getData(origin);
 
@@ -276,8 +276,7 @@ chain_t* HttpBuilder::bodyToChain(HttpFile* file,
                 if (file->noMoreData()) {
                     LOG(Debug) << "empty chain && file noMoreData, is tail chunk\n";
                     m_nWriteTailChunk = true;
-                }
-                else {
+                } else {
                     LOG(Debug) << "empty chain between compress, clearData && don't send\n";
                     // result = nullptr;
                     clearData(result);
@@ -286,7 +285,6 @@ chain_t* HttpBuilder::bodyToChain(HttpFile* file,
                 m_nWriteTailChunk = true;
             }
         }
-
     }
 
     return result;
@@ -294,9 +292,9 @@ chain_t* HttpBuilder::bodyToChain(HttpFile* file,
 }
 
 bool HttpBuilder::noMoreBody(HttpFile* file,
-        chain_t* chain,
-        enum content_encoding_type cont,
-        enum transport_encoding_type trans)
+    chain_t* chain,
+    enum content_encoding_type cont,
+    enum transport_encoding_type trans)
 {
     bool res = false;
     if (trans == transport_chunked_t) {
@@ -311,6 +309,111 @@ bool HttpBuilder::noMoreBody(HttpFile* file,
 }
 
 void HttpBuilder::response(const HttpRequest* req, std::string& data)
+{
+    // No use.
+}
+
+/* request */
+void HttpBuilder::buildRequest(const HttpRequest* req_client, HttpRequest* req_server)
+{
+    if (nullptr == req_client || nullptr == req_server) {
+        return;
+    }
+
+    req_server->type = HTTP_TYPE_REQUEST;
+    req_server->method = req_client->method;
+    req_server->http_version_major = req_client->http_version_major;
+    req_server->http_version_minor = req_client->http_version_minor;
+
+    req_server->method_s = std::string(httpMethodStr((enum http_method)(req_server->method)));
+
+    req_server->headerNum = 0;
+    req_server->url = req_client->url;
+    // req_server->headers = nullptr;
+    req_server->body = nullptr;
+
+    if (nullptr != req_server->headers) {
+        HttpHeaders *headers = req_server->headers;
+        headers->connection_keep_alive = 1;
+        headers->chrome = 1;
+    }
+}
+
+void HttpBuilder::lineToStr(const HttpRequest* req, sdstr* line_str)
+{
+    if (nullptr == req || nullptr == line_str) {
+        return;
+    }
+
+    char* url_begin = req->url->data;
+    unsigned int url_len = req->url->len;
+
+    sdscatsprintf(line_str, "%s %.*s HTTP/%d.%d\r\n",
+        req->method_s.c_str(),
+        url_len, url_begin,
+        req->http_version_major, req->http_version_minor);
+}
+
+void HttpBuilder::requestHeadersToStr(const HttpHeaders* headers, sdstr* res)
+{
+    if (nullptr == headers || nullptr == res) {
+        return;
+    }
+
+    sdstr tmp;
+    sdsnewempty(&tmp, 256);
+
+    if (headers->connection_keep_alive) {
+        sdscat(&tmp, "Connection: keep-alive\r\n");
+    } else if (headers->connection_close) {
+        sdscat(&tmp, "Connection: close\r\n");
+    }
+
+    if (headers->chrome) {
+
+        sdscat(&tmp, "User-Agent: Mozilla/5.0 "
+                     "(compatible; MSIE 9.0; "
+                     "Windows NT 6.1; WOW64; Trident/5.0)"
+                     "\r\n");
+
+    } else if (headers->firefox) {
+
+        sdscat(&tmp, "User-Agent: Mozilla/5.0 "
+                     "(Windows NT 6.2; Win64; x64; rv:16.0.1) "
+                     "Gecko/20121011 Firefox/16.0.1"
+                     "\r\n");
+
+    } else if (headers->ie) {
+
+        sdscat(&tmp, "User-Agent: Mozilla/5.0 "
+                     "(Windows; U; MSIE 9.0; Windows NT 9.0; en-US);"
+                     "\r\n");
+
+    } else if (headers->safari) {
+
+        sdscat(&tmp, "User-Agent: Mozilla/5.0 "
+                     "(iPad; CPU OS 6_0 like Mac OS X) "
+                     "AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 "
+                     "Mobile/10A5355d Safari/8536.25"
+                     "\r\n");
+
+    } else if (headers->opera) {
+
+        sdscat(&tmp, "User-Agent: Opera/9.80 "
+                     "(X11; Linux i686; U; ru) "
+                     "Presto/2.8.131 Version/11.11"
+                     "\r\n");
+
+    } else if (headers->unknow) {
+    }
+
+    sdscatsds(res, &tmp);
+    sdscat(res, "\r\n");
+
+    sdsdestory(&tmp);
+}
+
+void HttpBuilder::bodyToStr2(const HttpFile* file, sdstr* body_str)
 {
 }
 

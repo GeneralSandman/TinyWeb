@@ -93,6 +93,7 @@ public:
         m_nType = type;
     }
 
+    /* response */
     void buildResponse(const HttpRequest* req, bool valid_requ, HttpResponse* response);
     void lineToStr(const HttpResponseLine* line, sdstr* line_str);
     void headersToStr(HttpResponseHeaders* headers, sdstr* headers_str);
@@ -108,7 +109,15 @@ public:
         enum content_encoding_type cont,
         enum transport_encoding_type trans);
 
+    // Don't use this function now.
     void response(const HttpRequest* req, std::string& data);
+
+    /* request */
+    void buildRequest(const HttpRequest* req_client, HttpRequest* req_server);
+    void lineToStr(const HttpRequest* req, sdstr* line_str);
+    void requestHeadersToStr(const HttpHeaders* headers, sdstr* headers_str);
+    void bodyToStr2(const HttpFile* file, sdstr* body_str);
+
 
     ~HttpBuilder();
 };
