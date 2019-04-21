@@ -208,6 +208,18 @@ target_link_libraries(responser_test
     tiny_base_model
     )
 
+# builder_test
+add_executable(builder_test
+    builder_test.cc
+    )
+
+target_link_libraries(builder_test
+    tiny_http_model
+    tiny_struct_model
+    tiny_base_model
+    z
+    )
+
 # dynamicWeb_test
 add_executable(dynamicWeb_test
     dynamicWeb_test.cc

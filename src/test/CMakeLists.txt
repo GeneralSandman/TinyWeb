@@ -174,6 +174,19 @@ target_link_libraries(clientpool_test
     tiny_base_model
     )
 
+# proxyer_test
+add_executable(proxyer_test
+    proxyer_test.cc
+    )
+
+target_link_libraries(proxyer_test
+    tiny_core_model
+    tiny_http_model
+    tiny_struct_model
+    tiny_base_model
+    z
+    )
+
 # fcgi_client_test
 add_executable(fcgi_client_test
     fcgi_client_test.cc
