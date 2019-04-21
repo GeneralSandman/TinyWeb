@@ -23,6 +23,7 @@
 
 class EventLoop;
 
+// TODO: update ProxyCallback
 typedef boost::function<void()> ProxyCallback;
 
 typedef struct proxy_callback_t {
@@ -39,7 +40,7 @@ private:
 public:
     HttpProxyProtocol();
 
-    inline void setProxyCallback(const proxy_callback_t* callback)
+    inline void setProxyCallback(proxy_callback_t* callback)
     {
         m_pCallbacks = callback;
     }
@@ -50,18 +51,14 @@ public:
     void connectionLost();
 
     virtual ~HttpProxyProtocol();
-}
+};
 
 class HttpProxyer {
 private:
-    // std::map<NetAddress, Connection *> m_nServers;
-    // std::map<NetAddress, Connection *> m_nClients;
-
-    // Server m_nServer;
-    // Client m_nClient;
     // bool m_nStarted;
 
     EventLoop* m_pEventLoop;
+    NetAddress m_nClientAddress;
     ClientPool* m_pClientPool;
     std::vector<Protocol*> m_nProtocols;
 
@@ -76,7 +73,7 @@ public:
     void start();
     void stop();
 
-    void request(const std::string& requ);
+    void request(const NetAddress& serverAddress, proxy_callback_t* callbacks);
 
     ~HttpProxyer();
 };

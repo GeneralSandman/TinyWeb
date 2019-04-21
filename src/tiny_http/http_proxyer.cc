@@ -11,8 +11,8 @@
  *
  */
 
-#include <tiny_base/clientpool.h>
 #include <tiny_base/log.h>
+#include <tiny_core/clientpool.h>
 #include <tiny_core/eventloop.h>
 #include <tiny_core/netaddress.h>
 #include <tiny_core/protocol.h>
@@ -28,6 +28,20 @@ HttpProxyProtocol::HttpProxyProtocol()
 void HttpProxyProtocol::connectionMade()
 {
     LOG(Info) << "HttpProxyProtocol connection made\n";
+
+    std::string request_str1 = "GET http://172.17.0.3:80/tinyweb/tinyweb_home.html HTTP/1.0\r\n"
+                               "User-Agent: Mozilla/5.0 "
+                               "(compatible; MSIE 9.0; "
+                               "Windows NT 6.1; WOW64; Trident/5.0)\r\n"
+                               "\r\n";
+
+    std::string request_str2 = "GET http://172.17.0.3:80/404/404.html HTTP/1.1\r\n"
+                               "Host: 172.17.0.3\r\n"
+                               "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_1) "
+                               "AppleWebKit/605.1.15 (KHTML, like Gecko) "
+                               "Version/12.0.1 Safari/605.1.15\r\n"
+                               "\r\n";
+    sendMessage(request_str2);
 
     if (nullptr != m_pCallbacks) {
         LOG(Info) << "invoke connectCallback of m_pCallbacks\n";
@@ -48,7 +62,7 @@ void HttpProxyProtocol::dataReceived(const std::string& data)
     // Receive data from source web server.
     // Parser data
     // justice cache body or not
-    // return data to HttpParser or HttpResponser.
+    // return data to HttpParser or HttpBuilder.
 }
 
 void HttpProxyProtocol::writeCompletely()
@@ -81,8 +95,7 @@ RegistProtocol(HttpProxyProtocol);
 //----------end HttpProxyProtocol api----------//
 
 HttpProxyer::HttpProxyer(EventLoop* loop,
-    const NetAddress& clientAddress,
-    Protocol* protocol)
+    const NetAddress& clientAddress)
     : m_pEventLoop(loop)
     , m_nClientAddress(clientAddress)
     , m_pClientPool(new ClientPool(loop, clientAddress))
@@ -94,9 +107,10 @@ void HttpProxyer::start()
 {
     // Read configure from file
     // and invoke addClient()
-    
+
     m_pClientPool->start();
-    m_pClientPool->addClient();
+    NetAddress serverAddress("172.17.0.3:80"); // Init by configer.
+    m_pClientPool->addClient(m_nClientAddress, serverAddress, false, false);
 }
 
 void HttpProxyer::stop()
@@ -104,9 +118,9 @@ void HttpProxyer::stop()
     m_pClientPool->stop();
 }
 
-void HttpProxyer::request(const NetAddress& serverAddress, const proxy_callback_t* callbacks)
+void HttpProxyer::request(const NetAddress& serverAddress, proxy_callback_t* callbacks)
 {
-    Protocol* prot = new HttpProxyProtocol();
+    HttpProxyProtocol* prot = new HttpProxyProtocol();
     prot->setProxyCallback(callbacks);
     m_nProtocols.push_back(prot);
 
