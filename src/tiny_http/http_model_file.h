@@ -17,6 +17,7 @@
 #include <tiny_base/file.h>
 
 #include <string>
+#include <vector>
 
 class HttpFile : public File {
 public:

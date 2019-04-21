@@ -68,7 +68,7 @@ int Configer::checkConfigerFile(const std::string& file)
         LOG(Debug) << "configeure-file("<<file<<") parse error\n";
     }
 
-    bool debug = true;
+    bool debug = false;
     items = debug ? root.get_child("develop") : root.get_child("product");
     boost::property_tree::ptree basic = items.get_child("basic");
     boost::property_tree::ptree fcgi = items.get_child("fcgi");
@@ -212,6 +212,7 @@ int Configer::loadConfig(bool debug)
     items = debug ? root.get_child("develop") : root.get_child("product");
     boost::property_tree::ptree basic = items.get_child("basic");
     boost::property_tree::ptree fcgi = items.get_child("fcgi");
+    boost::property_tree::ptree proxy = items.get_child("proxy");
     boost::property_tree::ptree cache = items.get_child("cache");
     boost::property_tree::ptree server = items.get_child("server");
     boost::property_tree::ptree log = items.get_child("log");
@@ -252,6 +253,25 @@ int Configer::loadConfig(bool debug)
     fcgiConf.connect_timeout = fcgi.get<unsigned int>("connect_timeout", 1000);
     fcgiConf.send_timeout = fcgi.get<unsigned int>("send_timeout", 1000);
     fcgiConf.read_timeout = fcgi.get<unsigned int>("read_timeout", 1000);
+
+    // proxy-config
+    for (piterator it = proxy.begin(); it != proxy.end(); ++it) {
+        ProxyConfig proxy_tmp;
+        proxy_tmp.name = it->second.get<std::string>("name", "");
+        proxy_tmp.enable = it->second.get<bool>("enable", false);
+        proxy_tmp.keep_connect = it->second.get<bool>("keep_connect", false);
+        proxy_tmp.connect_timeout = it->second.get<unsigned int>("connect_timeout", 0);
+        proxy_tmp.send_timeout = it->second.get<unsigned int>("send_timeout", 0);
+        proxy_tmp.read_timeout = it->second.get<unsigned int>("read_timeout", 0);
+        proxy_tmp.buffers_4k = it->second.get<unsigned int>("buffers_4k", 0);
+
+        ptree set_header_tree = it->second.get_child("set_header");
+        for (piterator a = set_header_tree.begin(); a != set_header_tree.end(); a++) {
+            proxy_tmp.set_header.push_back(a->second.get_value<std::string>());
+        }
+
+        proxyConfig.push_back(proxy_tmp);
+    }
 
     // cache-config
     for (piterator it = cache.begin(); it != cache.end(); ++it) {

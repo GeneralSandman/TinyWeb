@@ -58,6 +58,18 @@ typedef struct fcgi_t {
     std::string listen;
 } fcgi_t;
 
+class ProxyConfig {
+public:
+    std::string name;
+    bool enable;
+    bool keep_connect;
+    unsigned int connect_timeout;
+    unsigned int send_timeout;
+    unsigned int read_timeout;
+    unsigned int buffers_4k;
+    std::vector<std::pair<std::string, std::string>> set_header;
+};
+
 class CacheConfig {
 public:
     std::string name;
@@ -96,6 +108,7 @@ private:
     static std::string m_nFile;
     BasicConfig basicConf;
     FcgiConfig fcgiConf;
+    std::vector<ProxyConfig> proxyConfig;
     std::vector<CacheConfig> cacheConf;
     std::vector<ServerConfig> serverConf;
     LogConfig logConf;
