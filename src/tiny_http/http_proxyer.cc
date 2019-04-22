@@ -29,6 +29,11 @@ void HttpProxyProtocol::connectionMade()
 {
     LOG(Info) << "HttpProxyProtocol connection made\n";
 
+    if (nullptr != m_pCallbacks) {
+        LOG(Info) << "invoke connectCallback of m_pCallbacks\n";
+        m_pCallbacks->connectCallback();
+    }
+
     std::string request_str1 = "GET http://172.17.0.3:80/tinyweb/tinyweb_home.html HTTP/1.0\r\n"
                                "User-Agent: Mozilla/5.0 "
                                "(compatible; MSIE 9.0; "
@@ -43,10 +48,6 @@ void HttpProxyProtocol::connectionMade()
                                "\r\n";
     sendMessage(request_str2);
 
-    if (nullptr != m_pCallbacks) {
-        LOG(Info) << "invoke connectCallback of m_pCallbacks\n";
-        m_pCallbacks->connectCallback();
-    }
 }
 
 void HttpProxyProtocol::dataReceived(const std::string& data)

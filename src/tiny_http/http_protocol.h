@@ -55,6 +55,9 @@ public:
     virtual void dataReceived(const std::string&);
     virtual void writeCompletely();
     virtual void connectionLost();
+    
+    void getDataFromProxy();
+
     virtual ~WebProtocol();
 };
 

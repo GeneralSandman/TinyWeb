@@ -17,6 +17,7 @@
 #include <tiny_http/http_parser.h>
 #include <tiny_http/http_protocol.h>
 #include <tiny_http/http_responser.h>
+#include <tiny_http/http_proxyer.h>
 
 // WebProtocol using for web server.
 
@@ -142,52 +143,55 @@ void WebProtocol::getDataFromProxy()
 {
     // 
     int valid;
+    char* str;
+    unsigned int begin;
+    unsigned int len;
 
-    m_nParser.execute();
+    HttpRequest* request = new HttpRequest;
+    m_nParser.execute(str, begin, len, request);
 
-    auto connectCallback = [](const int* i) {
+    int * test = new int;
+    *test = 90090;
+    auto connectCallback = [test]() {
         LOG(Debug) << "WebProtocol connect source-server by Proxyer\n";
 
-        LOG(Debug) << "Debug int value:" << *i << std::endl;
+        LOG(Debug) << "Debug int value:" << *test << std::endl;
         // Create HttpRequest.
         // Send request to source-server.
-    }
+    };
 
-    auto messageCallback = [](const int*) {
+    auto messageCallback = [test]() {
         LOG(Debug) << "WebProtocol get message from source-server by Proxyer\n";
 
-        LOG(Debug) << "Debug int value:" << *i << std::endl;
         // Create HttpParser.
         // Parse respnse from source-server.
-    }
+        LOG(Debug) << "Debug int value:" << *test << std::endl;
+    };
 
-    auto writeCompleteCallback = [](const int*) {
+    auto writeCompleteCallback = [test]() {
         LOG(Debug) << "WebProtocol write completely source-server by Proxyer\n";
 
-        LOG(Debug) << "Debug int value:" << *i << std::endl;
-    }
+        LOG(Debug) << "Debug int value:" << *test << std::endl;
+    };
 
-    auto closeCallback = [](const int*) {
+    auto closeCallback = [test]() {
         LOG(Debug) << "WebProtocol close connection with source-server by Proxyer\n";
         // do nothing
-        LOG(Debug) << "Debug int value:" << *i << std::endl;
-    }
+        LOG(Debug) << "Debug int value:" << *test << std::endl;
+    };
 
 
     // m_nProxyer request something of source-sever
     // static-site-proxyer or dynamic-response-fcgi
     proxy_callback_t * proxy_callback = new proxy_callback_t;
-    int * tmp = new int;
-    *tmp = 90090;
-    proxy_callback->connectCallback = boost::bind(connectCallback, tmp); // send proxy request.
-    proxy_callback->messageCallback = boost::bind(messageCallback, tmp); // parse proxy response.
-    proxy_callback->writeCompleteCallback = boost::bind(writeCompleteCallback, tmp);
-    proxy_callback->closeCallback = boost::bind(closeCallback, tmp);
+    proxy_callback->connectCallback = connectCallback; // send proxy request.
+    proxy_callback->messageCallback = messageCallback; // parse proxy response.
+    proxy_callback->writeCompleteCallback = writeCompleteCallback;
+    proxy_callback->closeCallback = closeCallback;
 
-    NetAddress serverAddress;
-    m_nProxyer.request(serverAddress, proxy_callback);
 
-    m_nResponser.buildResponse();
+    delete test;
+    delete request;
 }
 
 void WebProtocol::writeCompletely()

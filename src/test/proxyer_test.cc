@@ -60,25 +60,25 @@ void test1()
     auto connectCallback = [test]() {
         LOG(Debug) << "Testing connect source-server by Proxyer\n";
 
-        LOG(Debug) << "Debug int value:" << *test << std::endl;
+        LOG(Debug) << "(ConnectionCallback) Debug int value:" << *test << std::endl;
     };
 
     auto messageCallback = [test]() {
         LOG(Debug) << "Testing get message from source-server by Proxyer\n";
 
-        LOG(Debug) << "Debug int value:" << *test << std::endl;
+        LOG(Debug) << "(MessageCallback) Debug int value:" << *test << std::endl;
     };
 
     auto writeCompleteCallback = [test]() {
         LOG(Debug) << "Testing write completely source-server by Proxyer\n";
 
-        LOG(Debug) << "Debug int value:" << *test << std::endl;
+        LOG(Debug) << "(WriteCompleteCallback) Debug int value:" << *test << std::endl;
     };
 
     auto closeCallback = [test]() {
         LOG(Debug) << "Testing close connection with source-server by Proxyer\n";
 
-        LOG(Debug) << "Debug int value:" << *test << std::endl;
+        LOG(Debug) << "(CloseCallback) Debug int value:" << *test << std::endl;
     };
 
     proxy_callback_t* proxy_callback = new proxy_callback_t;
