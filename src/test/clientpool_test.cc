@@ -89,8 +89,14 @@ void test3()
     Protocol* protocol1 = new TestClientPoolProtocol();
     Protocol* protocol2 = new TestClientPoolProtocol();
     Protocol* protocol3 = new TestClientPoolProtocol();
+    Protocol* protocol4 = new TestClientPoolProtocol();
+    Protocol* protocol5 = new TestClientPoolProtocol();
+    Protocol* protocol6 = new TestClientPoolProtocol();
+    Protocol* protocol7 = new TestClientPoolProtocol();
+    Protocol* protocol8 = new TestClientPoolProtocol();
+    Protocol* protocol9 = new TestClientPoolProtocol();
 
-    loop->runAfter(15, std::bind(&EventLoop::quit, loop));
+    loop->runAfter(30, std::bind(&EventLoop::quit, loop));
 
     NetAddress serverAddress("172.17.0.3:9090");
     bool retry = false;
@@ -100,15 +106,14 @@ void test3()
     clientPool->addClient(clientAddress, serverAddress, retry, keepconnect);
 
     loop->runAfter(2, boost::bind(&ClientPool::doTask, clientPool, clientAddress, serverAddress, protocol1));
-    loop->runAfter(2, boost::bind(&ClientPool::doTask, clientPool, clientAddress, serverAddress, protocol2));
-    loop->runAfter(2, boost::bind(&ClientPool::doTask, clientPool, clientAddress, serverAddress, protocol3));
-    // loop->runAfter(2, boost::bind(&ClientPool::doTask, clientPool, clientAddress, serverAddress, protocol));
-    // loop->runAfter(2, boost::bind(&ClientPool::doTask, clientPool, clientAddress, serverAddress, protocol));
-    // loop->runAfter(2, boost::bind(&ClientPool::doTask, clientPool, clientAddress, serverAddress, protocol));
-    // loop->runAfter(2, boost::bind(&ClientPool::doTask, clientPool, clientAddress, serverAddress, protocol));
-    // loop->runAfter(2, boost::bind(&ClientPool::doTask, clientPool, clientAddress, serverAddress, protocol));
-    // loop->runAfter(2, boost::bind(&ClientPool::doTask, clientPool, clientAddress, serverAddress, protocol));
-    // loop->runAfter(2, boost::bind(&ClientPool::doTask, clientPool, clientAddress, serverAddress, protocol));
+    loop->runAfter(4, boost::bind(&ClientPool::doTask, clientPool, clientAddress, serverAddress, protocol2));
+    loop->runAfter(4, boost::bind(&ClientPool::doTask, clientPool, clientAddress, serverAddress, protocol3));
+    loop->runAfter(5, boost::bind(&ClientPool::doTask, clientPool, clientAddress, serverAddress, protocol4));
+    loop->runAfter(5, boost::bind(&ClientPool::doTask, clientPool, clientAddress, serverAddress, protocol5));
+    loop->runAfter(6, boost::bind(&ClientPool::doTask, clientPool, clientAddress, serverAddress, protocol6));
+    loop->runAfter(6, boost::bind(&ClientPool::doTask, clientPool, clientAddress, serverAddress, protocol7));
+    loop->runAfter(8, boost::bind(&ClientPool::doTask, clientPool, clientAddress, serverAddress, protocol8));
+    loop->runAfter(9, boost::bind(&ClientPool::doTask, clientPool, clientAddress, serverAddress, protocol9));
 
     loop->loop();
 
@@ -117,6 +122,12 @@ void test3()
     delete protocol1;
     delete protocol2;
     delete protocol3;
+    delete protocol4;
+    delete protocol5;
+    delete protocol6;
+    delete protocol7;
+    delete protocol8;
+    delete protocol9;
     delete loop;
 }
 

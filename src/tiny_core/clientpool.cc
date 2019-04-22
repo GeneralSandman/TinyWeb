@@ -150,6 +150,8 @@ void ClientPool::m_fNewConnectionCallback(int sockfd,
     m_nConnections[peerAddress_str].push_front(client);
 
     newCon->establishConnection();
+
+    m_fWakeUp(newCon);
 }
 
 void ClientPool::m_fHandleClose(Connection* con)
@@ -170,6 +172,7 @@ void ClientPool::m_fHandleClose(Connection* con)
         if (nullptr != client && nullptr != client->connection
             && client->connection == con) {
             m_nConnections[peerAddress_str].erase(i);
+            LOG(Debug) << "erase invalid connection(" << peerAddress_str << ")\n";
             break;
         }
         client = nullptr;
@@ -210,6 +213,18 @@ void ClientPool::m_fHandleClose(Connection* con)
 
     if (m_nStarted && conr->isKeepConnect())
         conr->restart();
+
+    
+    // Check there are tasks which not be handled in
+    // WaitList.
+    if (m_nWaitList.size()) {
+        auto i = m_nWaitList.begin();
+        NetAddress peerAddress = i->first;
+        Protocol* prot = i->second;
+
+        // FIXME: init retry and keep-connect.
+        m_fConnect(m_nHostAddress, peerAddress, false, false);
+    }
 }
 
 void ClientPool::m_fGiveUpControl(Connection* con)
@@ -418,21 +433,48 @@ void ClientPool::doTask(const NetAddress& hostAddress,
 {
     std::string peerAddress_str = peerAddress.getIpPort();
 
-    if (m_nConnections.find(peerAddress_str) == m_nConnections.end()) {
-        LOG(Info) << "m_nConnections hasn't corresponding connection, need to build new one\n";
-        // FIXME:
-        return;
+    LOG(Debug) << "doTask serverAddress(" << peerAddress_str << ")\n";
+
+    // ----
+    // if (m_nConnections.find(peerAddress_str) == m_nConnections.end()
+    //     || m_nConnections[peerAddress_str].empty()) {
+    //     LOG(Info) << "m_nConnections hasn't corresponding connection, need to build new one\n";
+
+    //     m_fConnect(hostAddress, peerAddress, false, false);
+    //     return;
+    // }
+
+    // bool res = m_fDoTaskNoDelay(m_nConnections[peerAddress_str], protocol);
+
+    // if (!res) {
+    //     LOG(Info) << "push to wait-list(host:" << hostAddress.getIpPort()
+    //               << ",peer:" << peerAddress.getIpPort() << ")\n";
+    //     MultiProtocol tmp(peerAddress, protocol);
+    //     m_nWaitList.push_back(tmp);
+    // }
+
+    // ------
+    bool res = false;
+    if (m_nConnections.find(peerAddress_str) != m_nConnections.end()
+        && m_nConnections[peerAddress_str].size()) {
+        
+        res = m_fDoTaskNoDelay(m_nConnections[peerAddress_str], protocol);
     }
 
-    bool res = m_fDoTaskNoDelay(m_nConnections[peerAddress_str], protocol);
-
     if (!res) {
-        // There is no idle connection.
-        // Push to wait list.
         LOG(Info) << "push to wait-list(host:" << hostAddress.getIpPort()
                   << ",peer:" << peerAddress.getIpPort() << ")\n";
         MultiProtocol tmp(peerAddress, protocol);
         m_nWaitList.push_back(tmp);
+    }
+
+    if (m_nConnections.find(peerAddress_str) == m_nConnections.end()
+        || m_nConnections[peerAddress_str].empty()) {
+        LOG(Info) << "m_nConnections hasn't corresponding connection, need to build new one\n";
+
+        // FIXME: init retry and keep-connect.
+        m_fConnect(hostAddress, peerAddress, false, false);
+        return;
     }
 }
 
