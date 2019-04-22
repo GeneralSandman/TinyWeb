@@ -22,6 +22,8 @@ provied by this file.
 #include <string>
 #include <map>
 #include <vector>
+#include <regex>
+
 
 pid_t gettid();
 
@@ -110,6 +112,18 @@ inline uint16_t netToHost16(uint16_t a)
 inline uint32_t netToHost32(uint32_t a)
 {
     return ntohl(a);
+}
+
+inline bool regex_match(const std::string& str, const std::string& pattern)
+{
+    bool res;
+    try {
+        std::regex reg(pattern);
+        res = std::regex_match(str, reg);
+    } catch (const std::exception& ex) {
+        return false;
+    }
+    return res;
 }
 
 #endif
