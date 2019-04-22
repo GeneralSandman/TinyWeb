@@ -33,27 +33,37 @@ Channel::Channel(EventLoop *loop, int fd)
 
 void Channel::handleEvent(Time time)
 {
-    // std::cout << "Epoller revent:" << m_nREvent << std::endl;
-    if (m_nREvent & (EPOLLIN | EPOLLRDHUP))
+    // LOG(Debug) << "Epoller revent:" << m_nREvent << std::endl;
+    // LOG(Debug) << "EOPLLHUP:" << EPOLLHUP
+    //     << "EPOLLIN:" << EPOLLIN 
+    //     << ",EPOLLPRI:" << EPOLLPRI
+    //     << ",EPOLLOUT:" << EPOLLOUT
+    //     << ",EPOLLERR:" << EPOLLERR
+    //     << std::endl;
+
+
+    if ( (m_nREvent & EPOLLHUP) && !(m_nREvent & EPOLLIN) ) {
+        if (m_fCloseCallback)
+            m_fCloseCallback();
+    }
+
+    if (m_nREvent & (EPOLLIN | EPOLLRDHUP | EPOLLPRI))
     {
         //EPOLLRDHUP is the signal of peer close connection;
         if (m_fReadCallback)
             m_fReadCallback(time);
     }
-    else if (m_nREvent == EPOLLOUT)
+
+    if (m_nREvent == EPOLLOUT)
     {
         if (m_fWriteCallback)
             m_fWriteCallback();
     }
-    else if (m_nREvent == EPOLLERR)
+
+    if (m_nREvent & (EPOLLERR))
     {
         if (m_fErrorCallback)
             m_fErrorCallback();
-    }
-    else if (m_nREvent == EPOLLHUP)
-    {
-        if (m_fCloseCallback)
-            m_fCloseCallback();
     }
 }
 
