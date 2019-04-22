@@ -108,7 +108,7 @@ private:
     static std::string m_nFile;
     BasicConfig basicConf;
     FcgiConfig fcgiConf;
-    std::vector<ProxyConfig> proxyConfig;
+    std::vector<ProxyConfig> proxyConf;
     std::vector<CacheConfig> cacheConf;
     std::vector<ServerConfig> serverConf;
     LogConfig logConf;
@@ -116,6 +116,11 @@ private:
 
     Configer();
     Configer(const Configer& c) {}
+
+    bool haveProxyName(const ProxyConfig& conf, const std::string& proxyname)
+    {
+        return (conf.name == proxyname);
+    }
 
     bool haveCacheName(const CacheConfig& conf, const std::string& cachename)
     {
@@ -147,6 +152,7 @@ public:
 
     const BasicConfig& getBasicConfig();
     const FcgiConfig& getFcgiConfig();
+    const ProxyConfig& getProxyConfig(const std::string& proxyname);
     const CacheConfig& getCacheConfig(const std::string& cachename);
     const ServerConfig& getServerConfig(const std::string& servername);
     const std::vector<ServerConfig>& getServerConfig();

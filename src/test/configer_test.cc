@@ -46,10 +46,12 @@ void test2()
         std::cout << "--load config failed\n";
 
     std::string servername = "dissigil.cn";
+    std::string proxyname = "proxy_test1";
     std::string cachename = "cache_test";
     BasicConfig basic = configer.getBasicConfig();
     FcgiConfig fcgi = configer.getFcgiConfig();
     ServerConfig server = configer.getServerConfig(servername);
+    ProxyConfig proxy = configer.getProxyConfig(proxyname);
     CacheConfig cache = configer.getCacheConfig(cachename);
     LogConfig log = configer.getLogConfig();
 
@@ -72,6 +74,20 @@ void test2()
 
     std::cout << "======server\n";
     std::cout << server.listen << std::endl;
+
+    std::cout << "======proxy\n";
+    std::cout << proxy.name << std::endl;
+    std::cout << proxy.enable << std::endl;
+    std::cout << proxy.keep_connect << std::endl;
+    std::cout << proxy.connect_timeout << std::endl;
+    std::cout << proxy.send_timeout << std::endl;
+    std::cout << proxy.read_timeout << std::endl;
+    std::cout << proxy.buffers_4k << std::endl;
+    for (auto t : proxy.set_header) {
+        std::cout << t.first << "->" << t.second << std::endl;
+    }
+
+
 
     std::cout << "======cache\n";
     std::cout << cache.name << std::endl;
@@ -221,8 +237,8 @@ void test4()
 int main()
 {
     // test1();
-    // test2();
+    test2();
     // test3();
-    test4();
+    // test4();
     return 0;
 }

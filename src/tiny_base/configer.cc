@@ -267,10 +267,14 @@ int Configer::loadConfig(bool debug)
 
         ptree set_header_tree = it->second.get_child("set_header");
         for (piterator a = set_header_tree.begin(); a != set_header_tree.end(); a++) {
-            proxy_tmp.set_header.push_back(a->second.get_value<std::string>());
+            std::pair<std::string, std::string> header_pair;
+            header_pair.first = a->second.get<std::string>("header", "");
+            header_pair.second = a->second.get<std::string>("value", "");
+
+            proxy_tmp.set_header.push_back(header_pair);
         }
 
-        proxyConfig.push_back(proxy_tmp);
+        proxyConf.push_back(proxy_tmp);
     }
 
     // cache-config
@@ -369,6 +373,21 @@ const FcgiConfig& Configer::getFcgiConfig()
     return fcgiConf;
 }
 
+const ProxyConfig& Configer::getProxyConfig(const std::string& proxyname)
+{
+    unsigned int index = 0;
+    for (; index < proxyConf.size(); index++) {
+        if (haveProxyName(proxyConf[index], proxyname))
+            break;
+    }
+
+    if (index == proxyConf.size()) {
+        std::cout << "not this proxyname(" << proxyname << ") config\n";
+        index = 0;
+    }
+    return proxyConf[index];
+}
+
 const CacheConfig& Configer::getCacheConfig(const std::string& cachename)
 {
     unsigned int index = 0;
@@ -378,7 +397,7 @@ const CacheConfig& Configer::getCacheConfig(const std::string& cachename)
     }
 
     if (index == cacheConf.size()) {
-        std::cout << "not this cachename(" << cachename << ") config";
+        std::cout << "not this cachename(" << cachename << ") config\n";
         index = 0;
     }
     return cacheConf[index];
