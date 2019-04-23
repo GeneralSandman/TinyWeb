@@ -65,12 +65,36 @@ void test2()
     std::cout << basic.gzip_buffers_4k << std::endl;
     std::cout << basic.gzip_min_len << std::endl;
 
-    std::cout << "======fcgi\n";
+    std::cout << "======fcgi-basic\n";
     std::cout << fcgi.enable << std::endl;
     std::cout << fcgi.keep_connect << std::endl;
     std::cout << fcgi.connect_timeout << std::endl;
     std::cout << fcgi.send_timeout << std::endl;
     std::cout << fcgi.read_timeout << std::endl;
+
+    std::cout << "======fcgi-addvance\n";
+    for (auto t : server.fcgis) {
+        std::cout << "pattern: size:(" << t.pattern.size() << "),data(" << t.pattern << ")\n";
+        if (regex_match("http://127.0.0.1/test/dynamic_get.php", t.pattern)) {
+            std::cout << "1---------\n";
+        }
+        if (regex_match("sdsdfsphp", t.pattern)) {
+            std::cout << "2---------\n";
+        }
+        if (regex_match("sdsdfs.phps", t.pattern)) {
+            std::cout << "3---------\n";
+        }
+        std::cout << "path:" << t.path << std::endl;
+
+        std::cout << "indexpage:";
+        for (auto i : t.indexpage) {
+            std::cout << i << " ";
+        }
+        std::cout << std::endl;
+        
+        std::cout << "listen:" << t.listen << std::endl;
+    }
+
 
     std::cout << "======server\n";
     std::cout << server.listen << std::endl;

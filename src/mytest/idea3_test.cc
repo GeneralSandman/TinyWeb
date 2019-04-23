@@ -23,16 +23,17 @@ bool regex__(const std::string& str, const std::string& pattern)
         std::regex reg(pattern);
         res = std::regex_match(str, reg);
     } catch (const std::exception& ex) {
-        std::cout << "regex_match error\n";
-        std::cout << ex.what() << std::endl;
+        // std::cout << "regex_match error\n";
+        // std::cout << ex.what() << std::endl;
+        return false;
     }
 
-    std::cout << "[" << str << "-" << pattern << "]:";
-    if (res) {
-        std::cout << "match success" << std::endl;
-    } else {
-        std::cout << "match failed" << std::endl;
-    }
+    // std::cout << "[" << str << "  " << pattern << "]:";
+    // if (res) {
+    //     std::cout << "match success" << std::endl;
+    // } else {
+    //     std::cout << "match failed" << std::endl;
+    // }
     return res;
 }
 
@@ -46,56 +47,55 @@ typedef struct
 
 regex_test_t regexs[] = {
     {
-        .str = "",
-        .pattern = "",
+        .str = "sdsd.php",
+        .pattern = ".*\\.php$",
         .match = true,
     },
 
     {
-        .str = "",
-        .pattern = "",
-        .match = true,
+        .str = "ssssphp",
+        .pattern = ".*\\.php$",
+        .match = false,
     },
 
     {
-        .str = "",
-        .pattern = "",
-        .match = true,
+        .str = "sdsf.php.",
+        .pattern = ".*\\.php$",
+        .match = false,
     },
 
     {
-        .str = "",
-        .pattern = "",
+        .str = "*..php",
+        .pattern = ".*\\.php$",
         .match = true,
     },
-
     {
-        .str = "",
-        .pattern = "",
+        .str = "sds.phpss",
+        .pattern = ".*\\.php$",
         .match = true,
     },
-
     {
-        .str = "",
-        .pattern = "",
-        .match = true,
-    },
-
-    {
-        .str = "",
-        .pattern = "",
-        .match = true,
-    },
-
-    {
-        .str = "",
-        .pattern = "",
+        .str = "sdsdfphp",
+        .pattern = ".*\\.php$",
         .match = true,
     },
 
 };
 
-void regex_test()
+void test()
+{
+    int alltest = 0;
+    int passtest = 0;
+
+    unsigned int len = sizeof(regexs) / sizeof(regexs[0]);
+
+    for (int i = 0; i < len; i++) {
+        bool res = regex__(regexs[i].str, regexs[i].pattern);
+    }
+
+}
+
+void test1()
 {
     std::vector<std::string> patterns;
     patterns.push_back(".*\.php$");
@@ -131,6 +131,33 @@ void regex_test()
 
 }
 
+void test2()
+{
+    std::vector<std::string> patterns;
+    patterns.push_back(".*\\.php$");
+
+
+    std::vector<std::string> strs;
+    strs.push_back("/dss.php");
+    strs.push_back(".php");
+    strs.push_back("/dss.phpss");
+    strs.push_back("/dssphp");
+
+
+    bool res;
+    for (unsigned int i = 0; i < strs.size(); i++) {
+        std::cout << i << ")\n";
+
+        for (auto p : patterns) {
+            res = regex__(strs[i], p);
+            if (res) {
+                break;
+            }
+        }
+    }
+
+}
+
 int _main()
 {
     std::string a;
@@ -144,5 +171,6 @@ int _main()
 
 int main()
 {
-    regex_test();
+    test();
+    // test2();
 }
