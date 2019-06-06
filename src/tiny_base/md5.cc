@@ -14,6 +14,9 @@
 
 #include <tiny_base/md5.h> 
 
+#include <stdio.h>
+#include <string.h>
+
 /*
  ***********************************************************************
  **  Message-digest routines:                                         **
@@ -283,5 +286,26 @@ static void Transform(UINT4 *buf, UINT4 *in)
   buf[1] += b;
   buf[2] += c;
   buf[3] += d;
+}
+
+void md5(char* key, int len, char* dst)
+{
+    static MD5_CTX ctx;
+    MD5Init(&ctx);
+    MD5Update(&ctx, (unsigned char*)key, len);
+    MD5Final(&ctx);
+
+    unsigned char tmp1[16];
+    char res[32];
+    memset(tmp1, 0, 16);
+    memset(res, 0, 32);
+
+    memcpy(tmp1, ctx.digest, 16);
+    for (int i = 0; i < 16; i++) {
+        sprintf(&(res[2 * i]), "%02x", (unsigned char)tmp1[i]);
+        sprintf(&(res[2 * i + 1]), "%02x", (unsigned char)(tmp1[i] << 4));
+    }
+
+    memcpy(dst, res, 32);
 }
 
