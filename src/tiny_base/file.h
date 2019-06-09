@@ -67,6 +67,8 @@ public:
     // using for Range && Content-Range.
     void getData(chain_t* chain, off_t begin, off_t end);
 
+    int writeData(chain_t* chain);
+
     ~File()
     {
         if (valid) {

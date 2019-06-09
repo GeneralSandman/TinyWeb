@@ -104,6 +104,7 @@ def server2(ip,port):
 def server3(ip,port):
     print "bind address:",ip,":",port
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind((ip, int(port)))
     s.listen(8)
     print "\nwait connect:\n"
@@ -187,6 +188,7 @@ def server5(ip,port):
             print "\n"
             break
         else :
+            conn.close()
             pass
 
     s.close()

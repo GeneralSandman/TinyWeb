@@ -119,6 +119,12 @@ int Configer::checkConfigerFile(const std::string& file)
         cache.name = it->second.get<std::string>("name", "");
         cache.server_address = it->second.get<std::string>("server_address", "");
         cache.path = it->second.get<std::string>("path", "");
+
+        ptree file_grade_ptree = it->second.get_child("file_grade");
+        for (piterator a = file_grade_ptree.begin(); a != file_grade_ptree.end(); a++) {
+            cache.file_grade.push_back(a->second.get_value<int>());
+        }
+
         cache.space_max_size = it->second.get<unsigned long long>("space_max_size", 0);
         cache.expires = it->second.get<unsigned long long>("expires", 0);
 
@@ -258,6 +264,7 @@ int Configer::loadConfig(bool debug)
     for (piterator it = proxy.begin(); it != proxy.end(); ++it) {
         ProxyConfig proxy_tmp;
         proxy_tmp.name = it->second.get<std::string>("name", "");
+        proxy_tmp.server_address = it->second.get<std::string>("server_address", "");
         proxy_tmp.enable = it->second.get<bool>("enable", false);
         proxy_tmp.keep_connect = it->second.get<bool>("keep_connect", false);
         proxy_tmp.connect_timeout = it->second.get<unsigned int>("connect_timeout", 0);
@@ -283,6 +290,12 @@ int Configer::loadConfig(bool debug)
         cache.name = it->second.get<std::string>("name", "");
         cache.server_address = it->second.get<std::string>("server_address", "");
         cache.path = it->second.get<std::string>("path", "");
+
+        ptree file_grade_ptree = it->second.get_child("file_grade");
+        for (piterator a = file_grade_ptree.begin(); a != file_grade_ptree.end(); a++) {
+            cache.file_grade.push_back(a->second.get_value<int>());
+        }
+
         cache.space_max_size = it->second.get<unsigned long long>("space_max_size", 0);
         cache.expires = it->second.get<unsigned long long>("expires", 0);
 
@@ -386,6 +399,11 @@ const ProxyConfig& Configer::getProxyConfig(const std::string& proxyname)
         index = 0;
     }
     return proxyConf[index];
+}
+
+const std::vector<ProxyConfig>& Configer::getProxyConfig()
+{
+    return proxyConf;
 }
 
 const CacheConfig& Configer::getCacheConfig(const std::string& cachename)

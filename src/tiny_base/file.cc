@@ -16,6 +16,7 @@
 #include <tiny_base/memorypool.h>
 
 #include <fcntl.h>
+#include <sys/uio.h>
 #include <string.h>
 #include <string>
 #include <sys/stat.h>
@@ -227,7 +228,51 @@ void File::getData(chain_t* chain)
 // using for Range && Content-Range.
 void File::getData(chain_t* chain, off_t begin, off_t end)
 {
+    // TODO: change open(O_RDONLY), to write data to file. 
 }
+
+int File::writeData(chain_t* chain)
+{
+    if (nullptr == chain)
+        return -1;
+    
+    int return_val;
+
+    unsigned int chain_len;
+    chain_t* tmp = chain;
+    buffer_t* buffer = nullptr;
+    
+    chain_len = countChain(chain);
+    struct iovec* iovs = new struct iovec[chain_len];
+
+    int index = 0;
+    while(nullptr != tmp) {
+        buffer = tmp->buffer;
+        if (nullptr != buffer) {
+            iovs[index].iov_base = buffer->begin;
+            iovs[index].iov_len = buffer->used - buffer->begin;
+        } else {
+            iovs[index].iov_base = 0;
+            iovs[index].iov_len = 0;
+        }
+        index++;
+        tmp = tmp->next;
+    }
+
+again:
+    return_val = writev(fd, iovs, (int)chain_len);
+    
+    if (return_val < 0 && errno == EINTR) {
+        goto again;
+    }
+
+    delete[] iovs;
+    if (return_val < buffer->used - buffer->begin) {
+        return -1;
+    }
+}
+
+
 // int sendfile(int outFd, HttpFile* file)
 // {
 //     if (outFd == 0) {

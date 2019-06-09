@@ -61,6 +61,7 @@ typedef struct fcgi_t {
 class ProxyConfig {
 public:
     std::string name;
+    std::string server_address;
     bool enable;
     bool keep_connect;
     unsigned int connect_timeout;
@@ -75,6 +76,7 @@ public:
     std::string name;
     std::string server_address;
     std::string path;
+    std::vector<int> file_grade;
     unsigned long long space_max_size;
     unsigned long long expires;
 };
@@ -153,6 +155,7 @@ public:
     const BasicConfig& getBasicConfig();
     const FcgiConfig& getFcgiConfig();
     const ProxyConfig& getProxyConfig(const std::string& proxyname);
+    const std::vector<ProxyConfig>& getProxyConfig();
     const CacheConfig& getCacheConfig(const std::string& cachename);
     const ServerConfig& getServerConfig(const std::string& servername);
     const std::vector<ServerConfig>& getServerConfig();
