@@ -11,15 +11,17 @@
  *
  */
 
+#include <tiny_base/api.h>
 #include <tiny_base/log.h>
 #include <tiny_base/md5.h>
 #include <tiny_http/http_model_cache.h>
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
 #include <iostream>
+#include <sys/stat.h>
+#include <sys/types.h>
 
+static const unsigned long long MAX_DISK_CACHE_SIZE = 1024 * 1024 * 1024;
 
 inline bool cache_comp(const disk_cache_t* a, const disk_cache_t* b)
 {
@@ -30,16 +32,17 @@ inline bool cache_comp(const disk_cache_t* a, const disk_cache_t* b)
     }
 }
 
-int createDiskCache(disk_cache_t* cache)
+int initDiskCache(disk_cache_t* cache)
 {
     if (nullptr == cache)
         return -1;
 
     int return_val;
-    return_val = open(cache->filename, O_CREAT, 0666);
+    return_val = open(cache->filename.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0666);
     if (return_val < 0) {
+        handle_error("create cache-file error:");
         if (errno == EACCES) {
-            // std::cout << "owner hasn't read permission\n";
+            std::cout << "owner hasn't read permission\n";
         }
         return -2;
     }
@@ -47,7 +50,6 @@ int createDiskCache(disk_cache_t* cache)
     cache->valid = true;
     cache->fd = return_val;
     cache->size = 0;
-
     return 0;
 }
 
@@ -65,8 +67,7 @@ int destroyDiskCache(disk_cache_t* cache)
     }
 
     int return_val;
-
-    return_val = remove(cache->filename);
+    return_val = remove(cache->filename.c_str());
     if (return_val != 0) {
         LOG(Debug) << "remove file(" << cache->filename << ") field\n";
         return -1;
@@ -86,9 +87,9 @@ int writeHeaders(disk_cache_t* cache, unsigned int code, const std::string& mess
     sdstr res;
     sdsnewempty(&res, 1024);
 
-    sdscatsprintf(&res, "HTTP/1.1 %3d %s", code, message);
+    sdscatsprintf(&res, "HTTP/1.1 %d %s", code, message.c_str());
 
-    sdscatsprintf(&res, "\r\nTinyWeb-Cache-Location: %s", cache->location);
+    sdscatsprintf(&res, "\r\nTinyWeb-Cache-Location: %s", cache->location.c_str());
 
     sdscatsprintf(&res, "\r\nTinyWeb-Cache-Access: ");
     formatHttpTime(cache->access, &res);
@@ -119,7 +120,7 @@ fail:
 
 #if (SYSTEM_WRITEV)
 
-int writeBody(disk_cache_t* cache, const chain_t* body)
+int writeBody(disk_cache_t* cache, chain_t* body)
 {
     if (nullptr == body || nullptr == cache || false == cache->valid)
         return 0;
@@ -191,7 +192,6 @@ int writeBody(disk_cache_t* cache, chain_t* body)
 
 #endif
 
-
 void HttpModelCache::m_fFloat(unsigned int i)
 {
     unsigned int index = i;
@@ -235,7 +235,7 @@ inline void HttpModelCache::m_fSwap(unsigned int parent, unsigned int child)
 
 void HttpModelCache::m_fPush(disk_cache_t* cache)
 {
-    cache->index = m_nVector.size() - 1;
+    // cache->index = m_nVector.size() - 1;
     m_nVector.push_back(cache);
     m_nMaps[cache->filename] = cache;
     m_fFloat(cache->index);
@@ -300,6 +300,7 @@ int HttpModelCache::m_fCheckSpace(unsigned int new_size)
     m_nDiskCacheSize = all_size - new_size;
 
     std::cout << "max-disk-space:" << MAX_DISK_CACHE_SIZE
+              << ",max-long-long:" << LLONG_MAX
               << ",m_nDiskCacheSize:" << m_nDiskCacheSize
               << ", new_size:" << new_size << std::endl;
     return 0;
@@ -339,10 +340,21 @@ int HttpModelCache::createDiskCache(const std::string& url)
         return -1;
     }
 
-    cache->location = const_cast<char*>(url.c_str());
-    md5(url, url.size(), cache->filename);
-    cache->used_times = 0;
+    std::string filename;
+    char* filename_tmp = new char[32];
+    md5(url.c_str(), url.size(), filename_tmp);
+    formatMd5Filename(filename_tmp, 32, filename);
+    delete[] filename_tmp;
+
+    cache->location = url;
+    cache->filename = filename;
     cache->size = 1;
+    cache->access = 10;
+    cache->data = 10;
+    cache->invalid_time = rand() % 10;
+    cache->used_times = 0;
+    cache->index = m_nVector.size();
+    initDiskCache(cache);
 
     m_fPush(cache);
     m_nDiskCacheSize += size;
@@ -351,8 +363,12 @@ int HttpModelCache::createDiskCache(const std::string& url)
 int HttpModelCache::writeDiskCacheHeaders(const std::string& url, unsigned int code, const std::string& message)
 {
     disk_cache_t* cache = nullptr;
-    char filename[32];
-    md5(url, url.size(), filename);
+    std::string filename;
+
+    char* filename_tmp = new char[32];
+    md5(url.c_str(), url.size(), filename_tmp);
+    formatMd5Filename(filename_tmp, 32, filename);
+    delete[] filename_tmp;
 
     if (m_nMaps.end() == m_nMaps.find(filename)) {
         return -1;
@@ -362,12 +378,15 @@ int HttpModelCache::writeDiskCacheHeaders(const std::string& url, unsigned int c
     writeHeaders(cache, code, message);
 }
 
-int HttpModelCache::writeDiskCacheBody(const std::string& url, const chain_t* body)
+int HttpModelCache::writeDiskCacheBody(const std::string& url, chain_t* body)
 {
     disk_cache_t* cache = nullptr;
-    char filename[32];
+    std::string filename;
 
-    md5(url, url.size(), filename);
+    char* filename_tmp = new char[32];
+    md5(url.c_str(), url.size(), filename_tmp);
+    formatMd5Filename(filename_tmp, 32, filename);
+    delete[] filename_tmp;
 
     if (m_nMaps.end() == m_nMaps.find(filename)) {
         return -1;
@@ -379,9 +398,14 @@ int HttpModelCache::writeDiskCacheBody(const std::string& url, const chain_t* bo
 
 bool HttpModelCache::haveDiskCache(const std::string& url)
 {
-    char filename[32];
+    std::string filename;
 
-    md5(url, url.size(), filename);
+    char* filename_tmp = new char[32];
+    md5(url.c_str(), url.size(), filename_tmp);
+    formatMd5Filename(filename_tmp, 32, filename);
+    delete[] filename_tmp;
+
+    LOG(Debug) << "location:(" << url << "),filename:(" << filename << ")\n";
 
     if (m_nMaps.end() == m_nMaps.find(filename)) {
         return false;
@@ -393,9 +417,12 @@ bool HttpModelCache::haveDiskCache(const std::string& url)
 void HttpModelCache::getDiskCache(const std::string& url, chain_t* chain)
 {
     disk_cache_t* cache = nullptr;
-    char filename[32];
+    std::string filename;
 
-    md5(url, url.size(), filename);
+    char* filename_tmp = new char[32];
+    md5(url.c_str(), url.size(), filename_tmp);
+    formatMd5Filename(filename_tmp, 32, filename);
+    delete[] filename_tmp;
 
     m_fChangeNode(filename, 1);
 
@@ -411,7 +438,6 @@ void HttpModelCache::getDiskCache(const std::string& url, chain_t* chain)
     if (nullptr == cache) {
         return;
     }
-
     // TODO: fill chain with cache.
 }
 

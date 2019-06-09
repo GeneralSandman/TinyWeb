@@ -41,7 +41,7 @@ void HttpModelFcgi::makeBeginRequestBody(
 {
     body->role_hi = (unsigned char)((role >> 8) & 0xff);
     body->role_lo = (unsigned char)(role & 0xff);
-    body->flags = (unsigned char)((keepConn) ? 1 : 0); // 1为长连接，0为短连接
+    body->flags = (unsigned char)((keepConn) ? 1 : 0);
     memset(body->reserved, 0, sizeof(body->reserved));
 }
 
@@ -71,9 +71,13 @@ void HttpModelFcgi::makeParamsRecord(
     cl = (vlen < 128) ? (cl + 1) : (cl + 4);
 
     // Count padding length. Round up 8.
-    pl = (cl % 8) == 0 ? 0 : (8 - cl % 8);
+    pl = ((cl % 8) == 0) ? 0 : (8 - cl % 8);
     buffer_size = FCGI_HEADER_LEN + cl + pl;
     old = buf = (unsigned char*)malloc(buffer_size);
+    if (nullptr == old) {
+        return;
+        // FIXME: return TINY_WEB_ERROR
+    }
 
     fcgi_header_t header;
     makeHeader(&header, FCGI_PARAMS, cl, pl);
@@ -84,7 +88,7 @@ void HttpModelFcgi::makeParamsRecord(
         // Store nlen with one byte.
         *buf++ = (unsigned char)nlen;
     } else {
-        // Store nlen with four byte.
+        // Store nlen with four bytes.
         *buf++ = (unsigned char)((nlen >> 24) | 0x80);
         *buf++ = (unsigned char)(nlen >> 16);
         *buf++ = (unsigned char)(nlen >> 8);

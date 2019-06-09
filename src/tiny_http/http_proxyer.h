@@ -18,10 +18,12 @@
 #include <tiny_core/connection.h>
 #include <tiny_core/netaddress.h>
 #include <tiny_core/protocol.h>
+#include <tiny_http/http_model_fcgi.h>
 
 #include <map>
 
 class EventLoop;
+class HttpModelFcgi;
 
 // TODO: update ProxyCallback
 typedef boost::function<void()> ProxyCallback;
@@ -35,6 +37,9 @@ typedef struct proxy_callback_t {
 
 class HttpProxyProtocol : public ClientPoolProtocol {
 private:
+
+    HttpModelFcgi* m_pFcgiModel;
+
     proxy_callback_t* m_pCallbacks;
 
 public:

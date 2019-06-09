@@ -14,10 +14,11 @@
 #ifndef HTTP_MODEL_FCGI_H
 #define HTTP_MODEL_FCGI_H
 
+#include <tiny_struct/sdstr_t.h>
 #include <tiny_base/log.h>
 #include <tiny_http/http_model_fcgi.h>
-#include <tiny_struct/sdstr_t.h>
 
+// FCGI basic macro
 #define FCGI_MAX_LENGTH 0xFFFF
 #define FCGI_VERSION_1 1
 #define FCGI_HEADER_LEN 8
