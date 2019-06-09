@@ -22,12 +22,15 @@
 #include <sys/stat.h>
 #include <unordered_map>
 #include <vector>
+#include <cstring>
 
-#define MAX_DISK_CACHE_SIZE (50 * 1024 * 1024 * 1024)
+const unsigned long long MAX_DISK_CACHE_SIZE = 50 * 1024 * 1024 * 1024;
 
 typedef struct disk_cache_t {
     char* location; // url location.
-    char* filename; // filename for disk cache.
+    char filename[32]; // filename for disk cache.
+    bool valid;
+    int fd;
 
     chain_t* source;
 
@@ -48,49 +51,51 @@ typedef struct disk_cache_t {
     unsigned int index; // index in cache heap.
 } disk_cache_t;
 
-inline bool cache_comp(const disk_cache_t* a, const disk_cache_t* b)
+struct str_comp
 {
-    if (a->invalid_time != b->invalid_time) {
-        return a->invalid_time < b->invalid_time;
-    } else {
-        return a->used_times < b->used_times;
+    bool operator()(char* a, char* b)
+    {
+        return std::strcmp(a, b) < 0;
     }
-}
-
-int writeHeaders(disk_cache_t* cache, unsigned int code, const std::string& message);
-int writeBody(disk_cache_t* cache, chain_t* body);
-
-class CacheHeap {
-
-private:
-    std::vector<disk_cache_t*> m_nVector;
-    std::unordered_map<std::string, disk_cache_t*> maps;
-
-    void m_fFloat(int i);
-    void m_fSink(int i);
-    void m_fSwap(int parent, int child);
-
-public:
-    CacheHeap();
-    void push(disk_cache_t* file);
-    disk_cache_t* top();
-    void pop();
-    int changeNode(const std::string& file, unsigned int add_used);
-    ~CacheHeap();
 };
+
+
+inline bool cache_comp(const disk_cache_t* a, const disk_cache_t* b);
+int createDiskCache(disk_cache_t* cache);
+int destroyDiskCache(disk_cache_t* cache);
+int writeHeaders(disk_cache_t* cache, unsigned int code, const std::string& message);
+int writeBody(disk_cache_t* cache, const chain_t* body);
+
 
 class HttpModelCache {
 
 private:
-    CacheHeap heap;
-    unsigned long long all_cache_size;
+    std::string m_nDiskCacheRoot;
+    unsigned long long m_nDiskCacheSize;
+    std::vector<disk_cache_t*> m_nVector;
+    std::unordered_map<char*, disk_cache_t*, str_comp> m_nMaps;
+
+    void m_fFloat(unsigned int i);
+    void m_fSink(unsigned int i);
+    inline void m_fSwap(unsigned int parent, unsigned int child);
+
+    void m_fPush(disk_cache_t* cache);
+    disk_cache_t* m_fTop();
+    void m_fPop();
+    int m_fChangeNode(const std::string& filename, unsigned int add_used);
+    int m_fCheckSpace(unsigned int new_size);
 
 public:
     HttpModelCache();
 
-    void push(disk_cache_t* cache);
-    disk_cache_t* remove();
-    void addUsedTime(const std::string& file);
+    void loadDiskCache();
+
+    int createDiskCache(const std::string& url);
+    int writeDiskCacheHeaders(const std::string& url, unsigned int code, const std::string& message);
+    int writeDiskCacheBody(const std::string& url, const chain_t* body);
+
+    bool haveDiskCache(const std::string& url);
+    void getDiskCache(const std::string& url, chain_t* chain);
 
     ~HttpModelCache();
 };
