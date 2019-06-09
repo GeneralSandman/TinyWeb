@@ -117,6 +117,10 @@ void test2()
     std::cout << cache.name << std::endl;
     std::cout << cache.server_address << std::endl;
     std::cout << cache.path << std::endl;
+    for (auto t: cache.file_grade) {
+        std::cout << t << ",";
+    }
+    std::cout << std::endl;
     std::cout << cache.space_max_size << std::endl;
     std::cout << cache.expires << std::endl;
 

@@ -288,7 +288,7 @@ static void Transform(UINT4 *buf, UINT4 *in)
   buf[3] += d;
 }
 
-void md5(char* key, int len, char* dst)
+void md5(const char* key, int len, char* dst)
 {
     static MD5_CTX ctx;
     MD5Init(&ctx);
@@ -306,6 +306,7 @@ void md5(char* key, int len, char* dst)
         sprintf(&(res[2 * i + 1]), "%02x", (unsigned char)(tmp1[i] << 4));
     }
 
+    memset(dst, 0, strlen(dst));
     memcpy(dst, res, 32);
 }
 

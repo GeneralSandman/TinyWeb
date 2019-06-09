@@ -52,16 +52,34 @@ typedef struct md5_test {
 
 struct md5_test md5_tests[] = {
     {
-        .url = "http://www.dissigil.cn/index.html",
+        .url = "/home/tinyweb/www/1-63k_files/1k.txt",
     },
     {
-        .url = "http://www.dissigil.cn/index.htm",
+        .url = "/home/tinyweb/www/1-63k_files/2k.txt",
     },
     {
-        .url = "http://dissigil.cn/index.html",
+        .url = "/home/tinyweb/www/1-63k_files/3k.txt",
     },
     {
-        .url = "http://dissigil.cn/index.htm",
+        .url = "/home/tinyweb/www/1-63k_files/4k.txt",
+    },
+    {
+        .url = "/home/tinyweb/www/1-63k_files/5k.txt",
+    },
+    {
+        .url = "/home/tinyweb/www/1-63k_files/6k.txt",
+    },
+    {
+        .url = "/home/tinyweb/www/1-63k_files/7k.txt",
+    },
+    {
+        .url = "/home/tinyweb/www/1-63k_files/8k.txt",
+    },
+    {
+        .url = "/home/tinyweb/www/1-63k_files/9k.txt",
+    },
+    {
+        .url = "/home/tinyweb/www/1-63k_files/10k.txt",
     },
 };
 
@@ -79,7 +97,7 @@ int test1()
     unsigned int all = 0;
     unsigned int pass = 0;
 
-    unsigned int len = 4;
+    unsigned int len = 10;
 
     for (unsigned int i = 0; i < len; i++) {
         md5_check(md5_tests[i].url);

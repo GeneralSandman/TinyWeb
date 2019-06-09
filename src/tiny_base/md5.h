@@ -35,6 +35,6 @@ void MD5Init (MD5_CTX *mdContext);
 void MD5Update (MD5_CTX *, unsigned const char *, unsigned int);
 void MD5Final (MD5_CTX *);
 
-void md5(char* key, int len, char* dst);
+void md5(const char* key, int len, char* dst);
 
 #endif
