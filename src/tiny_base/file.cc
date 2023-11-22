@@ -16,15 +16,14 @@
 #include <tiny_base/memorypool.h>
 
 #include <fcntl.h>
-#include <sys/uio.h>
 #include <string.h>
 #include <string>
 #include <sys/stat.h>
+#include <sys/uio.h>
 
-int isRegularFile(const std::string& fname)
-{
+int isRegularFile(const std::string& fname) {
     struct stat info;
-    int return_val;
+    int         return_val;
 
     return_val = stat(fname.c_str(), &info);
     if (return_val < 0) {
@@ -47,17 +46,16 @@ int isRegularFile(const std::string& fname)
     return return_val;
 }
 
-std::string getType(const std::string& f)
-{
+std::string getType(const std::string& f) {
     std::string res;
-    bool findPoint = false;
+    bool        findPoint = false;
     for (int i = f.size() - 1; i >= 0; i--) {
         if (f[i] == '.') {
             findPoint = true;
             break;
         }
         if (f[i] == '/')
-            break; //encounter a slash
+            break; // encounter a slash
         res = f[i] + res;
     }
     if (!findPoint)
@@ -65,11 +63,10 @@ std::string getType(const std::string& f)
     return res;
 }
 
-int File::setFile(const std::string& fname)
-{
-    name = fname;
-    offset = 0;
-    valid = false;
+int File::setFile(const std::string& fname) {
+    name           = fname;
+    offset         = 0;
+    valid          = false;
 
     int return_val = stat(name.c_str(), &info);
     if (return_val < 0) {
@@ -86,45 +83,44 @@ int File::setFile(const std::string& fname)
         return -2;
     }
 
-    type = getType(name);
+    type  = getType(name);
     // std::cout << "type:" << type << std::endl;
     valid = true;
-    fd = return_val;
+    fd    = return_val;
 
     // LOG(Debug) << "response file:" << name << std::endl;
     return 0;
 }
 
-unsigned int File::appendData(chain_t* & dest, const char* data, unsigned int len)
-{
+unsigned int File::appendData(chain_t*& dest, const char* data, unsigned int len) {
     // Have same code with appendData() in memorypool.h
     if (nullptr == dest || nullptr == data || 0 == len) {
         return 0;
     }
 
-    chain_t* chain;
-    buffer_t* buffer;
+    chain_t*     chain;
+    buffer_t*    buffer;
     unsigned int buff_size;
     unsigned int predata_size;
     unsigned int empty_size;
 
-    const char* pos = data;
-    unsigned int left = len;
+    const char*  pos      = data;
+    unsigned int left     = len;
     unsigned int to_write = 0;
 
     // LOG(Debug) << "append size:" << left << std::endl;
 
-    chain = dest;
+    chain                 = dest;
     while (left && nullptr != chain) {
-        buffer = chain->buffer;
-        buff_size = buffer->end - buffer->begin;
+        buffer       = chain->buffer;
+        buff_size    = buffer->end - buffer->begin;
         predata_size = buffer->used - buffer->begin;
-        empty_size = buff_size - predata_size;
+        empty_size   = buff_size - predata_size;
 
         if (!empty_size) {
             // This chain is full, change to next chain.
             buffer->islast = false;
-            chain = chain->next;
+            chain          = chain->next;
             continue;
         }
 
@@ -135,7 +131,7 @@ unsigned int File::appendData(chain_t* & dest, const char* data, unsigned int le
         // << "),predata-size(" << predata_size
         // << "),postdata-size(" << predata_size + to_write << ")\n";
 
-        buffer->used = buffer->used + to_write;
+        buffer->used   = buffer->used + to_write;
         buffer->islast = true;
 
         left -= to_write;
@@ -145,7 +141,7 @@ unsigned int File::appendData(chain_t* & dest, const char* data, unsigned int le
             // This chain is full, change to next chain.
             // LOG(Debug) << std::endl;
             buffer->islast = false;
-            chain = chain->next;
+            chain          = chain->next;
         }
     }
 
@@ -157,13 +153,13 @@ unsigned int File::appendData(chain_t* & dest, const char* data, unsigned int le
     empty_size = chain->buffer->end - chain->buffer->used;
     if (empty_size) {
         chain->buffer->islast = true;
-        dest = chain;
+        dest                  = chain;
     } else {
         // empty_size
         chain->buffer->islast = false;
         if (nullptr != chain->next) {
             chain->next->buffer->islast = true;
-            dest = chain->next;
+            dest                        = chain->next;
         }
         dest = chain->next;
     }
@@ -171,8 +167,7 @@ unsigned int File::appendData(chain_t* & dest, const char* data, unsigned int le
     return len - left;
 }
 
-void File::getData(chain_t* chain)
-{
+void File::getData(chain_t* chain) {
     // The space of chain maybe not enough for all file.
     // Load file to fill all chain and
     // Updata offset of file.
@@ -181,24 +176,24 @@ void File::getData(chain_t* chain)
         return;
     }
 
-    chain_t* end_chain;
-    chain_t* tmp_chain;
-    buffer_t* tmp_buffer;
-    char* read_buffer;
-    unsigned int chain_size = 0;
+    chain_t*     end_chain;
+    chain_t*     tmp_chain;
+    buffer_t*    tmp_buffer;
+    char*        read_buffer;
+    unsigned int chain_size  = 0;
     unsigned int buffer_size = 0;
-    unsigned int read_len = 0;
-    unsigned int write_len = 0;
+    unsigned int read_len    = 0;
+    unsigned int write_len   = 0;
 
-    buffer_size = chain->buffer->end - chain->buffer->begin;
+    buffer_size              = chain->buffer->end - chain->buffer->begin;
     if (!buffer_size) {
         buffer_size = 4 * 1024;
     }
     read_buffer = (char*)malloc(buffer_size);
 
-    end_chain = chain;
+    end_chain   = chain;
     while (nullptr != end_chain
-        && (read_len = pread(fd, (void*)read_buffer, buffer_size, offset))) {
+           && (read_len = pread(fd, (void*)read_buffer, buffer_size, offset))) {
         // offset += read_len;
         // end_chain = File::appendData(end_chain, read_buffer, read_len);
 
@@ -212,7 +207,7 @@ void File::getData(chain_t* chain)
 
     // Only for debug.
     unsigned int l = countChain(chain);
-    std::string debug_str;
+    std::string  debug_str;
     for (auto t = chain; t != nullptr; t = t->next) {
         if (t->buffer->islast) {
             debug_str.append("-");
@@ -226,34 +221,32 @@ void File::getData(chain_t* chain)
 }
 
 // using for Range && Content-Range.
-void File::getData(chain_t* chain, off_t begin, off_t end)
-{
-    // TODO: change open(O_RDONLY), to write data to file. 
+void File::getData(chain_t* chain, off_t begin, off_t end) {
+    // TODO: change open(O_RDONLY), to write data to file.
 }
 
-int File::writeData(chain_t* chain)
-{
+int File::writeData(chain_t* chain) {
     if (nullptr == chain)
         return -1;
-    
-    int return_val;
+
+    int          return_val;
 
     unsigned int chain_len;
-    chain_t* tmp = chain;
-    buffer_t* buffer = nullptr;
-    
-    chain_len = countChain(chain);
-    struct iovec* iovs = new struct iovec[chain_len];
+    chain_t*     tmp    = chain;
+    buffer_t*    buffer = nullptr;
 
-    int index = 0;
-    while(nullptr != tmp) {
+    chain_len           = countChain(chain);
+    struct iovec* iovs  = new struct iovec[chain_len];
+
+    int           index = 0;
+    while (nullptr != tmp) {
         buffer = tmp->buffer;
         if (nullptr != buffer) {
             iovs[index].iov_base = buffer->begin;
-            iovs[index].iov_len = buffer->used - buffer->begin;
+            iovs[index].iov_len  = buffer->used - buffer->begin;
         } else {
             iovs[index].iov_base = 0;
-            iovs[index].iov_len = 0;
+            iovs[index].iov_len  = 0;
         }
         index++;
         tmp = tmp->next;
@@ -261,7 +254,7 @@ int File::writeData(chain_t* chain)
 
 again:
     return_val = writev(fd, iovs, (int)chain_len);
-    
+
     if (return_val < 0 && errno == EINTR) {
         goto again;
     }

@@ -18,42 +18,37 @@
 
 #include <sys/stat.h>
 
-int isRegularFile(const std::string& fname);
+int         isRegularFile(const std::string& fname);
 std::string getType(const std::string& f);
 
 class File {
 public:
     std::string name;
     std::string type;
-    bool valid;
-    int fd;
-    off_t offset;
+    bool        valid;
+    int         fd;
+    off_t       offset;
     struct stat info;
 
     // appendData only used by getData(),
     // It append data begin dest and
     // Return the end of chain.
-    unsigned int appendData(chain_t* & dest, const char* data, unsigned int len);
+    unsigned int appendData(chain_t*& dest, const char* data, unsigned int len);
 
 public:
-    File()
-        : valid(false)
-        , fd(-1)
-        , offset(0)
-    {
+    File() :
+        valid(false), fd(-1), offset(0) {
         memset((void*)&info, 0, sizeof(info));
     }
 
-    int setFile(const std::string& fname);
-    inline unsigned int getFileSize()
-    {
+    int                 setFile(const std::string& fname);
+    inline unsigned int getFileSize() {
         if (valid) {
             return info.st_size;
         }
         return 0;
     }
-    inline bool noMoreData()
-    {
+    inline bool noMoreData() {
         if (valid) {
             // std::cout << "noMoreData:offset(" << offset << "),file-size(" << info.st_size << ")\n";
             return (offset == info.st_size);
@@ -67,10 +62,9 @@ public:
     // using for Range && Content-Range.
     void getData(chain_t* chain, off_t begin, off_t end);
 
-    int writeData(chain_t* chain);
+    int  writeData(chain_t* chain);
 
-    ~File()
-    {
+    ~File() {
         if (valid) {
             close(fd);
         }

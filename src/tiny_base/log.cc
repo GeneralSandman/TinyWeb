@@ -11,41 +11,31 @@
  *
  */
 
+#include <algorithm>
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
 #include <memory>
 #include <string>
-#include <algorithm>
 #include <sys/types.h>
 #include <unistd.h>
 
 
 #include <tiny_base/log.h>
 
-log_level convertStringToLoglevel(const std::string &s)
-{
+log_level convertStringToLoglevel(const std::string& s) {
     std::string tmp;
     tmp.resize(s.size());
     transform(s.begin(), s.end(), tmp.begin(), tolower);
-    if ("debug" == tmp)
-    {
+    if ("debug" == tmp) {
         return Debug;
-    }
-    else if ("info" == tmp)
-    {
+    } else if ("info" == tmp) {
         return Info;
-    }
-    else if ("warn" == tmp)
-    {
+    } else if ("warn" == tmp) {
         return Warn;
-    }
-    else if ("error" == tmp)
-    {
+    } else if ("error" == tmp) {
         return Error;
-    }
-    else if ("fatal" == tmp)
-    {
+    } else if ("fatal" == tmp) {
         return Fatal;
     }
     return Debug;
@@ -59,16 +49,15 @@ std::ofstream Logger::m_nErrLogFile;
 std::ofstream Logger::m_nWarnLogFile;
 std::ofstream Logger::m_nFatalLogFile;
 
-log_level Logger::m_nLevel = Debug;
+log_level     Logger::m_nLevel = Debug;
 
-void initLogger(const std::string &debug_log_filename,
-        const std::string &info_log_filename,
-        const std::string &warn_log_filename,
-        const std::string &error_log_filename,
-        const std::string &fatal_log_filename,
-        log_level level)
-{
-    // Logger::m_nDebugLogFile.open(debug_log_filename.c_str(), std::ios::in | std::ios::app);
+void          initLogger(const std::string& debug_log_filename,
+                         const std::string& info_log_filename,
+                         const std::string& warn_log_filename,
+                         const std::string& error_log_filename,
+                         const std::string& fatal_log_filename,
+                         log_level          level) {
+             // Logger::m_nDebugLogFile.open(debug_log_filename.c_str(), std::ios::in | std::ios::app);
     // Logger::m_nInfoLogFile.open(info_log_filename.c_str(), std::ios::in | std::ios::app);
     // Logger::m_nWarnLogFile.open(warn_log_filename.c_str(), std::ios::in | std::ios::app);
     // Logger::m_nErrLogFile.open(error_log_filename.c_str(), std::ios::in | std::ios::app);
@@ -85,114 +74,83 @@ void initLogger(const std::string &debug_log_filename,
     setLogLevel(level);
 }
 
-std::ostream &Logger::getStream(log_level level)
-{
-
-    if (Debug == level)
-    {
-        if (m_nDebugLogFile.is_open())
-        {
+std::ostream& Logger::getStream(log_level level) {
+    if (Debug == level) {
+        if (m_nDebugLogFile.is_open()) {
             return m_nDebugLogFile;
-        }
-        else
-        {
+        } else {
             return std::cout;
         }
-    }
-    else if (Info == level)
-    {
-        if (m_nInfoLogFile.is_open())
-        {
+    } else if (Info == level) {
+        if (m_nInfoLogFile.is_open()) {
             return m_nInfoLogFile;
-        }
-        else
-        {
+        } else {
             return std::cout;
         }
-    }
-    else if (Warn == level)
-    {
-        if (m_nWarnLogFile.is_open())
-        {
+    } else if (Warn == level) {
+        if (m_nWarnLogFile.is_open()) {
             return m_nWarnLogFile;
-        }
-        else
-        {
+        } else {
             return std::cerr;
         }
-    }
-    else if (Error == level)
-    {
-        if (m_nErrLogFile.is_open())
-        {
+    } else if (Error == level) {
+        if (m_nErrLogFile.is_open()) {
             return m_nErrLogFile;
-        }
-        else
-        {
+        } else {
             return std::cerr;
         }
-    }
-    else
-    {
-        if (m_nFatalLogFile.is_open())
-        {
+    } else {
+        if (m_nFatalLogFile.is_open()) {
             return m_nFatalLogFile;
-        }
-        else
-        {
+        } else {
             return std::cerr;
         }
     }
 }
 
-std::ostream &Logger::log(log_level level,
-        const int line,
-        const std::string &function)
-{
-
+std::ostream& Logger::log(log_level          level,
+                          const int          line,
+                          const std::string& function) {
     if (level < Logger::m_nLevel)
         return Logger::m_nNullStream;
 
     time_t t = time(0);
-    char tmpBuf[156];
-    strftime(tmpBuf, 156, "%Y%m%d%H%M%S", localtime(&t)); //format date and time.
+    char   tmpBuf[156];
+    strftime(tmpBuf, 156, "%Y%m%d%H%M%S", localtime(&t)); // format date and time.
 
     std::string level_string = "";
-    switch (level)
-    {
-        case Debug:
-            level_string = "Debug";
-            break;
-        case Info:
-            level_string = "Info";
-            break;
-        case Warn:
-            level_string = "Warn";
-            break;
-        case Error:
-            level_string = "Error";
-            break;
-        case Fatal:
-            level_string = "Fatal";
-            break;
+    switch (level) {
+    case Debug:
+        level_string = "Debug";
+        break;
+    case Info:
+        level_string = "Info";
+        break;
+    case Warn:
+        level_string = "Warn";
+        break;
+    case Error:
+        level_string = "Error";
+        break;
+    case Fatal:
+        level_string = "Fatal";
+        break;
     }
 
-    //if the current log level is Info,so the LOG(Debug) do nothing
+    // if the current log level is Info,so the LOG(Debug) do nothing
     return getStream(level) << "[" << tmpBuf << "]"
-        << "(pid:" << getpid() << ")"
-        << "[" << level_string << "] "
-        << "function (" << function << ")"
-        << "line " << line << ":";
+                            << "(pid:" << getpid() << ")"
+                            << "[" << level_string << "] "
+                            << "function (" << function << ")"
+                            << "line " << line << ":";
     // << std::flush;
 }
 
-Logger::~Logger()
-{
+Logger::~Logger() {
     getStream(m_nLevel) << std::endl
-        << std::flush;
+                        << std::flush;
 
-    if (Fatal == m_nLevel)
-    {
+    if (Fatal == m_nLevel) {
         // m_nNullStream.close();
 
         m_nDebugLogFile.close();

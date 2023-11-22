@@ -34,37 +34,39 @@ const char kCRLF[] = "\r\n";
 class Buffer {
 private:
     std::vector<char> m_nDatas;
-    int m_nReadIndex;
-    int m_nWriteIndex;
+    int               m_nReadIndex;
+    int               m_nWriteIndex;
 
-    size_t m_fPrependableBytes() const;
-    size_t m_fReadableBytes() const;
-    size_t m_fWriteableBytes() const;
-    char* m_fBegin();
-    const char* m_fBegin() const;
-    char* m_fReadableBegin();
-    const char* m_fReadableBegin() const;
-    char* m_fWriteableBegin();
-    const char* m_fWriteableBegin() const;
-    void hasReadBytes(size_t len);
-    void m_fEnsureWritableBytes(size_t len);
-    void m_fMakeSpace(size_t len);
-    void m_fClearAll();
+    size_t            m_fPrependableBytes() const;
+    size_t            m_fReadableBytes() const;
+    size_t            m_fWriteableBytes() const;
+    char*             m_fBegin();
+    const char*       m_fBegin() const;
+    char*             m_fReadableBegin();
+    const char*       m_fReadableBegin() const;
+    char*             m_fWriteableBegin();
+    const char*       m_fWriteableBegin() const;
+    void              hasReadBytes(size_t len);
+    void              m_fEnsureWritableBytes(size_t len);
+    void              m_fMakeSpace(size_t len);
+    void              m_fClearAll();
 
 public:
     Buffer();
-    void swap(Buffer& r);
+    void   swap(Buffer& r);
     size_t put(int fd);
-    size_t readableBytes() { return m_fReadableBytes(); }
+    size_t readableBytes() {
+        return m_fReadableBytes();
+    }
     std::string get(size_t len);
     std::string getAll();
-    void shrink();
-    void append(const std::string& str);
-    void append(const char* str, int len);
-    void prepend(const void* /*restrict*/ data, size_t len);
+    void        shrink();
+    void        append(const std::string& str);
+    void        append(const char* str, int len);
+    void        prepend(const void* /*restrict*/ data, size_t len);
     const char* findCRLF() const;
     const char* findCRLF(const char* start) const;
-    bool getALine(std::string& res);
+    bool        getALine(std::string& res);
     ~Buffer();
 };
 

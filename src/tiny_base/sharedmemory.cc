@@ -17,23 +17,21 @@
 
 #if (SHARED_MEMORY_ANON)
 
-void* SharedMemory::shm_alloc(size_t size)
-{
+void* SharedMemory::shm_alloc(size_t size) {
     LOG(Debug) << "alloc shared-memory by mmap(anon)\n";
 
     m_pSharedData = mmap(NULL, m_nSize,
-        PROT_READ | PROT_WRITE,
-        MAP_ANON | MAP_SHARED, -1, 0);
+                         PROT_READ | PROT_WRITE,
+                         MAP_ANON | MAP_SHARED, -1, 0);
     if (m_pSharedData == MAP_FAILED) {
         handle_error("mmap error:");
         return nullptr;
     }
-    
+
     return m_pSharedData;
 }
 
-void SharedMemory::shm_free(void* data, size_t size)
-{
+void SharedMemory::shm_free(void* data, size_t size) {
     LOG(Debug) << "free shared-memory by mmap(anon)\n";
 
     if (0 != munmap(data, size))
@@ -42,15 +40,13 @@ void SharedMemory::shm_free(void* data, size_t size)
 
 #elif (SHARED_MEMORY_DEVZERO)
 
-void* SharedMemory::shm_alloc(size_t size)
-{
+void* SharedMemory::shm_alloc(size_t size) {
     LOG(Debug) << "alloc shared-memory by mmap(dev/zero)\n";
 
     return nullptr;
 }
 
-void SharedMemory::shm_free(void* data, size_t size)
-{
+void SharedMemory::shm_free(void* data, size_t size) {
     LOG(Debug) << "free shared-memory by mmap(dev/zero)\n";
 }
 
@@ -58,11 +54,10 @@ void SharedMemory::shm_free(void* data, size_t size)
 
 #include <sys/shm.h>
 
-void* SharedMemory::shm_alloc(size_t size)
-{
+void* SharedMemory::shm_alloc(size_t size) {
     LOG(Debug) << "alloc shared-memory by shmget()\n";
 
-    int id;
+    int   id;
     void* data;
 
     id = shmget(IPC_PRIVATE, size, (SHM_R | SHM_W | IPC_CREAT));
@@ -87,8 +82,7 @@ void* SharedMemory::shm_alloc(size_t size)
     return data;
 }
 
-void SharedMemory::shm_free(void* data, size_t size)
-{
+void SharedMemory::shm_free(void* data, size_t size) {
     LOG(Debug) << "free shared-memory by shmget()\n";
     if (shmdt(data) == -1) {
         handle_error("shmdt() error:");
@@ -97,15 +91,13 @@ void SharedMemory::shm_free(void* data, size_t size)
 
 #endif
 
-SharedMemory::SharedMemory(size_t size)
-    : m_nSize(size)
-{
+SharedMemory::SharedMemory(size_t size) :
+    m_nSize(size) {
     m_pSharedData = shm_alloc(size);
     LOG(Debug) << "class SharedMemory constructor\n";
 }
 
-SharedMemory::~SharedMemory()
-{
+SharedMemory::~SharedMemory() {
     shm_free(m_pSharedData, m_nSize);
     LOG(Debug) << "class SharedMemory destructor\n";
 }

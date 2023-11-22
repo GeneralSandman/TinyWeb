@@ -14,7 +14,7 @@
 #ifndef NEW_BUFFER_H
 #define NEW_BUFFER_H
 
-#include <tiny_base/memorypool.h> 
+#include <tiny_base/memorypool.h>
 
 #include <string>
 #include <unistd.h>
@@ -24,14 +24,13 @@
 const char kCRLF[] = "\r\n";
 
 class NewBuffer {
-    private:
-        chain_t* m_nDatas;
-        
-    public:
-        NewBuffer();
+private:
+    chain_t* m_nDatas;
 
-        ~NewBuffer();
+public:
+    NewBuffer();
 
+    ~NewBuffer();
 };
 
 #endif // !NEW_BUFFER_H
